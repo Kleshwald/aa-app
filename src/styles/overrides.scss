@@ -1,0 +1,20 @@
+// Targeted overrides for Taiga UI defaults.
+// Use this file only for things that cannot be set via CSS variables in tokens.scss.
+
+// Match Taiga input/button heights to our 48px minimum (DESIGN_SYSTEM.md).
+[tuiButton],
+[tuiIconButton],
+tui-button {
+  min-height: var(--size-button);
+}
+
+tui-input,
+tui-textfield,
+tui-select {
+  --tui-height-l: var(--size-input);
+}
+
+// Make table rows comfortable for the older audience (56px instead of default).
+[tuiCell] {
+  min-height: var(--size-row);
+}

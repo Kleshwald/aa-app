@@ -1,0 +1,885 @@
+# Agent Academy API Contract
+# Version 1.0
+# Это источник правды для фронтенда (Angular) и бэкенда (1С).
+# Изменения в API проходят через изменение этого файла.
+
+openapi: 3.0.3
+info:
+  title: Agent Academy API
+  version: 1.0.0
+  description: |
+    HTTP API для платформы Agent Academy.
+    Реализуется в 1С через HTTP-сервисы.
+    Потребляется Angular-фронтендом.
+
+    Все ответы возвращаются в едином формате ApiResponse<T>.
+    Все запросы (кроме /auth/login) требуют JWT в заголовке Authorization.
+
+servers:
+  - url: http://localhost:4200/api/v1
+    description: Local development (с моками через HttpInterceptor)
+  - url: https://staging-1c.agentacademy.ru/hs/api/v1
+    description: Staging (тестовая 1С)
+  - url: https://b2b.agentacademy.ru/hs/api/v1
+    description: Production (реальная 1С)
+
+security:
+  - bearerAuth: []
+
+# ───── COMPONENTS ─────
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # ─── Общие схемы ───
+    
+    ApiResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          description: true при успехе, false при ошибке
+        data:
+          description: Данные ответа (тип зависит от endpoint)
+          nullable: true
+        error:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+              description: Машиночитаемый код ошибки
+            message:
+              type: string
+              example: "Заполните все обязательные поля"
+              description: Человекочитаемое сообщение (на русском)
+            details:
+              type: object
+              nullable: true
+              description: Дополнительные детали (например, список полей с ошибками)
+        meta:
+          type: object
+          nullable: true
+          properties:
+            page:
+              type: integer
+              example: 1
+            pageSize:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 142
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+          minimum: 1
+        pageSize:
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 100
+
+    # ─── Доменные схемы ───
+
+    Agent:
+      type: object
+      required: [id, fullName, email, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        ikp:
+          type: string
+          description: Индивидуальный код продавца (например, "00531")
+          example: "00531"
+        fullName:
+          type: string
+          example: "Иванова Елена Викторовна"
+        email:
+          type: string
+          format: email
+          example: "ivanova@example.ru"
+        phone:
+          type: string
+          example: "+79991234567"
+        birthDate:
+          type: string
+          format: date
+          example: "1976-04-15"
+        gender:
+          type: string
+          enum: [male, female, unknown]
+        region:
+          type: string
+          example: "Красноярский край"
+        district:
+          type: string
+          example: "Минусинск"
+        legalType:
+          type: string
+          enum: [individual, ip, sz, ul]
+          description: ФЛ, ИП, СЗ, ЮЛ
+        category:
+          type: string
+          example: "Категория 3"
+        curatorName:
+          type: string
+          example: "Марченко Елена Георгиевна"
+        joinDate:
+          type: string
+          format: date
+        firstSaleDate:
+          type: string
+          format: date
+          nullable: true
+        status:
+          type: string
+          enum: [active, inactive, blocked]
+        totalCommission:
+          type: number
+          format: float
+          description: Общая сумма комиссии за всё время
+
+    Policy:
+      type: object
+      required: [id, number, type, status, startDate, endDate]
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+          example: "РРР-12345678"
+        type:
+          type: string
+          enum: [OSAGO, NS, TICK, MORTGAGE]
+        status:
+          type: string
+          enum: [active, expired, cancelled, pending, processing]
+        clientName:
+          type: string
+          example: "Петров Иван Сергеевич"
+        clientPhone:
+          type: string
+          example: "+79991234567"
+        vehicleInfo:
+          $ref: '#/components/schemas/VehicleInfo'
+          nullable: true
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        premium:
+          type: number
+          format: float
+          description: Стоимость полиса
+        commission:
+          type: number
+          format: float
+          description: Комиссия агента
+        insuranceCompany:
+          $ref: '#/components/schemas/InsuranceCompany'
+        agentId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        cancellationReason:
+          type: string
+          nullable: true
+
+    VehicleInfo:
+      type: object
+      properties:
+        vin:
+          type: string
+          example: "XTA21099120123456"
+        licensePlate:
+          type: string
+          example: "А123ВС99"
+        year:
+          type: integer
+          example: 2018
+        brand:
+          type: string
+          example: "ВАЗ"
+        model:
+          type: string
+          example: "2110"
+        power:
+          type: number
+          example: 76.5
+        category:
+          type: string
+          enum: [B, C, D]
+
+    OwnerInfo:
+      type: object
+      required: [fullName, birthDate]
+      properties:
+        fullName:
+          type: string
+          example: "Петров Иван Сергеевич"
+        birthDate:
+          type: string
+          format: date
+          example: "1985-06-15"
+        licenseDate:
+          type: string
+          format: date
+          example: "2010-08-20"
+        passportSeries:
+          type: string
+          example: "4509"
+        passportNumber:
+          type: string
+          example: "123456"
+        kbm:
+          type: number
+          format: float
+          description: Коэффициент бонус-малус
+          example: 0.85
+
+    InsuranceCompany:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: "РЕСО-Гарантия"
+        shortName:
+          type: string
+          example: "РЕСО"
+        logo:
+          type: string
+          format: uri
+          nullable: true
+
+    CalculationOffer:
+      type: object
+      required: [insuranceCompany, premium, commission]
+      properties:
+        insuranceCompany:
+          $ref: '#/components/schemas/InsuranceCompany'
+        premium:
+          type: number
+          description: Стоимость полиса
+        commission:
+          type: number
+          description: Комиссия агента
+        validUntil:
+          type: string
+          format: date-time
+          description: До какого времени действительно предложение
+        conditions:
+          type: array
+          items:
+            type: string
+          description: Особые условия
+        recommendationScore:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Рекомендательный балл (для сортировки)
+        canProceed:
+          type: boolean
+          description: Можно ли оформить полис на этих условиях
+
+    UrgentAction:
+      type: object
+      required: [id, type, title, dueDate]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [prolongation, client_request, payment, document, other]
+        title:
+          type: string
+          example: "Пролонгация Петров И.С. истекает завтра"
+        description:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        relatedEntityId:
+          type: string
+          nullable: true
+        relatedEntityType:
+          type: string
+          enum: [policy, client, request]
+          nullable: true
+
+    DashboardMetrics:
+      type: object
+      properties:
+        monthlyEarnings:
+          type: number
+          description: Заработано в этом месяце (₽)
+        monthlyEarningsChange:
+          type: number
+          description: Изменение % к прошлому месяцу
+        activePolicies:
+          type: integer
+          description: Количество активных полисов
+        activePoliciesChange:
+          type: number
+        monthlyRenewals:
+          type: integer
+          description: Пролонгаций в этом месяце
+        urgentRenewals:
+          type: integer
+          description: Срочных пролонгаций (требуют действия)
+        conversionRate:
+          type: number
+          description: Конверсия расчётов в полисы (%)
+        conversionRateChange:
+          type: number
+
+    LoginRequest:
+      type: object
+      required: [login, password]
+      properties:
+        login:
+          type: string
+          example: "00531"
+          description: ИКП агента или email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Срок жизни access token в секундах
+        agent:
+          $ref: '#/components/schemas/Agent'
+
+# ───── PATHS ─────
+
+paths:
+  # ─── Auth ───
+  
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Авторизация агента
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Неверные учётные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Выход из системы (инвалидация токена)
+      operationId: logout
+      responses:
+        '200':
+          description: OK
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Обновление access token через refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Новый access token
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          token:
+                            type: string
+                          expiresIn:
+                            type: integer
+
+  # ─── Agent ───
+  
+  /agents/me:
+    get:
+      tags: [Agent]
+      summary: Профиль текущего агента
+      operationId: getCurrentAgent
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Agent'
+
+    patch:
+      tags: [Agent]
+      summary: Обновить профиль (контакты, настройки)
+      operationId: updateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Agent'
+
+  # ─── Dashboard ───
+  
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Все данные для главной страницы (одним запросом)
+      operationId: getDashboard
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          metrics:
+                            $ref: '#/components/schemas/DashboardMetrics'
+                          recentPolicies:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Policy'
+                            maxItems: 5
+                          urgentActions:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/UrgentAction'
+                            maxItems: 10
+
+  # ─── Policies ───
+  
+  /policies:
+    get:
+      tags: [Policies]
+      summary: Список полисов агента
+      operationId: getPolicies
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, expired, cancelled, pending]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [OSAGO, NS, TICK, MORTGAGE]
+        - name: insuranceCompanyId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Поиск по ФИО клиента, номеру полиса, номеру машины
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, premium, commission, endDate]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Policy'
+
+  /policies/{id}:
+    get:
+      tags: [Policies]
+      summary: Детали полиса
+      operationId: getPolicy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Policy'
+
+  /policies/{id}/cancel:
+    post:
+      tags: [Policies]
+      summary: Расторжение полиса
+      operationId: cancelPolicy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Расторжение инициировано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /policies/{id}/prolong:
+    post:
+      tags: [Policies]
+      summary: Пролонгация полиса (создание расчёта на основе старого)
+      operationId: prolongPolicy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Создан расчёт для пролонгации
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          calculationId:
+                            type: string
+
+  # ─── Calculations (OSAGO) ───
+  
+  /calculations/osago:
+    post:
+      tags: [Calculations]
+      summary: Расчёт ОСАГО (параллельный запрос ко всем 7 СК)
+      operationId: calculateOsago
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vehicle, owner]
+              properties:
+                vehicle:
+                  $ref: '#/components/schemas/VehicleInfo'
+                owner:
+                  $ref: '#/components/schemas/OwnerInfo'
+                additionalDrivers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/OwnerInfo'
+                period:
+                  type: integer
+                  description: Срок страхования в днях
+                  default: 365
+      responses:
+        '200':
+          description: Расчёт выполнен
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          calculationId:
+                            type: string
+                          offers:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/CalculationOffer'
+                          failedCompanies:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                companyId:
+                                  type: string
+                                reason:
+                                  type: string
+
+  /calculations/{id}:
+    get:
+      tags: [Calculations]
+      summary: Получить расчёт по ID
+      operationId: getCalculation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /calculations/{id}/proceed:
+    post:
+      tags: [Calculations]
+      summary: Оформить полис на основе выбранного предложения
+      operationId: proceedWithCalculation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [insuranceCompanyId]
+              properties:
+                insuranceCompanyId:
+                  type: string
+      responses:
+        '200':
+          description: Полис создан (в статусе processing)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Policy'
+
+  # ─── Insurance Companies ───
+  
+  /insurance-companies:
+    get:
+      tags: [InsuranceCompanies]
+      summary: Список доступных страховых компаний
+      operationId: getInsuranceCompanies
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/InsuranceCompany'
+
+  # ─── Vehicles (справочник) ───
+  
+  /vehicles/brands:
+    get:
+      tags: [Vehicles]
+      summary: Список марок автомобилей
+      operationId: getVehicleBrands
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+
+  /vehicles/models:
+    get:
+      tags: [Vehicles]
+      summary: Модели по марке
+      operationId: getVehicleModels
+      parameters:
+        - name: brandId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+# Endpoints, которые будут добавлены позже:
+# - /clients (управление клиентами)
+# - /commissions (детальная информация по комиссиям)
+# - /support (создание обращений в поддержку)
+# - /notifications (push-уведомления)
+# - /reports (отчёты для агента)

@@ -1,0 +1,9 @@
+/*
+ * Tailwind entry. Other globals (Taiga theme/fonts, tokens, typography,
+ * overrides) are listed separately in angular.json so they can include
+ * .less and avoid SCSS preprocessor cross-format issues.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

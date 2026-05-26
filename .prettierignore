@@ -1,0 +1,8 @@
+dist
+.angular
+node_modules
+coverage
+*.min.css
+*.min.js
+package-lock.json
+src/app/core/models/api.generated.ts

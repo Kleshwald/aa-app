@@ -1,0 +1,92 @@
+// Typography scale — increased for an older audience (35-65+).
+// Body text is 18px (not 16px). Minimum readable text 14px.
+// See DESIGN_SYSTEM.md and USER_PROFILE.md.
+
+:root {
+  --text-xs: 14px;
+  --text-sm: 16px;
+  --text-base: 18px; // body text
+  --text-lg: 20px;
+  --text-xl: 24px; // h3
+  --text-2xl: 28px; // h2
+  --text-3xl: 32px; // h1
+
+  --leading-xs: 20px;
+  --leading-sm: 24px;
+  --leading-base: 28px;
+  --leading-lg: 30px;
+  --leading-xl: 32px;
+  --leading-2xl: 36px;
+  --leading-3xl: 40px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+}
+
+html,
+body {
+  font-family: var(--font-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-regular);
+  color: var(--gray-900);
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--text-3xl);
+  line-height: var(--leading-3xl);
+}
+h2 {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+}
+h3 {
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+}
+h4 {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+}
+h5 {
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-medium);
+}
+h6 {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+}
+
+p {
+  margin: 0;
+}
+
+// Respect reduced-motion preference (a11y).
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

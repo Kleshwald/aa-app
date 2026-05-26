@@ -1,0 +1,111 @@
+// Agent Academy design tokens.
+// Single source of truth for colours, fonts and radii.
+// Tailwind references these via var(--brand-500) in tailwind.config.js,
+// Taiga UI inherits them through the --tui-* mappings at the bottom.
+
+:root {
+  // ─── Brand (navy from logo, used for primary CTA) ───
+  --brand-50: #eff4f9;
+  --brand-100: #dbe6f0;
+  --brand-200: #b7cce0;
+  --brand-300: #93b3d1;
+  --brand-400: #4f7ba6;
+  --brand-500: #0c3363; // logo navy — primary CTA, contrast 13.5:1 on white
+  --brand-600: #0a2a52; // hover
+  --brand-700: #082848; // pressed
+  --brand-800: #061f37;
+  --brand-900: #041527;
+
+  // ─── Accent (logo light blue — decorative only, NOT for body text) ───
+  --accent-300: #87bdee;
+  --accent-400: #5ba5e8;
+  --accent-500: #3992e4; // logo triangle blue
+  --accent-600: #236192; // hover, also used for info-600
+  --accent-700: #1b4d75;
+
+  // ─── Semantic ───
+  --success-50: #f0fdf4;
+  --success-100: #dcfce7;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+  --success-700: #15803d;
+
+  --warning-50: #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+
+  --error-50: #fef2f2;
+  --error-100: #fee2e2;
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+  --error-700: #b91c1c;
+
+  --info-50: #eff6ff;
+  --info-100: #dbeafe;
+  --info-500: #3992e4;
+  --info-600: #236192; // navy-tinted blue from brand palette
+  --info-700: #1b4d75;
+
+  // ─── Neutrals ───
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af; // decorative only — NEVER for body text
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151; // secondary text
+  --gray-800: #1f2937;
+  --gray-900: #111827; // primary text, contrast 16:1 on white
+
+  // ─── Typography ───
+  --font-text:
+    'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --font-heading:
+    'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+
+  // ─── Radii ───
+  --radius-sm: 4px;
+  --radius-base: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  // ─── Shadows ───
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  // ─── Component sizes (per DESIGN_SYSTEM.md) ───
+  --size-button-sm: 40px;
+  --size-button: 48px; // minimum touch target for our audience
+  --size-button-lg: 56px;
+  --size-input: 48px;
+  --size-row: 56px; // table row height
+
+  // ─── Taiga UI mappings ───
+  // Taiga reads these for accent colour, text, status, fonts.
+  --tui-background-accent-1: var(--brand-500);
+  --tui-background-accent-1-hover: var(--brand-600);
+  --tui-background-accent-1-pressed: var(--brand-700);
+  --tui-background-accent-2: var(--accent-500);
+  --tui-text-primary: var(--gray-900);
+  --tui-text-secondary: var(--gray-700);
+  --tui-text-tertiary: var(--gray-500);
+  --tui-status-positive: var(--success-600);
+  --tui-status-positive-pale: var(--success-50);
+  --tui-status-warning: var(--warning-600);
+  --tui-status-warning-pale: var(--warning-50);
+  --tui-status-negative: var(--error-600);
+  --tui-status-negative-pale: var(--error-50);
+  --tui-status-info: var(--info-600);
+  --tui-status-info-pale: var(--info-50);
+  --tui-font-text: var(--font-text);
+  --tui-font-heading: var(--font-heading);
+}
