@@ -4,20 +4,25 @@ import localeRu from '@angular/common/locales/ru';
 import {
   type ApplicationConfig,
   LOCALE_ID,
+  isDevMode,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
-  isDevMode,
+  signal,
 } from '@angular/core';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 
-import { environment } from '@env/environment';
+import { provideTaiga } from '@taiga-ui/core';
+import { provideEventPlugins } from '@taiga-ui/event-plugins';
+import { TUI_LANGUAGE, TUI_RUSSIAN_LANGUAGE } from '@taiga-ui/i18n';
 
 import { authInterceptor } from '@core/api/interceptors/auth.interceptor';
 import { errorInterceptor } from '@core/api/interceptors/error.interceptor';
 import { mockInterceptor } from '@core/api/interceptors/mock.interceptor';
+import { environment } from '@env/environment';
 
 import { routes } from './app.routes';
-import { provideServiceWorker } from '@angular/service-worker';
 
 registerLocaleData(localeRu, 'ru-RU');
 
@@ -31,7 +36,11 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
     provideHttpClient(withInterceptors(interceptors)),
+    provideAnimationsAsync(),
+    provideEventPlugins(),
+    provideTaiga({ scrollbars: 'native' }),
     { provide: LOCALE_ID, useValue: 'ru-RU' },
+    { provide: TUI_LANGUAGE, useValue: signal(TUI_RUSSIAN_LANGUAGE) },
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',

@@ -1,0 +1,53 @@
+<div class="login-shell">
+  <main class="login-card">
+    <img src="/images/logo.png" alt="Agent Academy" class="login-logo" />
+
+    <h1 class="login-title">Вход в платформу</h1>
+    <p class="login-subtitle">Войдите, чтобы продолжить работу с полисами и клиентами</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form" novalidate>
+      <label class="login-field">
+        <span class="login-field__label">Номер телефона</span>
+        <input
+          type="tel"
+          autocomplete="tel"
+          inputmode="tel"
+          formControlName="login"
+          placeholder="+7 (___) ___-__-__"
+          class="login-field__input"
+        />
+      </label>
+
+      <label class="login-field">
+        <span class="login-field__label-row">
+          <span class="login-field__label">Пароль</span>
+          <a class="login-field__forgot" routerLink="/forgot-password" tabindex="-1">
+            Забыли пароль?
+          </a>
+        </span>
+        <input
+          type="password"
+          autocomplete="current-password"
+          formControlName="password"
+          class="login-field__input"
+        />
+      </label>
+
+      @if (error(); as message) {
+        <div class="login-error" role="alert">
+          {{ message }}
+        </div>
+      }
+
+      <button type="submit" [disabled]="form.invalid || loading()" class="login-submit">
+        {{ loading() ? 'Входим…' : 'Войти' }}
+      </button>
+    </form>
+
+    <p class="login-help">Если у вас проблемы со входом, обратитесь к вашему куратору.</p>
+  </main>
+
+  <footer class="login-footer">
+    <p>© {{ currentYear }} Agent Academy. Платформа для страховых агентов.</p>
+  </footer>
+</div>
