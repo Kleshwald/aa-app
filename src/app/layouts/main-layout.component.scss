@@ -1,0 +1,264 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--gray-50);
+}
+
+// ─── Header ───
+
+.app-header {
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  background: var(--brand-500);
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.app-header__brand {
+  display: inline-flex;
+  align-items: center;
+  height: 64px;
+  text-decoration: none;
+}
+
+.app-header__logo {
+  height: 36px;
+  width: auto;
+  // Logo PNG has black text; on navy header we invert to keep readable.
+  filter: brightness(0) invert(1);
+}
+
+.app-header__spacer {
+  flex: 1;
+}
+
+.app-header__user {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.app-header__user-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px 0 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-base);
+  color: #ffffff;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+
+  &:hover,
+  &--open {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 1px;
+  }
+}
+
+.app-header__user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.app-header__user-name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #ffffff;
+}
+
+.app-header__user-location {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
+}
+
+.app-header__user-chevron {
+  transition: transform 120ms ease-out;
+  color: rgba(255, 255, 255, 0.85);
+
+  .app-header__user-button--open & {
+    transform: rotate(180deg);
+  }
+}
+
+.app-header__user-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 220px;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-header__user-menu-item {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--gray-900);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    background: var(--gray-100);
+  }
+
+  &:focus-visible {
+    outline: none;
+    background: var(--gray-100);
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
+
+  &--danger {
+    color: var(--error-600);
+
+    &:hover {
+      background: var(--error-50);
+      color: var(--error-700);
+    }
+  }
+}
+
+.app-header__user-menu-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--gray-200);
+}
+
+// ─── Body (sidebar + content) ───
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-sidebar {
+  flex-shrink: 0;
+  width: 240px;
+  padding: 16px 12px;
+  background: #ffffff;
+  border-right: 1px solid var(--gray-200);
+}
+
+.app-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-base);
+  text-decoration: none;
+  color: var(--gray-700);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out;
+
+  &:hover {
+    background: var(--gray-100);
+    color: var(--gray-900);
+  }
+
+  &:focus-visible {
+    outline: none;
+    background: var(--gray-100);
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
+
+  &--active {
+    background: var(--brand-50);
+    color: var(--brand-500);
+
+    .app-sidebar__icon {
+      color: var(--brand-500);
+    }
+  }
+}
+
+.app-sidebar__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--gray-500);
+  flex-shrink: 0;
+}
+
+.app-sidebar__label {
+  flex: 1;
+}
+
+.app-content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 32px;
+  overflow-x: auto;
+}
+
+// ─── Mobile compaction (PROJECT_BRIEF: mobile is secondary, but should still work) ───
+
+@media (max-width: 1023px) {
+  .app-sidebar {
+    width: 64px;
+    padding: 16px 8px;
+  }
+
+  .app-sidebar__label {
+    display: none;
+  }
+
+  .app-sidebar__item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .app-content {
+    padding: 16px;
+  }
+}

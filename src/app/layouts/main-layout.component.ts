@@ -1,34 +1,89 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  HostListener,
+  inject,
+  signal,
+} from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '@core/services/auth.service';
 
+interface NavItem {
+  label: string;
+  route: string;
+  icon:
+    | 'clients'
+    | 'prolongation'
+    | 'osago'
+    | 'health'
+    | 'mortgage'
+    | 'finance'
+    | 'learning'
+    | 'messages';
+}
+
+const NAV: readonly NavItem[] = [
+  { label: 'Мои клиенты', route: '/clients', icon: 'clients' },
+  { label: 'Пролонгация', route: '/prolongation', icon: 'prolongation' },
+  { label: 'ОСАГО', route: '/osago', icon: 'osago' },
+  { label: 'Здоровье', route: '/health', icon: 'health' },
+  { label: 'Ипотека', route: '/mortgage', icon: 'mortgage' },
+  { label: 'Мои финансы', route: '/finance', icon: 'finance' },
+  { label: 'Обучение', route: '/learning', icon: 'learning' },
+  { label: 'Сообщения', route: '/messages', icon: 'messages' },
+] as const;
+
 @Component({
   selector: 'app-main-layout',
-  imports: [RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="min-h-screen flex flex-col">
-      <header class="bg-white border-b border-gray-200 px-6 h-16 flex items-center justify-between">
-        <a routerLink="/dashboard" class="flex items-center gap-3">
-          <span class="text-xl font-semibold text-brand-500">Agent Academy</span>
-        </a>
-        <nav class="flex items-center gap-6 text-sm">
-          <a routerLink="/dashboard" class="text-gray-700 hover:text-brand-500">Главная</a>
-          <a routerLink="/osago" class="text-gray-700 hover:text-brand-500">Расчёт ОСАГО</a>
-          <a routerLink="/policies" class="text-gray-700 hover:text-brand-500">Полисы</a>
-          <a routerLink="/profile" class="text-gray-700 hover:text-brand-500">Профиль</a>
-          <button type="button" (click)="auth.logout()" class="text-gray-700 hover:text-error-600">
-            Выйти
-          </button>
-        </nav>
-      </header>
-      <main class="flex-1 bg-gray-50">
-        <router-outlet />
-      </main>
-    </div>
-  `,
+  templateUrl: './main-layout.component.html',
+  styleUrl: './main-layout.component.scss',
 })
 export class MainLayoutComponent {
-  protected readonly auth = inject(AuthService);
+  private readonly auth = inject(AuthService);
+  private readonly host = inject(ElementRef<HTMLElement>);
+
+  protected readonly nav = NAV;
+  protected readonly agent = this.auth.currentAgent;
+  protected readonly agentName = computed(() => this.agent()?.fullName ?? 'Агент');
+  protected readonly agentLocation = computed(() => {
+    const a = this.agent();
+    if (!a?.region && !a?.district) return '';
+    if (a.region && a.district) return `${a.region}, ${a.district}`;
+    return a.region ?? a.district ?? '';
+  });
+
+  protected readonly userMenuOpen = signal(false);
+
+  toggleUserMenu(): void {
+    this.userMenuOpen.update((v) => !v);
+  }
+
+  closeUserMenu(): void {
+    this.userMenuOpen.set(false);
+  }
+
+  logout(): void {
+    this.closeUserMenu();
+    this.auth.logout();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.userMenuOpen()) return;
+    const target = event.target as Node;
+    const menu = this.host.nativeElement.querySelector('.app-header__user');
+    if (menu && !menu.contains(target)) {
+      this.closeUserMenu();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeUserMenu();
+  }
 }

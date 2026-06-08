@@ -1,0 +1,223 @@
+<div class="app-shell">
+  <header class="app-header">
+    <a routerLink="/clients" class="app-header__brand" aria-label="Agent Academy — на главную">
+      <img src="/images/logo.png" alt="" class="app-header__logo" />
+    </a>
+
+    <div class="app-header__spacer"></div>
+
+    <div class="app-header__user">
+      <button
+        type="button"
+        class="app-header__user-button"
+        [class.app-header__user-button--open]="userMenuOpen()"
+        (click)="toggleUserMenu()"
+        [attr.aria-expanded]="userMenuOpen()"
+        aria-haspopup="menu"
+      >
+        <span class="app-header__user-info">
+          <span class="app-header__user-name">{{ agentName() }}</span>
+          @if (agentLocation()) {
+            <span class="app-header__user-location">{{ agentLocation() }}</span>
+          }
+        </span>
+        <svg
+          class="app-header__user-chevron"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M4 6l4 4 4-4"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+
+      @if (userMenuOpen()) {
+        <div class="app-header__user-menu" role="menu">
+          <a
+            routerLink="/profile"
+            class="app-header__user-menu-item"
+            role="menuitem"
+            (click)="closeUserMenu()"
+          >
+            Профиль
+          </a>
+          <a
+            routerLink="/settings"
+            class="app-header__user-menu-item"
+            role="menuitem"
+            (click)="closeUserMenu()"
+          >
+            Настройки
+          </a>
+          <span class="app-header__user-menu-divider"></span>
+          <button
+            type="button"
+            class="app-header__user-menu-item app-header__user-menu-item--danger"
+            role="menuitem"
+            (click)="logout()"
+          >
+            Выйти
+          </button>
+        </div>
+      }
+    </div>
+  </header>
+
+  <div class="app-body">
+    <aside class="app-sidebar" aria-label="Основное меню">
+      <nav class="app-sidebar__nav">
+        @for (item of nav; track item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="app-sidebar__item--active"
+            class="app-sidebar__item"
+          >
+            <span class="app-sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true">
+              @switch (item.icon) {
+                @case ('clients') {
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                }
+                @case ('prolongation') {
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                    <polyline points="21 3 21 9 15 9" />
+                  </svg>
+                }
+                @case ('osago') {
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"
+                    />
+                    <circle cx="6.5" cy="16.5" r="2.5" />
+                    <circle cx="16.5" cy="16.5" r="2.5" />
+                  </svg>
+                }
+                @case ('health') {
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"
+                    />
+                  </svg>
+                }
+                @case ('mortgage') {
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                }
+                @case ('finance') {
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M8 5h6a4 4 0 0 1 0 8H6" />
+                    <path d="M8 5v15" />
+                    <path d="M5 16h10" />
+                  </svg>
+                }
+                @case ('learning') {
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                  </svg>
+                }
+                @case ('messages') {
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                }
+              }
+            </span>
+            <span class="app-sidebar__label">{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    </aside>
+
+    <main class="app-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

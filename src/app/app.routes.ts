@@ -3,7 +3,7 @@ import { type Routes } from '@angular/router';
 import { authGuard, guestGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'clients' },
   {
     path: '',
     loadComponent: () =>
@@ -24,20 +24,51 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'dashboard',
+        path: 'clients',
+        loadComponent: () => import('@features/clients/clients.page').then((m) => m.ClientsPage),
+        title: 'Мои клиенты — Agent Academy',
+      },
+      {
+        path: 'prolongation',
         loadComponent: () =>
-          import('@features/dashboard/dashboard.page').then((m) => m.DashboardPage),
-        title: 'Главная — Agent Academy',
+          import('@features/prolongation/prolongation.page').then((m) => m.ProlongationPage),
+        title: 'Пролонгация — Agent Academy',
       },
       {
         path: 'osago',
         loadComponent: () => import('@features/osago/osago.page').then((m) => m.OsagoPage),
-        title: 'Расчёт ОСАГО — Agent Academy',
+        title: 'ОСАГО — Agent Academy',
       },
       {
-        path: 'policies',
-        loadComponent: () => import('@features/policies/policies.page').then((m) => m.PoliciesPage),
-        title: 'Мои полисы — Agent Academy',
+        path: 'health',
+        loadComponent: () => import('@features/health/health.page').then((m) => m.HealthPage),
+        title: 'Здоровье — Agent Academy',
+      },
+      {
+        path: 'mortgage',
+        loadComponent: () => import('@features/mortgage/mortgage.page').then((m) => m.MortgagePage),
+        title: 'Ипотека — Agent Academy',
+      },
+      {
+        path: 'finance',
+        loadComponent: () => import('@features/finance/finance.page').then((m) => m.FinancePage),
+        title: 'Мои финансы — Agent Academy',
+      },
+      {
+        path: 'learning',
+        loadComponent: () => import('@features/learning/learning.page').then((m) => m.LearningPage),
+        title: 'Обучение — Agent Academy',
+      },
+      {
+        path: 'messages',
+        loadComponent: () => import('@features/messages/messages.page').then((m) => m.MessagesPage),
+        title: 'Сообщения — Agent Academy',
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('@features/dashboard/dashboard.page').then((m) => m.DashboardPage),
+        title: 'Главная — Agent Academy',
       },
       {
         path: 'profile',
