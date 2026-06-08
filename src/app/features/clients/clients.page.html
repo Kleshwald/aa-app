@@ -1,0 +1,145 @@
+<section class="clients">
+  <header class="clients__header">
+    <h1 class="clients__title">Мои клиенты</h1>
+  </header>
+
+  <div class="clients__toolbar">
+    <div class="clients__toolbar-row">
+      <div class="clients__search">
+        <input
+          type="search"
+          [formControl]="searchControl"
+          placeholder="Поиск по ФИО, номеру полиса или госномеру (Ctrl+F)"
+          class="clients__search-input"
+          aria-label="Поиск"
+        />
+      </div>
+
+      <div class="clients__filter-group">
+        <label class="clients__filter">
+          <span class="clients__filter-label">Фильтры:</span>
+          <select
+            class="clients__filter-select"
+            [value]="period()"
+            (change)="setPeriod($any($event.target).value)"
+          >
+            <option value="this-month">Этот месяц</option>
+            <option value="this-quarter">Этот квартал</option>
+            <option value="this-year">Этот год</option>
+            <option value="all">Всё время</option>
+          </select>
+        </label>
+
+        <select
+          class="clients__filter-select"
+          [value]="status()"
+          (change)="status.set($any($event.target).value)"
+          aria-label="Статус"
+        >
+          <option value="">Все статусы</option>
+          <option value="active">Оформлен</option>
+          <option value="pending">Черновик</option>
+          <option value="processing">В обработке</option>
+          <option value="expired">Истёк</option>
+          <option value="cancelled">Расторгнут</option>
+        </select>
+
+        <select
+          class="clients__filter-select"
+          [value]="type()"
+          (change)="type.set($any($event.target).value)"
+          aria-label="Продукт"
+        >
+          <option value="">Все продукты</option>
+          <option value="OSAGO">ОСАГО</option>
+          <option value="NS">НС при ДТП</option>
+          <option value="TICK">Антиклещ</option>
+          <option value="MORTGAGE">Ипотека</option>
+        </select>
+
+        <select
+          class="clients__filter-select"
+          [value]="insuranceCompany()"
+          (change)="insuranceCompany.set($any($event.target).value)"
+          aria-label="Страховая компания"
+        >
+          <option value="">Все СК</option>
+          <option value="renessans">Ренессанс</option>
+          <option value="ugoria">Югория</option>
+          <option value="soglasie">Согласие</option>
+          <option value="zetta">Зетта</option>
+          <option value="rosgosstrah">Росгосстрах</option>
+          <option value="sogaz">СОГАЗ</option>
+          <option value="euroins">Евроинс</option>
+          <option value="energogarant">Энергогарант</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="clients__table-wrap">
+    <table class="clients__table" aria-label="Список полисов">
+      <thead>
+        <tr>
+          <th scope="col">ИКП</th>
+          <th scope="col">Дата</th>
+          <th scope="col">Куратор</th>
+          <th scope="col">Страхователь</th>
+          <th scope="col">Объект страхования</th>
+          <th scope="col">№ полиса</th>
+          <th scope="col">Продукт</th>
+          <th scope="col" class="clients__cell--num">Цена</th>
+          <th scope="col">Статус</th>
+          <th scope="col">Страховая компания</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (isLoading()) {
+          @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+            <tr class="clients__row clients__row--skeleton">
+              <td colspan="10"><span class="clients__skeleton"></span></td>
+            </tr>
+          }
+        } @else if (hasError()) {
+          <tr>
+            <td colspan="10" class="clients__state clients__state--error">
+              Не удалось загрузить данные{{ errorMessage() ? ': ' + errorMessage() : '' }}.
+              Попробуйте обновить страницу.
+            </td>
+          </tr>
+        } @else if (rows().length === 0) {
+          <tr>
+            <td colspan="10" class="clients__state">
+              По выбранным фильтрам полисов не найдено.
+              <button type="button" class="clients__reset" (click)="resetFilters()">
+                Сбросить фильтры
+              </button>
+            </td>
+          </tr>
+        } @else {
+          @for (row of rows(); track row.id) {
+            <tr class="clients__row">
+              <td>{{ row.ikp }}</td>
+              <td>{{ row.createdAt | date: 'dd.MM.yyyy' }}</td>
+              <td>{{ row.curatorName }}</td>
+              <td>{{ row.clientName }}</td>
+              <td>
+                {{ row.vehicleBrand }} {{ row.vehicleModel }}
+                <span class="clients__plate">({{ row.vehicleLicensePlate }})</span>
+              </td>
+              <td>{{ row.number }}</td>
+              <td>{{ productLabel[row.type] }}</td>
+              <td class="clients__cell--num">{{ row.premium | number: '1.0-0' }}</td>
+              <td>
+                <span class="clients__status" [attr.data-status]="row.status">{{
+                  statusLabel[row.status]
+                }}</span>
+              </td>
+              <td>{{ row.insuranceCompanyName }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -3,6 +3,7 @@ import { type Observable } from 'rxjs';
 
 import { type ApiResponse } from '@core/models';
 
+import { currentAgent } from '../fixtures/agents.fixture';
 import { policies } from '../fixtures/policies.fixture';
 import { mockOk } from '../helpers/response';
 
@@ -41,7 +42,11 @@ export function handleGetPolicies(
 
   const total = result.length;
   const offset = (page - 1) * pageSize;
-  const slice = result.slice(offset, offset + pageSize);
+  const slice = result.slice(offset, offset + pageSize).map((p) => ({
+    ...p,
+    ikp: currentAgent.ikp,
+    curatorName: currentAgent.curatorName,
+  }));
 
   return mockOk(slice, { page, pageSize, total });
 }
