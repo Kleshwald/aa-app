@@ -127,6 +127,47 @@
     color: var(--gray-500);
     cursor: not-allowed;
   }
+
+  &--with-action {
+    padding-right: 48px;
+  }
+}
+
+.login-field__input-wrap {
+  position: relative;
+  display: block;
+}
+
+.login-field__toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-base);
+  color: var(--gray-500);
+  cursor: pointer;
+  transition:
+    color 120ms ease-out,
+    background 120ms ease-out;
+
+  &:hover {
+    color: var(--gray-700);
+    background: var(--gray-100);
+  }
+
+  &:focus-visible {
+    outline: none;
+    color: var(--brand-500);
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
 }
 
 .login-error {

@@ -18,7 +18,12 @@ export class LoginPage {
 
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly showPassword = signal(false);
   protected readonly currentYear = new Date().getFullYear();
+
+  togglePassword(): void {
+    this.showPassword.update((v) => !v);
+  }
 
   protected readonly form = this.fb.nonNullable.group({
     login: ['', [Validators.required]],
