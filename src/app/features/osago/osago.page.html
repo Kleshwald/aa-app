@@ -1,0 +1,686 @@
+@switch (view()) {
+  <!-- ──────────────────────────── FORM ──────────────────────────── -->
+  @case ('form') {
+    <section class="osago" [formGroup]="form">
+      <header class="osago__title-row">
+        <h1 class="osago__title">ОСАГО</h1>
+        <button
+          type="button"
+          class="osago__test-fill"
+          (click)="fillTestData()"
+          title="Pre-fill для прототипа"
+        >
+          Заполнить тестовыми данными
+        </button>
+      </header>
+
+      <!-- Insurer-type tabs -->
+      <div class="osago__tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          class="osago__tab"
+          [class.osago__tab--active]="insurerType() === 'individual'"
+          (click)="setInsurerType('individual')"
+        >
+          Физическое лицо
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="osago__tab"
+          [class.osago__tab--active]="insurerType() === 'ip'"
+          (click)="setInsurerType('ip')"
+        >
+          Физическое лицо ИП
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="osago__tab"
+          [class.osago__tab--active]="insurerType() === 'legal'"
+          (click)="setInsurerType('legal')"
+        >
+          Юридическое лицо
+        </button>
+      </div>
+
+      <!-- Base info -->
+      <article class="osago-section" formGroupName="base">
+        <div class="osago-row osago-row--gap-large">
+          <label class="osago-field osago-field--narrow">
+            <span class="osago-field__label">Дата начала</span>
+            <input type="date" class="osago-field__input" formControlName="startDate" />
+          </label>
+          <label class="osago-field osago-field--narrow">
+            <span class="osago-field__label">Дата окончания</span>
+            <input type="date" class="osago-field__input" formControlName="endDate" readonly />
+          </label>
+          <label class="osago-field">
+            <span class="osago-field__label">Цель использования</span>
+            <select class="osago-field__input osago-field__input--select" formControlName="purpose">
+              @for (p of purposes; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+          </label>
+          <label class="osago-field">
+            <span class="osago-field__label">Телефон клиента</span>
+            <input
+              type="tel"
+              class="osago-field__input"
+              formControlName="clientPhone"
+              placeholder="+7 (___) ___-__-__"
+            />
+          </label>
+          <label class="osago-field">
+            <span class="osago-field__label">Email</span>
+            <input
+              type="email"
+              class="osago-field__input"
+              formControlName="email"
+              placeholder="example@mail.ru"
+            />
+          </label>
+        </div>
+      </article>
+
+      <!-- Vehicle -->
+      <article class="osago-section" formGroupName="vehicle">
+        <header class="osago-section__head">
+          <h2 class="osago-section__title">
+            <span class="osago-section__marker"></span> Транспортное средство
+          </h2>
+          <div class="osago-section__head-actions">
+            <label class="osago-check"
+              ><input type="checkbox" formControlName="hasTrailer" /><span
+                >ТС с прицепом</span
+              ></label
+            >
+            <label class="osago-check"
+              ><input type="checkbox" formControlName="customMakeModel" /><span
+                >Произвольная марка/модель</span
+              ></label
+            >
+            <button type="button" class="osago-link">Марка или модель отсутствует?</button>
+          </div>
+        </header>
+
+        <div class="osago-row">
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Гос.знак</span
+            ><input type="text" class="osago-field__input" formControlName="licensePlate"
+          /></label>
+          <label class="osago-check osago-check--inline-with-field"
+            ><input type="checkbox" formControlName="noLicensePlate" /><span
+              >без номера</span
+            ></label
+          >
+          <button type="button" class="osago-link osago-link--button">Найти</button>
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Категория</span
+            ><select
+              class="osago-field__input osago-field__input--select"
+              formControlName="category"
+            >
+              @for (c of categories; track c.value) {
+                <option [value]="c.value">{{ c.value }}</option>
+              }
+            </select></label
+          >
+          <label class="osago-field"
+            ><span class="osago-field__label">Марка</span
+            ><input type="text" class="osago-field__input" formControlName="make"
+          /></label>
+          <label class="osago-field"
+            ><span class="osago-field__label">Модель</span
+            ><input type="text" class="osago-field__input" formControlName="model"
+          /></label>
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Год выпуска</span
+            ><input
+              type="number"
+              class="osago-field__input"
+              formControlName="year"
+              [min]="1980"
+              [max]="today.getFullYear()"
+          /></label>
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Мощность (л.с.)</span
+            ><input type="number" class="osago-field__input" formControlName="power" step="0.01"
+          /></label>
+        </div>
+
+        <div class="osago-row osago-row--align-bottom">
+          <div class="osago-radio-group">
+            @for (id of identifierTypes; track id.value) {
+              <label class="osago-radio"
+                ><input type="radio" [value]="id.value" formControlName="identifierType" /><span>{{
+                  id.label
+                }}</span></label
+              >
+            }
+          </div>
+          <label class="osago-field osago-field--grow"
+            ><span class="osago-field__label visually-hidden">Значение</span
+            ><input type="text" class="osago-field__input" formControlName="identifierValue"
+          /></label>
+          <div class="osago-tab-pills">
+            @for (d of documentSubTypes; track d.value) {
+              <label
+                class="osago-tab-pill"
+                [class.osago-tab-pill--active]="
+                  form.controls.vehicle.controls.documentSubType.value === d.value
+                "
+                ><input
+                  type="radio"
+                  [value]="d.value"
+                  formControlName="documentSubType"
+                  class="visually-hidden"
+                />{{ d.label }}</label
+              >
+            }
+          </div>
+          <label class="osago-field"
+            ><span class="osago-field__label">Серия и номер</span
+            ><input type="text" class="osago-field__input" formControlName="documentSeries"
+          /></label>
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Дата выдачи</span
+            ><input type="date" class="osago-field__input" formControlName="documentDate"
+          /></label>
+        </div>
+      </article>
+
+      <!-- Policyholder -->
+      <article class="osago-section" formGroupName="policyholder">
+        <header class="osago-section__head">
+          <h2 class="osago-section__title">
+            <span class="osago-section__marker"></span> Страхователь
+          </h2>
+        </header>
+        <div class="osago-row">
+          <label class="osago-field"
+            ><span class="osago-field__label">Фамилия</span
+            ><input type="text" class="osago-field__input" formControlName="lastName"
+          /></label>
+          <label class="osago-field"
+            ><span class="osago-field__label">Имя</span
+            ><input type="text" class="osago-field__input" formControlName="firstName"
+          /></label>
+          <label class="osago-field osago-field--grow"
+            ><span class="osago-field__label">Отчество</span
+            ><input type="text" class="osago-field__input" formControlName="middleName"
+          /></label>
+          <label class="osago-check osago-check--inline-with-field"
+            ><input type="checkbox" formControlName="noMiddleName" /><span
+              >Без отчества</span
+            ></label
+          >
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Дата рождения</span
+            ><input type="date" class="osago-field__input" formControlName="birthDate"
+          /></label>
+        </div>
+        <div class="osago-row">
+          <label class="osago-field"
+            ><span class="osago-field__label">Тип документа</span
+            ><select
+              class="osago-field__input osago-field__input--select"
+              formControlName="docType"
+            >
+              @for (d of documentTypes; track d.value) {
+                <option [value]="d.value">{{ d.label }}</option>
+              }
+            </select></label
+          >
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Серия</span
+            ><input type="text" class="osago-field__input" formControlName="docSeries"
+          /></label>
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Номер</span
+            ><input type="text" class="osago-field__input" formControlName="docNumber"
+          /></label>
+          <label class="osago-field osago-field--narrow"
+            ><span class="osago-field__label">Дата выдачи</span
+            ><input type="date" class="osago-field__input" formControlName="docDate"
+          /></label>
+          <label class="osago-field osago-field--grow"
+            ><span class="osago-field__label">Адрес регистрации</span
+            ><input type="text" class="osago-field__input" formControlName="address"
+          /></label>
+        </div>
+      </article>
+
+      <!-- Owner -->
+      <article class="osago-section" formGroupName="owner">
+        <header class="osago-section__head">
+          <h2 class="osago-section__title">
+            <span class="osago-section__marker"></span> Собственник
+          </h2>
+          <label class="osago-check"
+            ><input type="checkbox" formControlName="isSameAsPolicyholder" /><span
+              >Является страхователем</span
+            ></label
+          >
+        </header>
+        @if (!ownerSameAsPolicyholder()) {
+          <ng-container formGroupName="person">
+            <div class="osago-row">
+              <label class="osago-field"
+                ><span class="osago-field__label">Фамилия</span
+                ><input type="text" class="osago-field__input" formControlName="lastName"
+              /></label>
+              <label class="osago-field"
+                ><span class="osago-field__label">Имя</span
+                ><input type="text" class="osago-field__input" formControlName="firstName"
+              /></label>
+              <label class="osago-field osago-field--grow"
+                ><span class="osago-field__label">Отчество</span
+                ><input type="text" class="osago-field__input" formControlName="middleName"
+              /></label>
+              <label class="osago-check osago-check--inline-with-field"
+                ><input type="checkbox" formControlName="noMiddleName" /><span
+                  >Без отчества</span
+                ></label
+              >
+              <label class="osago-field osago-field--narrow"
+                ><span class="osago-field__label">Дата рождения</span
+                ><input type="date" class="osago-field__input" formControlName="birthDate"
+              /></label>
+            </div>
+            <div class="osago-row">
+              <label class="osago-field"
+                ><span class="osago-field__label">Тип документа</span
+                ><select
+                  class="osago-field__input osago-field__input--select"
+                  formControlName="docType"
+                >
+                  @for (d of documentTypes; track d.value) {
+                    <option [value]="d.value">{{ d.label }}</option>
+                  }
+                </select></label
+              >
+              <label class="osago-field osago-field--narrow"
+                ><span class="osago-field__label">Серия</span
+                ><input type="text" class="osago-field__input" formControlName="docSeries"
+              /></label>
+              <label class="osago-field osago-field--narrow"
+                ><span class="osago-field__label">Номер</span
+                ><input type="text" class="osago-field__input" formControlName="docNumber"
+              /></label>
+              <label class="osago-field osago-field--narrow"
+                ><span class="osago-field__label">Дата выдачи</span
+                ><input type="date" class="osago-field__input" formControlName="docDate"
+              /></label>
+              <label class="osago-field osago-field--grow"
+                ><span class="osago-field__label">Адрес регистрации</span
+                ><input type="text" class="osago-field__input" formControlName="address"
+              /></label>
+            </div>
+          </ng-container>
+        }
+      </article>
+
+      <!-- Drivers -->
+      <article class="osago-section">
+        <header class="osago-section__head">
+          <h2 class="osago-section__title"><span class="osago-section__marker"></span> Водители</h2>
+          <div class="osago-tab-pills">
+            @for (n of [1, 2, 3, 4, 5]; track n) {
+              <button
+                type="button"
+                class="osago-tab-pill"
+                [class.osago-tab-pill--active]="isActiveDriverTab(n)"
+                (click)="setDriversMode('limited'); setDriverCount(n)"
+              >
+                {{ n }}
+              </button>
+            }
+            <button
+              type="button"
+              class="osago-tab-pill osago-tab-pill--wide"
+              [class.osago-tab-pill--active]="driversMode() === 'unlimited'"
+              (click)="setDriversMode('unlimited')"
+            >
+              Без ограничений
+            </button>
+          </div>
+        </header>
+
+        @if (driversMode() === 'limited') {
+          <div formArrayName="drivers" class="osago-drivers">
+            @for (driver of driversArray.controls; track $index) {
+              <div class="osago-driver" [formGroupName]="$index">
+                <h3 class="osago-driver__title">Водитель {{ $index + 1 }}</h3>
+                <div class="osago-tab-pills osago-tab-pills--secondary">
+                  <button
+                    type="button"
+                    class="osago-tab-pill"
+                    [class.osago-tab-pill--active]="driver.get('source')?.value === 'policyholder'"
+                    (click)="driver.patchValue({ source: 'policyholder' })"
+                  >
+                    Страхователь
+                  </button>
+                  <button
+                    type="button"
+                    class="osago-tab-pill"
+                    [class.osago-tab-pill--active]="driver.get('source')?.value === 'owner'"
+                    (click)="driver.patchValue({ source: 'owner' })"
+                  >
+                    Собственник
+                  </button>
+                  <button
+                    type="button"
+                    class="osago-tab-pill"
+                    [class.osago-tab-pill--active]="driver.get('source')?.value === 'other'"
+                    (click)="driver.patchValue({ source: 'other' })"
+                  >
+                    Иное лицо
+                  </button>
+                </div>
+                @if (driver.get('source')?.value === 'other') {
+                  <div class="osago-row">
+                    <label class="osago-field"
+                      ><span class="osago-field__label">Фамилия</span
+                      ><input type="text" class="osago-field__input" formControlName="lastName"
+                    /></label>
+                    <label class="osago-field"
+                      ><span class="osago-field__label">Имя</span
+                      ><input type="text" class="osago-field__input" formControlName="firstName"
+                    /></label>
+                    <label class="osago-field osago-field--grow"
+                      ><span class="osago-field__label">Отчество</span
+                      ><input type="text" class="osago-field__input" formControlName="middleName"
+                    /></label>
+                    <label class="osago-check osago-check--inline-with-field"
+                      ><input type="checkbox" formControlName="noMiddleName" /><span
+                        >Без отчества</span
+                      ></label
+                    >
+                    <label class="osago-field osago-field--narrow"
+                      ><span class="osago-field__label">Дата рождения</span
+                      ><input type="date" class="osago-field__input" formControlName="birthDate"
+                    /></label>
+                  </div>
+                }
+                <div class="osago-row">
+                  <label class="osago-field osago-field--narrow"
+                    ><span class="osago-field__label">В/У серия</span
+                    ><input type="text" class="osago-field__input" formControlName="licenseSeries"
+                  /></label>
+                  <label class="osago-field osago-field--narrow"
+                    ><span class="osago-field__label">В/У номер</span
+                    ><input type="text" class="osago-field__input" formControlName="licenseNumber"
+                  /></label>
+                  <label class="osago-check osago-check--inline-with-field"
+                    ><input type="checkbox" formControlName="isForeignLicense" /><span
+                      >Иностранное В/У</span
+                    ></label
+                  >
+                  <label class="osago-field osago-field--narrow"
+                    ><span class="osago-field__label">Дата выдачи В/У</span
+                    ><input type="date" class="osago-field__input" formControlName="licenseDate"
+                  /></label>
+                  <label class="osago-field osago-field--narrow"
+                    ><span class="osago-field__label">Дата начала стажа</span
+                    ><input
+                      type="date"
+                      class="osago-field__input"
+                      formControlName="startExperienceDate"
+                  /></label>
+                  <label class="osago-check osago-check--inline-with-field"
+                    ><input type="checkbox" formControlName="hasPreviousLicense" /><span
+                      >Указать предыдущее В/У</span
+                    ></label
+                  >
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="osago__unlimited-note">
+            Полис без ограничений по водителям. Управлять автомобилем смогут любые лица с
+            действующим водительским удостоверением.
+          </p>
+        }
+      </article>
+
+      <footer class="osago__actions">
+        <span class="osago__draft-hint">Дата расчёта: {{ today | date: 'dd.MM.yyyy HH:mm' }}</span>
+        <button type="button" class="osago__btn osago__btn--secondary" (click)="saveDraft()">
+          Сохранить черновик
+        </button>
+        <button type="button" class="osago__btn osago__btn--primary" (click)="calculate()">
+          Рассчитать
+        </button>
+      </footer>
+    </section>
+  }
+
+  <!-- ─────────────────────────── LOADING ─────────────────────────── -->
+  @case ('loading') {
+    <section class="loading">
+      <div class="loading__card">
+        <div class="loading__spinner" aria-hidden="true"></div>
+        <h2 class="loading__title">Рассчитываем стоимость в страховых компаниях</h2>
+        <p class="loading__step" [attr.aria-live]="'polite'">{{ loadingSteps[loadingStep()] }}</p>
+        <div
+          class="loading__bar"
+          role="progressbar"
+          [attr.aria-valuenow]="loadingProgress()"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="loading__bar-fill" [style.width.%]="loadingProgress()"></div>
+        </div>
+        <p class="loading__hint">Обычно занимает до 40 секунд. Не закрывайте окно.</p>
+        <button type="button" class="loading__cancel" (click)="cancelCalculation()">
+          Отменить
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- ─────────────────────────── RESULTS ─────────────────────────── -->
+  @case ('results') {
+    <section class="results">
+      <h1 class="results__title">Результаты расчёта</h1>
+
+      <div class="results__table-wrap">
+        <table class="results__table">
+          <thead>
+            <tr>
+              <th>Страховая компания</th>
+              <th>ОСАГО</th>
+              <th>Дополнительные сервисы</th>
+              <th>Итого</th>
+              <th class="results__cell--actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (q of quotes(); track q.id) {
+              <tr class="results__row">
+                <td>
+                  <div class="results__carrier">
+                    <div class="results__carrier-logo" [attr.data-carrier]="q.carrierId">
+                      {{ q.carrierShortName.charAt(0) }}
+                    </div>
+                    <div class="results__carrier-info">
+                      <div class="results__carrier-name">{{ q.carrierName }}</div>
+                      <div class="results__carrier-tag" [attr.data-color]="q.carrierTagColor">
+                        {{ q.carrierTag }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="results__price">{{ q.osagoPrice | number: '1.0-0' }} ₽</div>
+                  <div class="results__sub">Действует с {{ q.effectiveDate }}</div>
+                </td>
+                <td>
+                  <button type="button" class="results__addon" (click)="openAddOnModal(q.id)">
+                    @if (q.addOn.presetId === 'off') {
+                      <span class="results__addon-name results__addon-name--muted">Подключить</span>
+                    } @else {
+                      <span class="results__addon-name">{{
+                        addOnPresets[
+                          q.addOn.presetId === 'mini-kasko'
+                            ? 0
+                            : q.addOn.presetId === 'legal'
+                              ? 1
+                              : 2
+                        ].name
+                      }}</span>
+                      <span class="results__addon-price"
+                        >{{ q.addOn.price | number: '1.0-0' }} ₽</span
+                      >
+                      @if (q.addOn.required) {
+                        <span class="results__addon-required">Обязательно</span>
+                      }
+                    }
+                    <span class="results__addon-arrow" aria-hidden="true">▾</span>
+                  </button>
+                </td>
+                <td>
+                  <div class="results__price results__price--total">
+                    {{ totalFor(q) | number: '1.0-0' }} ₽
+                  </div>
+                  <div class="results__sub">{{ q.paymentMethod }}</div>
+                </td>
+                <td class="results__cell--actions">
+                  <button
+                    type="button"
+                    class="osago__btn osago__btn--primary"
+                    (click)="issue(q.id)"
+                  >
+                    Оформить
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="results__footer">
+        <button type="button" class="osago__btn osago__btn--secondary" (click)="backToForm()">
+          Вернуться
+        </button>
+      </footer>
+    </section>
+
+    <!-- Add-on modal (native <dialog>) -->
+    @if (addOnModalQuoteId(); as quoteId) {
+      <button
+        type="button"
+        class="modal-backdrop"
+        aria-label="Закрыть окно"
+        (click)="closeAddOnModal()"
+      ></button>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addon-modal-title">
+        <header class="modal__head">
+          <h2 id="addon-modal-title" class="modal__title">Дополнительные сервисы</h2>
+          <button type="button" class="osago-link">Подробнее о продуктах</button>
+          <button
+            type="button"
+            class="modal__close"
+            (click)="closeAddOnModal()"
+            aria-label="Закрыть"
+          >
+            ×
+          </button>
+        </header>
+
+        <div class="modal__body">
+          @for (preset of addOnPresets; track preset.id) {
+            <div class="addon-option" [class.addon-option--selected]="isAddOnSelected(preset.id)">
+              <label class="addon-option__header">
+                <input
+                  type="radio"
+                  name="addon-preset"
+                  [checked]="isAddOnSelected(preset.id)"
+                  (change)="selectAddOnPreset(preset.id)"
+                />
+                <span class="addon-option__name">{{ preset.name }}</span>
+              </label>
+              @if (preset.description && isAddOnSelected(preset.id)) {
+                <p class="addon-option__desc">{{ preset.description }}</p>
+              }
+              @if (preset.id !== 'off') {
+                <div
+                  class="addon-option__prices"
+                  [class.addon-option__prices--disabled]="!isAddOnSelected(preset.id)"
+                >
+                  @for (price of preset.priceOptions; track price) {
+                    <button
+                      type="button"
+                      class="addon-option__price"
+                      [class.addon-option__price--active]="
+                        isAddOnSelected(preset.id) && addOnModalPrice() === price
+                      "
+                      [disabled]="!isAddOnSelected(preset.id)"
+                      (click)="selectAddOnPrice(price)"
+                    >
+                      {{ price | number: '1.0-0' }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <footer class="modal__foot">
+          <button type="button" class="osago__btn osago__btn--primary" (click)="applyAddOnChoice()">
+            Выбрать
+          </button>
+        </footer>
+      </div>
+    }
+  }
+
+  <!-- ─────────────────────────── PAYMENT ─────────────────────────── -->
+  @case ('payment') {
+    <section class="payment">
+      <div class="payment__card">
+        @if (selectedQuote(); as q) {
+          <h2 class="payment__title">Оплата полиса</h2>
+          <div class="payment__amount">{{ totalFor(q) | number: '1.0-0' }} ₽</div>
+          <div class="payment__carrier">
+            {{ q.carrierName }} ·
+            {{
+              addOnPresets[
+                q.addOn.presetId === 'mini-kasko'
+                  ? 0
+                  : q.addOn.presetId === 'legal'
+                    ? 1
+                    : q.addOn.presetId === 'ns-dtp'
+                      ? 2
+                      : 3
+              ].name
+            }}
+          </div>
+        }
+        <div class="payment__spinner" aria-hidden="true"></div>
+        <p class="payment__step">Перенаправляем на платёжный шлюз…</p>
+        <p class="payment__hint">Не закрывайте окно во время оплаты.</p>
+        <button type="button" class="payment__cancel" (click)="cancelPayment()">
+          Отменить оплату
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- ─────────────────────────── SUCCESS ─────────────────────────── -->
+  @case ('success') {
+    <section class="success">
+      <div class="success__card">
+        <div class="success__icon" aria-hidden="true">✓</div>
+        <h2 class="success__title">Полис оформлен</h2>
+        <p class="success__hint">Перенаправляем в раздел «Мои клиенты»…</p>
+      </div>
+    </section>
+  }
+}
