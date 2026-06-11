@@ -2,6 +2,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -31,6 +32,11 @@ const STATUS_LABEL: Record<ClientRow['status'], string> = {
 })
 export class ClientsPage {
   private readonly service = inject(ClientService);
+  private readonly router = inject(Router);
+
+  openRow(row: ClientRow): void {
+    void this.router.navigate(['/clients', row.id]);
+  }
 
   protected readonly productLabel = PRODUCT_LABEL;
   protected readonly statusLabel = STATUS_LABEL;

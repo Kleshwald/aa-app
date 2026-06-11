@@ -167,6 +167,20 @@
     background: var(--gray-50);
   }
 
+  tbody tr.clients__row--clickable {
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: none;
+      td:first-child {
+        box-shadow: inset 3px 0 0 var(--brand-500);
+      }
+      td {
+        background: var(--brand-50);
+      }
+    }
+  }
+
   tbody tr:nth-child(even) td {
     background: #fbfcfd;
   }

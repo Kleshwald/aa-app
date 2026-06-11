@@ -29,6 +29,12 @@ export const routes: Routes = [
         title: 'Мои клиенты — Agent Academy',
       },
       {
+        path: 'clients/:id',
+        loadComponent: () =>
+          import('@features/clients/client-detail.page').then((m) => m.ClientDetailPage),
+        title: 'Информация о договоре — Agent Academy',
+      },
+      {
         path: 'prolongation',
         loadComponent: () =>
           import('@features/prolongation/prolongation.page').then((m) => m.ProlongationPage),

@@ -56,5 +56,70 @@ export function handleGetPolicy(
 ): Observable<HttpResponse<ApiResponse<unknown>>> {
   const id = req.url.split('/').pop();
   const policy = policies.find((p) => p.id === id);
-  return mockOk(policy ?? null);
+  if (!policy) return mockOk(null);
+
+  // Mock "addon" policies tied to the same contract (cross-sell of НС при ДТП etc.).
+  // Real 1C joins these via parentPolicyId — we just pick a couple from the fixture pool.
+  const possibleAddOns = policies
+    .filter((p) => p.id !== policy.id && p.type !== policy.type && p.type !== 'OSAGO')
+    .slice(0, 2);
+  const addOns = policy.type === 'OSAGO' && Math.random() < 0.65 ? possibleAddOns.slice(0, 1) : [];
+
+  // Process counters (история операций по полису).
+  const processCounters = {
+    changes: Math.random() < 0.15 ? 1 : 0,
+    cancellations: 0,
+    losses: Math.random() < 0.05 ? 1 : 0,
+  };
+
+  // Available downloadable documents.
+  const documents = [
+    { id: 'policy', name: `Полис ${productLabel(policy.type)}`, format: 'pdf' as const },
+    ...addOns.map((a) => ({
+      id: `addon-${a.id}`,
+      name: `Полис ${productLabel(a.type)}`,
+      format: 'pdf' as const,
+    })),
+    { id: 'application', name: 'Заявление на страхование', format: 'pdf' as const },
+  ];
+
+  // Cross-sell services (что ещё можно оформить этому клиенту).
+  const services = [
+    { id: 'mini-kasko', name: 'Оформить МиниКАСКО', available: true },
+    {
+      id: 'ns-dtp',
+      name: 'Оформить НС при ДТП',
+      available: !addOns.some((a) => a.type === 'NS'),
+    },
+    { id: 'legal', name: 'Оформить Юрист поможет', available: true },
+  ].filter((s) => s.available);
+
+  return mockOk({
+    ...policy,
+    ikp: currentAgent.ikp,
+    curatorName: currentAgent.curatorName,
+    addOns: addOns.map((a) => ({
+      id: a.id,
+      type: a.type,
+      number: a.number,
+      premium: a.premium,
+      productLabel: productLabel(a.type),
+    })),
+    processCounters,
+    documents,
+    services,
+  });
+}
+
+function productLabel(type: 'OSAGO' | 'NS' | 'TICK' | 'MORTGAGE'): string {
+  switch (type) {
+    case 'OSAGO':
+      return 'ОСАГО';
+    case 'NS':
+      return 'НС при ДТП';
+    case 'TICK':
+      return 'Антиклещ';
+    case 'MORTGAGE':
+      return 'Ипотека';
+  }
 }

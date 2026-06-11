@@ -118,7 +118,13 @@
           </tr>
         } @else {
           @for (row of rows(); track row.id) {
-            <tr class="clients__row">
+            <tr
+              class="clients__row clients__row--clickable"
+              (click)="openRow(row)"
+              (keydown.enter)="openRow(row)"
+              tabindex="0"
+              [attr.aria-label]="'Открыть договор ' + row.number"
+            >
               <td>{{ row.ikp }}</td>
               <td>{{ row.createdAt | date: 'dd.MM.yyyy' }}</td>
               <td>{{ row.curatorName }}</td>

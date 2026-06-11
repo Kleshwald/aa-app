@@ -1,0 +1,198 @@
+@if (isLoading()) {
+  <section class="detail">
+    <h1 class="detail__title">Информация о договоре</h1>
+    <div class="detail__loading">Загружаем данные договора…</div>
+  </section>
+} @else if (hasError() || !policy()) {
+  <section class="detail">
+    <h1 class="detail__title">Информация о договоре</h1>
+    <div class="detail__error">
+      Договор не найден или произошла ошибка. Попробуйте обновить страницу.
+    </div>
+  </section>
+} @else if (policy(); as p) {
+  <section class="detail">
+    <h1 class="detail__title">Информация о договоре</h1>
+
+    <div class="detail__grid">
+      <!-- Card 1: Полис -->
+      <article class="detail-card">
+        <header class="detail-card__head">
+          <div class="detail-card__head-left">
+            <h2 class="detail-card__product">{{ productLabel[p.type] }}</h2>
+            <p class="detail-card__price">{{ p.premium | number: '1.2-2' }} ₽</p>
+          </div>
+          <span class="detail-card__status" [attr.data-status]="p.status">
+            {{ statusLabel[p.status] }}
+          </span>
+        </header>
+
+        <dl class="detail-card__kv">
+          <dt>№ договора</dt>
+          <dd>{{ p.number }}</dd>
+          <dt>Страховая компания</dt>
+          <dd>{{ p.insuranceCompanyName }}</dd>
+          <dt>Период страхования</dt>
+          <dd>{{ p.startDate | date: 'dd.MM.yyyy' }} — {{ p.endDate | date: 'dd.MM.yyyy' }}</dd>
+          <dt>Транспортное средство</dt>
+          <dd>{{ p.vehicleBrand }} {{ p.vehicleModel }} ({{ p.vehicleLicensePlate }})</dd>
+          <dt>Страхователь</dt>
+          <dd>{{ p.clientName }}</dd>
+
+          @if (showMore()) {
+            <dt>VIN</dt>
+            <dd>{{ p.vehicleVin }}</dd>
+            <dt>Год выпуска</dt>
+            <dd>{{ p.vehicleYear }}</dd>
+            <dt>Телефон клиента</dt>
+            <dd>{{ p.clientPhone }}</dd>
+            <dt>ИКП</dt>
+            <dd>{{ p.ikp }}</dd>
+            <dt>Куратор</dt>
+            <dd>{{ p.curatorName }}</dd>
+            <dt>Комиссия</dt>
+            <dd>{{ p.commission | number: '1.2-2' }} ₽</dd>
+            <dt>Дата оформления</dt>
+            <dd>{{ p.createdAt | date: 'dd.MM.yyyy HH:mm' }}</dd>
+          }
+        </dl>
+
+        <button type="button" class="detail-card__more" (click)="showMore.set(!showMore())">
+          @if (showMore()) {
+            <span class="detail-card__more-arrow">▼</span> Свернуть
+          } @else {
+            <span class="detail-card__more-arrow">▶</span> Ещё
+          }
+        </button>
+
+        @if (p.addOns.length > 0) {
+          <div class="detail-card__addons">
+            @for (addon of p.addOns; track addon.id) {
+              <div class="detail-card__addon">
+                <div class="detail-card__addon-head">
+                  <h3 class="detail-card__addon-product">{{ addon.productLabel }}</h3>
+                  <p class="detail-card__addon-price">{{ addon.premium | number: '1.0-0' }} ₽</p>
+                </div>
+                <dl class="detail-card__kv detail-card__kv--compact">
+                  <dt>№ договора</dt>
+                  <dd>{{ addon.number }}</dd>
+                </dl>
+              </div>
+            }
+          </div>
+        }
+      </article>
+
+      <!-- Card 2: Процессы -->
+      <article class="detail-card">
+        <header class="detail-card__head">
+          <h2 class="detail-card__heading">Процессы</h2>
+          <div class="detail-card__counters">
+            <span><strong>Изменения</strong> {{ p.processCounters.changes }}</span>
+            <span><strong>Расторжения</strong> {{ p.processCounters.cancellations }}</span>
+            <span><strong>Убытки</strong> {{ p.processCounters.losses }}</span>
+          </div>
+        </header>
+
+        <fieldset class="detail-card__radio-group">
+          <legend class="visually-hidden">Выберите процесс</legend>
+          @for (
+            option of [
+              { value: 'change', label: 'Внести изменения' },
+              { value: 'cancel', label: 'Оформить расторжение' },
+              { value: 'loss', label: 'Урегулировать убыток' },
+            ];
+            track option.value
+          ) {
+            <label class="detail-card__radio">
+              <input
+                type="radio"
+                name="process"
+                [value]="option.value"
+                [checked]="selectedProcess() === option.value"
+                (change)="selectedProcess.set(option.value)"
+              />
+              <span>{{ option.label }}</span>
+            </label>
+          }
+        </fieldset>
+
+        <button
+          type="button"
+          class="detail-card__action"
+          [disabled]="!selectedProcess()"
+          (click)="submitProcess()"
+        >
+          Продолжить
+        </button>
+      </article>
+
+      <!-- Card 3: Документы -->
+      <article class="detail-card">
+        <header class="detail-card__head">
+          <h2 class="detail-card__heading">Документы</h2>
+        </header>
+
+        <div class="detail-card__doc-list">
+          <label class="detail-card__check detail-card__check--all">
+            <input type="checkbox" [checked]="allDocsSelected()" (change)="toggleAllDocs()" />
+            <span>Выбрать все ({{ p.documents.length }})</span>
+          </label>
+
+          @for (doc of p.documents; track doc.id) {
+            <label class="detail-card__check">
+              <input
+                type="checkbox"
+                [checked]="isDocSelected(doc.id)"
+                (change)="toggleDoc(doc.id)"
+              />
+              <span>{{ doc.name }}</span>
+              <span class="detail-card__pdf-badge">PDF</span>
+            </label>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="detail-card__action"
+          [disabled]="!hasAnyDocs()"
+          (click)="downloadDocs()"
+        >
+          Скачать
+        </button>
+      </article>
+
+      <!-- Card 4: Сервисы -->
+      <article class="detail-card">
+        <header class="detail-card__head">
+          <h2 class="detail-card__heading">Сервисы</h2>
+        </header>
+
+        <fieldset class="detail-card__radio-group">
+          <legend class="visually-hidden">Выберите дополнительный сервис</legend>
+          @for (service of p.services; track service.id) {
+            <label class="detail-card__radio">
+              <input
+                type="radio"
+                name="service"
+                [value]="service.id"
+                [checked]="selectedService() === service.id"
+                (change)="selectedService.set(service.id)"
+              />
+              <span>{{ service.name }}</span>
+            </label>
+          }
+        </fieldset>
+
+        <button
+          type="button"
+          class="detail-card__action"
+          [disabled]="!selectedService()"
+          (click)="submitService()"
+        >
+          Оформить
+        </button>
+      </article>
+    </div>
+  </section>
+}
