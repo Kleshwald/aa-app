@@ -8,6 +8,11 @@ import { handleLogin, handleLogout, handleRefresh } from '../../mock/handlers/au
 import { handleGetCurrentAgent } from '../../mock/handlers/agent.handler';
 import { handleDashboard } from '../../mock/handlers/dashboard.handler';
 import { handleGetPolicies, handleGetPolicy } from '../../mock/handlers/policies.handler';
+import {
+  handleGetProlongationStats,
+  handleGetProlongations,
+  handleRsaSearch,
+} from '../../mock/handlers/prolongations.handler';
 
 // Maps an incoming request to a mock handler. When useMocks is false
 // (staging/prod), the interceptor short-circuits and the request goes
@@ -29,6 +34,9 @@ const routes: Route[] = [
   { method: 'GET', match: /\/dashboard$/, handler: handleDashboard },
   { method: 'GET', match: /\/policies\/[^/]+$/, handler: handleGetPolicy },
   { method: 'GET', match: /\/policies(\?.*)?$/, handler: handleGetPolicies },
+  { method: 'GET', match: /\/prolongations\/stats$/, handler: handleGetProlongationStats },
+  { method: 'GET', match: /\/prolongations(\?.*)?$/, handler: handleGetProlongations },
+  { method: 'POST', match: /\/rsa-search$/, handler: handleRsaSearch },
 ];
 
 export const mockInterceptor: HttpInterceptorFn = (req, next) => {

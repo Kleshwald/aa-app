@@ -1,0 +1,265 @@
+<section class="prol">
+  <h1 class="prol__title">Продление полисов</h1>
+
+  <!-- Tabs -->
+  <div class="prol__tabs" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      class="prol__tab"
+      [class.prol__tab--active]="activeTab() === 'rsa'"
+      (click)="setTab('rsa')"
+    >
+      Поиск по базе РСА
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="prol__tab"
+      [class.prol__tab--active]="activeTab() === 'my'"
+      (click)="setTab('my')"
+    >
+      Мои пролонгации
+    </button>
+  </div>
+
+  @switch (activeTab()) {
+    <!-- ═══════════════ MY PROLONGATIONS ═══════════════ -->
+    @case ('my') {
+      <!-- Motivational dashboard -->
+      @if (stats(); as s) {
+        <div class="prol__metrics">
+          <div class="prol-metric">
+            <div class="prol-metric__value">{{ s.totalToRenew | number: '1.0-0' }}</div>
+            <div class="prol-metric__label">количество полисов к продлению</div>
+          </div>
+          <div class="prol-metric">
+            <div class="prol-metric__value">{{ s.calculated | number: '1.0-0' }}</div>
+            <div class="prol-metric__label">рассчитано</div>
+          </div>
+          <div class="prol-metric">
+            <div class="prol-metric__value">{{ s.issued | number: '1.0-0' }}</div>
+            <div class="prol-metric__label">оформлено</div>
+          </div>
+          <div class="prol-metric prol-metric--accent">
+            <div class="prol-metric__value">{{ s.renewalRatePct }}%</div>
+            <div class="prol-metric__label">уровень пролонгации</div>
+          </div>
+        </div>
+      }
+
+      <!-- Toolbar -->
+      <div class="prol__toolbar">
+        <div class="prol__toolbar-row">
+          <select class="prol__filter-select" disabled>
+            <option>Все агенты/субагенты</option>
+          </select>
+          <select
+            class="prol__filter-select"
+            [value]="statusFilter()"
+            (change)="statusFilter.set($any($event.target).value)"
+          >
+            <option value="">Оформленные и рассчитанные</option>
+            <option value="issued">Оформлено</option>
+            <option value="calculated">Рассчитано</option>
+            <option value="declined">Отказ клиента</option>
+            <option value="not-renewed">Не продлён</option>
+          </select>
+          <select class="prol__filter-select" disabled>
+            <option>Все продукты</option>
+          </select>
+          <input
+            type="search"
+            class="prol__filter-input prol__filter-input--grow"
+            [formControl]="searchControl"
+            (input)="onSearchChange()"
+            placeholder="Поиск по ФИО, полису, телефону (Ctrl+F)"
+            aria-label="Поиск"
+          />
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="prol__table-wrap">
+        <table class="prol__table">
+          <thead>
+            <tr>
+              <th>ИКП</th>
+              <th>ФИО страхователя</th>
+              <th>Марка/модель</th>
+              <th>Номер полиса</th>
+              <th>Дата окончания</th>
+              <th>Страховая компания</th>
+              <th class="prol__cell--num">Цена (прошл. год)</th>
+              <th>Номер телефона</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (isMyLoading()) {
+              @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+                <tr>
+                  <td colspan="9"><span class="prol__skeleton"></span></td>
+                </tr>
+              }
+            } @else if (myFiltered().length === 0) {
+              <tr>
+                <td colspan="9" class="prol__empty">
+                  По выбранным фильтрам ничего не найдено.
+                  <button type="button" class="prol__reset" (click)="resetMyFilters()">
+                    Сбросить
+                  </button>
+                </td>
+              </tr>
+            } @else {
+              @for (row of myFiltered(); track row.id) {
+                <tr class="prol__row" [attr.data-status]="row.status">
+                  <td>{{ row.ikp }}</td>
+                  <td>{{ row.clientName }}</td>
+                  <td>{{ row.vehicleBrand }} {{ row.vehicleModel }}</td>
+                  <td>{{ row.policyNumber }}</td>
+                  <td>{{ row.endDate | date: 'dd.MM.yyyy' }}</td>
+                  <td>{{ row.insuranceCompanyName }}</td>
+                  <td class="prol__cell--num">{{ row.lastYearPrice | number: '1.0-0' }}</td>
+                  <td>{{ row.phone }}</td>
+                  <td>{{ statusLabel[row.status] }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer: comments + legend -->
+      <footer class="prol__footer">
+        <div class="prol__comments">
+          <strong>Комментарии:</strong>
+          <ol>
+            <li>Дата пролонгации 14 дней до/после даты окончания предыдущего полиса.</li>
+            <li>Тот же собственник, страхователи и водители.</li>
+            <li>В прошлом году не было убытков.</li>
+          </ol>
+        </div>
+        <div class="prol__legend">
+          <span class="prol__legend-label">Цвета строк означают</span>
+          <span class="prol__legend-item" data-status="issued">Оформлено</span>
+          <span class="prol__legend-item" data-status="calculated">Рассчитано</span>
+          <span class="prol__legend-item" data-status="declined">Отказ клиента</span>
+          <span class="prol__legend-item" data-status="not-renewed">Не продлён</span>
+        </div>
+      </footer>
+    }
+
+    <!-- ═══════════════ RSA SEARCH ═══════════════ -->
+    @case ('rsa') {
+      <div class="prol__rsa-form">
+        <label class="prol-field">
+          <span class="prol-field__label">ФИО страхователя</span>
+          <input
+            type="text"
+            class="prol-field__input"
+            [formControl]="rsaName"
+            placeholder="Иванов Иван Иванович"
+          />
+        </label>
+        <label class="prol-field">
+          <span class="prol-field__label">Гос. номер</span>
+          <input
+            type="text"
+            class="prol-field__input"
+            [formControl]="rsaPlate"
+            placeholder="А123БС777"
+          />
+        </label>
+        <label class="prol-field">
+          <span class="prol-field__label">Водительское удостоверение</span>
+          <input
+            type="text"
+            class="prol-field__input"
+            [formControl]="rsaLicense"
+            placeholder="77 23 456789"
+          />
+        </label>
+        <button
+          type="button"
+          class="prol__find-btn"
+          (click)="searchRsa()"
+          [disabled]="rsaLoading()"
+        >
+          {{ rsaLoading() ? 'Ищем…' : 'Найти' }}
+        </button>
+      </div>
+
+      <div class="prol__table-wrap">
+        <table class="prol__table">
+          <thead>
+            <tr>
+              <th>ИКП</th>
+              <th>ФИО страхователя</th>
+              <th>Марка/модель</th>
+              <th>Номер полиса</th>
+              <th>Дата окончания</th>
+              <th>Страховая компания</th>
+              <th class="prol__cell--num">Цена (прошл. год)</th>
+              <th>Номер телефона</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (rsaLoading()) {
+              @for (i of [1, 2, 3]; track i) {
+                <tr>
+                  <td colspan="9"><span class="prol__skeleton"></span></td>
+                </tr>
+              }
+            } @else if (!rsaSearched()) {
+              <tr>
+                <td colspan="9" class="prol__empty prol__empty--rsa">
+                  Введите ФИО, гос. номер или В/У и нажмите «Найти», чтобы подтянуть данные из базы
+                  РСА.
+                </td>
+              </tr>
+            } @else if (rsaRows().length === 0) {
+              <tr>
+                <td colspan="9" class="prol__empty">По указанным параметрам ничего не найдено.</td>
+              </tr>
+            } @else {
+              @for (row of rsaRows(); track row.id) {
+                <tr class="prol__row" [attr.data-rsa-status]="row.rsaStatus">
+                  <td>{{ row.ikp }}</td>
+                  <td>{{ row.clientName }}</td>
+                  <td>{{ row.vehicleBrand }} {{ row.vehicleModel }}</td>
+                  <td>{{ row.policyNumber }}</td>
+                  <td>{{ row.endDate | date: 'dd.MM.yyyy' }}</td>
+                  <td>{{ row.insuranceCompanyName }}</td>
+                  <td class="prol__cell--num">{{ row.lastYearPrice | number: '1.0-0' }}</td>
+                  <td>{{ row.phone }}</td>
+                  <td>{{ rsaStatusLabel[row.rsaStatus] }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="prol__footer">
+        <div class="prol__comments">
+          <strong>Комментарии:</strong>
+          <ol>
+            <li>Дата пролонгации 14 дней до/после даты окончания предыдущего полиса.</li>
+            <li>Тот же собственник, страхователь и водители.</li>
+            <li>В прошлом году не было убытков.</li>
+          </ol>
+        </div>
+        <div class="prol__legend">
+          <span class="prol__legend-label">Цвета строк означают</span>
+          <span class="prol__legend-item" data-rsa-status="renewed">Продлён</span>
+          <span class="prol__legend-item" data-rsa-status="expiring-soon"
+            >10 дней до окончания</span
+          >
+          <span class="prol__legend-item" data-rsa-status="expired">Просрочен</span>
+        </div>
+      </footer>
+    }
+  }
+</section>
