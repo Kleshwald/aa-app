@@ -83,6 +83,15 @@ export class ClientsPage {
   });
   protected readonly errorMessage = computed(() => this.response()?.error?.message ?? null);
 
+  // Totals over the currently loaded/filtered rows — feeds the table "Итого" footer.
+  protected readonly summary = computed(() => {
+    const rows = this.rows();
+    return {
+      total: rows.length,
+      premium: rows.reduce((sum, r) => sum + (r.premium ?? 0), 0),
+    };
+  });
+
   setPeriod(p: NonNullable<ClientsQuery['period']>): void {
     this.period.set(p);
   }

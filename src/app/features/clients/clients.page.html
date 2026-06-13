@@ -146,6 +146,15 @@
           }
         }
       </tbody>
+      @if (!isLoading() && !hasError() && rows().length > 0) {
+        <tfoot>
+          <tr class="clients__total-row">
+            <td colspan="7">Итого по {{ summary().total }} полисам</td>
+            <td class="clients__cell--num">{{ summary().premium | number: '1.0-0' }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      }
     </table>
   </div>
 </section>
