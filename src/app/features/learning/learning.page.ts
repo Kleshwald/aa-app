@@ -6,45 +6,54 @@ interface EduProduct {
   title: string;
   description: string;
   url: string;
+  image: string;
 }
 
 // Source: agentacademy.ru/education (разводящая). Our hub links straight to the detail pages.
+// Cover images pulled from each product's detail page (og:image / hero).
 const PRODUCTS: EduProduct[] = [
   {
     id: 'ns-dtp',
     title: 'НС при ДТП',
     description: 'Защита водителя и пассажиров при ДТП.',
     url: 'https://kleshwald.github.io/AgentAcademy/ns-pri-dtp/',
+    image: 'https://kleshwald.github.io/AgentAcademy/ns-pri-dtp/img/hero.png',
   },
   {
     id: 'health',
     title: 'Здоровье',
     description: 'Линейка продуктов страхования здоровья.',
     url: 'https://agentacademy.ru/health',
+    image:
+      'https://static.tildacdn.com/tild3035-6264-4463-a461-646239633534/freepik__background_.png',
   },
   {
     id: 'lawyer',
     title: 'Юрист поможет',
     description: 'Юридическая поддержка автовладельца.',
     url: 'https://agentacademy.ru/lawyer',
+    image: 'https://static.tildacdn.com/tild3866-3130-4534-a532-326561636464/2.png',
   },
   {
     id: 'minikasko',
     title: 'МиниКАСКО',
     description: 'Защита авто от основных рисков по доступной цене.',
     url: 'https://agentacademy.ru/minikasko',
+    image: 'https://static.tildacdn.com/tild6261-6331-4136-b337-313433343265/20945733.jpg',
   },
   {
     id: 'pul-osago',
     title: 'ОСАГО в Перестраховочном Пуле',
     description: 'Оформление ОСАГО через перестраховочный пул.',
     url: 'https://agentacademy.ru/pul_osago',
+    image: 'https://static.tildacdn.com/tild3166-3566-4037-a632-623138653936/Group_1565_6.png',
   },
   {
     id: 'accident',
     title: 'Защита от ДТП',
     description: 'Выплаты при ДТП; на части территорий — «Защита при ДТП +».',
     url: 'https://agentacademy.ru/accident_protection',
+    image: 'https://static.tildacdn.com/tild3436-3563-4462-a334-336138636262/43055.jpg',
   },
 ];
 
@@ -113,39 +122,19 @@ const PRODUCTS: EduProduct[] = [
         <div class="edu__grid">
           @for (p of products; track p.id) {
             <button type="button" class="edu__card" (click)="open(p)">
-              <span class="edu__card-icon" aria-hidden="true">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                  <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                </svg>
+              <span class="edu__card-cover">
+                <img
+                  [src]="p.image"
+                  alt=""
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                  (error)="$any($event.target).style.display = 'none'"
+                />
               </span>
               <span class="edu__card-body">
                 <span class="edu__card-title">{{ p.title }}</span>
                 <span class="edu__card-desc">{{ p.description }}</span>
               </span>
-              <svg
-                class="edu__card-arrow"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
             </button>
           }
         </div>
@@ -188,16 +177,16 @@ const PRODUCTS: EduProduct[] = [
       .edu__grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
+        gap: 20px;
         overflow-y: auto;
         padding-bottom: 4px;
       }
 
       .edu__card {
         display: flex;
-        align-items: flex-start;
-        gap: 14px;
-        padding: 20px;
+        flex-direction: column;
+        padding: 0;
+        overflow: hidden;
         text-align: left;
         background: #ffffff;
         border: 1px solid var(--gray-200);
@@ -210,7 +199,7 @@ const PRODUCTS: EduProduct[] = [
 
       .edu__card:hover {
         border-color: var(--accent-300);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow-md);
       }
 
       .edu__card:focus-visible {
@@ -219,22 +208,27 @@ const PRODUCTS: EduProduct[] = [
         box-shadow: 0 0 0 3px var(--brand-100);
       }
 
-      .edu__card-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 48px;
-        height: 48px;
-        border-radius: var(--radius-md);
+      .edu__card-cover {
+        display: block;
+        width: 100%;
+        height: 180px;
         background: var(--brand-50);
-        color: var(--accent-500);
-        flex-shrink: 0;
+        overflow: hidden;
+      }
+
+      .edu__card-cover img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
       }
 
       .edu__card-body {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 6px;
+        padding: 16px 18px 20px;
         flex: 1;
         min-width: 0;
       }
@@ -249,12 +243,6 @@ const PRODUCTS: EduProduct[] = [
         font-size: var(--text-sm);
         line-height: var(--leading-sm);
         color: var(--gray-600);
-      }
-
-      .edu__card-arrow {
-        color: var(--gray-400);
-        flex-shrink: 0;
-        margin-top: 4px;
       }
 
       /* Detail (iframe) */
