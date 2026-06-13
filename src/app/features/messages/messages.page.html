@@ -1,0 +1,199 @@
+<section class="chat">
+  <header class="chat__head">
+    <span class="chat__head-avatar" aria-hidden="true">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+        <path
+          d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+        />
+      </svg>
+    </span>
+    <div class="chat__head-info">
+      <span class="chat__head-title">Поддержка Agent Academy</span>
+      <span class="chat__head-status">
+        <span class="chat__status-dot" aria-hidden="true"></span>
+        На связи · отвечаем за несколько минут
+      </span>
+    </div>
+  </header>
+
+  <div class="chat__body" #scroller>
+    @for (group of groups(); track group.label) {
+      <div class="chat__day">
+        <span>{{ group.label }}</span>
+      </div>
+
+      @for (m of group.messages; track m.id) {
+        <div class="chat__row" [class.chat__row--out]="m.author === 'agent'">
+          @if (m.author === 'company') {
+            <span class="chat__avatar" [attr.data-role]="m.sender?.role" aria-hidden="true">{{
+              initials(m.sender?.name)
+            }}</span>
+          }
+          <div class="chat__bubble">
+            @if (m.author === 'company' && m.sender) {
+              <span class="chat__sender" [attr.data-role]="m.sender.role">
+                {{ m.sender.name }} · {{ roleLabel(m.sender.role) }}
+              </span>
+            }
+            @if (m.text) {
+              <p class="chat__text">{{ m.text }}</p>
+            }
+            @for (a of m.attachments; track a.name) {
+              <span class="chat__attach">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                  />
+                </svg>
+                {{ a.name }}
+              </span>
+            }
+            <span class="chat__meta">
+              {{ m.createdAt | date: 'HH:mm' }}
+              @if (m.author === 'agent') {
+                <svg
+                  class="chat__tick"
+                  [class.chat__tick--sending]="m.status === 'sending'"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              }
+            </span>
+          </div>
+        </div>
+      }
+    }
+
+    @if (supportTyping()) {
+      <div class="chat__row">
+        <span class="chat__avatar" data-role="support" aria-hidden="true">{{
+          initials(support.name)
+        }}</span>
+        <div class="chat__bubble chat__bubble--typing" aria-label="Поддержка печатает">
+          <span class="chat__dot"></span>
+          <span class="chat__dot"></span>
+          <span class="chat__dot"></span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="chat__composer">
+    @if (showQuickReplies()) {
+      <div class="chat__suggest">
+        @for (q of quickReplies; track q) {
+          <button type="button" class="chat__chip" (click)="quickSend(q)">{{ q }}</button>
+        }
+      </div>
+    }
+
+    @if (pendingFiles().length) {
+      <div class="chat__files">
+        @for (f of pendingFiles(); track f.name) {
+          <span class="chat__file">
+            <span class="chat__file-name">{{ f.name }}</span>
+            <button
+              type="button"
+              class="chat__file-remove"
+              (click)="removeFile(f.name)"
+              aria-label="Убрать файл"
+            >
+              ×
+            </button>
+          </span>
+        }
+      </div>
+    }
+
+    <div class="chat__composer-row">
+      <button
+        type="button"
+        class="chat__icon-btn"
+        (click)="fileInput.click()"
+        aria-label="Прикрепить файл"
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+          />
+        </svg>
+      </button>
+      <input #fileInput type="file" multiple hidden (change)="onFiles($event)" />
+
+      <textarea
+        #input
+        class="chat__input"
+        placeholder="Напишите сообщение…"
+        [value]="draft()"
+        (input)="draft.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+        rows="1"
+        aria-label="Сообщение"
+      ></textarea>
+
+      <button
+        type="button"
+        class="chat__send"
+        [disabled]="!canSend()"
+        (click)="send()"
+        aria-label="Отправить"
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M22 2L11 13" />
+          <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+        </svg>
+      </button>
+    </div>
+
+    <p class="chat__hint">Enter — отправить, Shift+Enter — новая строка</p>
+  </div>
+</section>
