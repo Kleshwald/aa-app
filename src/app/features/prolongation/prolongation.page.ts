@@ -7,8 +7,8 @@ import {
   ProlongationService,
   type ProlongationRow,
   type ProlongationStatus,
-  type RsaSearchRow,
-  type RsaStatus,
+  type NsisSearchRow,
+  type NsisStatus,
 } from '@core/services/prolongation.service';
 
 const STATUS_LABEL: Record<ProlongationStatus, string> = {
@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<ProlongationStatus, string> = {
   'not-renewed': 'Не продлён',
 };
 
-const RSA_STATUS_LABEL: Record<RsaStatus, string> = {
+const NSIS_STATUS_LABEL: Record<NsisStatus, string> = {
   renewed: 'Продлён',
   'expiring-soon': '10 дней до окончания',
   expired: 'Просрочен',
@@ -35,9 +35,9 @@ export class ProlongationPage {
   private readonly service = inject(ProlongationService);
 
   protected readonly statusLabel = STATUS_LABEL;
-  protected readonly rsaStatusLabel = RSA_STATUS_LABEL;
+  protected readonly nsisStatusLabel = NSIS_STATUS_LABEL;
 
-  protected readonly activeTab = signal<'my' | 'rsa'>('my');
+  protected readonly activeTab = signal<'my' | 'nsis'>('my');
 
   // ─── My prolongations ───
   protected readonly statsResponse = toSignal(this.service.stats(), { initialValue: undefined });
@@ -67,16 +67,16 @@ export class ProlongationPage {
 
   protected readonly isMyLoading = computed(() => this.myResponse() === undefined);
 
-  // ─── RSA search ───
-  protected readonly rsaName = new FormControl<string>('', { nonNullable: true });
-  protected readonly rsaPlate = new FormControl<string>('', { nonNullable: true });
-  protected readonly rsaLicense = new FormControl<string>('', { nonNullable: true });
+  // ─── NSIS search ───
+  protected readonly nsisName = new FormControl<string>('', { nonNullable: true });
+  protected readonly nsisPlate = new FormControl<string>('', { nonNullable: true });
+  protected readonly nsisLicense = new FormControl<string>('', { nonNullable: true });
 
-  protected readonly rsaSearched = signal<boolean>(false);
-  protected readonly rsaLoading = signal<boolean>(false);
-  protected readonly rsaRows = signal<RsaSearchRow[]>([]);
+  protected readonly nsisSearched = signal<boolean>(false);
+  protected readonly nsisLoading = signal<boolean>(false);
+  protected readonly nsisRows = signal<NsisSearchRow[]>([]);
 
-  setTab(tab: 'my' | 'rsa'): void {
+  setTab(tab: 'my' | 'nsis'): void {
     this.activeTab.set(tab);
   }
 
@@ -85,23 +85,23 @@ export class ProlongationPage {
     this.statusFilter.set('');
   }
 
-  searchRsa(): void {
-    this.rsaLoading.set(true);
-    this.rsaSearched.set(true);
+  searchNsis(): void {
+    this.nsisLoading.set(true);
+    this.nsisSearched.set(true);
     this.service
-      .searchRsa({
-        name: this.rsaName.value || undefined,
-        plate: this.rsaPlate.value || undefined,
-        license: this.rsaLicense.value || undefined,
+      .searchNsis({
+        name: this.nsisName.value || undefined,
+        plate: this.nsisPlate.value || undefined,
+        license: this.nsisLicense.value || undefined,
       })
       .subscribe({
         next: (response) => {
-          this.rsaLoading.set(false);
-          this.rsaRows.set(response.success ? (response.data ?? []) : []);
+          this.nsisLoading.set(false);
+          this.nsisRows.set(response.success ? (response.data ?? []) : []);
         },
         error: () => {
-          this.rsaLoading.set(false);
-          this.rsaRows.set([]);
+          this.nsisLoading.set(false);
+          this.nsisRows.set([]);
         },
       });
   }

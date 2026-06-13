@@ -7,10 +7,10 @@
       type="button"
       role="tab"
       class="prol__tab"
-      [class.prol__tab--active]="activeTab() === 'rsa'"
-      (click)="setTab('rsa')"
+      [class.prol__tab--active]="activeTab() === 'nsis'"
+      (click)="setTab('nsis')"
     >
-      Поиск по базе РСА
+      Поиск по базе НСИС
     </button>
     <button
       type="button"
@@ -150,15 +150,15 @@
       </footer>
     }
 
-    <!-- ═══════════════ RSA SEARCH ═══════════════ -->
-    @case ('rsa') {
-      <div class="prol__rsa-form">
+    <!-- ═══════════════ NSIS SEARCH ═══════════════ -->
+    @case ('nsis') {
+      <div class="prol__nsis-form">
         <label class="prol-field">
           <span class="prol-field__label">ФИО страхователя</span>
           <input
             type="text"
             class="prol-field__input"
-            [formControl]="rsaName"
+            [formControl]="nsisName"
             placeholder="Иванов Иван Иванович"
           />
         </label>
@@ -167,7 +167,7 @@
           <input
             type="text"
             class="prol-field__input"
-            [formControl]="rsaPlate"
+            [formControl]="nsisPlate"
             placeholder="А123БС777"
           />
         </label>
@@ -176,17 +176,17 @@
           <input
             type="text"
             class="prol-field__input"
-            [formControl]="rsaLicense"
+            [formControl]="nsisLicense"
             placeholder="77 23 456789"
           />
         </label>
         <button
           type="button"
           class="prol__find-btn"
-          (click)="searchRsa()"
-          [disabled]="rsaLoading()"
+          (click)="searchNsis()"
+          [disabled]="nsisLoading()"
         >
-          {{ rsaLoading() ? 'Ищем…' : 'Найти' }}
+          {{ nsisLoading() ? 'Ищем…' : 'Найти' }}
         </button>
       </div>
 
@@ -206,26 +206,26 @@
             </tr>
           </thead>
           <tbody>
-            @if (rsaLoading()) {
+            @if (nsisLoading()) {
               @for (i of [1, 2, 3]; track i) {
                 <tr>
                   <td colspan="9"><span class="prol__skeleton"></span></td>
                 </tr>
               }
-            } @else if (!rsaSearched()) {
+            } @else if (!nsisSearched()) {
               <tr>
-                <td colspan="9" class="prol__empty prol__empty--rsa">
+                <td colspan="9" class="prol__empty prol__empty--nsis">
                   Введите ФИО, гос. номер или В/У и нажмите «Найти», чтобы подтянуть данные из базы
-                  РСА.
+                  НСИС.
                 </td>
               </tr>
-            } @else if (rsaRows().length === 0) {
+            } @else if (nsisRows().length === 0) {
               <tr>
                 <td colspan="9" class="prol__empty">По указанным параметрам ничего не найдено.</td>
               </tr>
             } @else {
-              @for (row of rsaRows(); track row.id) {
-                <tr class="prol__row" [attr.data-rsa-status]="row.rsaStatus">
+              @for (row of nsisRows(); track row.id) {
+                <tr class="prol__row" [attr.data-nsis-status]="row.nsisStatus">
                   <td>{{ row.ikp }}</td>
                   <td>{{ row.clientName }}</td>
                   <td>{{ row.vehicleBrand }} {{ row.vehicleModel }}</td>
@@ -234,7 +234,7 @@
                   <td>{{ row.insuranceCompanyName }}</td>
                   <td class="prol__cell--num">{{ row.lastYearPrice | number: '1.0-0' }}</td>
                   <td>{{ row.phone }}</td>
-                  <td>{{ rsaStatusLabel[row.rsaStatus] }}</td>
+                  <td>{{ nsisStatusLabel[row.nsisStatus] }}</td>
                 </tr>
               }
             }
@@ -253,11 +253,11 @@
         </div>
         <div class="prol__legend">
           <span class="prol__legend-label">Цвета строк означают</span>
-          <span class="prol__legend-item" data-rsa-status="renewed">Продлён</span>
-          <span class="prol__legend-item" data-rsa-status="expiring-soon"
+          <span class="prol__legend-item" data-nsis-status="renewed">Продлён</span>
+          <span class="prol__legend-item" data-nsis-status="expiring-soon"
             >10 дней до окончания</span
           >
-          <span class="prol__legend-item" data-rsa-status="expired">Просрочен</span>
+          <span class="prol__legend-item" data-nsis-status="expired">Просрочен</span>
         </div>
       </footer>
     }

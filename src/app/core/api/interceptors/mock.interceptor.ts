@@ -11,7 +11,7 @@ import { handleGetPolicies, handleGetPolicy } from '../../mock/handlers/policies
 import {
   handleGetProlongationStats,
   handleGetProlongations,
-  handleRsaSearch,
+  handleNsisSearch,
 } from '../../mock/handlers/prolongations.handler';
 
 // Maps an incoming request to a mock handler. When useMocks is false
@@ -36,7 +36,7 @@ const routes: Route[] = [
   { method: 'GET', match: /\/policies(\?.*)?$/, handler: handleGetPolicies },
   { method: 'GET', match: /\/prolongations\/stats$/, handler: handleGetProlongationStats },
   { method: 'GET', match: /\/prolongations(\?.*)?$/, handler: handleGetProlongations },
-  { method: 'POST', match: /\/rsa-search$/, handler: handleRsaSearch },
+  { method: 'POST', match: /\/nsis-search$/, handler: handleNsisSearch },
 ];
 
 export const mockInterceptor: HttpInterceptorFn = (req, next) => {

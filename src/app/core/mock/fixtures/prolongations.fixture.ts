@@ -10,13 +10,13 @@ import { insuranceCompanies } from './insurance-companies.fixture';
 //   declined     Отказ клиента    розовый фон
 //   not-renewed  Не продлён       бледно-розовый фон
 //
-// rsaStatus — для вкладки «Поиск по базе РСА»:
+// nsisStatus — для вкладки «Поиск по базе НСИС»:
 //   renewed         Продлён            зелёный
 //   expiring-soon   10 дней до окончания  жёлтый
 //   expired         Просрочен          красный
 
 export type ProlongationStatus = 'issued' | 'calculated' | 'declined' | 'not-renewed';
-export type RsaStatus = 'renewed' | 'expiring-soon' | 'expired';
+export type NsisStatus = 'renewed' | 'expiring-soon' | 'expired';
 
 const CAR_MAKES = [
   ['KIA', ['Rio', 'Sportage', 'Cerato']],
@@ -38,7 +38,7 @@ const STATUS_WEIGHTS: { value: ProlongationStatus; weight: number }[] = [
   { value: 'not-renewed', weight: 23 },
 ];
 
-const RSA_STATUS_WEIGHTS: { value: RsaStatus; weight: number }[] = [
+const NSIS_STATUS_WEIGHTS: { value: NsisStatus; weight: number }[] = [
   { value: 'renewed', weight: 50 },
   { value: 'expiring-soon', weight: 30 },
   { value: 'expired', weight: 20 },
@@ -58,8 +58,8 @@ export interface ProlongationRow {
   status: ProlongationStatus;
 }
 
-export interface RsaSearchRow extends Omit<ProlongationRow, 'status'> {
-  rsaStatus: RsaStatus;
+export interface NsisSearchRow extends Omit<ProlongationRow, 'status'> {
+  nsisStatus: NsisStatus;
 }
 
 function makeBase(): Omit<ProlongationRow, 'status'> {
@@ -94,9 +94,9 @@ export const prolongations: ProlongationRow[] = Array.from({ length: 50 }, () =>
   status: faker.helpers.weightedArrayElement(STATUS_WEIGHTS),
 }));
 
-export const rsaSamples: RsaSearchRow[] = Array.from({ length: 12 }, () => ({
+export const nsisSamples: NsisSearchRow[] = Array.from({ length: 12 }, () => ({
   ...makeBase(),
-  rsaStatus: faker.helpers.weightedArrayElement(RSA_STATUS_WEIGHTS),
+  nsisStatus: faker.helpers.weightedArrayElement(NSIS_STATUS_WEIGHTS),
 }));
 
 // Aggregated motivational metrics (top dashboard on the «Мои пролонгации» tab).

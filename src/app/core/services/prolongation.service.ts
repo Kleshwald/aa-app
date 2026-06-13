@@ -5,7 +5,7 @@ import { ApiClient } from '@core/api/api-client.service';
 import { type ApiResponse } from '@core/models';
 
 export type ProlongationStatus = 'issued' | 'calculated' | 'declined' | 'not-renewed';
-export type RsaStatus = 'renewed' | 'expiring-soon' | 'expired';
+export type NsisStatus = 'renewed' | 'expiring-soon' | 'expired';
 
 export interface ProlongationRow {
   id: string;
@@ -21,8 +21,8 @@ export interface ProlongationRow {
   status: ProlongationStatus;
 }
 
-export interface RsaSearchRow extends Omit<ProlongationRow, 'status'> {
-  rsaStatus: RsaStatus;
+export interface NsisSearchRow extends Omit<ProlongationRow, 'status'> {
+  nsisStatus: NsisStatus;
 }
 
 export interface ProlongationStats {
@@ -32,7 +32,7 @@ export interface ProlongationStats {
   renewalRatePct: number;
 }
 
-export interface RsaSearchQuery {
+export interface NsisSearchQuery {
   name?: string;
   plate?: string;
   license?: string;
@@ -55,7 +55,7 @@ export class ProlongationService {
     return this.api.get<ProlongationStats>('/prolongations/stats');
   }
 
-  searchRsa(query: RsaSearchQuery): Observable<ApiResponse<RsaSearchRow[]>> {
-    return this.api.post<RsaSearchRow[]>('/rsa-search', query);
+  searchNsis(query: NsisSearchQuery): Observable<ApiResponse<NsisSearchRow[]>> {
+    return this.api.post<NsisSearchRow[]>('/nsis-search', query);
   }
 }

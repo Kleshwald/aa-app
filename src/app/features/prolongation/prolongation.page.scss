@@ -211,14 +211,14 @@
   background: #fce4ec;
 }
 
-// Row colors per status — «Поиск РСА»
-.prol__row[data-rsa-status='renewed'] td {
+// Row colors per status — «Поиск НСИС»
+.prol__row[data-nsis-status='renewed'] td {
   background: #e8f5e9;
 }
-.prol__row[data-rsa-status='expiring-soon'] td {
+.prol__row[data-nsis-status='expiring-soon'] td {
   background: #fff8e1;
 }
-.prol__row[data-rsa-status='expired'] td {
+.prol__row[data-nsis-status='expired'] td {
   background: #ffe0e0;
 }
 
@@ -247,7 +247,7 @@
   color: var(--gray-700);
   font-size: var(--text-sm);
 
-  &--rsa {
+  &--nsis {
     color: var(--gray-600);
     padding: 60px 24px;
   }
@@ -265,8 +265,8 @@
   margin-left: 8px;
 }
 
-// ─── RSA search form ───
-.prol__rsa-form {
+// ─── NSIS search form ───
+.prol__nsis-form {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
@@ -415,13 +415,13 @@
     background: #f8bbd0;
   }
 
-  &[data-rsa-status='renewed'] {
+  &[data-nsis-status='renewed'] {
     background: #c5e1a5;
   }
-  &[data-rsa-status='expiring-soon'] {
+  &[data-nsis-status='expiring-soon'] {
     background: #ffe082;
   }
-  &[data-rsa-status='expired'] {
+  &[data-nsis-status='expired'] {
     background: #ef9a9a;
   }
 }

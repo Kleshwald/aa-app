@@ -3,7 +3,7 @@ import { type Observable } from 'rxjs';
 
 import { type ApiResponse } from '@core/models';
 
-import { prolongationStats, prolongations, rsaSamples } from '../fixtures/prolongations.fixture';
+import { prolongationStats, prolongations, nsisSamples } from '../fixtures/prolongations.fixture';
 import { mockOk } from '../helpers/response';
 
 export function handleGetProlongations(
@@ -32,7 +32,7 @@ export function handleGetProlongationStats(
   return mockOk(prolongationStats);
 }
 
-export function handleRsaSearch(
+export function handleNsisSearch(
   req: HttpRequest<unknown>,
 ): Observable<HttpResponse<ApiResponse<unknown>>> {
   const body = req.body as { name?: string; plate?: string; license?: string } | null;
@@ -41,6 +41,6 @@ export function handleRsaSearch(
   if (!hasQuery) return mockOk([]);
 
   const size = 2 + Math.floor(Math.random() * 4);
-  const slice = rsaSamples.slice(0, size);
+  const slice = nsisSamples.slice(0, size);
   return mockOk(slice);
 }
