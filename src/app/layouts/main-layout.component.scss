@@ -8,7 +8,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: var(--gray-50);
+  // Subtle brand-tinted canvas so white cards/header/sidebar read as "branded", not blank.
+  background: var(--brand-50);
 }
 
 // ─── Header ───
@@ -18,9 +19,15 @@
   align-items: center;
   height: 64px;
   padding: 0 24px;
-  background: var(--brand-500);
+  // Navy header — continuity with the previous platform version. Uses --header-bg
+  // (lighter corporate navy, not the dark logo navy). The bright-blue underline echoes
+  // the logo triangle + the marketing site, keeping it fresher than flat navy.
+  background: var(--header-bg);
   color: #ffffff;
+  // Soft brand-tinted shadow gives depth without the "highlighter stripe" look.
+  box-shadow: 0 2px 10px rgba(12, 51, 99, 0.18);
   flex-shrink: 0;
+  z-index: 10;
 }
 
 .app-header__brand {
@@ -33,7 +40,7 @@
 .app-header__logo {
   height: 36px;
   width: auto;
-  // Logo PNG has black text; on navy header we invert to keep readable.
+  // White-out logo for the navy header (matches the previous platform version).
   filter: brightness(0) invert(1);
 }
 
@@ -50,9 +57,9 @@
 .app-header__user-button {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  height: 44px;
-  padding: 0 12px 0 14px;
+  gap: 10px;
+  height: 52px;
+  padding: 0 12px 0 8px;
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-base);
@@ -78,7 +85,7 @@
 .app-header__user-info {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   line-height: 1.2;
 }
 
@@ -89,9 +96,17 @@
 }
 
 .app-header__user-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--text-xs);
   color: rgba(255, 255, 255, 0.72);
   margin-top: 2px;
+}
+
+.app-header__pin {
+  color: var(--accent-300);
+  flex-shrink: 0;
 }
 
 .app-header__user-chevron {
@@ -122,6 +137,7 @@
 .app-header__user-menu-item {
   display: flex;
   align-items: center;
+  gap: 10px;
   height: 40px;
   padding: 0 12px;
   font-size: var(--text-sm);
@@ -159,6 +175,37 @@
   height: 1px;
   margin: 4px 0;
   background: var(--gray-200);
+}
+
+.app-header__menu-icon {
+  color: var(--gray-500);
+  flex-shrink: 0;
+}
+
+// ─── Header actions cluster ───
+
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// ─── Avatar ───
+
+.app-header__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--accent-500);
+  color: #ffffff;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
 }
 
 // ─── Body (sidebar + content) ───
@@ -212,10 +259,12 @@
 
   &--active {
     background: var(--brand-50);
-    color: var(--brand-500);
+    color: var(--brand-600);
+    // Bright triangle-blue accent bar — the visual bridge to the marketing site.
+    box-shadow: inset 3px 0 0 var(--accent-500);
 
     .app-sidebar__icon {
-      color: var(--brand-500);
+      color: var(--accent-500);
     }
   }
 }
@@ -232,6 +281,22 @@
 
 .app-sidebar__label {
   flex: 1;
+}
+
+.app-sidebar__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  color: #ffffff;
+  background: var(--error-500);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
 }
 
 .app-content {

@@ -16,6 +16,12 @@
   --brand-800: #061f37;
   --brand-900: #041527;
 
+  // ─── Header chrome ───
+  // Lighter "corporate navy" for the app header — matches the previous platform
+  // version (which used a medium navy header, not the dark logo navy CTA #0C3363).
+  // White text/logo contrast on this stays AA. Tune freely — header-only colour.
+  --header-bg: #1d4e8c;
+
   // ─── Accent (logo light blue — decorative only, NOT for body text) ───
   --accent-300: #87bdee;
   --accent-400: #5ba5e8;

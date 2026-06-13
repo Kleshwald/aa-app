@@ -10,6 +10,7 @@ import {
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '@core/services/auth.service';
+import { ChatService } from '@core/services/chat.service';
 
 interface NavItem {
   label: string;
@@ -36,6 +37,8 @@ const NAV: readonly NavItem[] = [
   { label: 'Сообщения', route: '/messages', icon: 'messages' },
 ] as const;
 
+const MESSAGES_ROUTE = '/messages';
+
 @Component({
   selector: 'app-main-layout',
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
@@ -57,6 +60,22 @@ export class MainLayoutComponent {
     return a.region ?? a.district ?? '';
   });
 
+  // Avatar initials in «Имя + Фамилия» order. Full name is stored as
+  // "Фамилия Имя Отчество", so "Гринвальд Сергей Александрович" → "СГ".
+  protected readonly agentInitials = computed(() => {
+    const parts = (this.agent()?.fullName ?? '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'А';
+    const surnameInitial = parts[0]?.[0] ?? '';
+    const nameInitial = parts[1]?.[0] ?? '';
+    return (nameInitial + surnameInitial || surnameInitial).toUpperCase();
+  });
+
+  private readonly chat = inject(ChatService);
+
+  protected readonly messagesRoute = MESSAGES_ROUTE;
+  // Unread support messages — badge on the «Сообщения» nav item.
+  protected readonly messagesUnread = this.chat.unread;
+
   protected readonly userMenuOpen = signal(false);
 
   toggleUserMenu(): void {
@@ -77,9 +96,7 @@ export class MainLayoutComponent {
     if (!this.userMenuOpen()) return;
     const target = event.target as Node;
     const menu = this.host.nativeElement.querySelector('.app-header__user');
-    if (menu && !menu.contains(target)) {
-      this.closeUserMenu();
-    }
+    if (menu && !menu.contains(target)) this.closeUserMenu();
   }
 
   @HostListener('document:keydown.escape')
