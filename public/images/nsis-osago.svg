@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 280" role="img" aria-label="НСИС — Национальная страховая информационная система">
+  <rect width="560" height="280" fill="#f2f6fc"/>
+  <g fill="#1b3a8a" font-family="Arial, Helvetica, sans-serif">
+    <text x="118" y="158" font-size="92" font-weight="800" letter-spacing="2">НСИС</text>
+    <g font-family="'Courier New', monospace" font-size="15" font-weight="700" letter-spacing="3">
+      <text x="372" y="104">1001101</text>
+      <text x="372" y="126">1010001</text>
+      <text x="372" y="148">1011000</text>
+      <text x="372" y="170">1010100</text>
+    </g>
+    <text x="280" y="206" text-anchor="middle" font-size="16" letter-spacing="0.5">Национальная Страховая Информационная Система</text>
+  </g>
+</svg>

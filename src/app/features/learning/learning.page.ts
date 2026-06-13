@@ -7,6 +7,7 @@ interface EduProduct {
   description: string;
   url: string;
   image: string;
+  archived?: boolean;
 }
 
 // Source: agentacademy.ru/education (разводящая). Our hub links straight to the detail pages.
@@ -46,7 +47,7 @@ const PRODUCTS: EduProduct[] = [
     title: 'ОСАГО в Перестраховочном Пуле',
     description: 'Оформление ОСАГО через перестраховочный пул.',
     url: 'https://agentacademy.ru/pul_osago',
-    image: 'https://static.tildacdn.com/tild3166-3566-4037-a632-623138653936/Group_1565_6.png',
+    image: '/images/nsis-osago.svg',
   },
   {
     id: 'accident',
@@ -54,6 +55,7 @@ const PRODUCTS: EduProduct[] = [
     description: 'Выплаты при ДТП; на части территорий — «Защита при ДТП +».',
     url: 'https://agentacademy.ru/accident_protection',
     image: 'https://static.tildacdn.com/tild3436-3563-4462-a334-336138636262/43055.jpg',
+    archived: true,
   },
 ];
 
@@ -121,7 +123,12 @@ const PRODUCTS: EduProduct[] = [
 
         <div class="edu__grid">
           @for (p of products; track p.id) {
-            <button type="button" class="edu__card" (click)="open(p)">
+            <button
+              type="button"
+              class="edu__card"
+              [class.edu__card--archived]="p.archived"
+              (click)="open(p)"
+            >
               <span class="edu__card-cover">
                 <img
                   [src]="p.image"
@@ -130,6 +137,9 @@ const PRODUCTS: EduProduct[] = [
                   referrerpolicy="no-referrer"
                   (error)="$any($event.target).style.display = 'none'"
                 />
+                @if (p.archived) {
+                  <span class="edu__badge">В архиве</span>
+                }
               </span>
               <span class="edu__card-body">
                 <span class="edu__card-title">{{ p.title }}</span>
@@ -209,6 +219,7 @@ const PRODUCTS: EduProduct[] = [
       }
 
       .edu__card-cover {
+        position: relative;
         display: block;
         width: 100%;
         height: 180px;
@@ -222,6 +233,28 @@ const PRODUCTS: EduProduct[] = [
         height: 100%;
         object-fit: cover;
         object-position: center;
+      }
+
+      .edu__badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        padding: 4px 10px;
+        font-size: var(--text-xs);
+        font-weight: var(--weight-semibold);
+        letter-spacing: 0.02em;
+        color: #ffffff;
+        background: rgba(55, 65, 81, 0.92);
+        border-radius: var(--radius-full);
+      }
+
+      .edu__card--archived .edu__card-cover img {
+        filter: grayscale(0.6);
+        opacity: 0.7;
+      }
+
+      .edu__card--archived .edu__card-title {
+        color: var(--gray-600);
       }
 
       .edu__card-body {
