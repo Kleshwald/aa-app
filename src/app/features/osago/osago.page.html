@@ -463,28 +463,31 @@
   @case ('loading') {
     <section class="calc">
       <div class="calc__inner" role="status" aria-live="polite" aria-atomic="false">
-        <div class="calc__eyebrow">Расчёт ОСАГО</div>
+        @if (calcComplete()) {
+          <span class="calc__done-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10" /></svg>
+          </span>
+          <div class="calc__done-text">Готово</div>
+          <div class="calc__line calc__line--done"><i></i></div>
+        } @else {
+          <div class="calc__eyebrow">Расчёт ОСАГО</div>
 
-        <div class="calc__phrase">
-          @for (msg of [steps[stepIndex()]]; track stepIndex()) {
-            <span>{{ msg }}</span>
-          }
-        </div>
+          <div class="calc__phrase">
+            @for (msg of [steps[stepIndex()]]; track stepIndex()) {
+              <span>{{ msg }}</span>
+            }
+          </div>
 
-        <div
-          class="calc__line"
-          [class.calc__line--done]="calcComplete()"
-          role="progressbar"
-          aria-label="Идёт расчёт"
-        >
-          <i></i>
-        </div>
+          <div class="calc__line" role="progressbar" aria-label="Идёт расчёт">
+            <i></i>
+          </div>
 
-        <p class="calc__hint">Обычно занимает до 40 секунд · не закрывайте окно</p>
+          <p class="calc__hint">Обычно занимает до 40 секунд · не закрывайте окно</p>
 
-        <button type="button" class="calc__cancel" (click)="cancelCalculation()">
-          Отменить расчёт
-        </button>
+          <button type="button" class="calc__cancel" (click)="cancelCalculation()">
+            Отменить расчёт
+          </button>
+        }
       </div>
     </section>
   }
@@ -498,8 +501,12 @@
       </header>
 
       <div class="results__offers">
-        @for (q of quotes(); track q.id) {
-          <article class="results__offer" [class.results__offer--best]="$first">
+        @for (q of quotes(); track q.id; let i = $index) {
+          <article
+            class="results__offer results__offer--enter"
+            [class.results__offer--best]="$first"
+            [style.animation-delay]="120 + i * 80 + 'ms'"
+          >
             <app-insurer-logo
               class="results__offer-logo"
               [id]="q.carrierId"
