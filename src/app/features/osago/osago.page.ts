@@ -16,6 +16,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import { AddonIconComponent } from '@shared/addon-icon/addon-icon.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 
 const VEHICLE_PURPOSES = [
@@ -61,15 +62,24 @@ const LOADING_STEPS = [
 
 const LOADING_TOTAL_MS = 40_000;
 
+// Quote type: a regular "segment" quote, or a "reinsurance pool" quote that
+// typically forces a mandatory МиниКАСКО add-on.
+type QuoteType = 'segment' | 'pool';
+
 // Carriers participating in the quote — drawn from insurance-companies fixture.
-const CARRIERS: readonly { id: string; name: string; shortName: string; tag: string }[] = [
-  { id: 'zetta', name: 'Зетта страхование', shortName: 'Зетта', tag: 'Сегмент' },
-  { id: 'soglasie', name: 'Согласие', shortName: 'Согласие', tag: 'Перестраховочный пул' },
-  { id: 'renessans', name: 'Ренессанс страхование', shortName: 'Ренессанс', tag: 'Базовый' },
-  { id: 'ugoria', name: 'Югория', shortName: 'Югория', tag: 'Сегмент' },
-  { id: 'sogaz', name: 'СОГАЗ', shortName: 'СОГАЗ', tag: 'Премиум' },
-  { id: 'rosgosstrah', name: 'Росгосстрах', shortName: 'РГС', tag: 'Базовый' },
-  { id: 'euroins', name: 'Евроинс', shortName: 'Евроинс', tag: 'Перестраховочный пул' },
+const CARRIERS: readonly {
+  id: string;
+  name: string;
+  shortName: string;
+  quoteType: QuoteType;
+}[] = [
+  { id: 'zetta', name: 'Зетта страхование', shortName: 'Зетта', quoteType: 'segment' },
+  { id: 'soglasie', name: 'Согласие', shortName: 'Согласие', quoteType: 'pool' },
+  { id: 'renessans', name: 'Ренессанс страхование', shortName: 'Ренессанс', quoteType: 'segment' },
+  { id: 'ugoria', name: 'Югория', shortName: 'Югория', quoteType: 'segment' },
+  { id: 'sogaz', name: 'СОГАЗ', shortName: 'СОГАЗ', quoteType: 'segment' },
+  { id: 'rosgosstrah', name: 'Росгосстрах', shortName: 'РГС', quoteType: 'segment' },
+  { id: 'euroins', name: 'Евроинс', shortName: 'Евроинс', quoteType: 'pool' },
 ];
 
 // Add-on services offered on the quote-result row (modal opens to pick details).
@@ -105,8 +115,7 @@ export interface Quote {
   carrierId: string;
   carrierName: string;
   carrierShortName: string;
-  carrierTag: string;
-  carrierTagColor: 'accent' | 'orange' | 'green' | 'gray';
+  quoteType: QuoteType;
   osagoPrice: number;
   effectiveDate: string; // "9 июня"
   addOn: { presetId: AddOnPreset['id']; price: number; required: boolean };
@@ -117,7 +126,7 @@ type View = 'form' | 'loading' | 'results' | 'payment' | 'success';
 
 @Component({
   selector: 'app-osago-page',
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, InsurerLogoComponent],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, InsurerLogoComponent, AddonIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './osago.page.html',
   styleUrl: './osago.page.scss',
@@ -167,6 +176,14 @@ export class OsagoPage {
   protected readonly addOnModalQuoteId = signal<string | null>(null);
   protected readonly addOnModalPreset = signal<AddOnPreset['id']>('off');
   protected readonly addOnModalPrice = signal<number>(0);
+
+  // Whether the quote being edited in the modal forces a mandatory add-on
+  // (reinsurance-pool quotes) — used to hide the "Отключить сервис" option.
+  protected readonly addOnModalRequired = computed<boolean>(() => {
+    const id = this.addOnModalQuoteId();
+    const q = id ? this.quotes().find((x) => x.id === id) : null;
+    return q?.addOn.required ?? false;
+  });
 
   // Timers for the loading animation
   private loadingTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -392,6 +409,23 @@ export class OsagoPage {
     return quote.osagoPrice + (quote.addOn?.price ?? 0);
   }
 
+  /** Display name of an add-on preset (used in chip, total caption, payment screen). */
+  addOnName(id: AddOnPreset['id']): string {
+    return ADD_ON_PRESETS.find((p) => p.id === id)?.name ?? '';
+  }
+
+  /** "5 предложений" / "2 предложения" — Russian plural for the results subtitle. */
+  offersCountLabel(): string {
+    const n = this.quotes().length;
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    let word: string;
+    if (mod10 === 1 && mod100 !== 11) word = 'предложение';
+    else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) word = 'предложения';
+    else word = 'предложений';
+    return `${n} ${word}`;
+  }
+
   // ─── Issue / payment flow ───
 
   issue(quoteId: string): void {
@@ -425,27 +459,18 @@ export class OsagoPage {
     const power = this.form.controls.vehicle.controls.power.value ?? 100;
     const basePrice = Math.round(2500 + power * 30);
 
-    const tagColors: Record<string, Quote['carrierTagColor']> = {
-      Сегмент: 'accent',
-      'Перестраховочный пул': 'orange',
-      Премиум: 'green',
-      Базовый: 'gray',
-    };
-
     // Pick 2-5 carriers for the quote panel.
     const sample = [...CARRIERS]
       .sort(() => Math.random() - 0.5)
       .slice(0, 2 + Math.floor(Math.random() * 4));
 
-    return sample.map((c, idx) => {
+    const quotes = sample.map((c, idx) => {
       const variance = Math.round((Math.random() - 0.3) * 1500);
       const osagoPrice = Math.max(3500, basePrice + variance);
-      const requiresAddOn = c.tag === 'Перестраховочный пул';
-      const addOnPresetId: AddOnPreset['id'] = requiresAddOn
-        ? 'mini-kasko'
-        : idx === 0
-          ? 'ns-dtp'
-          : 'off';
+      // Reinsurance-pool quotes force a mandatory МиниКАСКО; segment quotes
+      // start with no add-on so the headline price equals the quoted price.
+      const requiresAddOn = c.quoteType === 'pool';
+      const addOnPresetId: AddOnPreset['id'] = requiresAddOn ? 'mini-kasko' : 'off';
       const preset = ADD_ON_PRESETS.find((p) => p.id === addOnPresetId)!;
 
       return {
@@ -453,8 +478,7 @@ export class OsagoPage {
         carrierId: c.id,
         carrierName: c.name,
         carrierShortName: c.shortName,
-        carrierTag: c.tag,
-        carrierTagColor: tagColors[c.tag] ?? 'gray',
+        quoteType: c.quoteType,
         osagoPrice,
         effectiveDate: effective,
         addOn: {
@@ -465,6 +489,9 @@ export class OsagoPage {
         paymentMethod: 'Банковская карта',
       };
     });
+
+    // Rank by base OSAGO premium, ascending — cheapest first (the anchor).
+    return quotes.sort((a, b) => a.osagoPrice - b.osagoPrice);
   }
 
   private formatRussianDate(iso: string): string {

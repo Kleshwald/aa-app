@@ -486,63 +486,129 @@
   <!-- ─────────────────────────── RESULTS ─────────────────────────── -->
   @case ('results') {
     <section class="results">
-      <h1 class="results__title">Результаты расчёта</h1>
+      <header class="results__head">
+        <h1 class="results__title">Результаты расчёта</h1>
+        <p class="results__subtitle">{{ offersCountLabel() }} · отсортированы по цене ОСАГО</p>
+      </header>
 
       <div class="results__offers">
         @for (q of quotes(); track q.id) {
-          <article class="results__offer">
+          <article class="results__offer" [class.results__offer--best]="$first">
             <app-insurer-logo
               class="results__offer-logo"
               [id]="q.carrierId"
               [name]="q.carrierShortName"
             />
+
             <div class="results__offer-main">
-              <div class="results__carrier-name">{{ q.carrierName }}</div>
-              <div class="results__sub">
-                ОСАГО {{ q.osagoPrice | number: '1.0-0' }} ₽ · действует с {{ q.effectiveDate }}
-              </div>
-            </div>
-
-            <button type="button" class="results__addon" (click)="openAddOnModal(q.id)">
-              @if (q.addOn.presetId === 'off') {
-                <span class="results__addon-name results__addon-name--muted"
-                  >Подключить сервис</span
-                >
-              } @else {
-                <span class="results__addon-name">{{
-                  addOnPresets[
-                    q.addOn.presetId === 'mini-kasko' ? 0 : q.addOn.presetId === 'legal' ? 1 : 2
-                  ].name
-                }}</span>
-                <span class="results__addon-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
-                @if (q.addOn.required) {
-                  <span class="results__addon-required">Обязательно</span>
-                }
+              @if ($first) {
+                <span class="results__best">Лучшая цена</span>
               }
-              <span class="results__addon-arrow" aria-hidden="true">▾</span>
-            </button>
-
-            <div class="results__offer-total">
-              <div class="results__price results__price--total">
-                {{ totalFor(q) | number: '1.0-0' }} ₽
+              <div class="results__carrier-name">{{ q.carrierName }}</div>
+              <div class="results__offer-meta">
+                <span class="results__qtype" [class.results__qtype--pool]="q.quoteType === 'pool'">
+                  {{ q.quoteType === 'pool' ? 'Перестраховочный пул' : 'Сегмент' }}
+                </span>
+                <span class="results__sub">с {{ q.effectiveDate }}</span>
               </div>
-              <div class="results__sub">Итого</div>
             </div>
 
-            <button
-              type="button"
-              class="osago__btn osago__btn--primary results__offer-action"
-              (click)="issue(q.id)"
-            >
-              Оформить
-            </button>
+            <div class="results__price-block">
+              <div class="results__price">{{ q.osagoPrice | number: '1.0-0' }} ₽</div>
+              <div class="results__price-cap">ОСАГО</div>
+            </div>
+
+            <!-- Add-on chip (opens modal). Three states: required / chosen / empty. -->
+            @if (q.addOn.required) {
+              <button
+                type="button"
+                class="results__addon results__addon--required"
+                (click)="openAddOnModal(q.id)"
+              >
+                <svg class="results__addon-lock" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <app-addon-icon [id]="q.addOn.presetId" class="results__addon-ico" />
+                <span class="results__addon-name">{{ addOnName(q.addOn.presetId) }}</span>
+                <span class="results__addon-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
+                <span class="results__addon-flag">Обязательно</span>
+              </button>
+            } @else if (q.addOn.presetId === 'off') {
+              <button
+                type="button"
+                class="results__addon results__addon--empty"
+                (click)="openAddOnModal(q.id)"
+              >
+                <app-addon-icon id="off" class="results__addon-ico" />
+                <span class="results__addon-name results__addon-name--muted">Добавить сервис</span>
+                <span class="results__addon-arrow" aria-hidden="true">▾</span>
+              </button>
+            } @else {
+              <button type="button" class="results__addon" (click)="openAddOnModal(q.id)">
+                <app-addon-icon [id]="q.addOn.presetId" class="results__addon-ico" />
+                <span class="results__addon-name">{{ addOnName(q.addOn.presetId) }}</span>
+                <span class="results__addon-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
+                <span class="results__addon-arrow" aria-hidden="true">▾</span>
+              </button>
+            }
+
+            <div class="results__cta">
+              @if (q.addOn.price > 0) {
+                <div class="results__total">
+                  <span class="results__total-cap"
+                    >Итого{{ q.addOn.required ? '' : ' с сервисом' }}</span
+                  >
+                  <span class="results__total-val">{{ totalFor(q) | number: '1.0-0' }} ₽</span>
+                  @if (q.addOn.required) {
+                    <span class="results__total-note"
+                      >включая {{ addOnName(q.addOn.presetId) }}</span
+                    >
+                  }
+                </div>
+              }
+              <button
+                type="button"
+                class="osago__btn osago__btn--primary results__offer-action"
+                (click)="issue(q.id)"
+              >
+                Оформить
+              </button>
+            </div>
           </article>
         }
       </div>
 
+      <!-- Trust strip — reduces abandonment for a price-sensitive agent. -->
+      <ul class="results__trust">
+        <li class="results__trust-item">
+          <svg class="results__trust-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+            />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+          Полис регистрируется в базе НСИС и проверяется официально
+        </li>
+        <li class="results__trust-item">
+          <svg class="results__trust-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <path d="M2 10h20" />
+          </svg>
+          Оплата банковской картой клиента через защищённый шлюз
+        </li>
+        <li class="results__trust-item">
+          <svg class="results__trust-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+          </svg>
+          Цены зафиксированы на момент расчёта и действуют сегодня
+        </li>
+      </ul>
+
       <footer class="results__footer">
         <button type="button" class="osago__btn osago__btn--secondary" (click)="backToForm()">
-          Вернуться
+          Вернуться к расчёту
         </button>
       </footer>
     </section>
@@ -569,42 +635,51 @@
           </button>
         </header>
 
+        @if (addOnModalRequired()) {
+          <p class="modal__note">Для этой котировки сервис обязателен — его нельзя отключить.</p>
+        }
+
         <div class="modal__body">
           @for (preset of addOnPresets; track preset.id) {
-            <div class="addon-option" [class.addon-option--selected]="isAddOnSelected(preset.id)">
-              <label class="addon-option__header">
-                <input
-                  type="radio"
-                  name="addon-preset"
-                  [checked]="isAddOnSelected(preset.id)"
-                  (change)="selectAddOnPreset(preset.id)"
-                />
-                <span class="addon-option__name">{{ preset.name }}</span>
-              </label>
-              @if (preset.description && isAddOnSelected(preset.id)) {
-                <p class="addon-option__desc">{{ preset.description }}</p>
-              }
-              @if (preset.id !== 'off') {
-                <div
-                  class="addon-option__prices"
-                  [class.addon-option__prices--disabled]="!isAddOnSelected(preset.id)"
-                >
-                  @for (price of preset.priceOptions; track price) {
-                    <button
-                      type="button"
-                      class="addon-option__price"
-                      [class.addon-option__price--active]="
-                        isAddOnSelected(preset.id) && addOnModalPrice() === price
-                      "
-                      [disabled]="!isAddOnSelected(preset.id)"
-                      (click)="selectAddOnPrice(price)"
-                    >
-                      {{ price | number: '1.0-0' }}
-                    </button>
+            @if (preset.id !== 'off' || !addOnModalRequired()) {
+              <div class="addon-option" [class.addon-option--selected]="isAddOnSelected(preset.id)">
+                <label class="addon-option__header">
+                  <input
+                    type="radio"
+                    name="addon-preset"
+                    [checked]="isAddOnSelected(preset.id)"
+                    (change)="selectAddOnPreset(preset.id)"
+                  />
+                  @if (preset.id !== 'off') {
+                    <app-addon-icon [id]="preset.id" class="addon-option__ico" />
                   }
-                </div>
-              }
-            </div>
+                  <span class="addon-option__name">{{ preset.name }}</span>
+                </label>
+                @if (preset.description && isAddOnSelected(preset.id)) {
+                  <p class="addon-option__desc">{{ preset.description }}</p>
+                }
+                @if (preset.id !== 'off') {
+                  <div
+                    class="addon-option__prices"
+                    [class.addon-option__prices--disabled]="!isAddOnSelected(preset.id)"
+                  >
+                    @for (price of preset.priceOptions; track price) {
+                      <button
+                        type="button"
+                        class="addon-option__price"
+                        [class.addon-option__price--active]="
+                          isAddOnSelected(preset.id) && addOnModalPrice() === price
+                        "
+                        [disabled]="!isAddOnSelected(preset.id)"
+                        (click)="selectAddOnPrice(price)"
+                      >
+                        {{ price | number: '1.0-0' }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
           }
         </div>
 
@@ -625,18 +700,10 @@
           <h2 class="payment__title">Оплата полиса</h2>
           <div class="payment__amount">{{ totalFor(q) | number: '1.0-0' }} ₽</div>
           <div class="payment__carrier">
-            {{ q.carrierName }} ·
-            {{
-              addOnPresets[
-                q.addOn.presetId === 'mini-kasko'
-                  ? 0
-                  : q.addOn.presetId === 'legal'
-                    ? 1
-                    : q.addOn.presetId === 'ns-dtp'
-                      ? 2
-                      : 3
-              ].name
-            }}
+            {{ q.carrierName }}
+            @if (q.addOn.price > 0) {
+              · {{ addOnName(q.addOn.presetId) }}
+            }
           </div>
         }
         <div class="payment__spinner" aria-hidden="true"></div>
