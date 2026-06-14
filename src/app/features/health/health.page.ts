@@ -30,10 +30,14 @@ interface Offer {
   discountable: boolean; // можно ли дать клиенту скидку (у части СК — фиксированная цена)
 }
 
-const PRODUCTS: { id: HealthProduct; label: string }[] = [
-  { id: 'accident', label: 'Страхование от несчастного случая' },
-  { id: 'sport', label: 'Страхование спортсменов' },
-  { id: 'tick', label: 'Страхование от укуса клеща' },
+const PRODUCTS: { id: HealthProduct; label: string; desc: string }[] = [
+  {
+    id: 'accident',
+    label: 'Страхование от несчастного случая',
+    desc: 'Травмы, госпитализация, инвалидность',
+  },
+  { id: 'sport', label: 'Страхование спортсменов', desc: 'Тренировки и соревнования' },
+  { id: 'tick', label: 'Страхование от укуса клеща', desc: 'Диагностика и лечение после укуса' },
 ];
 
 const CARRIERS: Record<string, { name: string; short: string }> = {
