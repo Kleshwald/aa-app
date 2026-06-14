@@ -11,6 +11,9 @@
 npm-debug.log
 yarn-error.log
 
+# Claude Code local settings (per-session permissions, not for the repo)
+.claude/
+
 # IDEs and editors
 .idea/
 .project
