@@ -1,0 +1,380 @@
+@switch (view()) {
+  <!-- ─────────────── PARAMS ─────────────── -->
+  @case ('params') {
+    <section class="hl" [formGroup]="params">
+      <h1 class="hl__title">Линейка продуктов «Здоровье»</h1>
+
+      <!-- Product tabs -->
+      <div class="hl-tabs" role="tablist">
+        @for (p of products; track p.id) {
+          <button
+            type="button"
+            role="tab"
+            class="hl-tab"
+            [class.hl-tab--active]="product() === p.id"
+            (click)="setProduct(p.id)"
+          >
+            {{ p.label }}
+          </button>
+        }
+      </div>
+
+      <div class="hl-card">
+        <!-- Type segment -->
+        <div class="hl-seg">
+          <button
+            type="button"
+            class="hl-seg__btn"
+            [class.hl-seg__btn--active]="insureType() === 'individual'"
+            (click)="setInsureType('individual')"
+          >
+            Индивидуальный
+          </button>
+          <button
+            type="button"
+            class="hl-seg__btn"
+            [class.hl-seg__btn--active]="insureType() === 'group'"
+            (click)="setInsureType('group')"
+          >
+            Для группы от 2-х человек
+          </button>
+        </div>
+
+        <!-- Category segment -->
+        <div class="hl-seg">
+          <button
+            type="button"
+            class="hl-seg__btn"
+            [class.hl-seg__btn--active]="category() === 'child'"
+            (click)="setCategory('child')"
+          >
+            Ребёнок (2–16 лет)
+          </button>
+          <button
+            type="button"
+            class="hl-seg__btn"
+            [class.hl-seg__btn--active]="category() === 'adult'"
+            (click)="setCategory('adult')"
+          >
+            Взрослый (16–70 лет)
+          </button>
+        </div>
+
+        <!-- Fields -->
+        <div class="hl-row">
+          <label class="hl-field">
+            <span class="hl-field__label">Срок страхования</span>
+            <select class="hl-input hl-input--select" formControlName="term">
+              @for (t of terms; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="hl-field">
+            <span class="hl-field__label">Страховая сумма</span>
+            <select class="hl-input hl-input--select" formControlName="sum">
+              @for (s of sums; track s) {
+                <option [value]="s">{{ s | number: '1.0-0' }} ₽</option>
+              }
+            </select>
+          </label>
+
+          <label class="hl-field">
+            <span class="hl-field__label">Дата начала действия полиса</span>
+            <input type="date" class="hl-input" formControlName="startDate" />
+          </label>
+
+          <label class="hl-field">
+            <span class="hl-field__label">Дата окончания действия полиса</span>
+            <input type="text" class="hl-input" [value]="endDate() | date: 'dd.MM.yyyy'" readonly />
+          </label>
+
+          @if (insureType() === 'group') {
+            <label class="hl-field hl-field--narrow">
+              <span class="hl-field__label">Количество застрахованных</span>
+              <input type="number" class="hl-input" formControlName="count" min="2" />
+            </label>
+          }
+        </div>
+      </div>
+
+      <footer class="hl__footer">
+        <button type="button" class="hl-btn hl-btn--secondary" (click)="saveDraft()">
+          Сохранить черновик
+        </button>
+        <button type="button" class="hl-btn hl-btn--primary" (click)="calculate()">
+          Рассчитать
+        </button>
+      </footer>
+    </section>
+  }
+
+  <!-- ─────────────── QUOTES ─────────────── -->
+  @case ('quotes') {
+    <section class="hl">
+      <h2 class="hl__heading"><span class="hl__heading-dot"></span> {{ productMeta().heading }}</h2>
+
+      <div class="hl-offers">
+        @for (o of baseOffers(); track o.id) {
+          <label class="hl-offer" [class.hl-offer--selected]="selectedOfferId() === o.id">
+            <input
+              type="radio"
+              name="offer"
+              class="hl-offer__radio"
+              [checked]="selectedOfferId() === o.id"
+              (change)="selectOffer(o.id)"
+            />
+            <span class="hl-offer__carrier">{{ o.carrierName }}</span>
+            <span class="hl-offer__sum"
+              >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
+            >
+            <span class="hl-offer__price">{{ o.price | number: '1.0-0' }} ₽</span>
+            <span class="hl-offer__dates">
+              {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
+              {{ endDate() | date: 'dd.MM.yy' }}
+            </span>
+          </label>
+        }
+
+        <button type="button" class="hl-more" (click)="toggleMore()">
+          Ещё предложения {{ showMore() ? '▲' : '▼' }}
+        </button>
+
+        @if (showMore()) {
+          @for (o of kvOffers(); track o.id) {
+            <label class="hl-offer" [class.hl-offer--selected]="selectedOfferId() === o.id">
+              <input
+                type="radio"
+                name="offer"
+                class="hl-offer__radio"
+                [checked]="selectedOfferId() === o.id"
+                (change)="selectOffer(o.id)"
+              />
+              <span class="hl-offer__carrier">{{ o.carrierName }}</span>
+              <span class="hl-offer__sum"
+                >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
+              >
+              <span class="hl-offer__price hl-offer__price--kv">
+                <span class="hl-offer__kv">КВ {{ o.kvPercent }} %</span>
+                <span class="hl-offer__price-new">{{ o.price | number: '1.0-0' }} ₽</span>
+                <span class="hl-offer__price-old">{{ o.basePrice | number: '1.0-0' }} ₽</span>
+              </span>
+              <span class="hl-offer__dates">
+                {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
+                {{ endDate() | date: 'dd.MM.yy' }}
+              </span>
+            </label>
+          }
+        }
+      </div>
+
+      <footer class="hl__footer">
+        <button type="button" class="hl-btn hl-btn--secondary" (click)="backToParams()">
+          Назад
+        </button>
+        <button
+          type="button"
+          class="hl-btn hl-btn--primary"
+          [disabled]="!selectedOffer()"
+          (click)="continueToIssue()"
+        >
+          Продолжить
+        </button>
+      </footer>
+    </section>
+  }
+
+  <!-- ─────────────── ISSUE ─────────────── -->
+  @case ('issue') {
+    <section class="hl" [formGroup]="issueForm">
+      <div class="hl-card">
+        <div class="hl-row">
+          <label class="hl-field">
+            <span class="hl-field__label">Страховая сумма</span>
+            <input
+              type="text"
+              class="hl-input"
+              [value]="(params.controls.sum.value | number: '1.0-0') + ' ₽'"
+              readonly
+            />
+          </label>
+          <label class="hl-field">
+            <span class="hl-field__label">Дата начала действия полиса</span>
+            <input
+              type="text"
+              class="hl-input"
+              [value]="params.controls.startDate.value | date: 'dd.MM.yyyy'"
+              readonly
+            />
+          </label>
+          <label class="hl-field">
+            <span class="hl-field__label">Дата окончания действия полиса</span>
+            <input type="text" class="hl-input" [value]="endDate() | date: 'dd.MM.yyyy'" readonly />
+          </label>
+        </div>
+      </div>
+
+      <article class="hl-card" formGroupName="policyholder">
+        <h3 class="hl-card__title">Страхователь</h3>
+        <div class="hl-row">
+          <label class="hl-field"
+            ><span class="hl-field__label">Фамилия</span
+            ><input type="text" class="hl-input" formControlName="lastName"
+          /></label>
+          <label class="hl-field"
+            ><span class="hl-field__label">Имя</span
+            ><input type="text" class="hl-input" formControlName="firstName"
+          /></label>
+          <label class="hl-field"
+            ><span class="hl-field__label">Отчество</span
+            ><input type="text" class="hl-input" formControlName="middleName"
+          /></label>
+          <label class="hl-field hl-field--narrow"
+            ><span class="hl-field__label">Дата рождения</span
+            ><input type="date" class="hl-input" formControlName="birthDate"
+          /></label>
+        </div>
+        <div class="hl-row">
+          <label class="hl-field"
+            ><span class="hl-field__label">Серия и номер паспорта РФ</span
+            ><input
+              type="text"
+              class="hl-input"
+              formControlName="passport"
+              placeholder="0000 000000"
+          /></label>
+          <label class="hl-field hl-field--narrow"
+            ><span class="hl-field__label">Дата выдачи</span
+            ><input type="date" class="hl-input" formControlName="passportDate"
+          /></label>
+          <label class="hl-field"
+            ><span class="hl-field__label">Кем выдан</span
+            ><input
+              type="text"
+              class="hl-input"
+              formControlName="passportDept"
+              placeholder="код подразделения"
+          /></label>
+        </div>
+        <div class="hl-row">
+          <label class="hl-field"
+            ><span class="hl-field__label">Телефон</span
+            ><input
+              type="tel"
+              class="hl-input"
+              formControlName="phone"
+              placeholder="+7 (___) ___-__-__"
+          /></label>
+          <label class="hl-field"
+            ><span class="hl-field__label">Email</span
+            ><input
+              type="email"
+              class="hl-input"
+              formControlName="email"
+              placeholder="example@mail.ru"
+          /></label>
+        </div>
+      </article>
+
+      <label class="hl-check">
+        <input type="checkbox" formControlName="sameAsInsured" (change)="onSameAsInsured()" />
+        <span>Страхователь = Застрахованный</span>
+      </label>
+
+      @for (ins of insuredControls; track $index) {
+        <article class="hl-card" [formGroup]="ins">
+          <h3 class="hl-card__title">Застрахованный {{ $index + 1 }}</h3>
+          <div class="hl-row">
+            <label class="hl-field"
+              ><span class="hl-field__label">Фамилия</span
+              ><input type="text" class="hl-input" formControlName="lastName"
+            /></label>
+            <label class="hl-field"
+              ><span class="hl-field__label">Имя</span
+              ><input type="text" class="hl-input" formControlName="firstName"
+            /></label>
+            <label class="hl-field"
+              ><span class="hl-field__label">Отчество</span
+              ><input type="text" class="hl-input" formControlName="middleName"
+            /></label>
+            <label class="hl-field hl-field--narrow"
+              ><span class="hl-field__label">Дата рождения</span
+              ><input type="date" class="hl-input" formControlName="birthDate"
+            /></label>
+          </div>
+        </article>
+      }
+
+      <footer class="hl-paybar">
+        <span class="hl-paybar__carrier">{{ selectedOffer()?.carrierShort }}</span>
+        <span class="hl-paybar__metric">
+          <span class="hl-paybar__metric-label">Стоимость полиса</span>
+          <span class="hl-paybar__metric-value"
+            >{{ selectedOffer()?.price | number: '1.0-0' }} ₽</span
+          >
+        </span>
+        <span class="hl-paybar__metric">
+          <span class="hl-paybar__metric-label">Застрахованы</span>
+          <span class="hl-paybar__metric-value">{{ count() }} чел.</span>
+        </span>
+        <span class="hl-paybar__spacer"></span>
+        <button type="button" class="hl-btn hl-btn--secondary" (click)="backToQuotes()">
+          Назад
+        </button>
+        <button type="button" class="hl-btn hl-btn--secondary" (click)="saveDraft()">
+          Сохранить черновик
+        </button>
+        <button type="button" class="hl-btn hl-btn--primary" (click)="pay()">Оплатить</button>
+      </footer>
+    </section>
+  }
+
+  <!-- ─────────────── PAYMENT ─────────────── -->
+  @case ('payment') {
+    <section class="hl hl--center">
+      <div class="hl-state">
+        <span class="hl-spinner" aria-hidden="true"></span>
+        <h2 class="hl-state__title">Проводим оплату…</h2>
+        <p class="hl-state__text">
+          {{ selectedOffer()?.price | number: '1.0-0' }} ₽ · {{ selectedOffer()?.carrierShort }}
+        </p>
+      </div>
+    </section>
+  }
+
+  <!-- ─────────────── SUCCESS ─────────────── -->
+  @case ('success') {
+    <section class="hl hl--center">
+      <div class="hl-state">
+        <span class="hl-state__check" aria-hidden="true">
+          <svg
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+        <h2 class="hl-state__title">Полис оформлен</h2>
+        <p class="hl-state__text">
+          {{ productMeta().label }} · {{ selectedOffer()?.carrierShort }} ·
+          {{ selectedOffer()?.price | number: '1.0-0' }} ₽ · застрахованы {{ count() }} чел.
+        </p>
+        <div class="hl-state__actions">
+          <button type="button" class="hl-btn hl-btn--secondary" (click)="newCalculation()">
+            Новый расчёт
+          </button>
+          <button type="button" class="hl-btn hl-btn--primary" (click)="goToClients()">
+            К моим клиентам
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+}
