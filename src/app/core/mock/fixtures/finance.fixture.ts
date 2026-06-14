@@ -19,11 +19,24 @@ export const financeResults: FinanceResults = {
   amountToNext: 65_500,
   dailyToNext: 4_094,
   daysLeft: 16,
+  tierLadder: [
+    { name: 'Старт', threshold: 0, state: 'done' },
+    { name: 'Бронза', threshold: 100_000, state: 'done' },
+    { name: 'Серебро', threshold: 180_000, state: 'current' },
+    { name: 'Золото', threshold: 250_000, state: 'locked' },
+    { name: 'Платина', threshold: 400_000, state: 'locked' },
+  ],
   segment: {
     totalCollected: 184_500,
     osagoCount: 47,
     avgAddonCheck: 1_280,
     penetrationPct: 38,
+    trends: {
+      totalCollected: 12,
+      osagoCount: 8,
+      avgAddonCheck: -3,
+      penetrationPct: 5,
+    },
   },
   pool: {
     osagoPoolCount: 12,

@@ -6,11 +6,27 @@ import { type ApiResponse } from '@core/models';
 
 // ─── «Мои результаты» — мотивационный дашборд агента ───
 
+export interface FinanceSegmentTrends {
+  totalCollected: number; // % к прошлому периоду
+  osagoCount: number;
+  avgAddonCheck: number;
+  penetrationPct: number; // в процентных пунктах
+}
+
 export interface FinanceSegmentMetrics {
   totalCollected: number; // итого сборов за период, ₽
   osagoCount: number; // ОСАГО, кол-во
   avgAddonCheck: number; // средний чек по доп. продуктам, ₽
   penetrationPct: number; // уровень проникновения допов, %
+  trends: FinanceSegmentTrends;
+}
+
+export type TierState = 'done' | 'current' | 'locked';
+
+export interface TierStep {
+  name: string; // «Серебро»
+  threshold: number; // ₽ порог входа в уровень
+  state: TierState;
 }
 
 export interface FinancePoolMetrics {
@@ -32,6 +48,7 @@ export interface FinanceResults {
   amountToNext: number; // ещё нужно собрать, ₽
   dailyToNext: number; // ₽/день до конца периода
   daysLeft: number; // дней до конца периода
+  tierLadder: TierStep[]; // лестница уровней мотивации
   segment: FinanceSegmentMetrics;
   pool: FinancePoolMetrics;
 }

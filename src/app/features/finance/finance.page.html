@@ -42,95 +42,252 @@
             {{ r.periodLabel }} <span>· {{ r.periodRange }}</span>
           </div>
 
-          <div class="fin-cards">
-            <article class="fin-card fin-card--forecast">
-              <span class="fin-card__label">Категория на период</span>
-              <span class="fin-card__category">{{ r.category }}</span>
-              <span class="fin-card__hint">Прогноз по текущему темпу продаж</span>
-            </article>
+          <!-- HERO: уровень мотивации -->
+          <section class="fin-hero">
+            <h2 class="fin-hero__title">Ваш уровень в этом месяце</h2>
+            <div class="fin-hero__body">
+              <div class="fin-ring">
+                <svg class="fin-ring__svg" viewBox="0 0 200 200" aria-hidden="true">
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="86"
+                    fill="none"
+                    stroke="var(--gray-200)"
+                    stroke-width="16"
+                  />
+                  <circle
+                    class="fin-ring__arc"
+                    cx="100"
+                    cy="100"
+                    r="86"
+                    fill="none"
+                    [attr.stroke]="ringColor()"
+                    stroke-width="16"
+                    stroke-linecap="round"
+                    [attr.stroke-dasharray]="ringDash"
+                    [attr.stroke-dashoffset]="ringOffset()"
+                    transform="rotate(-90 100 100)"
+                  />
+                </svg>
+                <div class="fin-ring__center">
+                  <svg class="fin-ring__medal" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="6" />
+                    <path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1" />
+                  </svg>
+                  <span class="fin-ring__tier">{{ r.category }}</span>
+                  <span class="fin-ring__pct">{{ progressPct() }}%</span>
+                </div>
+              </div>
 
-            <article class="fin-card fin-card--reco">
+              <div class="fin-ladder">
+                <div class="fin-ladder__steps">
+                  @for (t of r.tierLadder; track t.name) {
+                    <div class="fin-ladder__step" [attr.data-state]="t.state">
+                      @if (t.state === 'current') {
+                        <span class="fin-ladder__here">вы здесь</span>
+                      }
+                      <span class="fin-ladder__bar"></span>
+                      <span class="fin-ladder__name">{{ t.name }}</span>
+                      <span class="fin-ladder__th">{{ tierThresholdLabel(t.threshold) }}</span>
+                    </div>
+                  }
+                </div>
+                <p class="fin-ladder__note">
+                  @if (r.nextCategory) {
+                    Вы в категории «{{ r.category }}». Следующая ступень — «{{ r.nextCategory }}».
+                  } @else {
+                    Поздравляем — вы в высшей категории мотивации.
+                  }
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Следующий шаг -->
+          <section class="fin-next">
+            <svg class="fin-next__ico" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="4.5" />
+              <circle cx="12" cy="12" r="0.5" />
+            </svg>
+            <div class="fin-next__text">
               @if (r.nextCategory) {
-                <span class="fin-card__label">До категории «{{ r.nextCategory }}»</span>
-                <span class="fin-card__amount">{{ r.amountToNext | number: '1.0-0' }} ₽</span>
-                <span class="fin-card__hint">
-                  ≈ {{ r.dailyToNext | number: '1.0-0' }} ₽/день · осталось {{ r.daysLeft }} дн.
+                <span class="fin-next__head"
+                  >До «{{ r.nextCategory }}» осталось совсем немного</span
+                >
+                <span class="fin-next__sub">
+                  Ещё <b>{{ r.amountToNext | number: '1.0-0' }} ₽</b> сборов — это примерно
+                  <b>{{ r.dailyToNext | number: '1.0-0' }} ₽ в день</b> до конца месяца ({{
+                    r.daysLeft
+                  }}
+                  дн.).
                 </span>
               } @else {
-                <span class="fin-card__label">Категория</span>
-                <span class="fin-card__amount">Максимум</span>
-                <span class="fin-card__hint">Вы в высшей категории мотивации</span>
+                <span class="fin-next__head">Вы в высшей категории</span>
+                <span class="fin-next__sub">Так держать — продолжайте в том же темпе.</span>
               }
+            </div>
+            <a class="fin__btn fin__btn--primary fin-next__cta" routerLink="/osago"
+              >Оформить полис</a
+            >
+          </section>
+
+          <!-- KPI: целевой сегмент -->
+          <h2 class="fin-section__title">Целевой сегмент</h2>
+          <div class="fin-kpis">
+            <article class="fin-kpi fin-kpi--highlight">
+              <div class="fin-kpi__top">
+                <span class="fin-kpi__badge fin-kpi__badge--info">
+                  <svg class="fin-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="2" y="6" width="20" height="12" rx="2" />
+                    <circle cx="12" cy="12" r="2.5" />
+                  </svg>
+                </span>
+                <span
+                  class="fin-kpi__trend"
+                  [class.fin-kpi__trend--down]="r.segment.trends.totalCollected < 0"
+                >
+                  {{ r.segment.trends.totalCollected >= 0 ? '▲ +' : '▼ '
+                  }}{{
+                    r.segment.trends.totalCollected >= 0
+                      ? r.segment.trends.totalCollected
+                      : -r.segment.trends.totalCollected
+                  }}%
+                </span>
+              </div>
+              <span class="fin-kpi__value">{{ r.segment.totalCollected | number: '1.0-0' }} ₽</span>
+              <span class="fin-kpi__label">Итого сборов</span>
+            </article>
+
+            <article class="fin-kpi">
+              <div class="fin-kpi__top">
+                <span class="fin-kpi__badge fin-kpi__badge--brand">
+                  <svg class="fin-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                  </svg>
+                </span>
+                <span
+                  class="fin-kpi__trend"
+                  [class.fin-kpi__trend--down]="r.segment.trends.osagoCount < 0"
+                >
+                  {{ r.segment.trends.osagoCount >= 0 ? '▲ +' : '▼ '
+                  }}{{
+                    r.segment.trends.osagoCount >= 0
+                      ? r.segment.trends.osagoCount
+                      : -r.segment.trends.osagoCount
+                  }}%
+                </span>
+              </div>
+              <span class="fin-kpi__value">{{ r.segment.osagoCount }} шт.</span>
+              <span class="fin-kpi__label">ОСАГО</span>
+            </article>
+
+            <article class="fin-kpi">
+              <div class="fin-kpi__top">
+                <span class="fin-kpi__badge fin-kpi__badge--info">
+                  <svg class="fin-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 2v6h6" />
+                    <path d="M12 12v6M9 15h6" />
+                  </svg>
+                </span>
+                <span
+                  class="fin-kpi__trend"
+                  [class.fin-kpi__trend--down]="r.segment.trends.avgAddonCheck < 0"
+                >
+                  {{ r.segment.trends.avgAddonCheck >= 0 ? '▲ +' : '▼ '
+                  }}{{
+                    r.segment.trends.avgAddonCheck >= 0
+                      ? r.segment.trends.avgAddonCheck
+                      : -r.segment.trends.avgAddonCheck
+                  }}%
+                </span>
+              </div>
+              <span class="fin-kpi__value">{{ r.segment.avgAddonCheck | number: '1.0-0' }} ₽</span>
+              <span class="fin-kpi__label">Средний чек по допам</span>
+            </article>
+
+            <article class="fin-kpi">
+              <div class="fin-kpi__top">
+                <span class="fin-kpi__badge fin-kpi__badge--success">
+                  <svg class="fin-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <circle cx="12" cy="12" r="4.5" />
+                  </svg>
+                </span>
+                <span
+                  class="fin-kpi__trend"
+                  [class.fin-kpi__trend--down]="r.segment.trends.penetrationPct < 0"
+                >
+                  {{ r.segment.trends.penetrationPct >= 0 ? '▲ +' : '▼ '
+                  }}{{
+                    r.segment.trends.penetrationPct >= 0
+                      ? r.segment.trends.penetrationPct
+                      : -r.segment.trends.penetrationPct
+                  }}
+                  п.п.
+                </span>
+              </div>
+              <span class="fin-kpi__value">{{ r.segment.penetrationPct }} %</span>
+              <span class="fin-kpi__label">Уровень проникновения</span>
             </article>
           </div>
 
-          <div class="fin-progress">
-            <div class="fin-progress__head">
-              <span class="fin-progress__title">Прогресс по сборам</span>
-              <span class="fin-progress__nums">
-                {{ r.collected | number: '1.0-0' }} / {{ r.nextThreshold | number: '1.0-0' }} ₽
-              </span>
-            </div>
-            <div
-              class="fin-progress__bar"
-              role="progressbar"
-              [attr.aria-valuenow]="progressPct()"
-              aria-valuemin="0"
-              aria-valuemax="100"
-            >
-              <div class="fin-progress__fill" [style.width.%]="progressPct()"></div>
-            </div>
-          </div>
-
-          <h2 class="fin-section__title">Целевой сегмент</h2>
-          <div class="fin-metrics fin-metrics--4">
-            <div class="fin-metric fin-metric--accent">
-              <span class="fin-metric__value"
-                >{{ r.segment.totalCollected | number: '1.0-0' }} ₽</span
-              >
-              <span class="fin-metric__label">Итого сборов</span>
-            </div>
-            <div class="fin-metric">
-              <span class="fin-metric__value">{{ r.segment.osagoCount }}</span>
-              <span class="fin-metric__label">ОСАГО, шт.</span>
-            </div>
-            <div class="fin-metric">
-              <span class="fin-metric__value"
-                >{{ r.segment.avgAddonCheck | number: '1.0-0' }} ₽</span
-              >
-              <span class="fin-metric__label">Средний чек по допам</span>
-            </div>
-            <div class="fin-metric">
-              <span class="fin-metric__value">{{ r.segment.penetrationPct }} %</span>
-              <span class="fin-metric__label">Уровень проникновения</span>
-            </div>
-          </div>
-
+          <!-- Перестраховочный пул -->
           <h2 class="fin-section__title">Перестраховочный пул</h2>
-          <div class="fin-metrics fin-metrics--6">
-            <div class="fin-metric">
-              <span class="fin-metric__value">{{ r.pool.osagoPoolCount }}</span>
-              <span class="fin-metric__label">ОСАГО Пул, шт.</span>
+          <div class="fin-pool">
+            <div class="fin-pool__main">
+              <div class="fin-pool__bar">
+                @for (s of poolSegments(); track s.label) {
+                  <span
+                    class="fin-pool__seg"
+                    [style.width.%]="s.widthPct"
+                    [style.background]="s.color"
+                    [attr.title]="s.label + ': ' + s.count"
+                  ></span>
+                }
+              </div>
+              <ul class="fin-pool__legend">
+                @for (s of poolSegments(); track s.label) {
+                  <li class="fin-pool__legend-item">
+                    <span class="fin-pool__dot" [style.background]="s.color"></span>
+                    <span class="fin-pool__legend-label">{{ s.label }}</span>
+                    <span class="fin-pool__legend-val">{{ s.count }} шт · {{ s.sharePct }}%</span>
+                  </li>
+                }
+              </ul>
             </div>
-            <div class="fin-metric">
-              <span class="fin-metric__value">{{ r.pool.autoHelper }}</span>
-              <span class="fin-metric__label">Автопомощник</span>
-            </div>
-            <div class="fin-metric">
-              <span class="fin-metric__value">{{ r.pool.reliableTrip }}</span>
-              <span class="fin-metric__label">Надёжная поездка</span>
-            </div>
-            <div class="fin-metric">
-              <span class="fin-metric__value">{{ r.pool.reliableTripPlus }}</span>
-              <span class="fin-metric__label">Надёжная поездка +</span>
-            </div>
-            <div class="fin-metric">
-              <span class="fin-metric__value">{{ r.pool.reliableTripEco }}</span>
-              <span class="fin-metric__label">Надёжная поездка ЭКО</span>
-            </div>
-            <div class="fin-metric fin-metric--accent">
-              <span class="fin-metric__value">{{ r.pool.poolSharePct }} %</span>
-              <span class="fin-metric__label">Доля Пула в портфеле</span>
+
+            <div class="fin-pool__share">
+              <div class="fin-pool__ring-wrap">
+                <svg class="fin-pool__ring" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    fill="none"
+                    stroke="var(--gray-200)"
+                    stroke-width="12"
+                  />
+                  <circle
+                    class="fin-ring__arc"
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    fill="none"
+                    stroke="var(--brand-500)"
+                    stroke-width="12"
+                    stroke-linecap="round"
+                    [attr.stroke-dasharray]="poolRingDash"
+                    [attr.stroke-dashoffset]="poolShareOffset()"
+                    transform="rotate(-90 60 60)"
+                  />
+                </svg>
+                <span class="fin-pool__share-val">{{ r.pool.poolSharePct }}%</span>
+              </div>
+              <span class="fin-pool__share-label">Доля Пула в портфеле</span>
+              <span class="fin-pool__share-total">Всего в пуле: {{ poolTotal() }} полисов</span>
             </div>
           </div>
         </div>
