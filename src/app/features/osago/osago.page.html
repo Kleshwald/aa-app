@@ -461,37 +461,13 @@
 
   <!-- ─────────────────────────── РАСЧЁТ ─────────────────────────── -->
   @case ('loading') {
-    <section class="calc">
-      <div class="calc__inner" role="status" aria-live="polite" aria-atomic="false">
-        @if (calcComplete()) {
-          <div class="calc__done">
-            <span class="calc__done-bloom" aria-hidden="true"></span>
-            <span class="calc__done-text">Готово</span>
-          </div>
-        } @else {
-          <div class="calc__eyebrow">Расчёт ОСАГО</div>
-
-          <div class="calc__phrase">
-            @for (s of [steps[stepIndex()]]; track stepIndex()) {
-              <div class="calc__phrase-item">
-                @if (s.carrierId) {
-                  <app-insurer-logo class="calc__phrase-logo" [id]="s.carrierId" [name]="s.text" />
-                }
-                <span>{{ s.text }}</span>
-              </div>
-            }
-          </div>
-
-          <div class="calc__line" role="progressbar" aria-label="Идёт расчёт">
-            <i></i>
-          </div>
-
-          <p class="calc__hint">Обычно занимает до 40 секунд · не закрывайте окно</p>
-
-          <button type="button" class="calc__cancel" (click)="cancelCalculation()">Отменить</button>
-        }
-      </div>
-    </section>
+    <app-calc-loader
+      eyebrow="Расчёт ОСАГО"
+      [step]="steps[stepIndex()]"
+      [complete]="calcComplete()"
+      hint="Обычно занимает до 40 секунд · не закрывайте окно"
+      (cancelled)="cancelCalculation()"
+    />
   }
 
   <!-- ─────────────────────────── RESULTS ─────────────────────────── -->

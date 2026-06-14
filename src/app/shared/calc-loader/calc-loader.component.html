@@ -1,0 +1,37 @@
+<section class="calc">
+  <div class="calc__inner" role="status" aria-live="polite" aria-atomic="false">
+    @if (complete()) {
+      <div class="calc__done">
+        <span class="calc__done-bloom" aria-hidden="true"></span>
+        <span class="calc__done-text">Готово</span>
+      </div>
+    } @else {
+      <div class="calc__eyebrow">{{ eyebrow() }}</div>
+
+      <div class="calc__phrase">
+        @if (step(); as s) {
+          @for (item of [s]; track item.text) {
+            <div class="calc__phrase-item">
+              @if (item.carrierId) {
+                <app-insurer-logo
+                  class="calc__phrase-logo"
+                  [id]="item.carrierId"
+                  [name]="item.text"
+                />
+              }
+              <span>{{ item.text }}</span>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="calc__line" role="progressbar" aria-label="Идёт расчёт"><i></i></div>
+
+      @if (hint()) {
+        <p class="calc__hint">{{ hint() }}</p>
+      }
+
+      <button type="button" class="calc__cancel" (click)="cancelled.emit()">Отменить</button>
+    }
+  </div>
+</section>

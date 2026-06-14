@@ -17,6 +17,7 @@ import {
 import { Router } from '@angular/router';
 
 import { AddonIconComponent } from '@shared/addon-icon/addon-icon.component';
+import { CalcLoaderComponent } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 
 const VEHICLE_PURPOSES = [
@@ -133,7 +134,14 @@ interface CoefRow {
 
 @Component({
   selector: 'app-osago-page',
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, InsurerLogoComponent, AddonIconComponent],
+  imports: [
+    ReactiveFormsModule,
+    DatePipe,
+    DecimalPipe,
+    InsurerLogoComponent,
+    AddonIconComponent,
+    CalcLoaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './osago.page.html',
   styleUrl: './osago.page.scss',
