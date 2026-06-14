@@ -79,12 +79,11 @@ src/app/
 Помимо этого репо у Claude есть приватная memory на машине пользователя (грузится автоматически):
 
 ```
-C:\Users\Mi\.claude\projects\d--------Claude----------3-0\memory\
-├── MEMORY.md                      индекс
-├── project_overview.md            что за проект, история переезда
-├── project_stack_decisions.md     технические решения с обоснованием
-├── project_domain_facts.md        доменные уточнения от пользователя
-└── feedback_design_flow.md        как работать (code-first в браузере, без Figma)
+C:\Users\Mi\.claude\projects\d--aa-app\memory\
+├── MEMORY.md                            индекс
+├── project_messaging_architecture.md   направление по бэкенду чата (152-ФЗ)
+├── project_quote_screen_conventions.md залоченные решения по экранам котировок ОСАГО/Здоровье
+└── feedback_design_flow.md             как работать (code-first в браузере, ПМ+дизайнер, без Figma)
 ```
 
 Memory персональна для пользователя и не в репо. Этот `CLAUDE.md` — для команды и других машин.
