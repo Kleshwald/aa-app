@@ -19,7 +19,7 @@
       <article class="detail-card">
         <header class="detail-card__head">
           <div class="detail-card__head-left">
-            <h2 class="detail-card__product">{{ productLabel[p.type] }}</h2>
+            <h2 class="detail-card__product">{{ p.productName || productLabel[p.type] }}</h2>
             <p class="detail-card__price">{{ p.premium | number: '1.2-2' }} ₽</p>
           </div>
           <span class="detail-card__status" [attr.data-status]="p.status">
@@ -34,16 +34,20 @@
           <dd>{{ p.insuranceCompanyName }}</dd>
           <dt>Период страхования</dt>
           <dd>{{ p.startDate | date: 'dd.MM.yyyy' }} — {{ p.endDate | date: 'dd.MM.yyyy' }}</dd>
-          <dt>Транспортное средство</dt>
-          <dd>{{ p.vehicleBrand }} {{ p.vehicleModel }} ({{ p.vehicleLicensePlate }})</dd>
+          @if (p.type === 'OSAGO') {
+            <dt>Транспортное средство</dt>
+            <dd>{{ p.vehicleBrand }} {{ p.vehicleModel }} ({{ p.vehicleLicensePlate }})</dd>
+          }
           <dt>Страхователь</dt>
           <dd>{{ p.clientName }}</dd>
 
           @if (showMore()) {
-            <dt>VIN</dt>
-            <dd>{{ p.vehicleVin }}</dd>
-            <dt>Год выпуска</dt>
-            <dd>{{ p.vehicleYear }}</dd>
+            @if (p.type === 'OSAGO') {
+              <dt>VIN</dt>
+              <dd>{{ p.vehicleVin }}</dd>
+              <dt>Год выпуска</dt>
+              <dd>{{ p.vehicleYear }}</dd>
+            }
             <dt>Телефон клиента</dt>
             <dd>{{ p.clientPhone }}</dd>
             <dt>ИКП</dt>
@@ -163,36 +167,38 @@
       </article>
 
       <!-- Card 4: Сервисы -->
-      <article class="detail-card">
-        <header class="detail-card__head">
-          <h2 class="detail-card__heading">Сервисы</h2>
-        </header>
+      @if (p.services.length > 0) {
+        <article class="detail-card">
+          <header class="detail-card__head">
+            <h2 class="detail-card__heading">Сервисы</h2>
+          </header>
 
-        <fieldset class="detail-card__radio-group">
-          <legend class="visually-hidden">Выберите дополнительный сервис</legend>
-          @for (service of p.services; track service.id) {
-            <label class="detail-card__radio">
-              <input
-                type="radio"
-                name="service"
-                [value]="service.id"
-                [checked]="selectedService() === service.id"
-                (change)="selectedService.set(service.id)"
-              />
-              <span>{{ service.name }}</span>
-            </label>
-          }
-        </fieldset>
+          <fieldset class="detail-card__radio-group">
+            <legend class="visually-hidden">Выберите дополнительный сервис</legend>
+            @for (service of p.services; track service.id) {
+              <label class="detail-card__radio">
+                <input
+                  type="radio"
+                  name="service"
+                  [value]="service.id"
+                  [checked]="selectedService() === service.id"
+                  (change)="selectedService.set(service.id)"
+                />
+                <span>{{ service.name }}</span>
+              </label>
+            }
+          </fieldset>
 
-        <button
-          type="button"
-          class="detail-card__action"
-          [disabled]="!selectedService()"
-          (click)="submitService()"
-        >
-          Оформить
-        </button>
-      </article>
+          <button
+            type="button"
+            class="detail-card__action"
+            [disabled]="!selectedService()"
+            (click)="submitService()"
+          >
+            Оформить
+          </button>
+        </article>
+      }
     </div>
   </section>
 }

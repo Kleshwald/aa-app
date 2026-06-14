@@ -16,14 +16,13 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import {
+  type CreatePolicyPayload,
+  ClientDetailService,
+} from '@core/services/client-detail.service';
 import { AddonIconComponent } from '@shared/addon-icon/addon-icon.component';
 import { CalcLoaderComponent } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
-import {
-  type PolicyDetail,
-  type PolicyDoc,
-  PolicyIssuedComponent,
-} from '@shared/policy-issued/policy-issued.component';
 
 const VEHICLE_PURPOSES = [
   { value: 'personal', label: 'Личная' },
@@ -128,7 +127,7 @@ export interface Quote {
   addOn: { presetId: AddOnPreset['id']; price: number; required: boolean };
 }
 
-type View = 'form' | 'loading' | 'results' | 'payment' | 'success';
+type View = 'form' | 'loading' | 'results' | 'payment';
 
 // One coefficient line in the "how the ОСАГО price is built" popover.
 interface CoefRow {
@@ -146,7 +145,6 @@ interface CoefRow {
     InsurerLogoComponent,
     AddonIconComponent,
     CalcLoaderComponent,
-    PolicyIssuedComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './osago.page.html',
@@ -157,6 +155,7 @@ export class OsagoPage {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly policyService = inject(ClientDetailService);
 
   protected readonly purposes = VEHICLE_PURPOSES;
   protected readonly categories = VEHICLE_CATEGORIES;
@@ -282,48 +281,6 @@ export class OsagoPage {
   protected readonly paymentKind = computed<'card' | 'invoice'>(() =>
     this.insurerType() === 'legal' ? 'invoice' : 'card',
   );
-
-  // ─── Issued-policy screen ───
-  protected readonly policyNumber = signal<string>('');
-
-  protected readonly issuedTotal = computed<number>(() => {
-    const q = this.selectedQuote();
-    return q ? this.totalFor(q) : 0;
-  });
-
-  protected readonly issuedDetails = computed<PolicyDetail[]>(() => {
-    const q = this.selectedQuote();
-    const b = this.form.controls.base.getRawValue();
-    const v = this.form.controls.vehicle.getRawValue();
-    const ph = this.form.controls.policyholder.getRawValue();
-    const rows: PolicyDetail[] = [
-      {
-        label: 'Период страхования',
-        value: `${this.formatDmy(b.startDate)} — ${this.formatDmy(b.endDate)}`,
-      },
-    ];
-    const vehicle = [v.make, v.model].filter(Boolean).join(' ');
-    if (vehicle) {
-      rows.push({
-        label: 'Транспортное средство',
-        value: v.year ? `${vehicle}, ${v.year}` : vehicle,
-      });
-    }
-    if (v.licensePlate) rows.push({ label: 'Гос. номер', value: v.licensePlate });
-    const fio = [ph.lastName, ph.firstName, ph.middleName].filter(Boolean).join(' ');
-    if (fio) rows.push({ label: 'Страхователь', value: fio });
-    if (q && q.addOn.price > 0) {
-      rows.push({ label: 'Доп. сервис', value: this.addOnName(q.addOn.presetId) });
-    }
-    return rows;
-  });
-
-  protected readonly issuedDocs: PolicyDoc[] = [
-    { name: 'Полис ОСАГО', hint: 'Электронный бланк (е-ОСАГО)' },
-    { name: 'Квитанция об оплате' },
-    { name: 'Правила страхования ОСАГО' },
-    { name: 'Памятка при ДТП' },
-  ];
 
   constructor() {
     this.destroyRef.onDestroy(() => this.clearTimers());
@@ -528,12 +485,9 @@ export class OsagoPage {
 
   issue(quoteId: string): void {
     this.selectedQuoteId.set(quoteId);
-    this.policyNumber.set(this.generatePolicyNumber());
     this.view.set('payment');
-    // Имитация эквайринга — 3 сек, затем экран «Полис оформлен» (без авто-редиректа).
-    this.paymentTimeoutId = setTimeout(() => {
-      this.view.set('success');
-    }, 3000);
+    // Имитация эквайринга — 3 сек, затем оформляем договор и открываем его страницу.
+    this.paymentTimeoutId = setTimeout(() => this.finalizeIssue(), 3000);
   }
 
   cancelPayment(): void {
@@ -542,8 +496,32 @@ export class OsagoPage {
     this.view.set('results');
   }
 
-  goToClients(): void {
-    void this.router.navigate(['/clients']);
+  private finalizeIssue(): void {
+    const q = this.selectedQuote();
+    if (!q) return;
+    const b = this.form.controls.base.getRawValue();
+    const v = this.form.controls.vehicle.getRawValue();
+    const ph = this.form.controls.policyholder.getRawValue();
+    const payload: CreatePolicyPayload = {
+      type: 'OSAGO',
+      productName: 'ОСАГО',
+      premium: this.totalFor(q),
+      startDate: b.startDate,
+      endDate: b.endDate,
+      clientName: [ph.lastName, ph.firstName, ph.middleName].filter(Boolean).join(' '),
+      clientPhone: b.clientPhone,
+      insuranceCompanyId: q.carrierId,
+      insuranceCompanyName: q.carrierName,
+      vehicleBrand: v.make,
+      vehicleModel: v.model,
+      vehicleYear: v.year ?? undefined,
+      vehicleVin: v.identifierType === 'vin' ? v.identifierValue : '',
+      vehicleLicensePlate: v.licensePlate,
+    };
+    this.policyService.create(payload).subscribe((res) => {
+      const id = res.success && res.data ? res.data.id : null;
+      void this.router.navigate(id ? ['/clients', id] : ['/clients']);
+    });
   }
 
   saveDraft(): void {
@@ -600,21 +578,6 @@ export class OsagoPage {
       if (a.quoteType !== b.quoteType) return a.quoteType === 'segment' ? -1 : 1;
       return a.osagoPrice - b.osagoPrice;
     });
-  }
-
-  /** e-ОСАГО номер: серия из 3 букв + 10 цифр, напр. «ХХХ 0123456789». */
-  private generatePolicyNumber(): string {
-    let digits = '';
-    for (let i = 0; i < 10; i++) digits += Math.floor(Math.random() * 10);
-    return `ХХХ ${digits}`;
-  }
-
-  private formatDmy(iso: string): string {
-    if (!iso) return '';
-    const d = new Date(iso);
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    return `${dd}.${mm}.${d.getFullYear()}`;
   }
 
   private formatRussianDate(iso: string): string {

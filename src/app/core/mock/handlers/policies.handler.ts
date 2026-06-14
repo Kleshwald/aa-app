@@ -1,10 +1,12 @@
-import { type HttpRequest, type HttpResponse } from '@angular/common/http';
-import { type Observable } from 'rxjs';
+import { HttpResponse, type HttpRequest } from '@angular/common/http';
+import { type Observable, of, timer } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 
 import { type ApiResponse } from '@core/models';
 
 import { currentAgent } from '../fixtures/agents.fixture';
-import { policies } from '../fixtures/policies.fixture';
+import { type CreatePolicyInput, createPolicy, policies } from '../fixtures/policies.fixture';
+import { randomDelay } from '../helpers/delay';
 import { mockOk } from '../helpers/response';
 
 // GET /policies — supports filter, search, sort, pagination per api-contract.yaml.
@@ -72,27 +74,42 @@ export function handleGetPolicy(
     losses: Math.random() < 0.05 ? 1 : 0,
   };
 
-  // Available downloadable documents.
-  const documents = [
-    { id: 'policy', name: `Полис ${productLabel(policy.type)}`, format: 'pdf' as const },
-    ...addOns.map((a) => ({
-      id: `addon-${a.id}`,
-      name: `Полис ${productLabel(a.type)}`,
-      format: 'pdf' as const,
-    })),
-    { id: 'application', name: 'Заявление на страхование', format: 'pdf' as const },
-  ];
+  // Available downloadable documents. У продуктов «Здоровья» (НС/Антиклещ) —
+  // свой пакет: полис, таблица выплат, КИД (ключевой информационный документ).
+  const isHealth = policy.type === 'NS' || policy.type === 'TICK';
+  const documents = isHealth
+    ? [
+        { id: 'policy', name: 'Полис', format: 'pdf' as const },
+        { id: 'payouts', name: 'Таблица выплат', format: 'pdf' as const },
+        { id: 'kid', name: 'КИД', format: 'pdf' as const },
+      ]
+    : [
+        { id: 'policy', name: `Полис ${productLabel(policy.type)}`, format: 'pdf' as const },
+        ...addOns.map((a) => ({
+          id: `addon-${a.id}`,
+          name: `Полис ${productLabel(a.type)}`,
+          format: 'pdf' as const,
+        })),
+        { id: 'application', name: 'Заявление на страхование', format: 'pdf' as const },
+      ];
 
   // Cross-sell services (что ещё можно оформить этому клиенту).
-  const services = [
-    { id: 'mini-kasko', name: 'Оформить МиниКАСКО', available: true },
-    {
-      id: 'ns-dtp',
-      name: 'Оформить НС при ДТП',
-      available: !addOns.some((a) => a.type === 'NS'),
-    },
-    { id: 'legal', name: 'Оформить Юрист поможет', available: true },
-  ].filter((s) => s.available);
+  const services = (
+    isHealth
+      ? [
+          { id: 'tick', name: 'Оформить Антиклещ', available: policy.type !== 'TICK' },
+          { id: 'ns-sport', name: 'Оформить НС Спорт', available: true },
+        ]
+      : [
+          { id: 'mini-kasko', name: 'Оформить МиниКАСКО', available: true },
+          {
+            id: 'ns-dtp',
+            name: 'Оформить НС при ДТП',
+            available: !addOns.some((a) => a.type === 'NS'),
+          },
+          { id: 'legal', name: 'Оформить Юрист поможет', available: true },
+        ]
+  ).filter((s) => s.available);
 
   return mockOk({
     ...policy,
@@ -109,6 +126,40 @@ export function handleGetPolicy(
     documents,
     services,
   });
+}
+
+// POST /policies — оформление договора после эквайринга. Гарантированный успех
+// (без random-fail из mockOk), т.к. это критичный путь демо: оформил → открыли договор.
+export function handleCreatePolicy(
+  req: HttpRequest<unknown>,
+): Observable<HttpResponse<ApiResponse<unknown>>> {
+  const body = (req.body ?? {}) as Partial<CreatePolicyInput>;
+  const policy = createPolicy({
+    type: body.type ?? 'NS',
+    productName: body.productName ?? '',
+    premium: body.premium ?? 0,
+    startDate: body.startDate ?? new Date().toISOString().slice(0, 10),
+    endDate: body.endDate ?? '',
+    clientName: body.clientName ?? '',
+    clientPhone: body.clientPhone ?? '',
+    insuranceCompanyId: body.insuranceCompanyId ?? '',
+    insuranceCompanyName: body.insuranceCompanyName ?? '',
+    vehicleBrand: body.vehicleBrand,
+    vehicleModel: body.vehicleModel,
+    vehicleYear: body.vehicleYear,
+    vehicleVin: body.vehicleVin,
+    vehicleLicensePlate: body.vehicleLicensePlate,
+  });
+  return timer(randomDelay()).pipe(
+    mergeMap(() =>
+      of(
+        new HttpResponse({
+          status: 201,
+          body: { success: true, data: { id: policy.id }, error: null, meta: null },
+        }),
+      ),
+    ),
+  );
 }
 
 function productLabel(type: 'OSAGO' | 'NS' | 'TICK' | 'MORTGAGE'): string {

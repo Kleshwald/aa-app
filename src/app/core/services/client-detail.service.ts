@@ -30,10 +30,28 @@ export interface PolicyProcessCounters {
   losses: number;
 }
 
+export interface CreatePolicyPayload {
+  type: 'OSAGO' | 'NS' | 'TICK' | 'MORTGAGE';
+  productName: string;
+  premium: number;
+  startDate: string;
+  endDate: string;
+  clientName: string;
+  clientPhone: string;
+  insuranceCompanyId: string;
+  insuranceCompanyName: string;
+  vehicleBrand?: string;
+  vehicleModel?: string;
+  vehicleYear?: number;
+  vehicleVin?: string;
+  vehicleLicensePlate?: string;
+}
+
 export interface PolicyDetail {
   id: string;
   number: string;
   type: 'OSAGO' | 'NS' | 'TICK' | 'MORTGAGE';
+  productName?: string;
   status: 'active' | 'expired' | 'cancelled' | 'pending' | 'processing';
   premium: number;
   commission: number;
@@ -68,5 +86,10 @@ export class ClientDetailService {
 
   get(id: string): Observable<ApiResponse<PolicyDetail | null>> {
     return this.api.get<PolicyDetail | null>(`/policies/${id}`);
+  }
+
+  /** Оформление договора после эквайринга. Возвращает id созданного полиса. */
+  create(payload: CreatePolicyPayload): Observable<ApiResponse<{ id: string } | null>> {
+    return this.api.post<{ id: string } | null>('/policies', payload);
   }
 }

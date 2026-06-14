@@ -527,19 +527,4 @@
       </div>
     </section>
   }
-
-  <!-- ─────────────── SUCCESS ─────────────── -->
-  @case ('success') {
-    <app-policy-issued
-      [productTitle]="productMeta().label"
-      [carrierId]="selectedOffer()?.carrierId ?? ''"
-      [carrierName]="selectedOffer()?.carrierShort ?? ''"
-      [policyNumber]="policyNumber()"
-      [total]="selectedPrice()"
-      [details]="issuedDetails()"
-      [documents]="issuedDocs"
-      (toClients)="goToClients()"
-      (newPolicy)="newCalculation()"
-    />
-  }
 }

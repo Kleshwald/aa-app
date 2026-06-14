@@ -20,6 +20,7 @@ export interface PolicyFixture {
   id: string;
   number: string;
   type: PolicyType;
+  productName?: string; // витринное имя продукта (напр. «НС Спорт»), если отличается от type
   status: PolicyStatus;
   clientName: string;
   clientPhone: string;
@@ -91,3 +92,56 @@ import { currentAgent } from './agents.fixture';
 export const policies: PolicyFixture[] = Array.from({ length: 100 }, () =>
   makePolicy(currentAgent.id),
 );
+
+export interface CreatePolicyInput {
+  type: PolicyType;
+  productName: string;
+  premium: number;
+  startDate: string; // ISO yyyy-mm-dd
+  endDate: string;
+  clientName: string;
+  clientPhone: string;
+  insuranceCompanyId: string;
+  insuranceCompanyName: string;
+  vehicleBrand?: string;
+  vehicleModel?: string;
+  vehicleYear?: number;
+  vehicleVin?: string;
+  vehicleLicensePlate?: string;
+}
+
+/**
+ * Создаёт оформленный договор и кладёт его в начало списка (in-memory, на сессию).
+ * Используется POST /policies после имитации эквайринга в ОСАГО и «Здоровье».
+ */
+export function createPolicy(input: CreatePolicyInput): PolicyFixture {
+  const year = new Date(input.startDate || new Date().toISOString()).getFullYear();
+  const number =
+    input.type === 'OSAGO'
+      ? `ХХХ ${faker.string.numeric(10)}`
+      : `001SHG-${faker.string.numeric(6)}/${year}-AKN`;
+  const policy: PolicyFixture = {
+    id: faker.string.uuid(),
+    number,
+    type: input.type,
+    productName: input.productName,
+    status: 'active',
+    clientName: input.clientName || 'Клиент не указан',
+    clientPhone: input.clientPhone,
+    vehicleVin: input.vehicleVin ?? '',
+    vehicleLicensePlate: input.vehicleLicensePlate ?? '',
+    vehicleBrand: input.vehicleBrand ?? '',
+    vehicleModel: input.vehicleModel ?? '',
+    vehicleYear: input.vehicleYear ?? 0,
+    startDate: input.startDate,
+    endDate: input.endDate,
+    premium: Math.round(input.premium * 100) / 100,
+    commission: Math.round(input.premium * 0.1 * 100) / 100,
+    insuranceCompanyId: input.insuranceCompanyId,
+    insuranceCompanyName: input.insuranceCompanyName,
+    agentId: currentAgent.id,
+    createdAt: new Date().toISOString(),
+  };
+  policies.unshift(policy);
+  return policy;
+}
