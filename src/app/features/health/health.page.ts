@@ -12,23 +12,21 @@ import { type FormArray, FormBuilder, type FormGroup, ReactiveFormsModule } from
 import { Router } from '@angular/router';
 import { startWith } from 'rxjs';
 
+import { CalcLoaderComponent, type CalcStep } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 
 type HealthProduct = 'ns' | 'tick';
 type InsureType = 'individual' | 'group';
 type Category = 'child' | 'adult';
-type View = 'params' | 'quotes' | 'issue' | 'payment' | 'success';
+type View = 'params' | 'loading' | 'quotes' | 'issue' | 'payment' | 'success';
 
 interface Offer {
   id: string;
   carrierId: string;
   carrierName: string;
   carrierShort: string;
-  price: number;
-  basePrice: number;
-  rate: number; // carrier tariff as a share of the insured sum (e.g. 0.0078)
-  kv: boolean;
-  kvPercent: number;
+  basePrice: number; // полная цена (без скидки)
+  rate: number; // тариф СК как доля страховой суммы (напр. 0.0078)
 }
 
 const PRODUCTS: { id: HealthProduct; label: string; heading: string }[] = [
@@ -62,11 +60,23 @@ const TERMS: { value: string; label: string; months: number }[] = [
 
 const SUMS = [50000, 100000, 150000, 300000, 500000, 1000000];
 
-const KV_PERCENT = 18;
+// Скидка клиенту, % (агент отдаёт часть своего КВ). Видимое управление ценой.
+const DISCOUNT_TIERS = [0, 10, 18] as const;
+
+// Тайминги быстрого лоадера «Здоровья».
+const HL_CALC_TOTAL_MS = 4000; // момент «Готово»
+const HL_CALC_QUOTES_AT_MS = 4700; // переход к предложениям
 
 @Component({
   selector: 'app-health-page',
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, NgTemplateOutlet, InsurerLogoComponent],
+  imports: [
+    ReactiveFormsModule,
+    DatePipe,
+    DecimalPipe,
+    NgTemplateOutlet,
+    InsurerLogoComponent,
+    CalcLoaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './health.page.html',
   styleUrl: './health.page.scss',
@@ -88,12 +98,21 @@ export class HealthPage {
   protected readonly view = signal<View>('params');
 
   protected readonly offers = signal<Offer[]>([]);
-  protected readonly showMore = signal(false);
   protected readonly selectedOfferId = signal<string | null>(null);
+
+  // Управление ценой: скидка клиенту по каждому офферу (offerId → %).
+  protected readonly discountTiers = DISCOUNT_TIERS;
+  protected readonly discounts = signal<Record<string, number>>({});
 
   // Which offer's "how the price is built" popover is open (null = none).
   protected readonly priceInfoOfferId = signal<string | null>(null);
 
+  // Экран расчёта (общий лоадер).
+  protected readonly stepIndex = signal<number>(0);
+  protected readonly calcComplete = signal<boolean>(false);
+
+  private stepTimer: ReturnType<typeof setInterval> | null = null;
+  private calcTimers: ReturnType<typeof setTimeout>[] = [];
   private paymentTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly params = this.fb.nonNullable.group({
@@ -141,23 +160,42 @@ export class HealthPage {
     return end;
   });
 
-  // Cheapest first — base offers are ranked by price, the cheapest is the anchor
-  // (and the default selection set in calculate()).
-  protected readonly baseOffers = computed(() =>
-    this.offers()
-      .filter((o) => !o.kv)
-      .sort((a, b) => a.price - b.price),
-  );
-  protected readonly kvOffers = computed(() =>
-    this.offers()
-      .filter((o) => o.kv)
-      .sort((a, b) => a.price - b.price),
-  );
-
   protected readonly selectedOffer = computed<Offer | null>(() => {
     const id = this.selectedOfferId();
     return id ? (this.offers().find((o) => o.id === id) ?? null) : null;
   });
+  protected readonly selectedPrice = computed(() => {
+    const o = this.selectedOffer();
+    return o ? this.offerPrice(o) : 0;
+  });
+
+  // Самая выгодная сейчас (по текущей цене с учётом скидки) — «Лучшая цена».
+  protected readonly bestOfferId = computed<string | null>(() => {
+    const list = this.offers();
+    if (list.length === 0) return null;
+    return list.reduce((min, o) => (this.offerPrice(o) < this.offerPrice(min) ? o : min)).id;
+  });
+
+  // Шаги лоадера зависят от продукта (его СК), с логотипами.
+  protected readonly calcSteps = computed<CalcStep[]>(() => [
+    { text: 'Отправляем данные в страховые компании' },
+    ...PRODUCT_CARRIERS[this.product()].map((pc) => ({
+      text: CARRIERS[pc.carrierId].short,
+      carrierId: pc.carrierId,
+    })),
+    { text: 'Получаем ответы' },
+  ]);
+
+  // Цена и скидка по офферу (управление ценой).
+  offerDiscount(offer: Offer): number {
+    return this.discounts()[offer.id] ?? 0;
+  }
+  offerPrice(offer: Offer): number {
+    return Math.round(offer.basePrice * (1 - this.offerDiscount(offer) / 100));
+  }
+  setDiscount(offerId: string, pct: number): void {
+    this.discounts.update((d) => ({ ...d, [offerId]: pct }));
+  }
 
   // Labels/factors for the price-breakdown popover.
   protected readonly termLabel = computed(
@@ -176,7 +214,7 @@ export class HealthPage {
   }
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.clearTimer());
+    this.destroyRef.onDestroy(() => this.clearTimers());
   }
 
   // ─── Params ───
@@ -194,10 +232,28 @@ export class HealthPage {
   }
 
   calculate(): void {
-    this.offers.set(this.generateOffers());
-    this.selectedOfferId.set(this.baseOffers()[0]?.id ?? null);
-    this.showMore.set(false);
-    this.view.set('quotes');
+    this.clearTimers();
+    const list = this.generateOffers();
+    this.offers.set(list);
+    this.discounts.set({});
+    this.selectedOfferId.set(list[0]?.id ?? null); // самый дешёвый по базе
+    this.stepIndex.set(0);
+    this.calcComplete.set(false);
+    this.view.set('loading');
+
+    // Быстрый лоадер: фразы сменяются по очереди, затем «Готово» → предложения.
+    const stepMs = HL_CALC_TOTAL_MS / this.calcSteps().length;
+    this.stepTimer = setInterval(() => {
+      this.stepIndex.update((i) => Math.min(i + 1, this.calcSteps().length - 1));
+    }, stepMs);
+    this.calcTimers.push(setTimeout(() => this.calcComplete.set(true), HL_CALC_TOTAL_MS));
+    this.calcTimers.push(setTimeout(() => this.view.set('quotes'), HL_CALC_QUOTES_AT_MS));
+  }
+
+  cancelCalculation(): void {
+    this.clearTimers();
+    this.calcComplete.set(false);
+    this.view.set('params');
   }
 
   // ─── Quotes ───
@@ -206,20 +262,12 @@ export class HealthPage {
     this.selectedOfferId.set(id);
   }
 
-  toggleMore(): void {
-    this.showMore.update((v) => !v);
-  }
-
   togglePriceInfo(id: string): void {
     this.priceInfoOfferId.update((v) => (v === id ? null : id));
   }
 
   closePriceInfo(): void {
     this.priceInfoOfferId.set(null);
-  }
-
-  kvDiscount(offer: Offer): number {
-    return offer.basePrice - offer.price;
   }
 
   continueToIssue(): void {
@@ -276,35 +324,22 @@ export class HealthPage {
     const termFactor = (TERMS.find((t) => t.value === v.term)?.months ?? 12) / 12;
     const catFactor = this.category() === 'adult' ? 1.1 : 1;
     const count = this.count();
-    const list: Offer[] = [];
-    for (const pc of PRODUCT_CARRIERS[this.product()]) {
-      const c = CARRIERS[pc.carrierId];
-      const sum = Number(v.sum) || 0;
-      const base = Math.max(150, Math.round(sum * pc.rate * termFactor * catFactor * count));
-      list.push({
-        id: `${pc.carrierId}-base`,
-        carrierId: pc.carrierId,
-        carrierName: c.name,
-        carrierShort: c.short,
-        price: base,
-        basePrice: base,
-        rate: pc.rate,
-        kv: false,
-        kvPercent: 0,
-      });
-      list.push({
-        id: `${pc.carrierId}-kv`,
-        carrierId: pc.carrierId,
-        carrierName: c.name,
-        carrierShort: c.short,
-        price: Math.round(base * (1 - KV_PERCENT / 100)),
-        basePrice: base,
-        rate: pc.rate,
-        kv: true,
-        kvPercent: KV_PERCENT,
-      });
-    }
-    return list;
+    const sum = Number(v.sum) || 0;
+    // Один оффер на компанию (скидка теперь — управление ценой на карточке).
+    return PRODUCT_CARRIERS[this.product()]
+      .map((pc) => {
+        const c = CARRIERS[pc.carrierId];
+        const base = Math.max(150, Math.round(sum * pc.rate * termFactor * catFactor * count));
+        return {
+          id: pc.carrierId,
+          carrierId: pc.carrierId,
+          carrierName: c.name,
+          carrierShort: c.short,
+          basePrice: base,
+          rate: pc.rate,
+        };
+      })
+      .sort((a, b) => a.basePrice - b.basePrice);
   }
 
   private syncInsured(): void {
@@ -327,7 +362,13 @@ export class HealthPage {
     return d.toISOString().slice(0, 10);
   }
 
-  private clearTimer(): void {
+  private clearTimers(): void {
+    if (this.stepTimer) {
+      clearInterval(this.stepTimer);
+      this.stepTimer = null;
+    }
+    this.calcTimers.forEach((t) => clearTimeout(t));
+    this.calcTimers = [];
     if (this.paymentTimer) {
       clearTimeout(this.paymentTimer);
       this.paymentTimer = null;

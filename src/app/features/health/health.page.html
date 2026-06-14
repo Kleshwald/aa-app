@@ -110,6 +110,17 @@
     </section>
   }
 
+  <!-- ─────────────── РАСЧЁТ ─────────────── -->
+  @case ('loading') {
+    <app-calc-loader
+      eyebrow="Подбираем предложения"
+      [step]="calcSteps()[stepIndex()]"
+      [complete]="calcComplete()"
+      hint="Запрашиваем актуальные тарифы — это займёт несколько секунд"
+      (cancelled)="cancelCalculation()"
+    />
+  }
+
   <!-- ─────────────── QUOTES ─────────────── -->
   @case ('quotes') {
     <section class="hl hl--quotes">
@@ -121,84 +132,41 @@
       </header>
 
       <div class="hl-offers">
-        @for (o of baseOffers(); track o.id) {
-          <label class="hl-offer" [class.hl-offer--selected]="selectedOfferId() === o.id">
+        @for (o of offers(); track o.id) {
+          <label
+            class="hl-offer"
+            [class.hl-offer--selected]="selectedOfferId() === o.id"
+            [class.hl-offer--best]="bestOfferId() === o.id"
+          >
             <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
-            <span class="hl-offer__carrier">
-              {{ o.carrierName }}
-              @if ($first) {
+
+            <div class="hl-offer__main">
+              @if (bestOfferId() === o.id) {
                 <span class="hl-offer__best">Лучшая цена</span>
               }
-            </span>
-            <span class="hl-offer__sum"
-              >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
-            >
-            <span class="hl-offer__price">
-              {{ o.price | number: '1.0-0' }} ₽
-              <button
-                type="button"
-                class="hl-offer__info"
-                [class.hl-offer__info--open]="priceInfoOfferId() === o.id"
-                [attr.aria-expanded]="priceInfoOfferId() === o.id"
-                aria-label="Как рассчитана стоимость"
-                (click)="togglePriceInfo(o.id); $event.preventDefault(); $event.stopPropagation()"
-              >
-                ?
-              </button>
-            </span>
-            <span class="hl-offer__dates">
-              {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
-              {{ endDate() | date: 'dd.MM.yy' }}
-            </span>
-            <input
-              type="radio"
-              name="offer"
-              class="hl-offer__radio"
-              [checked]="selectedOfferId() === o.id"
-              (change)="selectOffer(o.id)"
-            />
-            @if (priceInfoOfferId() === o.id) {
-              <ng-container
-                [ngTemplateOutlet]="priceInfo"
-                [ngTemplateOutletContext]="{ $implicit: o }"
-              />
-            }
-          </label>
-        }
-
-        <button type="button" class="hl-more" (click)="toggleMore()">
-          <svg
-            class="hl-more__chev"
-            [class.hl-more__chev--open]="showMore()"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-          {{
-            showMore() ? 'Скрыть предложения' : 'Ещё предложения с КВ (' + kvOffers().length + ')'
-          }}
-        </button>
-
-        @if (showMore()) {
-          @for (o of kvOffers(); track o.id) {
-            <label class="hl-offer" [class.hl-offer--selected]="selectedOfferId() === o.id">
-              <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
               <span class="hl-offer__carrier">{{ o.carrierName }}</span>
-              <span class="hl-offer__sum"
-                >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
-              >
-              <span class="hl-offer__price hl-offer__price--kv">
-                <span class="hl-offer__kv">КВ {{ o.kvPercent }} %</span>
-                <span class="hl-offer__price-new">{{ o.price | number: '1.0-0' }} ₽</span>
+              <span class="hl-offer__meta">
+                <span class="hl-offer__sum"
+                  >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
+                >
+                <span class="hl-offer__dates">
+                  {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
+                  {{ endDate() | date: 'dd.MM.yy' }}
+                </span>
+              </span>
+            </div>
+
+            <div class="hl-offer__price">
+              @if (offerDiscount(o) > 0) {
                 <span class="hl-offer__price-old">{{ o.basePrice | number: '1.0-0' }} ₽</span>
+              }
+              <span class="hl-offer__price-row">
+                <span
+                  class="hl-offer__price-val"
+                  [class.hl-offer__price-val--disc]="offerDiscount(o) > 0"
+                >
+                  {{ offerPrice(o) | number: '1.0-0' }} ₽
+                </span>
                 <button
                   type="button"
                   class="hl-offer__info"
@@ -210,25 +178,46 @@
                   ?
                 </button>
               </span>
-              <span class="hl-offer__dates">
-                {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
-                {{ endDate() | date: 'dd.MM.yy' }}
+              <span class="hl-offer__price-cap">
+                @if (offerDiscount(o) > 0) {
+                  Цена со скидкой −{{ offerDiscount(o) }}%
+                } @else {
+                  Стоимость полиса
+                }
               </span>
-              <input
-                type="radio"
-                name="offer"
-                class="hl-offer__radio"
-                [checked]="selectedOfferId() === o.id"
-                (change)="selectOffer(o.id)"
-              />
-              @if (priceInfoOfferId() === o.id) {
-                <ng-container
-                  [ngTemplateOutlet]="priceInfo"
-                  [ngTemplateOutletContext]="{ $implicit: o }"
-                />
+            </div>
+
+            <div class="hl-price-ctl" role="group" aria-label="Скидка клиенту">
+              @for (tier of discountTiers; track tier) {
+                <button
+                  type="button"
+                  class="hl-price-ctl__chip"
+                  [class.hl-price-ctl__chip--active]="offerDiscount(o) === tier"
+                  [class.hl-price-ctl__chip--disc]="tier > 0 && offerDiscount(o) === tier"
+                  (click)="
+                    setDiscount(o.id, tier); $event.preventDefault(); $event.stopPropagation()
+                  "
+                >
+                  {{ tier === 0 ? 'Без скидки' : '−' + tier + '%' }}
+                </button>
               }
-            </label>
-          }
+            </div>
+
+            <input
+              type="radio"
+              name="offer"
+              class="hl-offer__radio"
+              [checked]="selectedOfferId() === o.id"
+              (change)="selectOffer(o.id)"
+            />
+
+            @if (priceInfoOfferId() === o.id) {
+              <ng-container
+                [ngTemplateOutlet]="priceInfo"
+                [ngTemplateOutletContext]="{ $implicit: o }"
+              />
+            }
+          </label>
         }
       </div>
 
@@ -279,15 +268,15 @@
             <span>Застрахованных</span>
             <b>× {{ count() }}</b>
           </div>
-          @if (o.kv) {
+          @if (offerDiscount(o) > 0) {
             <div class="hl-popover__row">
-              <span>Скидка по КВ {{ o.kvPercent }} %</span>
-              <b>− {{ kvDiscount(o) | number: '1.0-0' }} ₽</b>
+              <span>Скидка клиенту {{ offerDiscount(o) }} %</span>
+              <b>− {{ o.basePrice - offerPrice(o) | number: '1.0-0' }} ₽</b>
             </div>
           }
           <div class="hl-popover__total">
             <span>Стоимость полиса</span>
-            <b>{{ o.price | number: '1.0-0' }} ₽</b>
+            <b>{{ offerPrice(o) | number: '1.0-0' }} ₽</b>
           </div>
         </div>
       </ng-template>
@@ -419,9 +408,7 @@
         <span class="hl-paybar__carrier">{{ selectedOffer()?.carrierShort }}</span>
         <span class="hl-paybar__metric">
           <span class="hl-paybar__metric-label">Стоимость полиса</span>
-          <span class="hl-paybar__metric-value"
-            >{{ selectedOffer()?.price | number: '1.0-0' }} ₽</span
-          >
+          <span class="hl-paybar__metric-value">{{ selectedPrice() | number: '1.0-0' }} ₽</span>
         </span>
         <span class="hl-paybar__metric">
           <span class="hl-paybar__metric-label">Застрахованы</span>
@@ -446,7 +433,7 @@
         <span class="hl-spinner" aria-hidden="true"></span>
         <h2 class="hl-state__title">Проводим оплату…</h2>
         <p class="hl-state__text">
-          {{ selectedOffer()?.price | number: '1.0-0' }} ₽ · {{ selectedOffer()?.carrierShort }}
+          {{ selectedPrice() | number: '1.0-0' }} ₽ · {{ selectedOffer()?.carrierShort }}
         </p>
       </div>
     </section>
@@ -473,7 +460,7 @@
         <h2 class="hl-state__title">Полис оформлен</h2>
         <p class="hl-state__text">
           {{ productMeta().label }} · {{ selectedOffer()?.carrierShort }} ·
-          {{ selectedOffer()?.price | number: '1.0-0' }} ₽ · застрахованы {{ count() }} чел.
+          {{ selectedPrice() | number: '1.0-0' }} ₽ · застрахованы {{ count() }} чел.
         </p>
         <div class="hl-state__actions">
           <button type="button" class="hl-btn hl-btn--secondary" (click)="newCalculation()">
