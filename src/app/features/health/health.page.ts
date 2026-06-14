@@ -15,7 +15,7 @@ import { startWith } from 'rxjs';
 import { CalcLoaderComponent, type CalcStep } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 
-type HealthProduct = 'ns' | 'tick';
+type HealthProduct = 'accident' | 'sport' | 'tick';
 type InsureType = 'individual' | 'group';
 type Category = 'child' | 'adult';
 type View = 'params' | 'loading' | 'quotes' | 'issue' | 'payment' | 'success';
@@ -31,8 +31,9 @@ interface Offer {
 }
 
 const PRODUCTS: { id: HealthProduct; label: string }[] = [
-  { id: 'ns', label: 'НС' },
-  { id: 'tick', label: 'Антиклещ' },
+  { id: 'accident', label: 'Страхование от несчастного случая' },
+  { id: 'sport', label: 'Страхование спортсменов' },
+  { id: 'tick', label: 'Страхование от укуса клеща' },
 ];
 
 const CARRIERS: Record<string, { name: string; short: string }> = {
@@ -47,12 +48,17 @@ const PRODUCT_CARRIERS: Record<
   HealthProduct,
   { carrierId: string; rate: number; discountable: boolean }[]
 > = {
-  ns: [
+  accident: [
     { carrierId: 'renessans', rate: 0.0078, discountable: true },
     { carrierId: 'soglasie', rate: 0.0085, discountable: true },
   ],
+  sport: [
+    { carrierId: 'renessans', rate: 0.011, discountable: true },
+    { carrierId: 'soglasie', rate: 0.0125, discountable: true },
+    { carrierId: 'ugoria', rate: 0.013, discountable: true },
+  ],
   tick: [
-    // По Антиклещу скидку даёт только Югория; у Ренессанса — один вариант цены.
+    // По укусу клеща скидку даёт только Югория; у Ренессанса — один вариант цены.
     { carrierId: 'renessans', rate: 0.004, discountable: false },
     { carrierId: 'ugoria', rate: 0.0045, discountable: true },
   ],
@@ -100,7 +106,7 @@ export class HealthPage {
   protected readonly sums = SUMS;
   protected readonly today = new Date();
 
-  protected readonly product = signal<HealthProduct>('ns');
+  protected readonly product = signal<HealthProduct>('accident');
   protected readonly insureType = signal<InsureType>('individual');
   protected readonly category = signal<Category>('child');
   protected readonly view = signal<View>('params');
@@ -272,6 +278,12 @@ export class HealthPage {
 
   selectOffer(id: string): void {
     this.selectedOfferId.set(id);
+  }
+
+  // Выбор предложения по кнопке на карточке (как «Оформить» в ОСАГО — без radio).
+  chooseOffer(id: string): void {
+    this.selectOffer(id);
+    this.continueToIssue();
   }
 
   togglePriceInfo(id: string): void {

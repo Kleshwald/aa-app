@@ -113,7 +113,7 @@
   <!-- ─────────────── РАСЧЁТ ─────────────── -->
   @case ('loading') {
     <app-calc-loader
-      eyebrow="Расчёт {{ productMeta().label }}"
+      eyebrow="Расчёт стоимости"
       [step]="calcSteps()[stepIndex()]"
       [complete]="calcComplete()"
       hint="Обычно занимает несколько секунд · не закрывайте окно"
@@ -131,11 +131,7 @@
 
       <div class="hl-offers">
         @for (o of offers(); track o.id) {
-          <label
-            class="hl-offer"
-            [class.hl-offer--selected]="selectedOfferId() === o.id"
-            [class.hl-offer--best]="bestOfferId() === o.id"
-          >
+          <div class="hl-offer" [class.hl-offer--best]="bestOfferId() === o.id">
             <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
 
             <div class="hl-offer__main">
@@ -167,7 +163,7 @@
                   [class.hl-offer__info--open]="priceInfoOfferId() === o.id"
                   [attr.aria-expanded]="priceInfoOfferId() === o.id"
                   aria-label="Как рассчитана стоимость"
-                  (click)="togglePriceInfo(o.id); $event.preventDefault(); $event.stopPropagation()"
+                  (click)="togglePriceInfo(o.id)"
                 >
                   ?
                 </button>
@@ -182,32 +178,33 @@
             </div>
 
             @if (o.discountable) {
-              <div class="hl-price-ctl" role="group" aria-label="Скидка клиенту">
-                @for (tier of discountTiers; track tier) {
-                  <button
-                    type="button"
-                    class="hl-price-ctl__chip"
-                    [class.hl-price-ctl__chip--active]="offerDiscount(o) === tier"
-                    [class.hl-price-ctl__chip--disc]="tier > 0 && offerDiscount(o) === tier"
-                    (click)="
-                      setDiscount(o.id, tier); $event.preventDefault(); $event.stopPropagation()
-                    "
-                  >
-                    {{ tier === 0 ? 'Без скидки' : '−' + tier + '%' }}
-                  </button>
-                }
+              <div class="hl-price-ctl">
+                <span class="hl-price-ctl__label">Скидка из комиссии</span>
+                <div class="hl-price-ctl__chips" role="group" aria-label="Скидка из комиссии">
+                  @for (tier of discountTiers; track tier) {
+                    <button
+                      type="button"
+                      class="hl-price-ctl__chip"
+                      [class.hl-price-ctl__chip--active]="offerDiscount(o) === tier"
+                      [class.hl-price-ctl__chip--disc]="tier > 0 && offerDiscount(o) === tier"
+                      (click)="setDiscount(o.id, tier)"
+                    >
+                      {{ tier === 0 ? 'Без скидки' : '−' + tier + '%' }}
+                    </button>
+                  }
+                </div>
               </div>
             } @else {
               <span class="hl-price-ctl__fixed">Фиксированная цена</span>
             }
 
-            <input
-              type="radio"
-              name="offer"
-              class="hl-offer__radio"
-              [checked]="selectedOfferId() === o.id"
-              (change)="selectOffer(o.id)"
-            />
+            <button
+              type="button"
+              class="hl-btn hl-btn--primary hl-offer__action"
+              (click)="chooseOffer(o.id)"
+            >
+              Продолжить
+            </button>
 
             @if (priceInfoOfferId() === o.id) {
               <ng-container
@@ -215,7 +212,7 @@
                 [ngTemplateOutletContext]="{ $implicit: o }"
               />
             }
-          </label>
+          </div>
         }
       </div>
 
@@ -228,17 +225,9 @@
         ></button>
       }
 
-      <footer class="hl__footer">
+      <footer class="hl__footer hl__footer--center">
         <button type="button" class="hl-btn hl-btn--secondary" (click)="backToParams()">
-          Назад
-        </button>
-        <button
-          type="button"
-          class="hl-btn hl-btn--primary"
-          [disabled]="!selectedOffer()"
-          (click)="continueToIssue()"
-        >
-          Продолжить
+          Вернуться к расчёту
         </button>
       </footer>
 
