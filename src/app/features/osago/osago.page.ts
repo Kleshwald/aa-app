@@ -119,7 +119,6 @@ export interface Quote {
   osagoPrice: number;
   effectiveDate: string; // "9 июня"
   addOn: { presetId: AddOnPreset['id']; price: number; required: boolean };
-  paymentMethod: string; // "Банковская карта"
 }
 
 type View = 'form' | 'loading' | 'results' | 'payment' | 'success';
@@ -228,6 +227,12 @@ export class OsagoPage {
 
   protected readonly ownerSameAsPolicyholder = computed(
     () => this.form.controls.owner.controls.isSameAsPolicyholder.value,
+  );
+
+  // Payment method is derived from the payer type chosen on the form:
+  // individuals/ИП pay by card, legal entities pay by invoice.
+  protected readonly paymentKind = computed<'card' | 'invoice'>(() =>
+    this.insurerType() === 'legal' ? 'invoice' : 'card',
   );
 
   constructor() {
@@ -491,7 +496,6 @@ export class OsagoPage {
           price: preset.defaultPrice,
           required: requiresAddOn,
         },
-        paymentMethod: 'Банковская карта',
       };
     });
 

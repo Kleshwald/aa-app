@@ -28,8 +28,9 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 52px;
-        height: 52px;
+        /* Size overridable per host via --ins-logo-size (default 52px). */
+        width: var(--ins-logo-size, 52px);
+        height: var(--ins-logo-size, 52px);
         padding: 6px;
         background: #ffffff;
         border: 1px solid var(--gray-200);

@@ -525,10 +525,6 @@
                 class="results__addon results__addon--required"
                 (click)="openAddOnModal(q.id)"
               >
-                <svg class="results__addon-lock" viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="3" y="11" width="18" height="11" rx="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
                 <app-addon-icon [id]="q.addOn.presetId" class="results__addon-ico" />
                 <span class="results__addon-name">{{ addOnName(q.addOn.presetId) }}</span>
                 <span class="results__addon-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
@@ -555,14 +551,35 @@
 
             <div class="results__cta">
               <div class="results__total">
-                <span class="results__total-cap">
-                  {{ q.addOn.price > 0 && !q.addOn.required ? 'Итого с сервисом' : 'Итого' }}
-                </span>
-                <span class="results__total-val">{{ totalFor(q) | number: '1.0-0' }} ₽</span>
-                @if (q.addOn.required) {
-                  <span class="results__total-note">включая {{ addOnName(q.addOn.presetId) }}</span>
+                @if (q.addOn.price > 0) {
+                  <span class="results__total-sum">
+                    {{ q.osagoPrice | number: '1.0-0' }} + {{ q.addOn.price | number: '1.0-0' }} ₽
+                  </span>
                 }
+                <span class="results__total-main">
+                  <span class="results__total-cap">Итого</span>
+                  <span class="results__total-val">{{ totalFor(q) | number: '1.0-0' }} ₽</span>
+                </span>
               </div>
+
+              <span class="results__pay">
+                @if (paymentKind() === 'invoice') {
+                  <svg class="results__pay-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 2h9l4 4v16H6z" />
+                    <path d="M15 2v4h4" />
+                    <path d="M9 12h7" />
+                    <path d="M9 16h7" />
+                  </svg>
+                  Оплата по счёту
+                } @else {
+                  <svg class="results__pay-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <path d="M2 10h20" />
+                  </svg>
+                  Оплата картой
+                }
+              </span>
+
               <button
                 type="button"
                 class="osago__btn osago__btn--primary results__offer-action"
