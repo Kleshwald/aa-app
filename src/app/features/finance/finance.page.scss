@@ -1,0 +1,483 @@
+:host {
+  display: block;
+}
+
+.fin {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fin__title {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--header-bg);
+}
+
+// ─── Tabs ───
+
+.fin__tabs {
+  display: flex;
+  gap: 32px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.fin__tab {
+  padding: 12px 4px;
+  margin-bottom: -1px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition:
+    color 120ms ease-out,
+    border-color 120ms ease-out;
+
+  &:hover {
+    color: var(--gray-900);
+  }
+
+  &--active {
+    color: var(--header-bg);
+    border-bottom-color: var(--header-bg);
+  }
+}
+
+.fin__loading {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--gray-600);
+  font-size: var(--text-sm);
+}
+
+// ═══════════════════════════════════════════════════
+//  Мои результаты (дашборд)
+// ═══════════════════════════════════════════════════
+
+.fin-results {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fin-results__period {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+
+  span {
+    color: var(--gray-600);
+    font-weight: var(--weight-regular);
+  }
+}
+
+.fin-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @media (max-width: 1023px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fin-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 24px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+
+  &--forecast {
+    background: var(--brand-50);
+    border-color: var(--brand-200);
+    border-left: 4px solid var(--header-bg);
+  }
+
+  &--reco {
+    background: var(--info-50);
+    border-color: var(--info-100);
+    border-left: 4px solid var(--accent-500);
+  }
+}
+
+.fin-card__label {
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+}
+
+.fin-card__category {
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: var(--weight-semibold);
+  color: var(--header-bg);
+}
+
+.fin-card__amount {
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: var(--weight-semibold);
+  color: var(--accent-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-card__hint {
+  font-size: var(--text-xs);
+  color: var(--gray-600);
+}
+
+// ─── Progress ───
+
+.fin-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 24px;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.fin-progress__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.fin-progress__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+}
+
+.fin-progress__nums {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-progress__bar {
+  height: 12px;
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.fin-progress__fill {
+  height: 100%;
+  background: var(--header-bg);
+  border-radius: var(--radius-full);
+  transition: width 300ms ease-out;
+}
+
+// ─── Metrics ───
+
+.fin-section__title {
+  margin: 4px 0 -4px;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+}
+
+.fin-metrics {
+  display: grid;
+  gap: 16px;
+
+  &--4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  &--6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  @media (max-width: 1279px) {
+    &--6 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 1023px) {
+    &--4,
+    &--6 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+.fin-metric {
+  padding: 16px 18px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+
+  &--accent {
+    background: var(--brand-50);
+    border-color: var(--brand-200);
+  }
+}
+
+.fin-metric__value {
+  display: block;
+  font-size: var(--text-xl);
+  line-height: 1.1;
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+  font-variant-numeric: tabular-nums;
+
+  .fin-metric--accent & {
+    color: var(--header-bg);
+  }
+}
+
+.fin-metric__label {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--text-xs);
+  color: var(--gray-700);
+}
+
+// ═══════════════════════════════════════════════════
+//  Таблицы (К выплате / История выплат)
+// ═══════════════════════════════════════════════════
+
+.fin__table-wrap {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  overflow: auto;
+  max-height: calc(100vh - 320px);
+}
+
+.fin__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-900);
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 12px 16px;
+    background: var(--brand-50);
+    color: var(--brand-700);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--brand-100);
+  }
+
+  tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+  }
+
+  tbody tr:nth-child(even) td {
+    background: #fbfcfd;
+  }
+
+  tbody tr:hover td {
+    background: var(--gray-50);
+  }
+}
+
+.fin__cell--idx {
+  width: 56px;
+  color: var(--gray-600);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin__cell--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.fin__cell--strong {
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+}
+
+.fin__mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+.fin__status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+
+  &[data-status='paid'] {
+    background: var(--success-50);
+    color: var(--success-700);
+  }
+  &[data-status='preparing'] {
+    background: var(--warning-50);
+    color: var(--warning-700);
+  }
+}
+
+.fin__skeleton {
+  display: block;
+  height: 14px;
+  width: 70%;
+  background: linear-gradient(90deg, var(--gray-100) 0%, var(--gray-200) 50%, var(--gray-100) 100%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: fin-skel 1.4s ease-in-out infinite;
+}
+
+@keyframes fin-skel {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.fin__link {
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--header-bg);
+  background: none;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--header-bg-hover);
+    text-decoration: underline;
+  }
+}
+
+// ─── К выплате ───
+
+.fin-payout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fin-payout__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.fin-payout__title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+}
+
+.fin-payout__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.fin-payout__confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--text-sm);
+  color: var(--gray-900);
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    accent-color: var(--header-bg);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  b {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.fin-payout__done {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--success-700);
+}
+
+// ─── История выплат ───
+
+.fin-history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fin-history__note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+}
+
+// ─── Buttons ───
+
+.fin__btn {
+  height: 44px;
+  padding: 0 28px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border: none;
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition: background 120ms ease-out;
+
+  &--primary {
+    color: #ffffff;
+    background: var(--header-bg);
+
+    &:hover:not(:disabled) {
+      background: var(--header-bg-hover);
+    }
+    &:disabled {
+      background: var(--gray-300);
+      cursor: not-allowed;
+    }
+  }
+}

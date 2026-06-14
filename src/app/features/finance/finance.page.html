@@ -1,0 +1,259 @@
+<section class="fin">
+  <h1 class="fin__title">Мои финансы</h1>
+
+  <div class="fin__tabs" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      class="fin__tab"
+      [class.fin__tab--active]="activeTab() === 'results'"
+      (click)="setTab('results')"
+    >
+      Мои результаты
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="fin__tab"
+      [class.fin__tab--active]="activeTab() === 'payout'"
+      (click)="setTab('payout')"
+    >
+      К выплате
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="fin__tab"
+      [class.fin__tab--active]="activeTab() === 'history'"
+      (click)="setTab('history')"
+    >
+      История выплат
+    </button>
+  </div>
+
+  @switch (activeTab()) {
+    <!-- ─────────────── МОИ РЕЗУЛЬТАТЫ (дашборд мотивации) ─────────────── -->
+    @case ('results') {
+      @if (resultsLoading()) {
+        <div class="fin__loading">Загружаем результаты…</div>
+      } @else if (results(); as r) {
+        <div class="fin-results">
+          <div class="fin-results__period">
+            {{ r.periodLabel }} <span>· {{ r.periodRange }}</span>
+          </div>
+
+          <div class="fin-cards">
+            <article class="fin-card fin-card--forecast">
+              <span class="fin-card__label">Категория на период</span>
+              <span class="fin-card__category">{{ r.category }}</span>
+              <span class="fin-card__hint">Прогноз по текущему темпу продаж</span>
+            </article>
+
+            <article class="fin-card fin-card--reco">
+              @if (r.nextCategory) {
+                <span class="fin-card__label">До категории «{{ r.nextCategory }}»</span>
+                <span class="fin-card__amount">{{ r.amountToNext | number: '1.0-0' }} ₽</span>
+                <span class="fin-card__hint">
+                  ≈ {{ r.dailyToNext | number: '1.0-0' }} ₽/день · осталось {{ r.daysLeft }} дн.
+                </span>
+              } @else {
+                <span class="fin-card__label">Категория</span>
+                <span class="fin-card__amount">Максимум</span>
+                <span class="fin-card__hint">Вы в высшей категории мотивации</span>
+              }
+            </article>
+          </div>
+
+          <div class="fin-progress">
+            <div class="fin-progress__head">
+              <span class="fin-progress__title">Прогресс по сборам</span>
+              <span class="fin-progress__nums">
+                {{ r.collected | number: '1.0-0' }} / {{ r.nextThreshold | number: '1.0-0' }} ₽
+              </span>
+            </div>
+            <div
+              class="fin-progress__bar"
+              role="progressbar"
+              [attr.aria-valuenow]="progressPct()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <div class="fin-progress__fill" [style.width.%]="progressPct()"></div>
+            </div>
+          </div>
+
+          <h2 class="fin-section__title">Целевой сегмент</h2>
+          <div class="fin-metrics fin-metrics--4">
+            <div class="fin-metric fin-metric--accent">
+              <span class="fin-metric__value"
+                >{{ r.segment.totalCollected | number: '1.0-0' }} ₽</span
+              >
+              <span class="fin-metric__label">Итого сборов</span>
+            </div>
+            <div class="fin-metric">
+              <span class="fin-metric__value">{{ r.segment.osagoCount }}</span>
+              <span class="fin-metric__label">ОСАГО, шт.</span>
+            </div>
+            <div class="fin-metric">
+              <span class="fin-metric__value"
+                >{{ r.segment.avgAddonCheck | number: '1.0-0' }} ₽</span
+              >
+              <span class="fin-metric__label">Средний чек по допам</span>
+            </div>
+            <div class="fin-metric">
+              <span class="fin-metric__value">{{ r.segment.penetrationPct }} %</span>
+              <span class="fin-metric__label">Уровень проникновения</span>
+            </div>
+          </div>
+
+          <h2 class="fin-section__title">Перестраховочный пул</h2>
+          <div class="fin-metrics fin-metrics--6">
+            <div class="fin-metric">
+              <span class="fin-metric__value">{{ r.pool.osagoPoolCount }}</span>
+              <span class="fin-metric__label">ОСАГО Пул, шт.</span>
+            </div>
+            <div class="fin-metric">
+              <span class="fin-metric__value">{{ r.pool.autoHelper }}</span>
+              <span class="fin-metric__label">Автопомощник</span>
+            </div>
+            <div class="fin-metric">
+              <span class="fin-metric__value">{{ r.pool.reliableTrip }}</span>
+              <span class="fin-metric__label">Надёжная поездка</span>
+            </div>
+            <div class="fin-metric">
+              <span class="fin-metric__value">{{ r.pool.reliableTripPlus }}</span>
+              <span class="fin-metric__label">Надёжная поездка +</span>
+            </div>
+            <div class="fin-metric">
+              <span class="fin-metric__value">{{ r.pool.reliableTripEco }}</span>
+              <span class="fin-metric__label">Надёжная поездка ЭКО</span>
+            </div>
+            <div class="fin-metric fin-metric--accent">
+              <span class="fin-metric__value">{{ r.pool.poolSharePct }} %</span>
+              <span class="fin-metric__label">Доля Пула в портфеле</span>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ─────────────── К ВЫПЛАТЕ ─────────────── -->
+    @case ('payout') {
+      <div class="fin-payout">
+        <div class="fin-payout__head">
+          <h2 class="fin-payout__title">Информация о заключённых договорах</h2>
+          <button type="button" class="fin__link">Сохранить в Excel</button>
+        </div>
+
+        <div class="fin__table-wrap">
+          <table class="fin__table">
+            <thead>
+              <tr>
+                <th class="fin__cell--idx">№</th>
+                <th>Страхователь</th>
+                <th>Договор</th>
+                <th class="fin__cell--num">Вознаграждение, %</th>
+                <th class="fin__cell--num">Страховая премия, ₽</th>
+                <th class="fin__cell--num">К выплате, ₽</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (payoutsLoading()) {
+                @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+                  <tr>
+                    <td colspan="6"><span class="fin__skeleton"></span></td>
+                  </tr>
+                }
+              } @else {
+                @for (row of payouts(); track row.id; let idx = $index) {
+                  <tr class="fin__row">
+                    <td class="fin__cell--idx">{{ idx + 1 }}</td>
+                    <td>{{ row.policyholder }}</td>
+                    <td class="fin__mono">{{ row.contract }}</td>
+                    <td class="fin__cell--num">{{ row.rewardPct }}</td>
+                    <td class="fin__cell--num">{{ row.premium | number: '1.2-2' }}</td>
+                    <td class="fin__cell--num fin__cell--strong">
+                      {{ row.payout | number: '1.2-2' }}
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="fin-payout__foot">
+          @if (requested()) {
+            <p class="fin-payout__done">
+              ✓ Заявка на выплату {{ payoutTotal() | number: '1.2-2' }} ₽ отправлена. Готовим
+              выплату.
+            </p>
+          } @else {
+            <label class="fin-payout__confirm">
+              <input type="checkbox" [checked]="confirmed()" (change)="onConfirmChange($event)" />
+              <span>
+                Я проверил информацию о заключённых договорах и хочу получить вознаграждение в
+                размере
+                <b>{{ payoutTotal() | number: '1.2-2' }} ₽</b>
+              </span>
+            </label>
+            <button
+              type="button"
+              class="fin__btn fin__btn--primary"
+              [disabled]="!confirmed()"
+              (click)="requestPayout()"
+            >
+              Получить
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ─────────────── ИСТОРИЯ ВЫПЛАТ (только свои акты) ─────────────── -->
+    @case ('history') {
+      <div class="fin-history">
+        <p class="fin-history__note">Показаны только ваши акты об оказании услуг.</p>
+
+        <div class="fin__table-wrap">
+          <table class="fin__table">
+            <thead>
+              <tr>
+                <th>Акт об оказании услуг</th>
+                <th>Оформлено</th>
+                <th>Статус</th>
+                <th class="fin__cell--num">Сумма, ₽</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (historyLoading()) {
+                @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+                  <tr>
+                    <td colspan="4"><span class="fin__skeleton"></span></td>
+                  </tr>
+                }
+              } @else {
+                @for (act of history(); track act.id) {
+                  <tr class="fin__row">
+                    <td>
+                      <button type="button" class="fin__link">Акт № {{ act.actNumber }}</button>
+                    </td>
+                    <td>{{ act.date | date: 'dd.MM.yyyy' }}</td>
+                    <td>
+                      <span class="fin__status" [attr.data-status]="act.status">
+                        {{ historyStatusLabel[act.status] }}
+                      </span>
+                    </td>
+                    <td class="fin__cell--num fin__cell--strong">
+                      {{ act.amount | number: '1.2-2' }}
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</section>

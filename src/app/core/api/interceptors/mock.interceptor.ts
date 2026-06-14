@@ -13,6 +13,11 @@ import {
   handleGetProlongations,
   handleNsisSearch,
 } from '../../mock/handlers/prolongations.handler';
+import {
+  handleGetFinanceHistory,
+  handleGetFinancePayouts,
+  handleGetFinanceResults,
+} from '../../mock/handlers/finance.handler';
 
 // Maps an incoming request to a mock handler. When useMocks is false
 // (staging/prod), the interceptor short-circuits and the request goes
@@ -37,6 +42,9 @@ const routes: Route[] = [
   { method: 'GET', match: /\/prolongations\/stats$/, handler: handleGetProlongationStats },
   { method: 'GET', match: /\/prolongations(\?.*)?$/, handler: handleGetProlongations },
   { method: 'POST', match: /\/nsis-search$/, handler: handleNsisSearch },
+  { method: 'GET', match: /\/finance\/results$/, handler: handleGetFinanceResults },
+  { method: 'GET', match: /\/finance\/payouts(\?.*)?$/, handler: handleGetFinancePayouts },
+  { method: 'GET', match: /\/finance\/history(\?.*)?$/, handler: handleGetFinanceHistory },
 ];
 
 export const mockInterceptor: HttpInterceptorFn = (req, next) => {
