@@ -112,14 +112,24 @@
 
   <!-- ─────────────── QUOTES ─────────────── -->
   @case ('quotes') {
-    <section class="hl">
-      <h2 class="hl__heading"><span class="hl__heading-dot"></span> {{ productMeta().heading }}</h2>
+    <section class="hl hl--quotes">
+      <header class="hl__quotes-head">
+        <h2 class="hl__heading">
+          <span class="hl__heading-dot"></span> {{ productMeta().heading }}
+        </h2>
+        <p class="hl__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
+      </header>
 
       <div class="hl-offers">
         @for (o of baseOffers(); track o.id) {
           <label class="hl-offer" [class.hl-offer--selected]="selectedOfferId() === o.id">
             <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
-            <span class="hl-offer__carrier">{{ o.carrierName }}</span>
+            <span class="hl-offer__carrier">
+              {{ o.carrierName }}
+              @if ($first) {
+                <span class="hl-offer__best">Лучшая цена</span>
+              }
+            </span>
             <span class="hl-offer__sum"
               >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
             >

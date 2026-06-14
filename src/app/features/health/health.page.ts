@@ -136,8 +136,18 @@ export class HealthPage {
     return end;
   });
 
-  protected readonly baseOffers = computed(() => this.offers().filter((o) => !o.kv));
-  protected readonly kvOffers = computed(() => this.offers().filter((o) => o.kv));
+  // Cheapest first — base offers are ranked by price, the cheapest is the anchor
+  // (and the default selection set in calculate()).
+  protected readonly baseOffers = computed(() =>
+    this.offers()
+      .filter((o) => !o.kv)
+      .sort((a, b) => a.price - b.price),
+  );
+  protected readonly kvOffers = computed(() =>
+    this.offers()
+      .filter((o) => o.kv)
+      .sort((a, b) => a.price - b.price),
+  );
 
   protected readonly selectedOffer = computed<Offer | null>(() => {
     const id = this.selectedOfferId();
