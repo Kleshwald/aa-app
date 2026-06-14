@@ -42,39 +42,26 @@ const DOCUMENT_TYPES = [
   { value: 'temporary-id', label: 'Временное удостоверение' },
 ] as const;
 
-// Экран ожидания — анонимный «скан рынка». Алгоритм вывода СК скрыт «под
-// капотом»: НЕ показываем, кто ответил, в каком порядке и по какой цене.
-// Сообщения описывают РАБОТУ платформы, а не ответы конкретных компаний.
-const CALC_STATUS_MESSAGES = [
-  'Проверяем данные автомобиля и водителей…',
-  'Запрашиваем КБМ в базе НСИС…',
-  'Сравниваем условия по всему рынку ОСАГО…',
-  'Применяем правила и тарифы страховых компаний…',
-  'Учитываем вашу скидку за безаварийную езду…',
-  'Отбираем самые выгодные предложения…',
-  'Проверяем точность расчётов…',
-  'Почти готово — формируем итоговый список…',
+// Экран ожидания — простая сменяющаяся строка статуса (как в первой версии).
+// Компании всегда одни и те же; НЕ показываем, кто ответил и по какой цене —
+// это «под капотом». Фразы описывают отправку запроса и ожидание ответов.
+const CALC_STEPS = [
+  'Скоринг Agent Academy…',
+  'Направляем данные в страховые компании…',
+  'Ренессанс…',
+  'Югория…',
+  'Согласие…',
+  'Зетта…',
+  'СОГАЗ…',
+  'Росгосстрах…',
+  'Евроинс…',
+  'Сегментация…',
+  'Получаем ответы от страховых компаний…',
+  'Формируем для вас предложения…',
+  'Почти готово…',
 ] as const;
 
-// Этапы работы (не компании!) — дают «дофаминовые» отметки выполнения.
-const CALC_PHASES = [
-  'Проверяем данные',
-  'Запрос в НСИС',
-  'Сравниваем рынок',
-  'Готовим лучшие',
-] as const;
-
-// Сценарий продвижения: сколько этапов завершено и насколько заполнено кольцо.
-// Привязано к нашему таймеру, НЕ к ответам СК.
-const CALC_PHASE_SCHEDULE: readonly { at: number; done: number; progress: number }[] = [
-  { at: 6_000, done: 1, progress: 0.35 },
-  { at: 15_000, done: 2, progress: 0.58 },
-  { at: 26_000, done: 3, progress: 0.82 },
-  { at: 33_000, done: 3, progress: 0.9 }, // удержание у ~90% (не «фейковый дедлайн»)
-];
-
-const CALC_STATUS_INTERVAL_MS = 4_500;
-const CALC_COMPLETE_AT_MS = 39_000; // момент «Готово» (зелёное кольцо + галочка)
+const CALC_COMPLETE_AT_MS = 38_500; // короткий момент «Готово»
 const CALC_TOTAL_MS = 40_000; // переход на результаты
 
 // Quote type: a regular "segment" quote, or a "reinsurance pool" quote that
@@ -184,16 +171,11 @@ export class OsagoPage {
   // ─── Flow state ───
   protected readonly view = signal<View>('form');
 
-  // Экран «скан рынка» — без раскрытия конкретных СК.
-  protected readonly statusMessages = CALC_STATUS_MESSAGES;
-  protected readonly phases = CALC_PHASES;
-  protected readonly statusIndex = signal<number>(0);
-  protected readonly phaseDone = signal<number>(0); // сколько этапов завершено (0..4)
-  protected readonly scanProgress = signal<number>(0); // 0..1 заполнение кольца
+  // Экран ожидания — простая строка статуса + полоса прогресса.
+  protected readonly steps = CALC_STEPS;
+  protected readonly stepIndex = signal<number>(0);
+  protected readonly loadingProgress = signal<number>(0); // 0..100
   protected readonly calcComplete = signal<boolean>(false);
-
-  // Логотипы для амбиентной «орбиты» — все равны, ни один не выделяется/не оценивается.
-  protected readonly scanCarriers = CARRIERS.map((c) => ({ id: c.id, name: c.shortName }));
 
   protected readonly quotes = signal<Quote[]>([]);
   protected readonly selectedQuoteId = signal<string | null>(null);
@@ -201,25 +183,6 @@ export class OsagoPage {
     const id = this.selectedQuoteId();
     return id ? (this.quotes().find((q) => q.id === id) ?? null) : null;
   });
-
-  // Кольцо скана (r=96): окружность и смещение под scanProgress.
-  private readonly SCAN_RING_CIRC = 2 * Math.PI * 96;
-  protected readonly scanRingDash = this.SCAN_RING_CIRC;
-  protected readonly scanRingOffset = computed(
-    () => this.SCAN_RING_CIRC * (1 - this.scanProgress()),
-  );
-
-  phaseState(index: number): 'done' | 'active' | 'pending' {
-    const done = this.phaseDone();
-    if (index < done) return 'done';
-    if (index === done) return 'active';
-    return 'pending';
-  }
-
-  /** Угол размещения логотипа на орбите. */
-  logoAngle(index: number): number {
-    return (index * 360) / this.scanCarriers.length;
-  }
 
   // Modal for add-on editing
   protected readonly addOnModalQuoteId = signal<string | null>(null);
@@ -258,9 +221,10 @@ export class OsagoPage {
     return q?.addOn.required ?? false;
   });
 
-  // Timers for the carrier-poll animation
+  // Timers for the loading animation
   private calcTimers: ReturnType<typeof setTimeout>[] = [];
-  private statusTimer: ReturnType<typeof setInterval> | null = null;
+  private stepTimer: ReturnType<typeof setInterval> | null = null;
+  private progressTimer: ReturnType<typeof setInterval> | null = null;
   private paymentTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly form = this.fb.nonNullable.group({
@@ -397,44 +361,40 @@ export class OsagoPage {
   calculate(): void {
     this.clearTimers();
     // Котировки считаются сразу, но НЕ показываются до экрана результатов
-    // (алгоритм вывода СК скрыт). Экран ожидания — анонимный «скан рынка».
+    // (алгоритм вывода СК скрыт).
     this.quotes.set(this.generateQuotes());
-    this.phaseDone.set(0);
-    this.scanProgress.set(0.12);
-    this.statusIndex.set(0);
+    this.stepIndex.set(0);
+    this.loadingProgress.set(0);
     this.calcComplete.set(false);
     this.view.set('loading');
 
-    // Строка «что происходит» меняется каждые ~4.5 секунды.
-    this.statusTimer = setInterval(() => {
-      this.statusIndex.update((i) => Math.min(i + 1, CALC_STATUS_MESSAGES.length - 1));
-    }, CALC_STATUS_INTERVAL_MS);
+    // Строка статуса сменяется по очереди.
+    const stepMs = CALC_TOTAL_MS / CALC_STEPS.length;
+    this.stepTimer = setInterval(() => {
+      this.stepIndex.update((i) => Math.min(i + 1, CALC_STEPS.length - 1));
+    }, stepMs);
 
-    // Этапы работы завершаются по нашему сценарию (не по ответам СК).
-    for (const step of CALC_PHASE_SCHEDULE) {
-      this.calcTimers.push(
-        setTimeout(() => {
-          this.phaseDone.set(step.done);
-          this.scanProgress.set(step.progress);
-        }, step.at),
-      );
-    }
+    // Плавная полоса прогресса (по времени).
+    const start = performance.now();
+    this.progressTimer = setInterval(() => {
+      const pct = Math.min(100, ((performance.now() - start) / CALC_TOTAL_MS) * 100);
+      this.loadingProgress.set(pct);
+    }, 200);
 
-    // Кульминация «Готово» → переход на результаты.
+    // Короткий момент «Готово» → переход на результаты.
+    this.calcTimers.push(setTimeout(() => this.calcComplete.set(true), CALC_COMPLETE_AT_MS));
     this.calcTimers.push(
       setTimeout(() => {
-        this.calcComplete.set(true);
-        this.phaseDone.set(CALC_PHASES.length);
-        this.scanProgress.set(1);
-      }, CALC_COMPLETE_AT_MS),
+        this.loadingProgress.set(100);
+        this.view.set('results');
+      }, CALC_TOTAL_MS),
     );
-    this.calcTimers.push(setTimeout(() => this.view.set('results'), CALC_TOTAL_MS));
   }
 
   cancelCalculation(): void {
     this.clearTimers();
-    this.phaseDone.set(0);
-    this.scanProgress.set(0);
+    this.stepIndex.set(0);
+    this.loadingProgress.set(0);
     this.calcComplete.set(false);
     this.view.set('form');
   }
@@ -680,9 +640,13 @@ export class OsagoPage {
   private clearTimers(): void {
     this.calcTimers.forEach((t) => clearTimeout(t));
     this.calcTimers = [];
-    if (this.statusTimer) {
-      clearInterval(this.statusTimer);
-      this.statusTimer = null;
+    if (this.stepTimer) {
+      clearInterval(this.stepTimer);
+      this.stepTimer = null;
+    }
+    if (this.progressTimer) {
+      clearInterval(this.progressTimer);
+      this.progressTimer = null;
     }
     if (this.paymentTimeoutId) {
       clearTimeout(this.paymentTimeoutId);

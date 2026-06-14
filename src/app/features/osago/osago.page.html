@@ -459,114 +459,35 @@
     </section>
   }
 
-  <!-- ─────────────────────── ПОДБОР ПРЕДЛОЖЕНИЙ ─────────────────────── -->
+  <!-- ─────────────────────────── РАСЧЁТ ─────────────────────────── -->
   @case ('loading') {
     <section class="calc">
       <div class="calc__card" role="status" aria-live="polite" aria-atomic="false">
-        <h2 class="calc__title">
-          {{
-            calcComplete()
-              ? 'Нашли для вас лучшие варианты'
-              : 'Подбираем для вас лучшие предложения'
-          }}
-        </h2>
-        <p class="calc__subtitle">
-          {{ calcComplete() ? 'Сейчас покажем цены' : 'Сравниваем условия по всему рынку ОСАГО' }}
-        </p>
+        @if (calcComplete()) {
+          <span class="calc__check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10" /></svg>
+          </span>
+          <h2 class="calc__title">Готово!</h2>
+          <p class="calc__status">Открываем предложения…</p>
+        } @else {
+          <span class="calc__spinner" aria-hidden="true"></span>
+          <h2 class="calc__title">Рассчитываем стоимость в страховых компаниях</h2>
+          <p class="calc__status">{{ steps[stepIndex()] }}</p>
+        }
 
-        <!-- Анонимный «скан рынка»: кольцо + амбиентная орбита логотипов -->
         <div
-          class="calc-scan"
+          class="calc__bar"
           role="progressbar"
-          aria-label="Идёт подбор предложений по ОСАГО"
-          [attr.aria-valuetext]="statusMessages[statusIndex()]"
+          [attr.aria-valuenow]="loadingProgress()"
+          aria-valuemin="0"
+          aria-valuemax="100"
         >
-          <div class="calc-scan__orbit" aria-hidden="true">
-            @for (c of scanCarriers; track c.id; let i = $index) {
-              <span
-                class="calc-scan__logo"
-                [style.transform]="'rotate(' + logoAngle(i) + 'deg) translateY(-104px)'"
-              >
-                <app-insurer-logo [id]="c.id" [name]="c.name" />
-              </span>
-            }
-          </div>
-
-          <svg class="calc-scan__svg" viewBox="0 0 220 220" aria-hidden="true">
-            <circle
-              cx="110"
-              cy="110"
-              r="96"
-              fill="none"
-              stroke="var(--gray-100)"
-              stroke-width="10"
-            />
-            <circle
-              class="calc-scan__arc"
-              [class.calc-scan__arc--done]="calcComplete()"
-              cx="110"
-              cy="110"
-              r="96"
-              fill="none"
-              stroke="var(--accent-500)"
-              stroke-width="10"
-              stroke-linecap="round"
-              [attr.stroke-dasharray]="scanRingDash"
-              [attr.stroke-dashoffset]="scanRingOffset()"
-              transform="rotate(-90 110 110)"
-            />
-            @if (!calcComplete()) {
-              <circle
-                class="calc-scan__sweep"
-                cx="110"
-                cy="110"
-                r="80"
-                fill="none"
-                stroke="var(--accent-300)"
-                stroke-width="4"
-                stroke-linecap="round"
-                stroke-dasharray="40 600"
-              />
-            }
-          </svg>
-
-          <div class="calc-scan__center">
-            @if (calcComplete()) {
-              <svg class="calc-scan__check" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 12l4 4 10-10" />
-              </svg>
-              <span class="calc-scan__label">Готово</span>
-            } @else {
-              <svg class="calc-scan__glyph" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                <path d="M9 12l2 2 4-4" />
-              </svg>
-              <span class="calc-scan__label">Анализ рынка</span>
-            }
-          </div>
+          <div class="calc__bar-fill" [style.width.%]="loadingProgress()"></div>
         </div>
 
-        <!-- Этапы работы (не компании) -->
-        <ol class="calc-steps">
-          @for (p of phases; track p; let i = $index) {
-            <li class="calc-step" [attr.data-state]="phaseState(i)">
-              <span class="calc-step__node">
-                <svg class="calc-step__check" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M5 12l4 4 10-10" />
-                </svg>
-              </span>
-              <span class="calc-step__label">{{ p }}</span>
-            </li>
-          }
-        </ol>
-
-        <p class="calc__status" aria-live="polite">
-          {{ calcComplete() ? 'Открываем результаты…' : statusMessages[statusIndex()] }}
-        </p>
-
         <div class="calc__reassure">
-          <span>Обычно занимает 30–60 секунд</span>
-          <span>Не закрывайте это окно, пока идёт подбор</span>
+          <span>Обычно занимает до минуты</span>
+          <span>Не закрывайте это окно</span>
         </div>
 
         <button type="button" class="calc__cancel" (click)="cancelCalculation()">

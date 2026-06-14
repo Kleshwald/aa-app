@@ -510,216 +510,81 @@
 }
 
 .calc__title {
-  margin: 0 0 4px;
-  font-size: var(--text-xl);
+  margin: 0 0 6px;
+  font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
   color: var(--gray-900);
 }
 
-.calc__subtitle {
-  margin: 0;
-  font-size: var(--text-base);
-  color: var(--gray-500);
+.calc__spinner {
+  display: inline-block;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  border: 4px solid var(--brand-100);
+  border-top-color: var(--header-bg);
+  border-radius: var(--radius-full);
+  animation: loading-spin 0.9s linear infinite;
 }
 
-// ─── HERO: анонимный «скан рынка» ───
-
-.calc-scan {
-  position: relative;
-  width: 220px;
-  height: 220px;
-  margin: 32px auto;
-}
-
-.calc-scan__svg {
-  position: relative;
-  z-index: 1;
-  width: 220px;
-  height: 220px;
-}
-
-.calc-scan__arc {
-  transition:
-    stroke-dashoffset 500ms cubic-bezier(0.16, 1, 0.3, 1),
-    stroke 400ms ease;
-
-  &--done {
-    stroke: var(--success-600);
-  }
-}
-
-.calc-scan__sweep {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: calc-sweep 2.4s linear infinite;
-}
-
-// Амбиентная орбита логотипов — все равны, вращаются как единое целое.
-.calc-scan__orbit {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  animation: calc-orbit 60s linear infinite;
-}
-
-.calc-scan__logo {
-  --ins-logo-size: 28px;
-  position: absolute;
-  top: calc(50% - 14px);
-  left: calc(50% - 14px);
-  opacity: 0.28;
-  filter: grayscale(1);
-}
-
-.calc-scan__center {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  pointer-events: none;
-}
-
-.calc-scan__glyph {
-  width: 34px;
-  height: 34px;
-  fill: none;
-  stroke: var(--brand-500);
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.calc-scan__check {
-  width: 44px;
-  height: 44px;
-  fill: none;
-  stroke: var(--success-600);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  animation: calc-check-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 1;
-}
-
-.calc-scan__label {
-  font-size: var(--text-sm);
-  color: var(--gray-500);
-}
-
-// ─── Этапы работы (stepper) ───
-
-.calc-steps {
-  display: flex;
-  margin: 0 0 20px;
-  padding: 0;
-  list-style: none;
-}
-
-.calc-step {
-  position: relative;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-
-  &:not(:first-child)::before {
-    content: '';
-    position: absolute;
-    top: 11px;
-    left: -50%;
-    width: 100%;
-    height: 2px;
-    background: var(--gray-200);
-  }
-
-  &[data-state='active']:not(:first-child)::before,
-  &[data-state='done']:not(:first-child)::before {
-    background: var(--accent-500);
-  }
-}
-
-.calc-step__node {
-  position: relative;
-  z-index: 1;
+.calc__check {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 8px;
   border-radius: var(--radius-full);
-  background: #ffffff;
-  border: 2px solid var(--gray-200);
-  box-sizing: border-box;
-  transition:
-    border-color 200ms ease,
-    background 200ms ease;
+  background: var(--success-50);
+  animation: calc-check-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 1;
 
-  .calc-step[data-state='active'] & {
-    border-color: var(--accent-500);
-    background: var(--brand-50);
-  }
-  .calc-step[data-state='done'] & {
-    border-color: var(--success-600);
-    background: var(--success-600);
+  svg {
+    width: 34px;
+    height: 34px;
+    fill: none;
+    stroke: var(--success-600);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 }
-
-.calc-step__check {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: #ffffff;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0;
-
-  .calc-step[data-state='done'] & {
-    opacity: 1;
-    animation: calc-check-in 240ms ease-out 1;
-  }
-}
-
-.calc-step__label {
-  font-size: var(--text-xs);
-  text-align: center;
-  color: var(--gray-500);
-
-  .calc-step[data-state='active'] & {
-    color: var(--gray-700);
-    font-weight: var(--weight-medium);
-  }
-  .calc-step[data-state='done'] & {
-    color: var(--gray-600);
-  }
-}
-
-// ─── Статус, подсказки, отмена ───
 
 .calc__status {
   min-height: 24px;
   margin: 0;
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  color: var(--accent-600);
-  transition: opacity 240ms ease-in-out;
+  color: var(--header-bg);
+  transition: opacity 200ms ease-out;
+}
+
+.calc__bar {
+  width: 100%;
+  height: 8px;
+  margin-top: 20px;
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.calc__bar-fill {
+  height: 100%;
+  background: var(--header-bg);
+  border-radius: var(--radius-full);
+  transition: width 200ms linear;
 }
 
 .calc__reassure {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 24px;
+  margin-top: 20px;
   font-size: var(--text-sm);
   color: var(--gray-600);
 }
 
 .calc__cancel {
-  margin-top: 12px;
+  margin-top: 16px;
   padding: 8px 16px;
   min-height: 44px;
   background: none;
@@ -735,18 +600,6 @@
   }
 }
 
-@keyframes calc-sweep {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes calc-orbit {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes calc-check-in {
   from {
     opacity: 0;
@@ -758,7 +611,7 @@
   }
 }
 
-// Результаты появляются мягким въездом после кульминации.
+// Результаты появляются мягким въездом.
 .results {
   animation: calc-results-in 280ms cubic-bezier(0.16, 1, 0.3, 1) 1;
 }
@@ -775,15 +628,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .calc-scan__arc,
+  .calc__spinner {
+    animation-duration: 2s;
+  }
   .calc__status,
-  .calc-step__node {
+  .calc__bar-fill {
     transition: none;
   }
-  .calc-scan__sweep,
-  .calc-scan__orbit,
-  .calc-scan__check,
-  .calc-step__check,
+  .calc__check,
   .results {
     animation: none;
   }
