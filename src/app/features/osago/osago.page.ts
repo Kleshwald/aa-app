@@ -16,6 +16,8 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
+
 const VEHICLE_PURPOSES = [
   { value: 'personal', label: 'Личная' },
   { value: 'taxi', label: 'Такси' },
@@ -115,7 +117,7 @@ type View = 'form' | 'loading' | 'results' | 'payment' | 'success';
 
 @Component({
   selector: 'app-osago-page',
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, InsurerLogoComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './osago.page.html',
   styleUrl: './osago.page.scss',

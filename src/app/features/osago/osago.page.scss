@@ -589,125 +589,53 @@
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
   font-weight: var(--weight-semibold);
-  color: var(--brand-500);
+  color: var(--header-bg);
   text-align: center;
   margin: 0;
 }
 
-.results__table-wrap {
-  background: #ffffff;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.results__table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-
-  thead th {
-    padding: 16px 20px;
-    background: var(--gray-50);
-    text-align: left;
-    font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
-    color: var(--gray-700);
-    border-bottom: 1px solid var(--gray-200);
-  }
-
-  tbody td {
-    padding: 20px;
-    border-bottom: 1px solid var(--gray-100);
-    vertical-align: middle;
-  }
-
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
-
-  tbody tr:hover td {
-    background: var(--gray-50);
-  }
-}
-
-.results__cell--actions {
-  width: 160px;
-  text-align: right;
-}
-
-.results__carrier {
+.results__offers {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
 }
 
-.results__carrier-logo {
+.results__offer {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
-  color: #ffffff;
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-lg);
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  transition:
+    border-color 120ms ease-out,
+    box-shadow 120ms ease-out;
 
-  // Color per carrier (rough hash by first letter — replace with real logos later).
-  &[data-carrier='zetta'] {
-    background: #1e3a5f;
-  }
-  &[data-carrier='soglasie'] {
-    background: #e07b00;
-  }
-  &[data-carrier='renessans'] {
-    background: #ff5a3c;
-  }
-  &[data-carrier='ugoria'] {
-    background: #2d6e3e;
-  }
-  &[data-carrier='sogaz'] {
-    background: #0066b3;
-  }
-  &[data-carrier='rosgosstrah'] {
-    background: #c20e23;
-  }
-  &[data-carrier='euroins'] {
-    background: #00aa8a;
-  }
-  &[data-carrier='energogarant'] {
-    background: #4a90e2;
+  &:hover {
+    border-color: var(--accent-400);
+    box-shadow: var(--shadow-sm);
   }
 }
 
-.results__carrier-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.results__offer-main {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.results__offer-total {
+  text-align: right;
+}
+
+.results__offer-action {
+  flex-shrink: 0;
 }
 
 .results__carrier-name {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   color: var(--gray-900);
-}
-
-.results__carrier-tag {
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-
-  &[data-color='accent'] {
-    color: var(--accent-600);
-  }
-  &[data-color='orange'] {
-    color: var(--warning-600);
-  }
-  &[data-color='green'] {
-    color: var(--success-600);
-  }
-  &[data-color='gray'] {
-    color: var(--gray-600);
-  }
 }
 
 .results__price {
@@ -717,7 +645,8 @@
   font-variant-numeric: tabular-nums;
 
   &--total {
-    color: var(--brand-500);
+    font-size: var(--text-lg);
+    color: var(--brand-700);
   }
 }
 

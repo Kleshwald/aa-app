@@ -488,80 +488,56 @@
     <section class="results">
       <h1 class="results__title">Результаты расчёта</h1>
 
-      <div class="results__table-wrap">
-        <table class="results__table">
-          <thead>
-            <tr>
-              <th>Страховая компания</th>
-              <th>ОСАГО</th>
-              <th>Дополнительные сервисы</th>
-              <th>Итого</th>
-              <th class="results__cell--actions"></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (q of quotes(); track q.id) {
-              <tr class="results__row">
-                <td>
-                  <div class="results__carrier">
-                    <div class="results__carrier-logo" [attr.data-carrier]="q.carrierId">
-                      {{ q.carrierShortName.charAt(0) }}
-                    </div>
-                    <div class="results__carrier-info">
-                      <div class="results__carrier-name">{{ q.carrierName }}</div>
-                      <div class="results__carrier-tag" [attr.data-color]="q.carrierTagColor">
-                        {{ q.carrierTag }}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div class="results__price">{{ q.osagoPrice | number: '1.0-0' }} ₽</div>
-                  <div class="results__sub">Действует с {{ q.effectiveDate }}</div>
-                </td>
-                <td>
-                  <button type="button" class="results__addon" (click)="openAddOnModal(q.id)">
-                    @if (q.addOn.presetId === 'off') {
-                      <span class="results__addon-name results__addon-name--muted">Подключить</span>
-                    } @else {
-                      <span class="results__addon-name">{{
-                        addOnPresets[
-                          q.addOn.presetId === 'mini-kasko'
-                            ? 0
-                            : q.addOn.presetId === 'legal'
-                              ? 1
-                              : 2
-                        ].name
-                      }}</span>
-                      <span class="results__addon-price"
-                        >{{ q.addOn.price | number: '1.0-0' }} ₽</span
-                      >
-                      @if (q.addOn.required) {
-                        <span class="results__addon-required">Обязательно</span>
-                      }
-                    }
-                    <span class="results__addon-arrow" aria-hidden="true">▾</span>
-                  </button>
-                </td>
-                <td>
-                  <div class="results__price results__price--total">
-                    {{ totalFor(q) | number: '1.0-0' }} ₽
-                  </div>
-                  <div class="results__sub">{{ q.paymentMethod }}</div>
-                </td>
-                <td class="results__cell--actions">
-                  <button
-                    type="button"
-                    class="osago__btn osago__btn--primary"
-                    (click)="issue(q.id)"
-                  >
-                    Оформить
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+      <div class="results__offers">
+        @for (q of quotes(); track q.id) {
+          <article class="results__offer">
+            <app-insurer-logo
+              class="results__offer-logo"
+              [id]="q.carrierId"
+              [name]="q.carrierShortName"
+            />
+            <div class="results__offer-main">
+              <div class="results__carrier-name">{{ q.carrierName }}</div>
+              <div class="results__sub">
+                ОСАГО {{ q.osagoPrice | number: '1.0-0' }} ₽ · действует с {{ q.effectiveDate }}
+              </div>
+            </div>
+
+            <button type="button" class="results__addon" (click)="openAddOnModal(q.id)">
+              @if (q.addOn.presetId === 'off') {
+                <span class="results__addon-name results__addon-name--muted"
+                  >Подключить сервис</span
+                >
+              } @else {
+                <span class="results__addon-name">{{
+                  addOnPresets[
+                    q.addOn.presetId === 'mini-kasko' ? 0 : q.addOn.presetId === 'legal' ? 1 : 2
+                  ].name
+                }}</span>
+                <span class="results__addon-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
+                @if (q.addOn.required) {
+                  <span class="results__addon-required">Обязательно</span>
+                }
+              }
+              <span class="results__addon-arrow" aria-hidden="true">▾</span>
+            </button>
+
+            <div class="results__offer-total">
+              <div class="results__price results__price--total">
+                {{ totalFor(q) | number: '1.0-0' }} ₽
+              </div>
+              <div class="results__sub">Итого</div>
+            </div>
+
+            <button
+              type="button"
+              class="osago__btn osago__btn--primary results__offer-action"
+              (click)="issue(q.id)"
+            >
+              Оформить
+            </button>
+          </article>
+        }
       </div>
 
       <footer class="results__footer">
