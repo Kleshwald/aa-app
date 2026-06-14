@@ -42,18 +42,22 @@ const DOCUMENT_TYPES = [
   { value: 'temporary-id', label: 'Временное удостоверение' },
 ] as const;
 
-// Экран ожидания — простая сменяющаяся строка статуса (как в первой версии).
-// Компании всегда одни и те же; НЕ показываем, кто ответил и по какой цене —
-// это «под капотом». Фразы описывают отправку запроса и ожидание ответов.
+// Экран ожидания — сменяющаяся строка статуса. Формулировки — как в самой
+// первой версии (по просьбе владельца, дословно, не править).
 const CALC_STEPS = [
-  'Проверяем данные…',
-  'Отправляем запрос в страховые компании…',
-  'Запрос в работе: Ренессанс, Югория, Согласие…',
-  'Запрос в работе: Зетта, СОГАЗ, Росгосстрах, Евроинс…',
-  'Ждём ответы от страховых компаний…',
-  'Сравниваем условия…',
-  'Готовим для вас предложения…',
-  'Почти готово…',
+  'Скоринг Agent Academy…',
+  'Направляем информацию в страховые компании…',
+  'Ренессанс…',
+  'Югория…',
+  'Согласие…',
+  'Зетта…',
+  'СОГАЗ…',
+  'Росгосстрах…',
+  'Евроинс…',
+  'Сегментация…',
+  'Скоринг…',
+  'Получаем ответы от страховых компаний…',
+  'Подождите ещё несколько секунд…',
 ] as const;
 
 const CALC_COMPLETE_AT_MS = 38_500; // короткий момент «Готово»
@@ -166,18 +170,10 @@ export class OsagoPage {
   // ─── Flow state ───
   protected readonly view = signal<View>('form');
 
-  // Экран ожидания — строка статуса + кольцо прогресса.
+  // Экран ожидания — крупная сменяющаяся строка статуса (вариант «минимал»).
   protected readonly steps = CALC_STEPS;
   protected readonly stepIndex = signal<number>(0);
-  protected readonly loadingProgress = signal<number>(0); // 0..100
   protected readonly calcComplete = signal<boolean>(false);
-
-  // Кольцо прогресса (r=52): окружность и смещение под loadingProgress.
-  private readonly CALC_RING_CIRC = 2 * Math.PI * 52;
-  protected readonly ringDash = this.CALC_RING_CIRC;
-  protected readonly ringOffset = computed(
-    () => this.CALC_RING_CIRC * (1 - this.loadingProgress() / 100),
-  );
 
   protected readonly quotes = signal<Quote[]>([]);
   protected readonly selectedQuoteId = signal<string | null>(null);
@@ -226,7 +222,6 @@ export class OsagoPage {
   // Timers for the loading animation
   private calcTimers: ReturnType<typeof setTimeout>[] = [];
   private stepTimer: ReturnType<typeof setInterval> | null = null;
-  private progressTimer: ReturnType<typeof setInterval> | null = null;
   private paymentTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly form = this.fb.nonNullable.group({
@@ -366,37 +361,23 @@ export class OsagoPage {
     // (алгоритм вывода СК скрыт).
     this.quotes.set(this.generateQuotes());
     this.stepIndex.set(0);
-    this.loadingProgress.set(0);
     this.calcComplete.set(false);
     this.view.set('loading');
 
-    // Строка статуса сменяется по очереди.
+    // Крупная строка статуса сменяется по очереди.
     const stepMs = CALC_TOTAL_MS / CALC_STEPS.length;
     this.stepTimer = setInterval(() => {
       this.stepIndex.update((i) => Math.min(i + 1, CALC_STEPS.length - 1));
     }, stepMs);
 
-    // Плавная полоса прогресса (по времени).
-    const start = performance.now();
-    this.progressTimer = setInterval(() => {
-      const pct = Math.min(100, ((performance.now() - start) / CALC_TOTAL_MS) * 100);
-      this.loadingProgress.set(pct);
-    }, 200);
-
-    // Короткий момент «Готово» → переход на результаты.
+    // Короткий момент завершения → переход на результаты.
     this.calcTimers.push(setTimeout(() => this.calcComplete.set(true), CALC_COMPLETE_AT_MS));
-    this.calcTimers.push(
-      setTimeout(() => {
-        this.loadingProgress.set(100);
-        this.view.set('results');
-      }, CALC_TOTAL_MS),
-    );
+    this.calcTimers.push(setTimeout(() => this.view.set('results'), CALC_TOTAL_MS));
   }
 
   cancelCalculation(): void {
     this.clearTimers();
     this.stepIndex.set(0);
-    this.loadingProgress.set(0);
     this.calcComplete.set(false);
     this.view.set('form');
   }
@@ -645,10 +626,6 @@ export class OsagoPage {
     if (this.stepTimer) {
       clearInterval(this.stepTimer);
       this.stepTimer = null;
-    }
-    if (this.progressTimer) {
-      clearInterval(this.progressTimer);
-      this.progressTimer = null;
     }
     if (this.paymentTimeoutId) {
       clearTimeout(this.paymentTimeoutId);

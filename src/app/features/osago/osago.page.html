@@ -462,60 +462,25 @@
   <!-- ─────────────────────────── РАСЧЁТ ─────────────────────────── -->
   @case ('loading') {
     <section class="calc">
-      <div class="calc__card" role="status" aria-live="polite" aria-atomic="false">
-        <!-- Кольцо прогресса (определённый прогресс + «комета» для живости) -->
-        <div
-          class="calc__ring"
-          role="progressbar"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          [attr.aria-valuenow]="loadingProgress() | number: '1.0-0'"
-          aria-label="Прогресс расчёта"
-        >
-          <svg class="calc__ring-svg" viewBox="0 0 120 120" aria-hidden="true">
-            <circle class="calc__ring-track" cx="60" cy="60" r="52" />
-            @if (!calcComplete()) {
-              <circle class="calc__ring-sweep" cx="60" cy="60" r="52" />
-            }
-            <circle
-              class="calc__ring-progress"
-              [class.calc__ring-progress--done]="calcComplete()"
-              cx="60"
-              cy="60"
-              r="52"
-              [attr.stroke-dasharray]="ringDash"
-              [attr.stroke-dashoffset]="ringOffset()"
-              transform="rotate(-90 60 60)"
-            />
-          </svg>
-          <div class="calc__ring-center">
-            @if (calcComplete()) {
-              <svg class="calc__ring-check" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 12l4 4 10-10" />
-              </svg>
-            } @else {
-              <span class="calc__ring-num"
-                >{{ loadingProgress() | number: '1.0-0'
-                }}<span class="calc__ring-pct">%</span></span
-              >
-            }
-          </div>
-        </div>
+      <div class="calc__inner" role="status" aria-live="polite" aria-atomic="false">
+        <div class="calc__eyebrow">Расчёт ОСАГО</div>
 
-        @if (calcComplete()) {
-          <h2 class="calc__title">Готово</h2>
-          <p class="calc__status">Нашли предложения от страховых компаний</p>
-        } @else {
-          <h2 class="calc__title">Запрашиваем стоимость в страховых компаниях</h2>
+        <div class="calc__phrase">
           @for (msg of [steps[stepIndex()]]; track stepIndex()) {
-            <p class="calc__status">{{ msg }}</p>
+            <span>{{ msg }}</span>
           }
-        }
-
-        <div class="calc__reassure">
-          <span>Обычно занимает до минуты</span>
-          <span>Пожалуйста, не закрывайте эту страницу — мы собираем ответы</span>
         </div>
+
+        <div
+          class="calc__line"
+          [class.calc__line--done]="calcComplete()"
+          role="progressbar"
+          aria-label="Идёт расчёт"
+        >
+          <i></i>
+        </div>
+
+        <p class="calc__hint">Обычно занимает до 40 секунд · не закрывайте окно</p>
 
         <button type="button" class="calc__cancel" (click)="cancelCalculation()">
           Отменить расчёт

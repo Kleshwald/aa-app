@@ -481,7 +481,7 @@
 }
 
 // ════════════════════════════════════════════════════════════════
-//  CALC screen — живое табло опроса страховых
+//  CALC screen — минимал: крупная фраза + бегущая линия
 // ════════════════════════════════════════════════════════════════
 
 // Спиннер оплаты использует этот же keyframe (см. .payment__spinner).
@@ -498,133 +498,77 @@
   min-height: calc(100vh - 64px - 48px);
 }
 
-.calc__card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.calc__inner {
   width: 100%;
-  max-width: 480px;
-  padding: 48px 48px 32px;
-  background: #ffffff;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  max-width: 600px;
+  padding: 32px;
   text-align: center;
 }
 
-// ─── Кольцо прогресса ───
+// ─── Минимал: крупная сменяющаяся фраза + тонкая «бегущая» линия ───
 
-.calc__ring {
-  position: relative;
-  width: 120px;
-  height: 120px;
+.calc__eyebrow {
+  margin-bottom: 22px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-500);
 }
 
-.calc__ring-svg {
-  width: 120px;
-  height: 120px;
-}
-
-.calc__ring-track {
-  fill: none;
-  stroke: var(--brand-100);
-  stroke-width: 8;
-}
-
-// «Комета» — лёгкая живость поверх трека (не показатель прогресса).
-.calc__ring-sweep {
-  fill: none;
-  stroke: var(--accent-500);
-  stroke-width: 10;
-  stroke-linecap: round;
-  stroke-dasharray: 34 293;
-  opacity: 0.9;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: calc-ring-sweep 2.4s linear infinite;
-}
-
-.calc__ring-progress {
-  fill: none;
-  stroke: var(--header-bg);
-  stroke-width: 10;
-  stroke-linecap: round;
-  transition:
-    stroke-dashoffset 220ms linear,
-    stroke 300ms ease-out;
-
-  &--done {
-    stroke: var(--success-600);
-  }
-}
-
-.calc__ring-center {
-  position: absolute;
-  inset: 0;
+.calc__phrase {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 84px;
 }
 
-.calc__ring-num {
-  display: inline-flex;
-  align-items: baseline;
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-semibold);
-  color: var(--header-bg);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.calc__ring-pct {
-  margin-left: 2px;
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  color: var(--gray-500);
-}
-
-.calc__ring-check {
-  width: 44px;
-  height: 44px;
-  fill: none;
-  stroke: var(--success-600);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  animation: calc-check-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 1;
-}
-
-// ─── Тексты / подсказки / отмена ───
-
-.calc__title {
-  margin: 28px 0 0;
-  max-width: 30ch;
-  font-size: var(--text-lg);
+.calc__phrase span {
+  font-size: clamp(22px, 3vw, 32px);
+  line-height: 1.2;
   font-weight: var(--weight-semibold);
   color: var(--gray-900);
   text-wrap: balance;
+  animation: calc-phrase-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.calc__status {
-  min-height: 28px;
-  margin: 10px 0 0;
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  color: var(--header-bg);
-  animation: calc-status-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.calc__line {
+  position: relative;
+  width: 320px;
+  max-width: 80%;
+  height: 4px;
+  margin: 36px auto 0;
+  background: var(--gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
 }
 
-.calc__reassure {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 28px;
+.calc__line i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--header-bg), var(--accent-500));
+  animation: calc-slide 1.7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.calc__line--done i {
+  width: 100%;
+  background: var(--header-bg);
+  animation: none;
+  transition: width 400ms ease-out;
+}
+
+.calc__hint {
+  margin: 26px 0 0;
   font-size: var(--text-sm);
-  color: var(--gray-600);
+  color: var(--gray-500);
 }
 
 .calc__cancel {
-  margin-top: 24px;
+  margin-top: 20px;
   padding: 8px 16px;
   min-height: 44px;
   background: none;
@@ -640,16 +584,10 @@
   }
 }
 
-@keyframes calc-ring-sweep {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes calc-status-in {
+@keyframes calc-phrase-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -657,14 +595,12 @@
   }
 }
 
-@keyframes calc-check-in {
-  from {
-    opacity: 0;
-    transform: scale(0.6);
+@keyframes calc-slide {
+  0% {
+    transform: translateX(-110%);
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+  100% {
+    transform: translateX(260%);
   }
 }
 
@@ -685,14 +621,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .calc__ring-progress {
-    transition: none;
+  .calc__phrase span {
+    animation: none;
   }
-  .calc__ring-sweep {
-    display: none;
+  .calc__line i {
+    width: 100%;
+    animation: none;
   }
-  .calc__status,
-  .calc__ring-check,
   .results {
     animation: none;
   }
