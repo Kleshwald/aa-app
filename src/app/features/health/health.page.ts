@@ -12,6 +12,8 @@ import { type FormArray, FormBuilder, type FormGroup, ReactiveFormsModule } from
 import { Router } from '@angular/router';
 import { startWith } from 'rxjs';
 
+import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
+
 type HealthProduct = 'ns' | 'tick';
 type InsureType = 'individual' | 'group';
 type Category = 'child' | 'adult';
@@ -63,7 +65,7 @@ const KV_PERCENT = 18;
 
 @Component({
   selector: 'app-health-page',
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, InsurerLogoComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './health.page.html',
   styleUrl: './health.page.scss',

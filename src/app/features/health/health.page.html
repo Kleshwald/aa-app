@@ -118,13 +118,7 @@
       <div class="hl-offers">
         @for (o of baseOffers(); track o.id) {
           <label class="hl-offer" [class.hl-offer--selected]="selectedOfferId() === o.id">
-            <input
-              type="radio"
-              name="offer"
-              class="hl-offer__radio"
-              [checked]="selectedOfferId() === o.id"
-              (change)="selectOffer(o.id)"
-            />
+            <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
             <span class="hl-offer__carrier">{{ o.carrierName }}</span>
             <span class="hl-offer__sum"
               >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
@@ -134,23 +128,41 @@
               {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
               {{ endDate() | date: 'dd.MM.yy' }}
             </span>
+            <input
+              type="radio"
+              name="offer"
+              class="hl-offer__radio"
+              [checked]="selectedOfferId() === o.id"
+              (change)="selectOffer(o.id)"
+            />
           </label>
         }
 
         <button type="button" class="hl-more" (click)="toggleMore()">
-          Ещё предложения {{ showMore() ? '▲' : '▼' }}
+          <svg
+            class="hl-more__chev"
+            [class.hl-more__chev--open]="showMore()"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+          {{
+            showMore() ? 'Скрыть предложения' : 'Ещё предложения с КВ (' + kvOffers().length + ')'
+          }}
         </button>
 
         @if (showMore()) {
           @for (o of kvOffers(); track o.id) {
             <label class="hl-offer" [class.hl-offer--selected]="selectedOfferId() === o.id">
-              <input
-                type="radio"
-                name="offer"
-                class="hl-offer__radio"
-                [checked]="selectedOfferId() === o.id"
-                (change)="selectOffer(o.id)"
-              />
+              <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
               <span class="hl-offer__carrier">{{ o.carrierName }}</span>
               <span class="hl-offer__sum"
                 >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
@@ -164,6 +176,13 @@
                 {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
                 {{ endDate() | date: 'dd.MM.yy' }}
               </span>
+              <input
+                type="radio"
+                name="offer"
+                class="hl-offer__radio"
+                [checked]="selectedOfferId() === o.id"
+                (change)="selectOffer(o.id)"
+              />
             </label>
           }
         }
