@@ -144,15 +144,11 @@
               @if (bestOfferId() === o.id) {
                 <span class="hl-offer__best">Лучшая цена</span>
               }
-              <span class="hl-offer__carrier">{{ o.carrierName }}</span>
+              <span class="hl-offer__carrier">{{ o.carrierShort }}</span>
               <span class="hl-offer__meta">
                 <span class="hl-offer__sum"
                   >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
                 >
-                <span class="hl-offer__dates">
-                  {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
-                  {{ endDate() | date: 'dd.MM.yy' }}
-                </span>
               </span>
             </div>
 

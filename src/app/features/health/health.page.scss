@@ -15,10 +15,10 @@
     padding-bottom: 16px;
   }
 
-  // Offer-selection view — узкий контейнер (обычно 2 предложения).
+  // Offer-selection view — контейнер под ~2 предложения (не растянуто).
   &--quotes {
     width: 100%;
-    max-width: 760px;
+    max-width: 820px;
     margin: 0 auto;
   }
 }
@@ -311,7 +311,7 @@
 .hl-offer {
   position: relative;
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 150px 280px 44px;
+  grid-template-columns: 64px minmax(0, 1fr) 150px 250px 44px;
   align-items: center;
   column-gap: 20px;
   min-height: 96px;
