@@ -113,10 +113,10 @@
   <!-- ─────────────── РАСЧЁТ ─────────────── -->
   @case ('loading') {
     <app-calc-loader
-      eyebrow="Подбираем предложения"
+      eyebrow="Расчёт {{ productMeta().label }}"
       [step]="calcSteps()[stepIndex()]"
       [complete]="calcComplete()"
-      hint="Запрашиваем актуальные тарифы — это займёт несколько секунд"
+      hint="Обычно занимает несколько секунд · не закрывайте окно"
       (cancelled)="cancelCalculation()"
     />
   }
@@ -125,9 +125,7 @@
   @case ('quotes') {
     <section class="hl hl--quotes">
       <header class="hl__quotes-head">
-        <h2 class="hl__heading">
-          <span class="hl__heading-dot"></span> {{ productMeta().heading }}
-        </h2>
+        <h1 class="hl__heading">Результаты расчёта</h1>
         <p class="hl__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
       </header>
 
@@ -183,21 +181,25 @@
               </span>
             </div>
 
-            <div class="hl-price-ctl" role="group" aria-label="Скидка клиенту">
-              @for (tier of discountTiers; track tier) {
-                <button
-                  type="button"
-                  class="hl-price-ctl__chip"
-                  [class.hl-price-ctl__chip--active]="offerDiscount(o) === tier"
-                  [class.hl-price-ctl__chip--disc]="tier > 0 && offerDiscount(o) === tier"
-                  (click)="
-                    setDiscount(o.id, tier); $event.preventDefault(); $event.stopPropagation()
-                  "
-                >
-                  {{ tier === 0 ? 'Без скидки' : '−' + tier + '%' }}
-                </button>
-              }
-            </div>
+            @if (o.discountable) {
+              <div class="hl-price-ctl" role="group" aria-label="Скидка клиенту">
+                @for (tier of discountTiers; track tier) {
+                  <button
+                    type="button"
+                    class="hl-price-ctl__chip"
+                    [class.hl-price-ctl__chip--active]="offerDiscount(o) === tier"
+                    [class.hl-price-ctl__chip--disc]="tier > 0 && offerDiscount(o) === tier"
+                    (click)="
+                      setDiscount(o.id, tier); $event.preventDefault(); $event.stopPropagation()
+                    "
+                  >
+                    {{ tier === 0 ? 'Без скидки' : '−' + tier + '%' }}
+                  </button>
+                }
+              </div>
+            } @else {
+              <span class="hl-price-ctl__fixed">Фиксированная цена</span>
+            }
 
             <input
               type="radio"

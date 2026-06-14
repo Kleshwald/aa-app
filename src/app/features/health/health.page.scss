@@ -32,33 +32,28 @@
   color: var(--header-bg);
 }
 
-.hl__heading {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  color: var(--gray-900);
-}
-
-.hl__heading-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
-  background: var(--accent-500);
-}
-
+// Шапка результатов — идентична ОСАГО (.results__head / .results__title).
 .hl__quotes-head {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
+}
+
+.hl__heading {
+  margin: 0;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--header-bg);
+  text-align: center;
 }
 
 .hl__subtitle {
   margin: 0;
   font-size: var(--text-sm);
   color: var(--gray-600);
+  text-align: center;
 }
 
 // ─── Product tabs ───
@@ -311,7 +306,7 @@
 .hl-offer {
   position: relative;
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 150px 250px 44px;
+  grid-template-columns: 64px minmax(0, 1fr) 150px 200px 44px;
   align-items: center;
   column-gap: 20px;
   min-height: 96px;
@@ -533,6 +528,13 @@
     font-weight: var(--weight-semibold);
     box-shadow: var(--shadow-xs);
   }
+}
+
+// СК без права на скидку — фиксированная цена (вместо чипов).
+.hl-price-ctl__fixed {
+  justify-self: start;
+  font-size: var(--text-sm);
+  color: var(--gray-500);
 }
 
 // ─── Price-breakdown popover ───

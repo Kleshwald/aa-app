@@ -27,11 +27,12 @@ interface Offer {
   carrierShort: string;
   basePrice: number; // полная цена (без скидки)
   rate: number; // тариф СК как доля страховой суммы (напр. 0.0078)
+  discountable: boolean; // можно ли дать клиенту скидку (у части СК — фиксированная цена)
 }
 
-const PRODUCTS: { id: HealthProduct; label: string; heading: string }[] = [
-  { id: 'ns', label: 'НС', heading: 'Предложения по страхованию от НС:' },
-  { id: 'tick', label: 'Антиклещ', heading: 'Предложения по страхованию от клеща:' },
+const PRODUCTS: { id: HealthProduct; label: string }[] = [
+  { id: 'ns', label: 'НС' },
+  { id: 'tick', label: 'Антиклещ' },
 ];
 
 const CARRIERS: Record<string, { name: string; short: string }> = {
@@ -40,15 +41,20 @@ const CARRIERS: Record<string, { name: string; short: string }> = {
   ugoria: { name: 'Югория', short: 'Югория' },
 };
 
-// Which carriers quote which product, and their mock rate (share of the insured sum / year).
-const PRODUCT_CARRIERS: Record<HealthProduct, { carrierId: string; rate: number }[]> = {
+// Which carriers quote which product, their mock rate (share of the insured sum / year),
+// and whether the agent may give the client a discount (часть СК продаёт по фикс-цене).
+const PRODUCT_CARRIERS: Record<
+  HealthProduct,
+  { carrierId: string; rate: number; discountable: boolean }[]
+> = {
   ns: [
-    { carrierId: 'renessans', rate: 0.0078 },
-    { carrierId: 'soglasie', rate: 0.0085 },
+    { carrierId: 'renessans', rate: 0.0078, discountable: true },
+    { carrierId: 'soglasie', rate: 0.0085, discountable: true },
   ],
   tick: [
-    { carrierId: 'renessans', rate: 0.004 },
-    { carrierId: 'ugoria', rate: 0.0045 },
+    // По Антиклещу скидку даёт только Югория; у Ренессанса — один вариант цены.
+    { carrierId: 'renessans', rate: 0.004, discountable: false },
+    { carrierId: 'ugoria', rate: 0.0045, discountable: true },
   ],
 };
 
@@ -60,12 +66,14 @@ const TERMS: { value: string; label: string; months: number }[] = [
 
 const SUMS = [50000, 100000, 150000, 300000, 500000, 1000000];
 
-// Скидка клиенту, % (агент отдаёт часть своего КВ). Видимое управление ценой.
-const DISCOUNT_TIERS = [0, 10, 18] as const;
+// Управление ценой: либо полная цена, либо цена со скидкой 15% для клиента.
+const DISCOUNT_PCT = 15;
+const DISCOUNT_TIERS = [0, DISCOUNT_PCT] as const;
 
-// Тайминги быстрого лоадера «Здоровья».
-const HL_CALC_TOTAL_MS = 4000; // момент «Готово»
-const HL_CALC_QUOTES_AT_MS = 4700; // переход к предложениям
+// Тайминги лоадера «Здоровья»: фиксированная длительность фразы (читаемо),
+// затем короткая выдержка на «Готово» перед переходом к предложениям.
+const HL_STEP_MS = 1400;
+const HL_DONE_HOLD_MS = 700;
 
 @Component({
   selector: 'app-health-page',
@@ -186,14 +194,17 @@ export class HealthPage {
     { text: 'Получаем ответы' },
   ]);
 
-  // Цена и скидка по офферу (управление ценой).
+  // Цена и скидка по офферу (управление ценой). У неразрешённых к скидке СК — всегда 0.
   offerDiscount(offer: Offer): number {
+    if (!offer.discountable) return 0;
     return this.discounts()[offer.id] ?? 0;
   }
   offerPrice(offer: Offer): number {
     return Math.round(offer.basePrice * (1 - this.offerDiscount(offer) / 100));
   }
   setDiscount(offerId: string, pct: number): void {
+    const offer = this.offers().find((o) => o.id === offerId);
+    if (!offer?.discountable) return;
     this.discounts.update((d) => ({ ...d, [offerId]: pct }));
   }
 
@@ -241,13 +252,14 @@ export class HealthPage {
     this.calcComplete.set(false);
     this.view.set('loading');
 
-    // Быстрый лоадер: фразы сменяются по очереди, затем «Готово» → предложения.
-    const stepMs = HL_CALC_TOTAL_MS / this.calcSteps().length;
+    // Лоадер: каждая фраза держится HL_STEP_MS (читаемо), затем «Готово» → предложения.
+    const steps = this.calcSteps().length;
+    const totalMs = HL_STEP_MS * steps;
     this.stepTimer = setInterval(() => {
-      this.stepIndex.update((i) => Math.min(i + 1, this.calcSteps().length - 1));
-    }, stepMs);
-    this.calcTimers.push(setTimeout(() => this.calcComplete.set(true), HL_CALC_TOTAL_MS));
-    this.calcTimers.push(setTimeout(() => this.view.set('quotes'), HL_CALC_QUOTES_AT_MS));
+      this.stepIndex.update((i) => Math.min(i + 1, steps - 1));
+    }, HL_STEP_MS);
+    this.calcTimers.push(setTimeout(() => this.calcComplete.set(true), totalMs));
+    this.calcTimers.push(setTimeout(() => this.view.set('quotes'), totalMs + HL_DONE_HOLD_MS));
   }
 
   cancelCalculation(): void {
@@ -337,6 +349,7 @@ export class HealthPage {
           carrierShort: c.short,
           basePrice: base,
           rate: pc.rate,
+          discountable: pc.discountable,
         };
       })
       .sort((a, b) => a.basePrice - b.basePrice);

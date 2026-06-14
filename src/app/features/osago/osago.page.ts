@@ -476,18 +476,6 @@ export class OsagoPage {
     return ADD_ON_PRESETS.find((p) => p.id === id)?.name ?? '';
   }
 
-  /** "5 предложений" / "2 предложения" — Russian plural for the results subtitle. */
-  offersCountLabel(): string {
-    const n = this.quotes().length;
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-    let word: string;
-    if (mod10 === 1 && mod100 !== 11) word = 'предложение';
-    else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) word = 'предложения';
-    else word = 'предложений';
-    return `${n} ${word}`;
-  }
-
   // ─── Issue / payment flow ───
 
   issue(quoteId: string): void {
