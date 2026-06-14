@@ -42,32 +42,38 @@ const DOCUMENT_TYPES = [
   { value: 'temporary-id', label: 'Временное удостоверение' },
 ] as const;
 
-// «Опрос страховых» — экран ожидания как живое табло: 7 СК отвечают по очереди
-// своей ценой. Сообщения честно отражают реальные шаги расчёта ОСАГО.
+// Экран ожидания — анонимный «скан рынка». Алгоритм вывода СК скрыт «под
+// капотом»: НЕ показываем, кто ответил, в каком порядке и по какой цене.
+// Сообщения описывают РАБОТУ платформы, а не ответы конкретных компаний.
 const CALC_STATUS_MESSAGES = [
-  'Проверяем данные автомобиля в НСИС',
-  'Запрашиваем КБМ водителей в базе НСИС',
-  'Отправляем запрос в 7 страховых компаний',
-  'Получаем расчёты от страховых компаний',
-  'Применяем коэффициенты ЦБ РФ',
-  'Сравниваем условия и цены',
-  'Подбираем для вас лучшую цену',
-  'Почти готово — формируем предложения',
+  'Проверяем данные автомобиля и водителей…',
+  'Запрашиваем КБМ в базе НСИС…',
+  'Сравниваем условия по всему рынку ОСАГО…',
+  'Применяем правила и тарифы страховых компаний…',
+  'Учитываем вашу скидку за безаварийную езду…',
+  'Отбираем самые выгодные предложения…',
+  'Проверяем точность расчётов…',
+  'Почти готово — формируем итоговый список…',
 ] as const;
 
-// Сценарий ответов СК (front-load + неравномерные паузы = ощущение реального
-// опроса). id совпадают с CARRIERS. Последняя (пул) отвечает дольше всех.
-const CALC_REVEAL_SCHEDULE: readonly { id: string; at: number }[] = [
-  { id: 'zetta', at: 3_500 },
-  { id: 'renessans', at: 6_000 },
-  { id: 'sogaz', at: 11_000 },
-  { id: 'ugoria', at: 16_500 },
-  { id: 'rosgosstrah', at: 22_000 },
-  { id: 'soglasie', at: 28_000 },
-  { id: 'euroins', at: 38_500 },
+// Этапы работы (не компании!) — дают «дофаминовые» отметки выполнения.
+const CALC_PHASES = [
+  'Проверяем данные',
+  'Запрос в НСИС',
+  'Сравниваем рынок',
+  'Готовим лучшие',
+] as const;
+
+// Сценарий продвижения: сколько этапов завершено и насколько заполнено кольцо.
+// Привязано к нашему таймеру, НЕ к ответам СК.
+const CALC_PHASE_SCHEDULE: readonly { at: number; done: number; progress: number }[] = [
+  { at: 6_000, done: 1, progress: 0.35 },
+  { at: 15_000, done: 2, progress: 0.58 },
+  { at: 26_000, done: 3, progress: 0.82 },
+  { at: 33_000, done: 3, progress: 0.9 }, // удержание у ~90% (не «фейковый дедлайн»)
 ];
 
-const CALC_STATUS_INTERVAL_MS = 5_000;
+const CALC_STATUS_INTERVAL_MS = 4_500;
 const CALC_COMPLETE_AT_MS = 39_000; // момент «Готово» (зелёное кольцо + галочка)
 const CALC_TOTAL_MS = 40_000; // переход на результаты
 
@@ -178,12 +184,16 @@ export class OsagoPage {
   // ─── Flow state ───
   protected readonly view = signal<View>('form');
 
-  // Экран опроса СК
+  // Экран «скан рынка» — без раскрытия конкретных СК.
   protected readonly statusMessages = CALC_STATUS_MESSAGES;
+  protected readonly phases = CALC_PHASES;
   protected readonly statusIndex = signal<number>(0);
-  protected readonly respondedIds = signal<readonly string[]>([]);
+  protected readonly phaseDone = signal<number>(0); // сколько этапов завершено (0..4)
+  protected readonly scanProgress = signal<number>(0); // 0..1 заполнение кольца
   protected readonly calcComplete = signal<boolean>(false);
-  protected readonly respondedCount = computed(() => this.respondedIds().length);
+
+  // Логотипы для амбиентной «орбиты» — все равны, ни один не выделяется/не оценивается.
+  protected readonly scanCarriers = CARRIERS.map((c) => ({ id: c.id, name: c.shortName }));
 
   protected readonly quotes = signal<Quote[]>([]);
   protected readonly selectedQuoteId = signal<string | null>(null);
@@ -192,35 +202,23 @@ export class OsagoPage {
     return id ? (this.quotes().find((q) => q.id === id) ?? null) : null;
   });
 
-  // Карточки в списке опроса — фиксированный порядок CARRIERS (без пересортировки).
-  protected readonly waitCarriers = computed<Quote[]>(() =>
-    CARRIERS.map((c) => this.quotes().find((q) => q.carrierId === c.id)).filter(
-      (q): q is Quote => !!q,
-    ),
-  );
-  // Верхняя ещё не ответившая СК — на ней крутятся точки «ожидаем».
-  protected readonly activeWaitCarrierId = computed<string | null>(() => {
-    const responded = this.respondedIds();
-    const next = this.waitCarriers().find((q) => !responded.includes(q.carrierId));
-    return next?.carrierId ?? null;
-  });
-  // Текущий лидер по цене среди ответивших — «лучшая цена пока».
-  protected readonly bestWaitCarrierId = computed<string | null>(() => {
-    const responded = this.respondedIds();
-    const revealed = this.quotes().filter((q) => responded.includes(q.carrierId));
-    if (revealed.length === 0) return null;
-    return revealed.reduce((min, q) => (q.osagoPrice < min.osagoPrice ? q : min)).carrierId;
-  });
-
-  // Кольцо прогресса (r=54): окружность и смещение под respondedCount/7.
-  private readonly CALC_RING_CIRC = 2 * Math.PI * 54;
-  protected readonly calcRingDash = this.CALC_RING_CIRC;
-  protected readonly calcRingOffset = computed(
-    () => this.CALC_RING_CIRC * (1 - this.respondedCount() / CARRIERS.length),
+  // Кольцо скана (r=96): окружность и смещение под scanProgress.
+  private readonly SCAN_RING_CIRC = 2 * Math.PI * 96;
+  protected readonly scanRingDash = this.SCAN_RING_CIRC;
+  protected readonly scanRingOffset = computed(
+    () => this.SCAN_RING_CIRC * (1 - this.scanProgress()),
   );
 
-  isResponded(carrierId: string): boolean {
-    return this.respondedIds().includes(carrierId);
+  phaseState(index: number): 'done' | 'active' | 'pending' {
+    const done = this.phaseDone();
+    if (index < done) return 'done';
+    if (index === done) return 'active';
+    return 'pending';
+  }
+
+  /** Угол размещения логотипа на орбите. */
+  logoAngle(index: number): number {
+    return (index * 360) / this.scanCarriers.length;
   }
 
   // Modal for add-on editing
@@ -398,36 +396,45 @@ export class OsagoPage {
 
   calculate(): void {
     this.clearTimers();
-    // Котировки считаются сразу; на экране опроса мы лишь раскрываем их по очереди
-    // (честная «театрализация» реального ожидания ответов от СК).
+    // Котировки считаются сразу, но НЕ показываются до экрана результатов
+    // (алгоритм вывода СК скрыт). Экран ожидания — анонимный «скан рынка».
     this.quotes.set(this.generateQuotes());
-    this.respondedIds.set([]);
+    this.phaseDone.set(0);
+    this.scanProgress.set(0.12);
     this.statusIndex.set(0);
     this.calcComplete.set(false);
     this.view.set('loading');
 
-    // Сообщение «что происходит» меняется каждые 5 секунд.
+    // Строка «что происходит» меняется каждые ~4.5 секунды.
     this.statusTimer = setInterval(() => {
       this.statusIndex.update((i) => Math.min(i + 1, CALC_STATUS_MESSAGES.length - 1));
     }, CALC_STATUS_INTERVAL_MS);
 
-    // СК отвечают по очереди по сценарию.
-    for (const step of CALC_REVEAL_SCHEDULE) {
+    // Этапы работы завершаются по нашему сценарию (не по ответам СК).
+    for (const step of CALC_PHASE_SCHEDULE) {
       this.calcTimers.push(
         setTimeout(() => {
-          this.respondedIds.update((ids) => (ids.includes(step.id) ? ids : [...ids, step.id]));
+          this.phaseDone.set(step.done);
+          this.scanProgress.set(step.progress);
         }, step.at),
       );
     }
 
-    // Кульминация «Готово», затем переход на результаты.
-    this.calcTimers.push(setTimeout(() => this.calcComplete.set(true), CALC_COMPLETE_AT_MS));
+    // Кульминация «Готово» → переход на результаты.
+    this.calcTimers.push(
+      setTimeout(() => {
+        this.calcComplete.set(true);
+        this.phaseDone.set(CALC_PHASES.length);
+        this.scanProgress.set(1);
+      }, CALC_COMPLETE_AT_MS),
+    );
     this.calcTimers.push(setTimeout(() => this.view.set('results'), CALC_TOTAL_MS));
   }
 
   cancelCalculation(): void {
     this.clearTimers();
-    this.respondedIds.set([]);
+    this.phaseDone.set(0);
+    this.scanProgress.set(0);
     this.calcComplete.set(false);
     this.view.set('form');
   }
@@ -563,9 +570,13 @@ export class OsagoPage {
     const power = this.form.controls.vehicle.controls.power.value ?? 100;
     const basePrice = Math.round(2500 + power * 30);
 
-    // Все 7 СК участвуют в опросе и в результатах (так список опроса и итог
-    // согласованы: кто ответил на табло — тот и в предложениях).
-    const quotes = CARRIERS.map((c, idx) => {
+    // Алгоритм вывода СК «под капотом»: на результатах показываем подобранную
+    // выборку (4–6 компаний), а не весь опрошенный рынок.
+    const sample = [...CARRIERS]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4 + Math.floor(Math.random() * 3));
+
+    const quotes = sample.map((c, idx) => {
       const variance = Math.round((Math.random() - 0.3) * 1500);
       const osagoPrice = Math.max(3500, basePrice + variance);
       // Every quote ships with a pre-selected add-on. Reinsurance-pool quotes

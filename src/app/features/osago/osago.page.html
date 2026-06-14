@@ -459,97 +459,114 @@
     </section>
   }
 
-  <!-- ─────────────────────── ОПРОС СТРАХОВЫХ ─────────────────────── -->
+  <!-- ─────────────────────── ПОДБОР ПРЕДЛОЖЕНИЙ ─────────────────────── -->
   @case ('loading') {
     <section class="calc">
       <div class="calc__card" role="status" aria-live="polite" aria-atomic="false">
-        <!-- Кольцо: N / 7 ответили -->
+        <h2 class="calc__title">
+          {{
+            calcComplete()
+              ? 'Нашли для вас лучшие варианты'
+              : 'Подбираем для вас лучшие предложения'
+          }}
+        </h2>
+        <p class="calc__subtitle">
+          {{ calcComplete() ? 'Сейчас покажем цены' : 'Сравниваем условия по всему рынку ОСАГО' }}
+        </p>
+
+        <!-- Анонимный «скан рынка»: кольцо + амбиентная орбита логотипов -->
         <div
-          class="calc-ring"
+          class="calc-scan"
           role="progressbar"
-          [attr.aria-valuenow]="respondedCount()"
-          aria-valuemin="0"
-          [attr.aria-valuemax]="waitCarriers().length"
-          aria-label="Ответили страховых компаний"
+          aria-label="Идёт подбор предложений по ОСАГО"
+          [attr.aria-valuetext]="statusMessages[statusIndex()]"
         >
-          <svg class="calc-ring__svg" viewBox="0 0 120 120" aria-hidden="true">
-            <circle cx="60" cy="60" r="54" fill="none" stroke="var(--gray-100)" stroke-width="8" />
+          <div class="calc-scan__orbit" aria-hidden="true">
+            @for (c of scanCarriers; track c.id; let i = $index) {
+              <span
+                class="calc-scan__logo"
+                [style.transform]="'rotate(' + logoAngle(i) + 'deg) translateY(-104px)'"
+              >
+                <app-insurer-logo [id]="c.id" [name]="c.name" />
+              </span>
+            }
+          </div>
+
+          <svg class="calc-scan__svg" viewBox="0 0 220 220" aria-hidden="true">
             <circle
-              class="calc-ring__arc"
-              [class.calc-ring__arc--done]="calcComplete()"
-              cx="60"
-              cy="60"
-              r="54"
+              cx="110"
+              cy="110"
+              r="96"
+              fill="none"
+              stroke="var(--gray-100)"
+              stroke-width="10"
+            />
+            <circle
+              class="calc-scan__arc"
+              [class.calc-scan__arc--done]="calcComplete()"
+              cx="110"
+              cy="110"
+              r="96"
               fill="none"
               stroke="var(--accent-500)"
-              stroke-width="8"
+              stroke-width="10"
               stroke-linecap="round"
-              [attr.stroke-dasharray]="calcRingDash"
-              [attr.stroke-dashoffset]="calcRingOffset()"
-              transform="rotate(-90 60 60)"
+              [attr.stroke-dasharray]="scanRingDash"
+              [attr.stroke-dashoffset]="scanRingOffset()"
+              transform="rotate(-90 110 110)"
             />
+            @if (!calcComplete()) {
+              <circle
+                class="calc-scan__sweep"
+                cx="110"
+                cy="110"
+                r="80"
+                fill="none"
+                stroke="var(--accent-300)"
+                stroke-width="4"
+                stroke-linecap="round"
+                stroke-dasharray="40 600"
+              />
+            }
           </svg>
-          <div class="calc-ring__center">
+
+          <div class="calc-scan__center">
             @if (calcComplete()) {
-              <svg class="calc-ring__check" viewBox="0 0 24 24" aria-hidden="true">
+              <svg class="calc-scan__check" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M5 12l4 4 10-10" />
               </svg>
+              <span class="calc-scan__label">Готово</span>
             } @else {
-              <span class="calc-ring__count"
-                >{{ respondedCount() }} / {{ waitCarriers().length }}</span
-              >
-              <span class="calc-ring__cap">ответили</span>
+              <svg class="calc-scan__glyph" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+              <span class="calc-scan__label">Анализ рынка</span>
             }
           </div>
         </div>
 
-        <h2 class="calc__title">
-          {{ calcComplete() ? 'Готово! Нашли предложения' : 'Опрашиваем страховые компании' }}
-        </h2>
-        <p class="calc__status">
-          {{ calcComplete() ? 'Сравните цены и оформите полис' : statusMessages[statusIndex()] }}
-        </p>
-
-        <!-- Живое табло ответов -->
-        <ul class="calc-carriers">
-          @for (q of waitCarriers(); track q.carrierId) {
-            <li
-              class="race-row"
-              [attr.data-state]="isResponded(q.carrierId) ? 'responded' : 'pending'"
-            >
-              <app-insurer-logo
-                class="race-row__logo"
-                [id]="q.carrierId"
-                [name]="q.carrierShortName"
-              />
-              <span class="race-row__name">{{ q.carrierName }}</span>
-
-              @if (isResponded(q.carrierId)) {
-                <span class="race-row__result">
-                  @if (bestWaitCarrierId() === q.carrierId) {
-                    <span class="race-row__lead">лучшая цена</span>
-                  }
-                  <span class="race-row__price">{{ q.osagoPrice | number: '1.0-0' }} ₽</span>
-                  <span class="race-row__check" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10" /></svg>
-                  </span>
-                </span>
-              } @else if (activeWaitCarrierId() === q.carrierId) {
-                <span class="race-row__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-              } @else {
-                <span class="race-row__wait">ожидаем</span>
-              }
+        <!-- Этапы работы (не компании) -->
+        <ol class="calc-steps">
+          @for (p of phases; track p; let i = $index) {
+            <li class="calc-step" [attr.data-state]="phaseState(i)">
+              <span class="calc-step__node">
+                <svg class="calc-step__check" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12l4 4 10-10" />
+                </svg>
+              </span>
+              <span class="calc-step__label">{{ p }}</span>
             </li>
           }
-        </ul>
+        </ol>
 
-        <p class="calc__count" aria-live="polite">
-          Ответили {{ respondedCount() }} из {{ waitCarriers().length }}
+        <p class="calc__status" aria-live="polite">
+          {{ calcComplete() ? 'Открываем результаты…' : statusMessages[statusIndex()] }}
         </p>
 
         <div class="calc__reassure">
-          <span>Обычно занимает до минуты</span>
-          <span>Не закрывайте окно до завершения</span>
+          <span>Обычно занимает 30–60 секунд</span>
+          <span>Не закрывайте это окно, пока идёт подбор</span>
         </div>
 
         <button type="button" class="calc__cancel" (click)="cancelCalculation()">
@@ -564,7 +581,7 @@
     <section class="results">
       <header class="results__head">
         <h1 class="results__title">Результаты расчёта</h1>
-        <p class="results__subtitle">{{ offersCountLabel() }} · отсортированы по цене ОСАГО</p>
+        <p class="results__subtitle">Подобрали для вас {{ offersCountLabel() }}</p>
       </header>
 
       <div class="results__offers">

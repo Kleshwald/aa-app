@@ -509,21 +509,36 @@
   text-align: center;
 }
 
-// ─── Кольцо прогресса ───
+.calc__title {
+  margin: 0 0 4px;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+}
 
-.calc-ring {
+.calc__subtitle {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--gray-500);
+}
+
+// ─── HERO: анонимный «скан рынка» ───
+
+.calc-scan {
   position: relative;
-  width: 140px;
-  height: 140px;
-  margin: 0 auto;
+  width: 220px;
+  height: 220px;
+  margin: 32px auto;
 }
 
-.calc-ring__svg {
-  width: 140px;
-  height: 140px;
+.calc-scan__svg {
+  position: relative;
+  z-index: 1;
+  width: 220px;
+  height: 220px;
 }
 
-.calc-ring__arc {
+.calc-scan__arc {
   transition:
     stroke-dashoffset 500ms cubic-bezier(0.16, 1, 0.3, 1),
     stroke 400ms ease;
@@ -533,30 +548,54 @@
   }
 }
 
-.calc-ring__center {
+.calc-scan__sweep {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: calc-sweep 2.4s linear infinite;
+}
+
+// Амбиентная орбита логотипов — все равны, вращаются как единое целое.
+.calc-scan__orbit {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  animation: calc-orbit 60s linear infinite;
+}
+
+.calc-scan__logo {
+  --ins-logo-size: 28px;
+  position: absolute;
+  top: calc(50% - 14px);
+  left: calc(50% - 14px);
+  opacity: 0.28;
+  filter: grayscale(1);
+}
+
+.calc-scan__center {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  pointer-events: none;
 }
 
-.calc-ring__count {
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-semibold);
-  color: var(--gray-900);
-  font-variant-numeric: tabular-nums;
+.calc-scan__glyph {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: var(--brand-500);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.calc-ring__cap {
-  font-size: var(--text-xs);
-  color: var(--gray-500);
-}
-
-.calc-ring__check {
-  width: 48px;
-  height: 48px;
+.calc-scan__check {
+  width: 44px;
+  height: 44px;
   fill: none;
   stroke: var(--success-600);
   stroke-width: 3;
@@ -565,153 +604,109 @@
   animation: calc-check-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 1;
 }
 
-.calc__title {
-  margin: 20px 0 4px;
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
-  color: var(--gray-900);
-}
-
-.calc__status {
-  margin: 0 0 24px;
-  min-height: 24px;
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  color: var(--accent-600);
-  transition: opacity 240ms ease-in-out;
-}
-
-// ─── Табло ответов ───
-
-.calc-carriers {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.race-row {
-  --ins-logo-size: 36px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 52px;
-  padding: 0 8px;
-  border-bottom: 1px solid var(--gray-100);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &[data-state='responded'] {
-    animation: calc-row-arrive 600ms ease-out 1;
-  }
-}
-
-.race-row__logo {
-  transition:
-    filter 320ms ease-out,
-    opacity 320ms ease-out;
-
-  .race-row[data-state='pending'] & {
-    filter: grayscale(1);
-    opacity: 0.55;
-  }
-}
-
-.race-row__name {
-  flex: 1;
-  min-width: 0;
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  color: var(--gray-700);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  .race-row[data-state='responded'] & {
-    color: var(--gray-900);
-  }
-}
-
-.race-row__result {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  animation: calc-result-in 380ms cubic-bezier(0.16, 1, 0.3, 1) 1;
-}
-
-.race-row__lead {
-  padding: 2px 8px;
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  color: var(--success-700);
-  background: var(--success-50);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
-
-.race-row__price {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  color: var(--gray-900);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.race-row__check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-full);
-  background: var(--success-50);
-
-  svg {
-    width: 14px;
-    height: 14px;
-    fill: none;
-    stroke: var(--success-600);
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-}
-
-.race-row__wait {
+.calc-scan__label {
   font-size: var(--text-sm);
   color: var(--gray-500);
 }
 
-.race-row__dots {
-  display: inline-flex;
+// ─── Этапы работы (stepper) ───
+
+.calc-steps {
+  display: flex;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.calc-step {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 
-  i {
-    width: 5px;
-    height: 5px;
-    border-radius: var(--radius-full);
+  &:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 11px;
+    left: -50%;
+    width: 100%;
+    height: 2px;
+    background: var(--gray-200);
+  }
+
+  &[data-state='active']:not(:first-child)::before,
+  &[data-state='done']:not(:first-child)::before {
     background: var(--accent-500);
-    animation: calc-dot-pulse 1.2s ease-in-out infinite;
-
-    &:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    &:nth-child(3) {
-      animation-delay: 0.4s;
-    }
   }
 }
 
-// ─── Подписи под табло ───
+.calc-step__node {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  border: 2px solid var(--gray-200);
+  box-sizing: border-box;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease;
 
-.calc__count {
-  margin: 12px 0 0;
-  font-size: var(--text-sm);
+  .calc-step[data-state='active'] & {
+    border-color: var(--accent-500);
+    background: var(--brand-50);
+  }
+  .calc-step[data-state='done'] & {
+    border-color: var(--success-600);
+    background: var(--success-600);
+  }
+}
+
+.calc-step__check {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+
+  .calc-step[data-state='done'] & {
+    opacity: 1;
+    animation: calc-check-in 240ms ease-out 1;
+  }
+}
+
+.calc-step__label {
+  font-size: var(--text-xs);
+  text-align: center;
+  color: var(--gray-500);
+
+  .calc-step[data-state='active'] & {
+    color: var(--gray-700);
+    font-weight: var(--weight-medium);
+  }
+  .calc-step[data-state='done'] & {
+    color: var(--gray-600);
+  }
+}
+
+// ─── Статус, подсказки, отмена ───
+
+.calc__status {
+  min-height: 24px;
+  margin: 0;
+  font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  color: var(--gray-600);
+  color: var(--accent-600);
+  transition: opacity 240ms ease-in-out;
 }
 
 .calc__reassure {
@@ -736,37 +731,19 @@
   cursor: pointer;
 
   &:hover {
-    color: var(--gray-800);
+    color: var(--error-600);
   }
 }
 
-@keyframes calc-dot-pulse {
-  0%,
-  100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes calc-result-in {
-  from {
-    opacity: 0;
-    transform: translateX(8px);
-  }
+@keyframes calc-sweep {
   to {
-    opacity: 1;
-    transform: translateX(0);
+    transform: rotate(360deg);
   }
 }
 
-@keyframes calc-row-arrive {
-  from {
-    background: var(--success-50);
-  }
+@keyframes calc-orbit {
   to {
-    background: transparent;
+    transform: rotate(360deg);
   }
 }
 
@@ -798,15 +775,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .calc-ring__arc,
+  .calc-scan__arc,
   .calc__status,
-  .race-row__logo {
+  .calc-step__node {
     transition: none;
   }
-  .calc-ring__check,
-  .race-row[data-state='responded'],
-  .race-row__result,
-  .race-row__dots i,
+  .calc-scan__sweep,
+  .calc-scan__orbit,
+  .calc-scan__check,
+  .calc-step__check,
   .results {
     animation: none;
   }
