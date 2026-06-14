@@ -55,7 +55,7 @@ const CALC_STEPS: readonly { text: string; carrierId?: string }[] = [
   { text: 'Росгосстрах', carrierId: 'rosgosstrah' },
   { text: 'Евроинс', carrierId: 'euroins' },
   { text: 'Сегментация' },
-  { text: 'Проверяем данные в НСИС' },
+  { text: 'Проверка НСИС' },
   { text: 'Получаем ответы от страховых компаний' },
   { text: 'Ещё несколько секунд' },
 ];
