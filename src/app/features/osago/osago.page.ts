@@ -123,12 +123,20 @@ export interface Quote {
 
 type View = 'form' | 'loading' | 'results' | 'payment' | 'success';
 
+// One coefficient line in the "how the ОСАГО price is built" popover.
+interface CoefRow {
+  code: string;
+  label: string;
+  value: number;
+}
+
 @Component({
   selector: 'app-osago-page',
   imports: [ReactiveFormsModule, DatePipe, DecimalPipe, InsurerLogoComponent, AddonIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './osago.page.html',
   styleUrl: './osago.page.scss',
+  host: { '(document:keydown.escape)': 'onEscape()' },
 })
 export class OsagoPage {
   private readonly fb = inject(FormBuilder);
@@ -175,6 +183,30 @@ export class OsagoPage {
   protected readonly addOnModalQuoteId = signal<string | null>(null);
   protected readonly addOnModalPreset = signal<AddOnPreset['id']>('off');
   protected readonly addOnModalPrice = signal<number>(0);
+
+  // Which quote's "how the price is built" popover is open (null = none).
+  protected readonly priceInfoQuoteId = signal<string | null>(null);
+
+  // ОСАГО coefficients — same for all carriers (depend on driver/vehicle, not
+  // the company); the per-carrier base tariff is what makes prices differ.
+  protected readonly osagoCoefs = computed<CoefRow[]>(() => {
+    const power = this.form.controls.vehicle.controls.power.value ?? 100;
+    const km = power >= 150 ? 1.4 : power >= 120 ? 1.2 : power >= 100 ? 1.1 : 1.0;
+    const hasTrailer = this.form.controls.vehicle.controls.hasTrailer.value;
+    const rows: CoefRow[] = [
+      { code: 'КТ', label: 'Территория', value: 1.64 },
+      { code: 'КБМ', label: 'Бонус-малус', value: 0.78 },
+      { code: 'КВС', label: 'Возраст и стаж', value: 1.04 },
+      { code: 'КМ', label: 'Мощность двигателя', value: km },
+      {
+        code: 'КО',
+        label: 'Ограничение по водителям',
+        value: this.driversMode() === 'unlimited' ? 1.94 : 1.0,
+      },
+    ];
+    if (hasTrailer) rows.push({ code: 'КПр', label: 'Прицеп', value: 1.0 });
+    return rows;
+  });
 
   // Whether the quote being edited in the modal forces a mandatory add-on
   // (reinsurance-pool quotes) — used to hide the "Отключить сервис" option.
@@ -361,9 +393,31 @@ export class OsagoPage {
     this.addOnModalQuoteId.set(null);
   }
 
+  // ─── Price-breakdown popover ───
+
+  togglePriceInfo(quoteId: string): void {
+    this.priceInfoQuoteId.update((id) => (id === quoteId ? null : quoteId));
+  }
+
+  closePriceInfo(): void {
+    this.priceInfoQuoteId.set(null);
+  }
+
+  /** Per-carrier base tariff (ТБ) implied by the row price and the shared coefficients. */
+  baseTariff(quote: Quote): number {
+    const product = this.osagoCoefs().reduce((acc, r) => acc * r.value, 1);
+    return Math.round(quote.osagoPrice / product);
+  }
+
+  onEscape(): void {
+    this.closePriceInfo();
+    this.closeAddOnModal();
+  }
+
   // ─── Add-on modal ───
 
   openAddOnModal(quoteId: string): void {
+    this.closePriceInfo();
     const q = this.quotes().find((x) => x.id === quoteId);
     if (!q) return;
     this.addOnModalQuoteId.set(quoteId);
@@ -499,8 +553,12 @@ export class OsagoPage {
       };
     });
 
-    // Rank by base OSAGO premium, ascending — cheapest first (the anchor).
-    return quotes.sort((a, b) => a.osagoPrice - b.osagoPrice);
+    // Segment quotes always on top, reinsurance-pool always below; within each
+    // group rank by ОСАГО price ascending (cheapest first = the anchor).
+    return quotes.sort((a, b) => {
+      if (a.quoteType !== b.quoteType) return a.quoteType === 'segment' ? -1 : 1;
+      return a.osagoPrice - b.osagoPrice;
+    });
   }
 
   private formatRussianDate(iso: string): string {

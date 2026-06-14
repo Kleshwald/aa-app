@@ -133,7 +133,19 @@
             <span class="hl-offer__sum"
               >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
             >
-            <span class="hl-offer__price">{{ o.price | number: '1.0-0' }} ₽</span>
+            <span class="hl-offer__price">
+              {{ o.price | number: '1.0-0' }} ₽
+              <button
+                type="button"
+                class="hl-offer__info"
+                [class.hl-offer__info--open]="priceInfoOfferId() === o.id"
+                [attr.aria-expanded]="priceInfoOfferId() === o.id"
+                aria-label="Как рассчитана стоимость"
+                (click)="togglePriceInfo(o.id); $event.preventDefault(); $event.stopPropagation()"
+              >
+                ?
+              </button>
+            </span>
             <span class="hl-offer__dates">
               {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
               {{ endDate() | date: 'dd.MM.yy' }}
@@ -145,6 +157,12 @@
               [checked]="selectedOfferId() === o.id"
               (change)="selectOffer(o.id)"
             />
+            @if (priceInfoOfferId() === o.id) {
+              <ng-container
+                [ngTemplateOutlet]="priceInfo"
+                [ngTemplateOutletContext]="{ $implicit: o }"
+              />
+            }
           </label>
         }
 
@@ -181,6 +199,16 @@
                 <span class="hl-offer__kv">КВ {{ o.kvPercent }} %</span>
                 <span class="hl-offer__price-new">{{ o.price | number: '1.0-0' }} ₽</span>
                 <span class="hl-offer__price-old">{{ o.basePrice | number: '1.0-0' }} ₽</span>
+                <button
+                  type="button"
+                  class="hl-offer__info"
+                  [class.hl-offer__info--open]="priceInfoOfferId() === o.id"
+                  [attr.aria-expanded]="priceInfoOfferId() === o.id"
+                  aria-label="Как рассчитана стоимость"
+                  (click)="togglePriceInfo(o.id); $event.preventDefault(); $event.stopPropagation()"
+                >
+                  ?
+                </button>
               </span>
               <span class="hl-offer__dates">
                 {{ params.controls.startDate.value | date: 'dd.MM.yy' }} —
@@ -193,10 +221,25 @@
                 [checked]="selectedOfferId() === o.id"
                 (change)="selectOffer(o.id)"
               />
+              @if (priceInfoOfferId() === o.id) {
+                <ng-container
+                  [ngTemplateOutlet]="priceInfo"
+                  [ngTemplateOutletContext]="{ $implicit: o }"
+                />
+              }
             </label>
           }
         }
       </div>
+
+      @if (priceInfoOfferId()) {
+        <button
+          type="button"
+          class="hl-popover-backdrop"
+          aria-label="Закрыть"
+          (click)="closePriceInfo()"
+        ></button>
+      }
 
       <footer class="hl__footer">
         <button type="button" class="hl-btn hl-btn--secondary" (click)="backToParams()">
@@ -211,6 +254,43 @@
           Продолжить
         </button>
       </footer>
+
+      <!-- Shared price-breakdown popover (rendered inside the open offer). -->
+      <ng-template #priceInfo let-o>
+        <div class="hl-popover" role="dialog" aria-label="Расчёт стоимости">
+          <div class="hl-popover__title">Из чего складывается цена</div>
+          <div class="hl-popover__row">
+            <span>Страховая сумма</span>
+            <b>{{ params.controls.sum.value | number: '1.0-0' }} ₽</b>
+          </div>
+          <div class="hl-popover__row">
+            <span>Тариф ({{ o.carrierShort }})</span>
+            <b>{{ o.rate * 100 | number: '1.0-2' }} %</b>
+          </div>
+          <div class="hl-popover__row">
+            <span>Срок ({{ termLabel() }})</span>
+            <b>× {{ termFactor() }}</b>
+          </div>
+          <div class="hl-popover__row">
+            <span>Категория ({{ catLabel() }})</span>
+            <b>× {{ catFactor() }}</b>
+          </div>
+          <div class="hl-popover__row">
+            <span>Застрахованных</span>
+            <b>× {{ count() }}</b>
+          </div>
+          @if (o.kv) {
+            <div class="hl-popover__row">
+              <span>Скидка по КВ {{ o.kvPercent }} %</span>
+              <b>− {{ kvDiscount(o) | number: '1.0-0' }} ₽</b>
+            </div>
+          }
+          <div class="hl-popover__total">
+            <span>Стоимость полиса</span>
+            <b>{{ o.price | number: '1.0-0' }} ₽</b>
+          </div>
+        </div>
+      </ng-template>
     </section>
   }
 

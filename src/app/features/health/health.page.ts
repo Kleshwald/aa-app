@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -26,6 +26,7 @@ interface Offer {
   carrierShort: string;
   price: number;
   basePrice: number;
+  rate: number; // carrier tariff as a share of the insured sum (e.g. 0.0078)
   kv: boolean;
   kvPercent: number;
 }
@@ -65,10 +66,11 @@ const KV_PERCENT = 18;
 
 @Component({
   selector: 'app-health-page',
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, InsurerLogoComponent],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, NgTemplateOutlet, InsurerLogoComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './health.page.html',
   styleUrl: './health.page.scss',
+  host: { '(document:keydown.escape)': 'closePriceInfo()' },
 })
 export class HealthPage {
   private readonly fb = inject(FormBuilder);
@@ -88,6 +90,9 @@ export class HealthPage {
   protected readonly offers = signal<Offer[]>([]);
   protected readonly showMore = signal(false);
   protected readonly selectedOfferId = signal<string | null>(null);
+
+  // Which offer's "how the price is built" popover is open (null = none).
+  protected readonly priceInfoOfferId = signal<string | null>(null);
 
   private paymentTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -154,6 +159,18 @@ export class HealthPage {
     return id ? (this.offers().find((o) => o.id === id) ?? null) : null;
   });
 
+  // Labels/factors for the price-breakdown popover.
+  protected readonly termLabel = computed(
+    () => TERMS.find((t) => t.value === this.paramsValue().term)?.label ?? 'Год',
+  );
+  protected readonly termFactor = computed(
+    () => (TERMS.find((t) => t.value === this.paramsValue().term)?.months ?? 12) / 12,
+  );
+  protected readonly catLabel = computed(() =>
+    this.category() === 'adult' ? 'Взрослый' : 'Ребёнок',
+  );
+  protected readonly catFactor = computed(() => (this.category() === 'adult' ? 1.1 : 1));
+
   protected get insuredControls(): FormGroup[] {
     return (this.issueForm.controls.insured as FormArray<FormGroup>).controls;
   }
@@ -191,6 +208,18 @@ export class HealthPage {
 
   toggleMore(): void {
     this.showMore.update((v) => !v);
+  }
+
+  togglePriceInfo(id: string): void {
+    this.priceInfoOfferId.update((v) => (v === id ? null : id));
+  }
+
+  closePriceInfo(): void {
+    this.priceInfoOfferId.set(null);
+  }
+
+  kvDiscount(offer: Offer): number {
+    return offer.basePrice - offer.price;
   }
 
   continueToIssue(): void {
@@ -259,6 +288,7 @@ export class HealthPage {
         carrierShort: c.short,
         price: base,
         basePrice: base,
+        rate: pc.rate,
         kv: false,
         kvPercent: 0,
       });
@@ -269,6 +299,7 @@ export class HealthPage {
         carrierShort: c.short,
         price: Math.round(base * (1 - KV_PERCENT / 100)),
         basePrice: base,
+        rate: pc.rate,
         kv: true,
         kvPercent: KV_PERCENT,
       });
