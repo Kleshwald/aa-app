@@ -342,6 +342,11 @@
   <!-- ─────────────── ISSUE ─────────────── -->
   @case ('issue') {
     <section class="hl" [formGroup]="issueForm">
+      <header class="hl-issue-head">
+        <h1 class="hl-issue-head__title">{{ productMeta().label }}</h1>
+        <p class="hl-issue-head__sub">Оформление полиса</p>
+      </header>
+
       <div class="hl-card">
         <div class="hl-row">
           <label class="hl-field">
@@ -438,7 +443,14 @@
 
       @for (ins of insuredControls; track $index) {
         <article class="hl-card" [formGroup]="ins">
-          <h3 class="hl-card__title">Застрахованный {{ $index + 1 }}</h3>
+          <header class="hl-card__head">
+            <h3 class="hl-card__title">Застрахованный {{ $index + 1 }}</h3>
+            @if (insuredControls.length > 1) {
+              <button type="button" class="hl-card__remove" (click)="removeInsured($index)">
+                Удалить
+              </button>
+            }
+          </header>
           <div class="hl-row">
             <label class="hl-field"
               ><span class="hl-field__label">Фамилия</span
@@ -460,7 +472,28 @@
         </article>
       }
 
+      <button type="button" class="hl-add-insured" (click)="addInsured()">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+        Добавить застрахованного
+      </button>
+
       <footer class="hl-paybar">
+        <app-insurer-logo
+          class="hl-paybar__logo"
+          [id]="selectedOffer()?.carrierId ?? ''"
+          [name]="selectedOffer()?.carrierShort ?? ''"
+        />
         <span class="hl-paybar__carrier">{{ selectedOffer()?.carrierShort }}</span>
         <span class="hl-paybar__metric">
           <span class="hl-paybar__metric-label">Стоимость полиса</span>
@@ -468,7 +501,7 @@
         </span>
         <span class="hl-paybar__metric">
           <span class="hl-paybar__metric-label">Застрахованы</span>
-          <span class="hl-paybar__metric-value">{{ count() }} чел.</span>
+          <span class="hl-paybar__metric-value">{{ insuredControls.length }} чел.</span>
         </span>
         <span class="hl-paybar__spacer"></span>
         <button type="button" class="hl-btn hl-btn--secondary" (click)="backToQuotes()">
@@ -497,36 +530,16 @@
 
   <!-- ─────────────── SUCCESS ─────────────── -->
   @case ('success') {
-    <section class="hl hl--center">
-      <div class="hl-state">
-        <span class="hl-state__check" aria-hidden="true">
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.4"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </span>
-        <h2 class="hl-state__title">Полис оформлен</h2>
-        <p class="hl-state__text">
-          {{ productMeta().label }} · {{ selectedOffer()?.carrierShort }} ·
-          {{ selectedPrice() | number: '1.0-0' }} ₽ · застрахованы {{ count() }} чел.
-        </p>
-        <div class="hl-state__actions">
-          <button type="button" class="hl-btn hl-btn--secondary" (click)="newCalculation()">
-            Новый расчёт
-          </button>
-          <button type="button" class="hl-btn hl-btn--primary" (click)="goToClients()">
-            К моим клиентам
-          </button>
-        </div>
-      </div>
-    </section>
+    <app-policy-issued
+      [productTitle]="productMeta().label"
+      [carrierId]="selectedOffer()?.carrierId ?? ''"
+      [carrierName]="selectedOffer()?.carrierShort ?? ''"
+      [policyNumber]="policyNumber()"
+      [total]="selectedPrice()"
+      [details]="issuedDetails()"
+      [documents]="issuedDocs"
+      (toClients)="goToClients()"
+      (newPolicy)="newCalculation()"
+    />
   }
 }

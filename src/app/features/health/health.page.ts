@@ -14,6 +14,11 @@ import { startWith } from 'rxjs';
 
 import { CalcLoaderComponent, type CalcStep } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
+import {
+  type PolicyDetail,
+  type PolicyDoc,
+  PolicyIssuedComponent,
+} from '@shared/policy-issued/policy-issued.component';
 
 type HealthProduct = 'accident' | 'sport' | 'tick';
 type InsureType = 'individual' | 'group';
@@ -94,6 +99,7 @@ const HL_DONE_HOLD_MS = 700;
     NgTemplateOutlet,
     InsurerLogoComponent,
     CalcLoaderComponent,
+    PolicyIssuedComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './health.page.html',
@@ -203,6 +209,33 @@ export class HealthPage {
     })),
     { text: 'Получаем ответы' },
   ]);
+
+  // ─── Issued-policy screen ───
+  protected readonly policyNumber = signal<string>('');
+
+  protected readonly issuedDetails = computed<PolicyDetail[]>(() => {
+    const v = this.paramsValue();
+    const ph = this.issueForm.controls.policyholder.getRawValue();
+    const rows: PolicyDetail[] = [
+      {
+        label: 'Период страхования',
+        value: `${this.dmy(new Date(v.startDate || this.toDateInput(this.today)))} — ${this.dmy(this.endDate())}`,
+      },
+      { label: 'Страховая сумма', value: `${(Number(v.sum) || 0).toLocaleString('ru-RU')} ₽` },
+      { label: 'Срок', value: this.termLabel() },
+      { label: 'Застраховано', value: `${this.insuredControls.length} чел.` },
+    ];
+    const fio = [ph.lastName, ph.firstName, ph.middleName].filter(Boolean).join(' ');
+    if (fio) rows.push({ label: 'Страхователь', value: fio });
+    return rows;
+  });
+
+  protected readonly issuedDocs: PolicyDoc[] = [
+    { name: 'Страховой полис' },
+    { name: 'Квитанция об оплате' },
+    { name: 'Правила страхования' },
+    { name: 'Памятка застрахованному' },
+  ];
 
   // Цена и скидка по офферу (управление ценой). У неразрешённых к скидке СК — всегда 0.
   offerDiscount(offer: Offer): number {
@@ -326,7 +359,17 @@ export class HealthPage {
     });
   }
 
+  addInsured(): void {
+    (this.issueForm.controls.insured as FormArray<FormGroup>).push(this.makeInsured());
+  }
+
+  removeInsured(index: number): void {
+    const arr = this.issueForm.controls.insured as FormArray<FormGroup>;
+    if (arr.length > 1) arr.removeAt(index);
+  }
+
   pay(): void {
+    this.policyNumber.set(this.generatePolicyNumber());
     this.view.set('payment');
     this.paymentTimer = setTimeout(() => this.view.set('success'), 3000);
   }
@@ -389,6 +432,18 @@ export class HealthPage {
 
   private toDateInput(d: Date): string {
     return d.toISOString().slice(0, 10);
+  }
+
+  private dmy(d: Date): string {
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `${dd}.${mm}.${d.getFullYear()}`;
+  }
+
+  private generatePolicyNumber(): string {
+    let digits = '';
+    for (let i = 0; i < 10; i++) digits += Math.floor(Math.random() * 10);
+    return `${digits.slice(0, 4)} ${digits.slice(4)}`;
   }
 
   private clearTimers(): void {

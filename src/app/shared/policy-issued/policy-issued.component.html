@@ -1,0 +1,101 @@
+<section class="issued">
+  <div class="issued__card">
+    <header class="issued__head">
+      <span class="issued__badge" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </span>
+      <div class="issued__head-text">
+        <h1 class="issued__title">Полис оформлен</h1>
+        <p class="issued__subtitle">Договор сохранён в разделе «Мои клиенты»</p>
+      </div>
+    </header>
+
+    <div class="issued__policy">
+      <app-insurer-logo class="issued__logo" [id]="carrierId()" [name]="carrierName()" />
+      <div class="issued__policy-main">
+        <span class="issued__product">{{ productTitle() }}</span>
+        <span class="issued__number">Полис № {{ policyNumber() }}</span>
+      </div>
+      <div class="issued__amount">
+        <span class="issued__amount-cap">Оплачено</span>
+        <span class="issued__amount-val">{{ total() | number: '1.0-0' }} ₽</span>
+      </div>
+    </div>
+
+    @if (details().length) {
+      <dl class="issued__details">
+        @for (row of details(); track row.label) {
+          <div class="issued__detail">
+            <dt class="issued__detail-label">{{ row.label }}</dt>
+            <dd class="issued__detail-value">{{ row.value }}</dd>
+          </div>
+        }
+      </dl>
+    }
+
+    @if (documents().length) {
+      <section class="issued__docs">
+        <h2 class="issued__docs-title">Документы по договору</h2>
+        <div class="issued__docs-list">
+          @for (item of documents(); track item.name) {
+            <button type="button" class="issued__doc" (click)="downloadDoc(item)">
+              <span class="issued__doc-ico" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M6 2h9l4 4v16H6z" />
+                  <path d="M15 2v4h4" />
+                  <path d="M9 13h6" />
+                  <path d="M9 17h6" />
+                </svg>
+              </span>
+              <span class="issued__doc-main">
+                <span class="issued__doc-name">{{ item.name }}</span>
+                @if (item.hint) {
+                  <span class="issued__doc-hint">{{ item.hint }}</span>
+                }
+              </span>
+              <span class="issued__doc-dl" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 3v12" />
+                  <path d="M7 11l5 5 5-5" />
+                  <path d="M5 21h14" />
+                </svg>
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    <footer class="issued__actions">
+      <button type="button" class="issued__btn issued__btn--secondary" (click)="newPolicy.emit()">
+        Новый расчёт
+      </button>
+      <button type="button" class="issued__btn issued__btn--primary" (click)="toClients.emit()">
+        К моим клиентам
+      </button>
+    </footer>
+  </div>
+</section>

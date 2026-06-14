@@ -1179,16 +1179,14 @@
 //  PAYMENT / SUCCESS screens
 // ════════════════════════════════════════════════════════════════
 
-.payment,
-.success {
+.payment {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 64px - 48px);
 }
 
-.payment__card,
-.success__card {
+.payment__card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1257,30 +1255,4 @@
   &:hover {
     color: var(--error-600);
   }
-}
-
-.success__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: var(--success-600);
-  color: #ffffff;
-  font-size: 40px;
-  font-weight: var(--weight-semibold);
-}
-
-.success__title {
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
-  color: var(--gray-900);
-  margin: 0;
-}
-
-.success__hint {
-  font-size: var(--text-sm);
-  color: var(--gray-700);
-  margin: 0;
 }

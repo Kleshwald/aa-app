@@ -175,6 +175,82 @@
   color: var(--gray-900);
 }
 
+.hl-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hl-card__remove {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  color: var(--error-600);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 120ms ease-out;
+
+  &:hover {
+    background: var(--error-50);
+  }
+}
+
+// ─── Issue-screen header (название продукта сверху) ───
+
+.hl-issue-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hl-issue-head__title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--header-bg);
+}
+
+.hl-issue-head__sub {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+}
+
+// ─── «Добавить застрахованного» ───
+
+.hl-add-insured {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 12px 18px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--header-bg-hover);
+  background: #ffffff;
+  border: 1px dashed var(--gray-300);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease-out,
+    background 120ms ease-out;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    border-color: var(--accent-400);
+    background: var(--brand-50);
+  }
+}
+
 // ─── Segment toggles (type / category) ───
 
 .hl-seg {
@@ -678,6 +754,10 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   margin-top: 4px;
+}
+
+.hl-paybar__logo {
+  --ins-logo-size: 44px;
 }
 
 .hl-paybar__carrier {

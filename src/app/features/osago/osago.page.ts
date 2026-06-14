@@ -19,6 +19,11 @@ import { Router } from '@angular/router';
 import { AddonIconComponent } from '@shared/addon-icon/addon-icon.component';
 import { CalcLoaderComponent } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
+import {
+  type PolicyDetail,
+  type PolicyDoc,
+  PolicyIssuedComponent,
+} from '@shared/policy-issued/policy-issued.component';
 
 const VEHICLE_PURPOSES = [
   { value: 'personal', label: 'Личная' },
@@ -141,6 +146,7 @@ interface CoefRow {
     InsurerLogoComponent,
     AddonIconComponent,
     CalcLoaderComponent,
+    PolicyIssuedComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './osago.page.html',
@@ -276,6 +282,48 @@ export class OsagoPage {
   protected readonly paymentKind = computed<'card' | 'invoice'>(() =>
     this.insurerType() === 'legal' ? 'invoice' : 'card',
   );
+
+  // ─── Issued-policy screen ───
+  protected readonly policyNumber = signal<string>('');
+
+  protected readonly issuedTotal = computed<number>(() => {
+    const q = this.selectedQuote();
+    return q ? this.totalFor(q) : 0;
+  });
+
+  protected readonly issuedDetails = computed<PolicyDetail[]>(() => {
+    const q = this.selectedQuote();
+    const b = this.form.controls.base.getRawValue();
+    const v = this.form.controls.vehicle.getRawValue();
+    const ph = this.form.controls.policyholder.getRawValue();
+    const rows: PolicyDetail[] = [
+      {
+        label: 'Период страхования',
+        value: `${this.formatDmy(b.startDate)} — ${this.formatDmy(b.endDate)}`,
+      },
+    ];
+    const vehicle = [v.make, v.model].filter(Boolean).join(' ');
+    if (vehicle) {
+      rows.push({
+        label: 'Транспортное средство',
+        value: v.year ? `${vehicle}, ${v.year}` : vehicle,
+      });
+    }
+    if (v.licensePlate) rows.push({ label: 'Гос. номер', value: v.licensePlate });
+    const fio = [ph.lastName, ph.firstName, ph.middleName].filter(Boolean).join(' ');
+    if (fio) rows.push({ label: 'Страхователь', value: fio });
+    if (q && q.addOn.price > 0) {
+      rows.push({ label: 'Доп. сервис', value: this.addOnName(q.addOn.presetId) });
+    }
+    return rows;
+  });
+
+  protected readonly issuedDocs: PolicyDoc[] = [
+    { name: 'Полис ОСАГО', hint: 'Электронный бланк (е-ОСАГО)' },
+    { name: 'Квитанция об оплате' },
+    { name: 'Правила страхования ОСАГО' },
+    { name: 'Памятка при ДТП' },
+  ];
 
   constructor() {
     this.destroyRef.onDestroy(() => this.clearTimers());
@@ -480,14 +528,11 @@ export class OsagoPage {
 
   issue(quoteId: string): void {
     this.selectedQuoteId.set(quoteId);
+    this.policyNumber.set(this.generatePolicyNumber());
     this.view.set('payment');
-    // Simulate payment processing — 3 sec then jump to success → detail page.
+    // Имитация эквайринга — 3 сек, затем экран «Полис оформлен» (без авто-редиректа).
     this.paymentTimeoutId = setTimeout(() => {
       this.view.set('success');
-      // After short success state, route to a detail page (using first policy id).
-      setTimeout(() => {
-        void this.router.navigate(['/clients']);
-      }, 1500);
     }, 3000);
   }
 
@@ -495,6 +540,10 @@ export class OsagoPage {
     if (this.paymentTimeoutId) clearTimeout(this.paymentTimeoutId);
     this.paymentTimeoutId = null;
     this.view.set('results');
+  }
+
+  goToClients(): void {
+    void this.router.navigate(['/clients']);
   }
 
   saveDraft(): void {
@@ -551,6 +600,21 @@ export class OsagoPage {
       if (a.quoteType !== b.quoteType) return a.quoteType === 'segment' ? -1 : 1;
       return a.osagoPrice - b.osagoPrice;
     });
+  }
+
+  /** e-ОСАГО номер: серия из 3 букв + 10 цифр, напр. «ХХХ 0123456789». */
+  private generatePolicyNumber(): string {
+    let digits = '';
+    for (let i = 0; i < 10; i++) digits += Math.floor(Math.random() * 10);
+    return `ХХХ ${digits}`;
+  }
+
+  private formatDmy(iso: string): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `${dd}.${mm}.${d.getFullYear()}`;
   }
 
   private formatRussianDate(iso: string): string {

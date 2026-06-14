@@ -741,12 +741,16 @@
 
   <!-- ─────────────────────────── SUCCESS ─────────────────────────── -->
   @case ('success') {
-    <section class="success">
-      <div class="success__card">
-        <div class="success__icon" aria-hidden="true">✓</div>
-        <h2 class="success__title">Полис оформлен</h2>
-        <p class="success__hint">Перенаправляем в раздел «Мои клиенты»…</p>
-      </div>
-    </section>
+    <app-policy-issued
+      productTitle="ОСАГО"
+      [carrierId]="selectedQuote()?.carrierId ?? ''"
+      [carrierName]="selectedQuote()?.carrierName ?? ''"
+      [policyNumber]="policyNumber()"
+      [total]="issuedTotal()"
+      [details]="issuedDetails()"
+      [documents]="issuedDocs"
+      (toClients)="goToClients()"
+      (newPolicy)="backToForm()"
+    />
   }
 }
