@@ -32,7 +32,7 @@
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
   font-weight: var(--weight-semibold);
-  color: var(--brand-500);
+  color: var(--header-bg);
   text-align: center;
   margin: 0;
 }
@@ -89,11 +89,11 @@
   }
 
   &--active {
-    background: var(--brand-500);
+    background: var(--header-bg);
     color: #ffffff;
 
     &:hover {
-      background: var(--brand-600);
+      background: var(--header-bg-hover);
       color: #ffffff;
     }
   }
@@ -211,7 +211,7 @@
   }
 
   &:focus {
-    border-color: var(--brand-500);
+    border-color: var(--header-bg);
     box-shadow: 0 0 0 3px var(--brand-100);
   }
 
@@ -243,7 +243,7 @@
   input[type='checkbox'] {
     width: 16px;
     height: 16px;
-    accent-color: var(--brand-500);
+    accent-color: var(--header-bg);
     cursor: pointer;
   }
 
@@ -275,7 +275,7 @@
   input[type='radio'] {
     width: 16px;
     height: 16px;
-    accent-color: var(--brand-500);
+    accent-color: var(--header-bg);
     cursor: pointer;
   }
 }
@@ -315,11 +315,11 @@
   }
 
   &--active {
-    background: var(--brand-500);
+    background: var(--header-bg);
     color: #ffffff;
 
     &:hover {
-      background: var(--brand-600);
+      background: var(--header-bg-hover);
       color: #ffffff;
     }
   }
@@ -339,9 +339,9 @@
     background: #ffffff;
 
     &--active {
-      background: var(--brand-500);
+      background: var(--header-bg);
       color: #ffffff;
-      border-color: var(--brand-500);
+      border-color: var(--header-bg);
     }
   }
 }
@@ -351,7 +351,7 @@
 .osago-link {
   background: none;
   border: none;
-  color: var(--brand-500);
+  color: var(--header-bg);
   font-family: inherit;
   font-size: var(--text-sm);
   cursor: pointer;
@@ -359,13 +359,13 @@
   text-decoration: none;
 
   &:hover {
-    color: var(--brand-600);
+    color: var(--header-bg-hover);
     text-decoration: underline;
   }
 
   &--button {
     padding: 10px 16px;
-    border: 1px solid var(--brand-500);
+    border: 1px solid var(--header-bg);
     border-radius: var(--radius-base);
     text-decoration: none;
     align-self: flex-end;
@@ -449,14 +449,14 @@
     color 120ms ease-out;
 
   &--primary {
-    background: var(--brand-500);
+    background: var(--header-bg);
     color: #ffffff;
 
     &:hover {
-      background: var(--brand-600);
+      background: var(--header-bg-hover);
     }
     &:active {
-      background: var(--brand-700);
+      background: var(--header-bg-hover);
     }
     &:focus-visible {
       outline: none;
@@ -466,8 +466,8 @@
 
   &--secondary {
     background: #ffffff;
-    color: var(--brand-500);
-    border: 1px solid var(--brand-500);
+    color: var(--header-bg);
+    border: 1px solid var(--header-bg);
 
     &:hover {
       background: var(--brand-50);
@@ -509,7 +509,7 @@
   width: 56px;
   height: 56px;
   border: 4px solid var(--brand-100);
-  border-top-color: var(--brand-500);
+  border-top-color: var(--header-bg);
   border-radius: 50%;
   animation: loading-spin 0.9s linear infinite;
   margin-bottom: 8px;
@@ -530,7 +530,7 @@
 
 .loading__step {
   font-size: var(--text-base);
-  color: var(--brand-500);
+  color: var(--header-bg);
   font-weight: var(--weight-medium);
   margin: 0;
   min-height: 28px;
@@ -548,7 +548,7 @@
 
 .loading__bar-fill {
   height: 100%;
-  background: var(--brand-500);
+  background: var(--header-bg);
   border-radius: 999px;
   transition: width 200ms linear;
 }
@@ -646,7 +646,7 @@
 
   &--total {
     font-size: var(--text-lg);
-    color: var(--brand-700);
+    color: var(--header-bg);
   }
 }
 
@@ -816,7 +816,7 @@
   input[type='radio'] {
     width: 18px;
     height: 18px;
-    accent-color: var(--brand-500);
+    accent-color: var(--header-bg);
   }
 }
 
@@ -856,13 +856,13 @@
   color: var(--gray-700);
 
   &:hover:not(:disabled) {
-    border-color: var(--brand-500);
-    color: var(--brand-500);
+    border-color: var(--header-bg);
+    color: var(--header-bg);
   }
 
   &--active {
-    border-color: var(--brand-500);
-    color: var(--brand-500);
+    border-color: var(--header-bg);
+    color: var(--header-bg);
     background: var(--brand-50);
     font-weight: var(--weight-semibold);
   }
@@ -909,7 +909,7 @@
 .payment__amount {
   font-size: var(--text-3xl);
   font-weight: var(--weight-semibold);
-  color: var(--brand-500);
+  color: var(--header-bg);
   font-variant-numeric: tabular-nums;
 }
 
@@ -922,7 +922,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid var(--brand-100);
-  border-top-color: var(--brand-500);
+  border-top-color: var(--header-bg);
   border-radius: 50%;
   animation: loading-spin 0.9s linear infinite;
   margin-top: 8px;
