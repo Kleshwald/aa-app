@@ -459,25 +459,101 @@
     </section>
   }
 
-  <!-- ─────────────────────────── LOADING ─────────────────────────── -->
+  <!-- ─────────────────────── ОПРОС СТРАХОВЫХ ─────────────────────── -->
   @case ('loading') {
-    <section class="loading">
-      <div class="loading__card">
-        <div class="loading__spinner" aria-hidden="true"></div>
-        <h2 class="loading__title">Рассчитываем стоимость в страховых компаниях</h2>
-        <p class="loading__step" [attr.aria-live]="'polite'">{{ loadingSteps[loadingStep()] }}</p>
+    <section class="calc">
+      <div class="calc__card" role="status" aria-live="polite" aria-atomic="false">
+        <!-- Кольцо: N / 7 ответили -->
         <div
-          class="loading__bar"
+          class="calc-ring"
           role="progressbar"
-          [attr.aria-valuenow]="loadingProgress()"
+          [attr.aria-valuenow]="respondedCount()"
           aria-valuemin="0"
-          aria-valuemax="100"
+          [attr.aria-valuemax]="waitCarriers().length"
+          aria-label="Ответили страховых компаний"
         >
-          <div class="loading__bar-fill" [style.width.%]="loadingProgress()"></div>
+          <svg class="calc-ring__svg" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="54" fill="none" stroke="var(--gray-100)" stroke-width="8" />
+            <circle
+              class="calc-ring__arc"
+              [class.calc-ring__arc--done]="calcComplete()"
+              cx="60"
+              cy="60"
+              r="54"
+              fill="none"
+              stroke="var(--accent-500)"
+              stroke-width="8"
+              stroke-linecap="round"
+              [attr.stroke-dasharray]="calcRingDash"
+              [attr.stroke-dashoffset]="calcRingOffset()"
+              transform="rotate(-90 60 60)"
+            />
+          </svg>
+          <div class="calc-ring__center">
+            @if (calcComplete()) {
+              <svg class="calc-ring__check" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12l4 4 10-10" />
+              </svg>
+            } @else {
+              <span class="calc-ring__count"
+                >{{ respondedCount() }} / {{ waitCarriers().length }}</span
+              >
+              <span class="calc-ring__cap">ответили</span>
+            }
+          </div>
         </div>
-        <p class="loading__hint">Обычно занимает до 40 секунд. Не закрывайте окно.</p>
-        <button type="button" class="loading__cancel" (click)="cancelCalculation()">
-          Отменить
+
+        <h2 class="calc__title">
+          {{ calcComplete() ? 'Готово! Нашли предложения' : 'Опрашиваем страховые компании' }}
+        </h2>
+        <p class="calc__status">
+          {{ calcComplete() ? 'Сравните цены и оформите полис' : statusMessages[statusIndex()] }}
+        </p>
+
+        <!-- Живое табло ответов -->
+        <ul class="calc-carriers">
+          @for (q of waitCarriers(); track q.carrierId) {
+            <li
+              class="race-row"
+              [attr.data-state]="isResponded(q.carrierId) ? 'responded' : 'pending'"
+            >
+              <app-insurer-logo
+                class="race-row__logo"
+                [id]="q.carrierId"
+                [name]="q.carrierShortName"
+              />
+              <span class="race-row__name">{{ q.carrierName }}</span>
+
+              @if (isResponded(q.carrierId)) {
+                <span class="race-row__result">
+                  @if (bestWaitCarrierId() === q.carrierId) {
+                    <span class="race-row__lead">лучшая цена</span>
+                  }
+                  <span class="race-row__price">{{ q.osagoPrice | number: '1.0-0' }} ₽</span>
+                  <span class="race-row__check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10" /></svg>
+                  </span>
+                </span>
+              } @else if (activeWaitCarrierId() === q.carrierId) {
+                <span class="race-row__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              } @else {
+                <span class="race-row__wait">ожидаем</span>
+              }
+            </li>
+          }
+        </ul>
+
+        <p class="calc__count" aria-live="polite">
+          Ответили {{ respondedCount() }} из {{ waitCarriers().length }}
+        </p>
+
+        <div class="calc__reassure">
+          <span>Обычно занимает до минуты</span>
+          <span>Не закрывайте окно до завершения</span>
+        </div>
+
+        <button type="button" class="calc__cancel" (click)="cancelCalculation()">
+          Отменить расчёт
         </button>
       </div>
     </section>

@@ -42,25 +42,34 @@ const DOCUMENT_TYPES = [
   { value: 'temporary-id', label: 'Временное удостоверение' },
 ] as const;
 
-// Loading animation steps shown while we "fetch" quotes from carriers.
-// Real backend takes ~60s for all 7 carriers; we keep visible motion for the agent.
-const LOADING_STEPS = [
-  'Скоринг Agent Academy…',
-  'Направляем информацию в страховые компании…',
-  'Ренессанс…',
-  'Югория…',
-  'Согласие…',
-  'Зетта…',
-  'СОГАЗ…',
-  'Росгосстрах…',
-  'Евроинс…',
-  'Сегментация…',
-  'Скоринг…',
-  'Получаем ответы от страховых компаний…',
-  'Подождите ещё несколько секунд…',
+// «Опрос страховых» — экран ожидания как живое табло: 7 СК отвечают по очереди
+// своей ценой. Сообщения честно отражают реальные шаги расчёта ОСАГО.
+const CALC_STATUS_MESSAGES = [
+  'Проверяем данные автомобиля в НСИС',
+  'Запрашиваем КБМ водителей в базе НСИС',
+  'Отправляем запрос в 7 страховых компаний',
+  'Получаем расчёты от страховых компаний',
+  'Применяем коэффициенты ЦБ РФ',
+  'Сравниваем условия и цены',
+  'Подбираем для вас лучшую цену',
+  'Почти готово — формируем предложения',
 ] as const;
 
-const LOADING_TOTAL_MS = 40_000;
+// Сценарий ответов СК (front-load + неравномерные паузы = ощущение реального
+// опроса). id совпадают с CARRIERS. Последняя (пул) отвечает дольше всех.
+const CALC_REVEAL_SCHEDULE: readonly { id: string; at: number }[] = [
+  { id: 'zetta', at: 3_500 },
+  { id: 'renessans', at: 6_000 },
+  { id: 'sogaz', at: 11_000 },
+  { id: 'ugoria', at: 16_500 },
+  { id: 'rosgosstrah', at: 22_000 },
+  { id: 'soglasie', at: 28_000 },
+  { id: 'euroins', at: 38_500 },
+];
+
+const CALC_STATUS_INTERVAL_MS = 5_000;
+const CALC_COMPLETE_AT_MS = 39_000; // момент «Готово» (зелёное кольцо + галочка)
+const CALC_TOTAL_MS = 40_000; // переход на результаты
 
 // Quote type: a regular "segment" quote, or a "reinsurance pool" quote that
 // typically forces a mandatory МиниКАСКО add-on.
@@ -168,9 +177,13 @@ export class OsagoPage {
 
   // ─── Flow state ───
   protected readonly view = signal<View>('form');
-  protected readonly loadingStep = signal<number>(0);
-  protected readonly loadingProgress = signal<number>(0); // 0..100
-  protected readonly loadingSteps = LOADING_STEPS;
+
+  // Экран опроса СК
+  protected readonly statusMessages = CALC_STATUS_MESSAGES;
+  protected readonly statusIndex = signal<number>(0);
+  protected readonly respondedIds = signal<readonly string[]>([]);
+  protected readonly calcComplete = signal<boolean>(false);
+  protected readonly respondedCount = computed(() => this.respondedIds().length);
 
   protected readonly quotes = signal<Quote[]>([]);
   protected readonly selectedQuoteId = signal<string | null>(null);
@@ -178,6 +191,37 @@ export class OsagoPage {
     const id = this.selectedQuoteId();
     return id ? (this.quotes().find((q) => q.id === id) ?? null) : null;
   });
+
+  // Карточки в списке опроса — фиксированный порядок CARRIERS (без пересортировки).
+  protected readonly waitCarriers = computed<Quote[]>(() =>
+    CARRIERS.map((c) => this.quotes().find((q) => q.carrierId === c.id)).filter(
+      (q): q is Quote => !!q,
+    ),
+  );
+  // Верхняя ещё не ответившая СК — на ней крутятся точки «ожидаем».
+  protected readonly activeWaitCarrierId = computed<string | null>(() => {
+    const responded = this.respondedIds();
+    const next = this.waitCarriers().find((q) => !responded.includes(q.carrierId));
+    return next?.carrierId ?? null;
+  });
+  // Текущий лидер по цене среди ответивших — «лучшая цена пока».
+  protected readonly bestWaitCarrierId = computed<string | null>(() => {
+    const responded = this.respondedIds();
+    const revealed = this.quotes().filter((q) => responded.includes(q.carrierId));
+    if (revealed.length === 0) return null;
+    return revealed.reduce((min, q) => (q.osagoPrice < min.osagoPrice ? q : min)).carrierId;
+  });
+
+  // Кольцо прогресса (r=54): окружность и смещение под respondedCount/7.
+  private readonly CALC_RING_CIRC = 2 * Math.PI * 54;
+  protected readonly calcRingDash = this.CALC_RING_CIRC;
+  protected readonly calcRingOffset = computed(
+    () => this.CALC_RING_CIRC * (1 - this.respondedCount() / CARRIERS.length),
+  );
+
+  isResponded(carrierId: string): boolean {
+    return this.respondedIds().includes(carrierId);
+  }
 
   // Modal for add-on editing
   protected readonly addOnModalQuoteId = signal<string | null>(null);
@@ -216,10 +260,9 @@ export class OsagoPage {
     return q?.addOn.required ?? false;
   });
 
-  // Timers for the loading animation
-  private loadingTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  private loadingIntervalId: ReturnType<typeof setInterval> | null = null;
-  private progressIntervalId: ReturnType<typeof setInterval> | null = null;
+  // Timers for the carrier-poll animation
+  private calcTimers: ReturnType<typeof setTimeout>[] = [];
+  private statusTimer: ReturnType<typeof setInterval> | null = null;
   private paymentTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly form = this.fb.nonNullable.group({
@@ -355,35 +398,37 @@ export class OsagoPage {
 
   calculate(): void {
     this.clearTimers();
+    // Котировки считаются сразу; на экране опроса мы лишь раскрываем их по очереди
+    // (честная «театрализация» реального ожидания ответов от СК).
+    this.quotes.set(this.generateQuotes());
+    this.respondedIds.set([]);
+    this.statusIndex.set(0);
+    this.calcComplete.set(false);
     this.view.set('loading');
-    this.loadingStep.set(0);
-    this.loadingProgress.set(0);
 
-    const stepMs = LOADING_TOTAL_MS / LOADING_STEPS.length;
+    // Сообщение «что происходит» меняется каждые 5 секунд.
+    this.statusTimer = setInterval(() => {
+      this.statusIndex.update((i) => Math.min(i + 1, CALC_STATUS_MESSAGES.length - 1));
+    }, CALC_STATUS_INTERVAL_MS);
 
-    this.loadingIntervalId = setInterval(() => {
-      this.loadingStep.update((s) => Math.min(s + 1, LOADING_STEPS.length - 1));
-    }, stepMs);
+    // СК отвечают по очереди по сценарию.
+    for (const step of CALC_REVEAL_SCHEDULE) {
+      this.calcTimers.push(
+        setTimeout(() => {
+          this.respondedIds.update((ids) => (ids.includes(step.id) ? ids : [...ids, step.id]));
+        }, step.at),
+      );
+    }
 
-    // Smoother progress bar (updates every 200 ms).
-    const tickMs = 200;
-    const start = performance.now();
-    this.progressIntervalId = setInterval(() => {
-      const elapsed = performance.now() - start;
-      const pct = Math.min(100, (elapsed / LOADING_TOTAL_MS) * 100);
-      this.loadingProgress.set(pct);
-    }, tickMs);
-
-    this.loadingTimeoutId = setTimeout(() => {
-      this.clearTimers();
-      this.loadingProgress.set(100);
-      this.quotes.set(this.generateQuotes());
-      this.view.set('results');
-    }, LOADING_TOTAL_MS);
+    // Кульминация «Готово», затем переход на результаты.
+    this.calcTimers.push(setTimeout(() => this.calcComplete.set(true), CALC_COMPLETE_AT_MS));
+    this.calcTimers.push(setTimeout(() => this.view.set('results'), CALC_TOTAL_MS));
   }
 
   cancelCalculation(): void {
     this.clearTimers();
+    this.respondedIds.set([]);
+    this.calcComplete.set(false);
     this.view.set('form');
   }
 
@@ -518,12 +563,9 @@ export class OsagoPage {
     const power = this.form.controls.vehicle.controls.power.value ?? 100;
     const basePrice = Math.round(2500 + power * 30);
 
-    // Pick 2-5 carriers for the quote panel.
-    const sample = [...CARRIERS]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 2 + Math.floor(Math.random() * 4));
-
-    const quotes = sample.map((c, idx) => {
+    // Все 7 СК участвуют в опросе и в результатах (так список опроса и итог
+    // согласованы: кто ответил на табло — тот и в предложениях).
+    const quotes = CARRIERS.map((c, idx) => {
       const variance = Math.round((Math.random() - 0.3) * 1500);
       const osagoPrice = Math.max(3500, basePrice + variance);
       // Every quote ships with a pre-selected add-on. Reinsurance-pool quotes
@@ -625,17 +667,11 @@ export class OsagoPage {
   }
 
   private clearTimers(): void {
-    if (this.loadingTimeoutId) {
-      clearTimeout(this.loadingTimeoutId);
-      this.loadingTimeoutId = null;
-    }
-    if (this.loadingIntervalId) {
-      clearInterval(this.loadingIntervalId);
-      this.loadingIntervalId = null;
-    }
-    if (this.progressIntervalId) {
-      clearInterval(this.progressIntervalId);
-      this.progressIntervalId = null;
+    this.calcTimers.forEach((t) => clearTimeout(t));
+    this.calcTimers = [];
+    if (this.statusTimer) {
+      clearInterval(this.statusTimer);
+      this.statusTimer = null;
     }
     if (this.paymentTimeoutId) {
       clearTimeout(this.paymentTimeoutId);
