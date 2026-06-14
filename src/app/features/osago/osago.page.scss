@@ -827,9 +827,9 @@
 }
 
 .results__total-val {
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  color: var(--gray-700);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--header-bg);
   font-variant-numeric: tabular-nums;
 }
 
@@ -840,39 +840,6 @@
 
 .results__offer-action {
   width: 100%;
-}
-
-// ─── Trust strip ───
-
-.results__trust {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin: 4px 0 0;
-  padding: 16px 20px;
-  list-style: none;
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-}
-
-.results__trust-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--text-sm);
-  color: var(--gray-700);
-}
-
-.results__trust-ico {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  fill: none;
-  stroke: var(--success-600);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 .results__footer {

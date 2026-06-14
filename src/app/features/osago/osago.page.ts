@@ -467,10 +467,15 @@ export class OsagoPage {
     const quotes = sample.map((c, idx) => {
       const variance = Math.round((Math.random() - 0.3) * 1500);
       const osagoPrice = Math.max(3500, basePrice + variance);
-      // Reinsurance-pool quotes force a mandatory МиниКАСКО; segment quotes
-      // start with no add-on so the headline price equals the quoted price.
+      // Every quote ships with a pre-selected add-on. Reinsurance-pool quotes
+      // force a mandatory МиниКАСКО; segment quotes get an optional service the
+      // agent can remove (then the chip becomes "Добавить сервис").
       const requiresAddOn = c.quoteType === 'pool';
-      const addOnPresetId: AddOnPreset['id'] = requiresAddOn ? 'mini-kasko' : 'off';
+      const addOnPresetId: AddOnPreset['id'] = requiresAddOn
+        ? 'mini-kasko'
+        : idx % 2 === 0
+          ? 'ns-dtp'
+          : 'legal';
       const preset = ADD_ON_PRESETS.find((p) => p.id === addOnPresetId)!;
 
       return {
@@ -483,7 +488,7 @@ export class OsagoPage {
         effectiveDate: effective,
         addOn: {
           presetId: addOnPresetId,
-          price: addOnPresetId === 'off' ? 0 : preset.defaultPrice,
+          price: preset.defaultPrice,
           required: requiresAddOn,
         },
         paymentMethod: 'Банковская карта',
