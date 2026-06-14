@@ -46,18 +46,13 @@ const DOCUMENT_TYPES = [
 // Компании всегда одни и те же; НЕ показываем, кто ответил и по какой цене —
 // это «под капотом». Фразы описывают отправку запроса и ожидание ответов.
 const CALC_STEPS = [
-  'Скоринг Agent Academy…',
-  'Направляем данные в страховые компании…',
-  'Ренессанс…',
-  'Югория…',
-  'Согласие…',
-  'Зетта…',
-  'СОГАЗ…',
-  'Росгосстрах…',
-  'Евроинс…',
-  'Сегментация…',
-  'Получаем ответы от страховых компаний…',
-  'Формируем для вас предложения…',
+  'Проверяем данные…',
+  'Отправляем запрос в страховые компании…',
+  'Запрос в работе: Ренессанс, Югория, Согласие…',
+  'Запрос в работе: Зетта, СОГАЗ, Росгосстрах, Евроинс…',
+  'Ждём ответы от страховых компаний…',
+  'Сравниваем условия…',
+  'Готовим для вас предложения…',
   'Почти готово…',
 ] as const;
 
@@ -171,11 +166,18 @@ export class OsagoPage {
   // ─── Flow state ───
   protected readonly view = signal<View>('form');
 
-  // Экран ожидания — простая строка статуса + полоса прогресса.
+  // Экран ожидания — строка статуса + кольцо прогресса.
   protected readonly steps = CALC_STEPS;
   protected readonly stepIndex = signal<number>(0);
   protected readonly loadingProgress = signal<number>(0); // 0..100
   protected readonly calcComplete = signal<boolean>(false);
+
+  // Кольцо прогресса (r=52): окружность и смещение под loadingProgress.
+  private readonly CALC_RING_CIRC = 2 * Math.PI * 52;
+  protected readonly ringDash = this.CALC_RING_CIRC;
+  protected readonly ringOffset = computed(
+    () => this.CALC_RING_CIRC * (1 - this.loadingProgress() / 100),
+  );
 
   protected readonly quotes = signal<Quote[]>([]);
   protected readonly selectedQuoteId = signal<string | null>(null);

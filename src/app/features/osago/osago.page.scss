@@ -499,92 +499,132 @@
 }
 
 .calc__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  max-width: 560px;
-  padding: 40px 40px 28px;
+  max-width: 480px;
+  padding: 48px 48px 32px;
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   text-align: center;
 }
 
-.calc__title {
-  margin: 0 0 6px;
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  color: var(--gray-900);
+// ─── Кольцо прогресса ───
+
+.calc__ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
 }
 
-.calc__spinner {
-  display: inline-block;
-  width: 56px;
-  height: 56px;
-  margin-bottom: 8px;
-  border: 4px solid var(--brand-100);
-  border-top-color: var(--header-bg);
-  border-radius: var(--radius-full);
-  animation: loading-spin 0.9s linear infinite;
+.calc__ring-svg {
+  width: 120px;
+  height: 120px;
 }
 
-.calc__check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 8px;
-  border-radius: var(--radius-full);
-  background: var(--success-50);
-  animation: calc-check-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 1;
+.calc__ring-track {
+  fill: none;
+  stroke: var(--brand-100);
+  stroke-width: 8;
+}
 
-  svg {
-    width: 34px;
-    height: 34px;
-    fill: none;
+// «Комета» — лёгкая живость поверх трека (не показатель прогресса).
+.calc__ring-sweep {
+  fill: none;
+  stroke: var(--accent-500);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 34 293;
+  opacity: 0.9;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: calc-ring-sweep 2.4s linear infinite;
+}
+
+.calc__ring-progress {
+  fill: none;
+  stroke: var(--header-bg);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition:
+    stroke-dashoffset 220ms linear,
+    stroke 300ms ease-out;
+
+  &--done {
     stroke: var(--success-600);
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
   }
 }
 
+.calc__ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calc__ring-num {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--header-bg);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.calc__ring-pct {
+  margin-left: 2px;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--gray-500);
+}
+
+.calc__ring-check {
+  width: 44px;
+  height: 44px;
+  fill: none;
+  stroke: var(--success-600);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: calc-check-in 300ms cubic-bezier(0.16, 1, 0.3, 1) 1;
+}
+
+// ─── Тексты / подсказки / отмена ───
+
+.calc__title {
+  margin: 28px 0 0;
+  max-width: 30ch;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+  text-wrap: balance;
+}
+
 .calc__status {
-  min-height: 24px;
-  margin: 0;
+  min-height: 28px;
+  margin: 10px 0 0;
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
   color: var(--header-bg);
-  transition: opacity 200ms ease-out;
-}
-
-.calc__bar {
-  width: 100%;
-  height: 8px;
-  margin-top: 20px;
-  background: var(--gray-100);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.calc__bar-fill {
-  height: 100%;
-  background: var(--header-bg);
-  border-radius: var(--radius-full);
-  transition: width 200ms linear;
+  animation: calc-status-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .calc__reassure {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 20px;
+  margin-top: 28px;
   font-size: var(--text-sm);
   color: var(--gray-600);
 }
 
 .calc__cancel {
-  margin-top: 16px;
+  margin-top: 24px;
   padding: 8px 16px;
   min-height: 44px;
   background: none;
@@ -597,6 +637,23 @@
 
   &:hover {
     color: var(--error-600);
+  }
+}
+
+@keyframes calc-ring-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes calc-status-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -628,14 +685,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .calc__spinner {
-    animation-duration: 2s;
-  }
-  .calc__status,
-  .calc__bar-fill {
+  .calc__ring-progress {
     transition: none;
   }
-  .calc__check,
+  .calc__ring-sweep {
+    display: none;
+  }
+  .calc__status,
+  .calc__ring-check,
   .results {
     animation: none;
   }
