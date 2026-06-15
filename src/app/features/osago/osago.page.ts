@@ -29,7 +29,7 @@ import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.componen
 import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
 import { TuiDay, type TuiValueTransformer } from '@taiga-ui/cdk';
-import { TuiLabel, TuiTextfield } from '@taiga-ui/core';
+import { TuiInput, TuiLabel, TuiTextfield } from '@taiga-ui/core';
 import { TuiInputDate, TuiSelect, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
 
 const VEHICLE_PURPOSES = [
@@ -172,6 +172,7 @@ class IsoDayTransformer implements TuiValueTransformer<TuiDay | null, string> {
     MotivationStripComponent,
     TuiTextfield,
     TuiLabel,
+    TuiInput,
     TuiInputDate,
     TuiSelect,
   ],
