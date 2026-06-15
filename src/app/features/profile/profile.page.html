@@ -1,0 +1,156 @@
+@if (profile(); as p) {
+  <section class="pr">
+    <!-- ─── Identity header ─── -->
+    <header class="pr-id">
+      <span class="pr-id__avatar" aria-hidden="true">{{ initials() }}</span>
+      <div class="pr-id__main">
+        <h1 class="pr-id__name">{{ p.fullName }}</h1>
+        <div class="pr-id__meta">
+          @if (location()) {
+            <span class="pr-id__loc">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path d="M12 21s-7-6.3-7-11a7 7 0 0 1 14 0c0 4.7-7 11-7 11z" />
+                <circle cx="12" cy="10" r="2.5" />
+              </svg>
+              {{ location() }}
+            </span>
+          }
+          <span>ИКП {{ p.ikp }}</span>
+          <span>{{ legalTypeLabel() }}</span>
+          <span>в системе с {{ p.joinDate | date: 'yyyy' }} г.</span>
+          <span>куратор: {{ p.curatorName }}</span>
+        </div>
+      </div>
+      <span class="pr-id__status" [class.pr-id__status--active]="p.status === 'active'">
+        {{ statusLabel() }}
+      </span>
+    </header>
+
+    <!-- ─── Motivation dashboard ─── -->
+    @if (motivation(); as m) {
+      <section class="pr-card pr-mot">
+        <header class="pr-card__head">
+          <h2 class="pr-card__title">Моя мотивация</h2>
+          <span class="pr-card__hint">Категория присваивается по прогнозу сборов за месяц</span>
+        </header>
+
+        <app-motivation-strip [snapshot]="m" />
+
+        <div class="pr-metrics">
+          <div class="pr-metric">
+            <span class="pr-metric__val">{{ progress()?.currentTier?.kv }}%</span>
+            <span class="pr-metric__label">КВ категории</span>
+          </div>
+          <div class="pr-metric">
+            <span class="pr-metric__val">{{ m.penetration }}%</span>
+            <span class="pr-metric__label">Проникновение</span>
+          </div>
+          <div class="pr-metric">
+            <span class="pr-metric__val">{{ m.poolShare }}%</span>
+            <span class="pr-metric__label">ОСАГО в пуле</span>
+          </div>
+          <div class="pr-metric">
+            <span class="pr-metric__val">{{ m.policiesThisMonth }}</span>
+            <span class="pr-metric__label">Договоров за {{ m.monthLabel }}</span>
+          </div>
+        </div>
+
+        <div class="pr-ladder" role="table" aria-label="Категории мотивации">
+          @for (t of m.tiers; track t.name) {
+            <div
+              class="pr-ladder__row"
+              [class.pr-ladder__row--current]="progress()?.currentTier?.name === t.name"
+              role="row"
+            >
+              <span class="pr-ladder__name">{{ t.name }}</span>
+              <span class="pr-ladder__th">
+                @if (t.minProjection > 0) {
+                  прогноз от {{ t.minProjection | number: '1.0-0' }} ₽
+                } @else {
+                  стартовая категория
+                }
+              </span>
+              <span class="pr-ladder__kv">КВ {{ t.kv }}%</span>
+              @if (progress()?.currentTier?.name === t.name) {
+                <span class="pr-ladder__you">вы здесь</span>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- ─── Personal + payout ─── -->
+    <div class="pr-grid">
+      <section class="pr-card">
+        <header class="pr-card__head">
+          <h2 class="pr-card__title">Личные данные</h2>
+          <button type="button" class="pr-edit" (click)="notImplemented()">Изменить</button>
+        </header>
+        <dl class="pr-fields">
+          <div class="pr-fields__row">
+            <dt>ФИО</dt>
+            <dd>{{ p.fullName }}</dd>
+          </div>
+          <div class="pr-fields__row">
+            <dt>Дата рождения</dt>
+            <dd>{{ p.birthDate | date: 'dd.MM.yyyy' }}</dd>
+          </div>
+          <div class="pr-fields__row">
+            <dt>Телефон</dt>
+            <dd>{{ phoneFormatted() }}</dd>
+          </div>
+          <div class="pr-fields__row">
+            <dt>Email</dt>
+            <dd>{{ p.email }}</dd>
+          </div>
+          <div class="pr-fields__row">
+            <dt>Форма</dt>
+            <dd>{{ legalTypeLabel() }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="pr-card">
+        <header class="pr-card__head">
+          <h2 class="pr-card__title">Реквизиты для выплат</h2>
+          <button type="button" class="pr-edit" (click)="notImplemented()">Изменить</button>
+        </header>
+        <dl class="pr-fields">
+          <div class="pr-fields__row">
+            <dt>Получатель</dt>
+            <dd>{{ p.fullName }}</dd>
+          </div>
+          <div class="pr-fields__row">
+            <dt>ИНН</dt>
+            <dd>{{ payout.inn }}</dd>
+          </div>
+          <div class="pr-fields__row">
+            <dt>Банк</dt>
+            <dd>{{ payout.bank }}</dd>
+          </div>
+          <div class="pr-fields__row">
+            <dt>Счёт</dt>
+            <dd>{{ payout.account }}</dd>
+          </div>
+          <div class="pr-fields__row">
+            <dt>БИК</dt>
+            <dd>{{ payout.bik }}</dd>
+          </div>
+        </dl>
+        <p class="pr-note">Реквизиты — демо-данные прототипа.</p>
+      </section>
+    </div>
+  </section>
+} @else {
+  <section class="pr">
+    <div class="pr-skeleton"></div>
+    <div class="pr-skeleton pr-skeleton--tall"></div>
+  </section>
+}
