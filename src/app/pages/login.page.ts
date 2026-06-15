@@ -38,7 +38,7 @@ export class LoginPage {
       next: (response) => {
         this.loading.set(false);
         if (response.success) {
-          void this.router.navigate(['/dashboard']);
+          void this.router.navigate(['/clients']);
         } else {
           this.error.set(response.error?.message ?? 'Не удалось войти. Проверьте логин и пароль.');
         }

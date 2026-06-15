@@ -1,24 +1,33 @@
 import { type Routes } from '@angular/router';
 
 import { authGuard, guestGuard } from '@core/guards/auth.guard';
+import { hubGuard } from '@core/guards/hub.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'clients' },
 
-  // Техническая панель проекта — вне агентской оболочки и без гардов.
+  // Техническая панель проекта — вне агентской оболочки, за паролем (hubGuard).
+  {
+    path: 'hub-unlock',
+    loadComponent: () => import('@pages/hub-unlock.page').then((m) => m.HubUnlockPage),
+    title: 'Панель проекта — доступ',
+  },
   {
     path: 'hub',
     loadComponent: () => import('@features/hub/hub.page').then((m) => m.HubPage),
+    canActivate: [hubGuard],
     title: 'Панель проекта — Agent Academy',
   },
   {
     path: 'hub/brandbook',
     loadComponent: () => import('@features/hub/brandbook.page').then((m) => m.BrandbookPage),
+    canActivate: [hubGuard],
     title: 'Брендбук — Agent Academy',
   },
   {
     path: 'hub/doc/:id',
     loadComponent: () => import('@features/hub/doc.page').then((m) => m.DocPage),
+    canActivate: [hubGuard],
     title: 'Документация — Agent Academy',
   },
   {
