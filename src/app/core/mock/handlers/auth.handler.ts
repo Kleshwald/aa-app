@@ -10,8 +10,8 @@ import { mockFail, mockOk } from '../helpers/response';
 // Логин — номер телефона (сверяем последние 10 цифр, формат не важен),
 // пароль — точное совпадение. Реальная авторизация появится с 1С HTTP-сервисом.
 
-const TEST_LOGIN_DIGITS = '9000000000';
-const TEST_PASSWORD = 'agent2026';
+const TEST_LOGIN_DIGITS = '9161093560';
+const TEST_PASSWORD = '123';
 
 export function handleLogin(
   req: HttpRequest<unknown>,
