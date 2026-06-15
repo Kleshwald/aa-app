@@ -21,14 +21,6 @@ export interface FinanceSegmentMetrics {
   trends: FinanceSegmentTrends;
 }
 
-export type TierState = 'done' | 'current' | 'locked';
-
-export interface TierStep {
-  name: string; // «Серебро»
-  threshold: number; // ₽ порог входа в уровень
-  state: TierState;
-}
-
 export interface FinancePoolMetrics {
   osagoPoolCount: number; // ОСАГО Пул, кол-во
   autoHelper: number; // Автопомощник
@@ -41,14 +33,13 @@ export interface FinancePoolMetrics {
 export interface FinanceResults {
   periodLabel: string; // «Июнь 2026»
   periodRange: string; // «1 – 14 июня»
-  category: string; // текущая категория мотивации
-  nextCategory: string | null; // следующая категория (null = максимум)
-  collected: number; // сборы за период, ₽
-  nextThreshold: number; // порог следующей категории, ₽
-  amountToNext: number; // ещё нужно собрать, ₽
-  dailyToNext: number; // ₽/день до конца периода
-  daysLeft: number; // дней до конца периода
-  tierLadder: TierStep[]; // лестница уровней мотивации
+  category: string; // текущая категория («Основная»)
+  nextCategory: string | null; // следующая категория («Индивидуальная») или null
+  collected: number; // сборы за период на текущий день, ₽
+  daysPassed: number; // прошло дней месяца
+  daysInMonth: number; // всего дней в месяце
+  daysLeft: number; // дней до конца месяца
+  minThreshold: number; // порог продаж ОСАГО, ₽ (ниже 3 мес подряд → стоп)
   segment: FinanceSegmentMetrics;
   pool: FinancePoolMetrics;
 }

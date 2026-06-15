@@ -5,43 +5,32 @@
       <span class="mot__cat-name">{{ results().category }}</span>
     </span>
     <span class="mot__figures">
-      Сборы за {{ results().periodLabel }}
-      <b>{{ results().collected | number: '1.0-0' }} ₽</b>
+      Прогноз сборов на {{ results().periodLabel }}
+      <b [class.mot__proj--up]="hasPreview()">
+        {{ (hasPreview() ? previewProjection() : projection()) | number: '1.0-0' }} ₽
+      </b>
     </span>
   </div>
 
   <div
     class="mot__bar"
-    [class.mot__bar--max]="!results().nextCategory"
     role="progressbar"
-    [attr.aria-valuenow]="basePct()"
+    [attr.aria-valuenow]="monthPct()"
     aria-valuemin="0"
     aria-valuemax="100"
   >
-    <span class="mot__bar-fill" [style.width.%]="basePct()"></span>
-    @if (hasPreview()) {
-      <span
-        class="mot__bar-ghost"
-        [style.left.%]="basePct()"
-        [style.width.%]="previewPct() - basePct()"
-      ></span>
-    }
+    <span class="mot__bar-fill" [style.width.%]="monthPct()"></span>
   </div>
 
   <div class="mot__foot">
-    @if (results().nextCategory; as next) {
-      <span class="mot__next">
-        До категории «{{ next }}» — ещё
-        <b>{{ (hasPreview() ? previewToNext() : results().amountToNext) | number: '1.0-0' }} ₽</b>
-        сборов
-      </span>
-      @if (hasPreview()) {
-        <span class="mot__gain"
-          >эта сделка: +{{ previewPremium() | number: '1.0-0' }} ₽ в сборы</span
-        >
-      }
-    } @else {
-      <span class="mot__next mot__next--max">Вы в максимальной категории</span>
+    <span class="mot__next">
+      сегодня собрано <b>{{ results().collected | number: '1.0-0' }} ₽</b> · день
+      {{ results().daysPassed }}/{{ results().daysInMonth }}
+    </span>
+    @if (hasPreview()) {
+      <span class="mot__gain"
+        >эта сделка: +{{ previewPremium() | number: '1.0-0' }} ₽ к сборам</span
+      >
     }
   </div>
 </div>

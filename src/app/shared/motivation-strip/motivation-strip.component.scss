@@ -47,10 +47,16 @@
   b {
     color: var(--gray-900);
     font-variant-numeric: tabular-nums;
+    transition: color 200ms ease-out;
   }
 }
 
-// ─── Progress bar ───
+// Прогноз подсветился — сделка под курсором его поднимает.
+.mot__proj--up {
+  color: var(--accent-600) !important;
+}
+
+// ─── Progress bar (прогресс месяца) ───
 
 .mot__bar {
   position: relative;
@@ -68,23 +74,6 @@
   background: linear-gradient(90deg, var(--accent-500), var(--header-bg));
   border-radius: var(--radius-full);
   transition: width 240ms ease-out;
-}
-
-// «Призрачный» прирост от предложения под курсором.
-.mot__bar-ghost {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background: var(--accent-300);
-  opacity: 0.6;
-  transition:
-    left 240ms ease-out,
-    width 240ms ease-out;
-}
-
-.mot__bar--max .mot__bar-fill {
-  width: 100% !important;
-  background: linear-gradient(90deg, var(--success-500), var(--success-600));
 }
 
 // ─── Footer line ───
@@ -119,8 +108,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mot__bar-fill,
-  .mot__bar-ghost {
+  .mot__bar-fill {
     transition: none;
   }
 }

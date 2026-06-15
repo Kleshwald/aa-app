@@ -37,21 +37,27 @@ export class FinancePage {
     () => this.resultsResponse()?.data ?? null,
   );
   protected readonly resultsLoading = computed(() => this.resultsResponse() === undefined);
-  protected readonly progressPct = computed(() => {
+  // Прогноз сборов на месяц по текущему темпу — главный показатель категории/КВ.
+  protected readonly projection = computed(() => {
     const r = this.results();
-    if (!r || r.nextThreshold <= 0) return 0;
-    return Math.min(100, Math.round((r.collected / r.nextThreshold) * 100));
+    if (!r || r.daysPassed <= 0) return r?.collected ?? 0;
+    return Math.round((r.collected / r.daysPassed) * r.daysInMonth);
+  });
+  // Доля собранного и положение порога ОСАГО на шкале «темпа» (0..100 от прогноза).
+  protected readonly collectedPct = computed(() => {
+    const r = this.results();
+    const p = this.projection();
+    return r && p > 0 ? Math.min(100, Math.round((r.collected / p) * 100)) : 0;
+  });
+  protected readonly floorPct = computed(() => {
+    const r = this.results();
+    const p = this.projection();
+    return r && p > 0 ? Math.min(100, Math.round((r.minThreshold / p) * 100)) : 0;
   });
 
-  // ─── SVG-кольца (рукописная визуализация, без библиотек) ───
-  private readonly RING_CIRC = 2 * Math.PI * 86; // главное кольцо, r=86
+  // ─── Кольцо доли пула (рукописный SVG, без библиотек) ───
   private readonly POOL_RING_CIRC = 2 * Math.PI * 50; // кольцо доли пула, r=50
-  protected readonly ringDash = this.RING_CIRC;
   protected readonly poolRingDash = this.POOL_RING_CIRC;
-  protected readonly ringOffset = computed(() => this.RING_CIRC * (1 - this.progressPct() / 100));
-  protected readonly ringColor = computed(() =>
-    this.progressPct() >= 100 ? 'var(--success-600)' : 'var(--accent-500)',
-  );
   protected readonly poolShareOffset = computed(() => {
     const pct = this.results()?.pool.poolSharePct ?? 0;
     return this.POOL_RING_CIRC * (1 - pct / 100);
@@ -78,11 +84,6 @@ export class FinancePage {
   protected readonly poolTotal = computed(() =>
     this.poolSegments().reduce((sum, s) => sum + s.count, 0),
   );
-
-  /** «100 тыс» / «старт» для подписей лестницы уровней. */
-  tierThresholdLabel(threshold: number): string {
-    return threshold === 0 ? 'старт' : `${Math.round(threshold / 1000)} тыс`;
-  }
 
   // ─── К выплате ───
   private readonly payoutsResponse = toSignal(this.finance.payouts(), { initialValue: undefined });

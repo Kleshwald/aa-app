@@ -12,25 +12,18 @@ import { faker } from './seed';
 export const financeResults: FinanceResults = {
   periodLabel: 'Июнь 2026',
   periodRange: '1 – 14 июня',
-  category: 'Серебро',
-  nextCategory: 'Золото',
-  collected: 184_500,
-  nextThreshold: 250_000,
-  amountToNext: 65_500,
-  dailyToNext: 4_094,
+  category: 'Основная',
+  nextCategory: 'Индивидуальная',
+  collected: 175_000, // прогноз = 175 000 / 14 × 30 = 375 000 ₽
+  daysPassed: 14,
+  daysInMonth: 30,
   daysLeft: 16,
-  tierLadder: [
-    { name: 'Старт', threshold: 0, state: 'done' },
-    { name: 'Бронза', threshold: 100_000, state: 'done' },
-    { name: 'Серебро', threshold: 180_000, state: 'current' },
-    { name: 'Золото', threshold: 250_000, state: 'locked' },
-    { name: 'Платина', threshold: 400_000, state: 'locked' },
-  ],
+  minThreshold: 50_000,
   segment: {
-    totalCollected: 184_500,
+    totalCollected: 175_000,
     osagoCount: 47,
     avgAddonCheck: 1_280,
-    penetrationPct: 38,
+    penetrationPct: 41,
     trends: {
       totalCollected: 12,
       osagoCount: 8,

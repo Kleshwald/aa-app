@@ -42,95 +42,57 @@
             {{ r.periodLabel }} <span>· {{ r.periodRange }}</span>
           </div>
 
-          <!-- HERO: уровень мотивации -->
+          <!-- HERO: прогноз сборов и категория -->
           <section class="fin-hero">
-            <h2 class="fin-hero__title">Ваш уровень в этом месяце</h2>
-            <div class="fin-hero__body">
-              <div class="fin-ring">
-                <svg class="fin-ring__svg" viewBox="0 0 200 200" aria-hidden="true">
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="86"
-                    fill="none"
-                    stroke="var(--gray-200)"
-                    stroke-width="16"
-                  />
-                  <circle
-                    class="fin-ring__arc"
-                    cx="100"
-                    cy="100"
-                    r="86"
-                    fill="none"
-                    [attr.stroke]="ringColor()"
-                    stroke-width="16"
-                    stroke-linecap="round"
-                    [attr.stroke-dasharray]="ringDash"
-                    [attr.stroke-dashoffset]="ringOffset()"
-                    transform="rotate(-90 100 100)"
-                  />
-                </svg>
-                <div class="fin-ring__center">
-                  <svg class="fin-ring__medal" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="8" r="6" />
-                    <path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1" />
-                  </svg>
-                  <span class="fin-ring__tier">{{ r.category }}</span>
-                  <span class="fin-ring__pct">{{ progressPct() }}%</span>
+            <div class="fin-hero__main">
+              <span class="fin-hero__eyebrow">Прогноз сборов на месяц</span>
+              <span class="fin-hero__value">{{ projection() | number: '1.0-0' }} ₽</span>
+              <span class="fin-hero__sub">
+                по текущему темпу · собрано <b>{{ r.collected | number: '1.0-0' }} ₽</b> за
+                {{ r.daysPassed }} дн. · до конца месяца {{ r.daysLeft }} дн.
+              </span>
+
+              <!-- Темп: собрано → прогноз, с отметкой минимального порога ОСАГО -->
+              <div class="fin-pace">
+                <div class="fin-pace__track">
+                  <span class="fin-pace__fill" [style.width.%]="collectedPct()"></span>
+                  <span
+                    class="fin-pace__floor"
+                    [style.left.%]="floorPct()"
+                    [attr.title]="
+                      'Порог продаж ОСАГО — ' + (r.minThreshold | number: '1.0-0') + ' ₽'
+                    "
+                  ></span>
+                </div>
+                <div class="fin-pace__labels">
+                  <span class="fin-pace__floor-label" [style.left.%]="floorPct()">
+                    порог {{ r.minThreshold | number: '1.0-0' }} ₽
+                  </span>
                 </div>
               </div>
 
-              <div class="fin-ladder">
-                <div class="fin-ladder__steps">
-                  @for (t of r.tierLadder; track t.name) {
-                    <div class="fin-ladder__step" [attr.data-state]="t.state">
-                      @if (t.state === 'current') {
-                        <span class="fin-ladder__here">вы здесь</span>
-                      }
-                      <span class="fin-ladder__bar"></span>
-                      <span class="fin-ladder__name">{{ t.name }}</span>
-                      <span class="fin-ladder__th">{{ tierThresholdLabel(t.threshold) }}</span>
-                    </div>
-                  }
-                </div>
-                <p class="fin-ladder__note">
-                  @if (r.nextCategory) {
-                    Вы в категории «{{ r.category }}». Следующая ступень — «{{ r.nextCategory }}».
-                  } @else {
-                    Поздравляем — вы в высшей категории мотивации.
-                  }
-                </p>
-              </div>
+              <a class="fin__btn fin__btn--primary fin-hero__cta" routerLink="/osago">
+                Оформить полис — поднять прогноз
+              </a>
             </div>
-          </section>
 
-          <!-- Следующий шаг -->
-          <section class="fin-next">
-            <svg class="fin-next__ico" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <circle cx="12" cy="12" r="4.5" />
-              <circle cx="12" cy="12" r="0.5" />
-            </svg>
-            <div class="fin-next__text">
+            <aside class="fin-cat">
+              <span class="fin-cat__label">Категория месяца</span>
+              <span class="fin-cat__name">{{ r.category }}</span>
+              <p class="fin-cat__note">
+                Категория и КВ пересчитываются каждый день по прогнозу сборов на месяц.
+              </p>
               @if (r.nextCategory) {
-                <span class="fin-next__head"
-                  >До «{{ r.nextCategory }}» осталось совсем немного</span
-                >
-                <span class="fin-next__sub">
-                  Ещё <b>{{ r.amountToNext | number: '1.0-0' }} ₽</b> сборов — это примерно
-                  <b>{{ r.dailyToNext | number: '1.0-0' }} ₽ в день</b> до конца месяца ({{
-                    r.daysLeft
-                  }}
-                  дн.).
-                </span>
-              } @else {
-                <span class="fin-next__head">Вы в высшей категории</span>
-                <span class="fin-next__sub">Так держать — продолжайте в том же темпе.</span>
+                <div class="fin-cat__next">
+                  <span class="fin-cat__next-label">Следующая ступень</span>
+                  <span class="fin-cat__next-name">{{ r.nextCategory }}</span>
+                  <span class="fin-cat__next-desc">
+                    Индивидуальные условия и повышенный КВ — для агентов со стабильно высокими
+                    сборами.
+                  </span>
+                </div>
               }
-            </div>
-            <a class="fin__btn fin__btn--primary fin-next__cta" routerLink="/osago"
-              >Оформить полис</a
-            >
+            </aside>
           </section>
 
           <!-- KPI: целевой сегмент -->
