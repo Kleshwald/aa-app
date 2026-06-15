@@ -4,6 +4,29 @@ import { authGuard, guestGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'clients' },
+
+  // Техническая панель проекта — вне агентской оболочки и без гардов.
+  {
+    path: 'hub',
+    loadComponent: () => import('@features/hub/hub.page').then((m) => m.HubPage),
+    title: 'Панель проекта — Agent Academy',
+  },
+  {
+    path: 'hub/brandbook',
+    loadComponent: () => import('@features/hub/brandbook.page').then((m) => m.BrandbookPage),
+    title: 'Брендбук — Agent Academy',
+  },
+  {
+    path: 'hub/doc/:id',
+    loadComponent: () => import('@features/hub/doc.page').then((m) => m.DocPage),
+    title: 'Документация — Agent Academy',
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('@pages/register.page').then((m) => m.RegisterPage),
+    title: 'Регистрация — Agent Academy',
+  },
+
   {
     path: '',
     loadComponent: () =>

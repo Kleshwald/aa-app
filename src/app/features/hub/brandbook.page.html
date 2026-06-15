@@ -1,0 +1,87 @@
+<div class="bb">
+  <a class="bb__back" routerLink="/hub">← Панель проекта</a>
+
+  <header class="bb__head">
+    <h1 class="bb__title">Брендбук системы</h1>
+    <p class="bb__intro">
+      Живой справочник: цвета, шрифты и элементы рендерятся прямо из токенов
+      <code>src/styles/tokens.scss</code> — то, что видите здесь, и есть актуальные значения.
+    </p>
+  </header>
+
+  <!-- Цвета -->
+  <section class="bb-card">
+    <h2 class="bb-card__title">Цвета</h2>
+    @for (g of colorGroups; track g.title) {
+      <div class="bb-cgroup">
+        <h3 class="bb-cgroup__title">{{ g.title }}</h3>
+        <div class="bb-swatches">
+          @for (s of g.swatches; track s.token) {
+            <div class="bb-swatch">
+              <span class="bb-swatch__box" [style.background]="'var(' + s.token + ')'"></span>
+              <span class="bb-swatch__name">{{ s.token }}</span>
+              <span class="bb-swatch__hex">{{ s.hex }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- Типографика -->
+  <section class="bb-card">
+    <h2 class="bb-card__title">Типографика</h2>
+    <p class="bb-card__note">Системный шрифт (Segoe UI / Inter fallback).</p>
+    <div class="bb-type">
+      @for (t of typeSizes; track t.token) {
+        <div class="bb-type__row">
+          <span class="bb-type__sample" [style.fontSize]="'var(' + t.token + ')'">
+            Агент Академия
+          </span>
+          <span class="bb-type__label">{{ t.label }} · {{ t.token }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Кнопки -->
+  <section class="bb-card">
+    <h2 class="bb-card__title">Кнопки</h2>
+    <div class="bb-row">
+      <button type="button" class="bb-btn bb-btn--primary">Основная</button>
+      <button type="button" class="bb-btn bb-btn--secondary">Вторичная</button>
+      <button type="button" class="bb-btn bb-btn--primary" disabled>Недоступна</button>
+    </div>
+    <p class="bb-card__note">Высота 48px (касательная цель для аудитории), радиус base.</p>
+  </section>
+
+  <!-- Бейджи / статусы -->
+  <section class="bb-card">
+    <h2 class="bb-card__title">Бейджи и статусы</h2>
+    <div class="bb-row">
+      <span class="bb-badge bb-badge--success">Оформлен</span>
+      <span class="bb-badge bb-badge--warning">На проверке</span>
+      <span class="bb-badge bb-badge--error">Ошибка</span>
+      <span class="bb-badge bb-badge--info">ЭП</span>
+      <span class="bb-badge bb-badge--neutral">Черновик</span>
+    </div>
+  </section>
+
+  <!-- Поля ввода -->
+  <section class="bb-card">
+    <h2 class="bb-card__title">Поля ввода</h2>
+    <div class="bb-fields">
+      <label class="bb-field">
+        <span class="bb-field__label">Текстовое поле</span>
+        <input class="bb-input" type="text" placeholder="Например, Иванов" />
+      </label>
+      <label class="bb-field">
+        <span class="bb-field__label">Выпадающий список</span>
+        <select class="bb-input">
+          <option>Вариант 1</option>
+          <option>Вариант 2</option>
+        </select>
+      </label>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,30 @@
+<div class="doc">
+  <a class="doc__back" routerLink="/hub">← Панель проекта</a>
+
+  @if (doc(); as d) {
+    <article class="doc__card">
+      <header class="doc__head">
+        <h1 class="doc__title">{{ d.title }}</h1>
+        <p class="doc__intro">{{ d.intro }}</p>
+      </header>
+
+      @for (s of d.sections; track s.heading) {
+        <section class="doc-sec">
+          <h2 class="doc-sec__title">{{ s.heading }}</h2>
+          <ul class="doc-list">
+            @for (item of s.items; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        </section>
+      }
+
+      <footer class="doc__src">Источник в репозитории: {{ d.source }}</footer>
+    </article>
+  } @else {
+    <article class="doc__card">
+      <h1 class="doc__title">Документ не найден</h1>
+      <p class="doc__intro">Вернитесь на панель и выберите раздел документации.</p>
+    </article>
+  }
+</div>
