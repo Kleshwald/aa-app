@@ -47,7 +47,7 @@ const PRODUCTS: EduProduct[] = [
     title: 'ОСАГО в Перестраховочном Пуле',
     description: 'Оформление ОСАГО через перестраховочный пул.',
     url: 'https://agentacademy.ru/pul_osago',
-    image: '/images/nsis-osago.svg',
+    image: 'images/nsis-osago.svg',
   },
   {
     id: 'accident',

@@ -61,6 +61,6 @@ export class InsurerLogoComponent {
 
   protected readonly failed = signal(false);
 
-  protected readonly src = computed(() => `/images/insurers/${this.id()}.png`);
+  protected readonly src = computed(() => `images/insurers/${this.id()}.png`);
   protected readonly letter = computed(() => (this.name().trim()[0] ?? '?').toUpperCase());
 }

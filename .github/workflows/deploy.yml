@@ -34,8 +34,8 @@ jobs:
         env:
           HUSKY: '0' # не ставить git-хуки в CI
 
-      - name: Build (base-href = /<repo>/)
-        run: npx ng build --base-href "/${GITHUB_REPOSITORY#*/}/"
+      - name: Build (demo config = моки включены; base-href = /<repo>/)
+        run: npx ng build --configuration demo --base-href "/${GITHUB_REPOSITORY#*/}/"
 
       - name: SPA fallback + .nojekyll
         run: |
