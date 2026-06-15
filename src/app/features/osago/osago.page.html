@@ -478,8 +478,8 @@
         <p class="results__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
       </header>
 
-      @if (motivation(); as m) {
-        <app-motivation-strip [snapshot]="m" [previewPremium]="previewPremium()" />
+      @if (financeResults(); as m) {
+        <app-motivation-strip [results]="m" [previewPremium]="previewPremium()" />
       }
 
       <div class="results__offers">

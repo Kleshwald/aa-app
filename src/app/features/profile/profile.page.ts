@@ -1,11 +1,9 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
-import { MotivationService } from '@core/services/motivation.service';
 import { ProfileService, type AgentProfile } from '@core/services/profile.service';
-import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
 const LEGAL_TYPE_LABELS: Record<AgentProfile['legalType'], string> = {
   individual: 'Физическое лицо',
@@ -16,26 +14,16 @@ const LEGAL_TYPE_LABELS: Record<AgentProfile['legalType'], string> = {
 
 @Component({
   selector: 'app-profile-page',
-  imports: [DatePipe, DecimalPipe, MotivationStripComponent],
+  imports: [DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',
 })
 export class ProfilePage {
   private readonly profileService = inject(ProfileService);
-  private readonly motivationService = inject(MotivationService);
 
   protected readonly profile = toSignal(this.profileService.me().pipe(map((r) => r.data)), {
     initialValue: null,
-  });
-  protected readonly motivation = toSignal(
-    this.motivationService.snapshot().pipe(map((r) => r.data)),
-    { initialValue: null },
-  );
-
-  protected readonly progress = computed(() => {
-    const m = this.motivation();
-    return m ? this.motivationService.progress(m) : null;
   });
 
   protected readonly initials = computed(() => {

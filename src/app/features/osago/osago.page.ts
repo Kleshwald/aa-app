@@ -22,7 +22,7 @@ import {
   type CreatePolicyPayload,
   ClientDetailService,
 } from '@core/services/client-detail.service';
-import { MotivationService } from '@core/services/motivation.service';
+import { FinanceService } from '@core/services/finance.service';
 import { AddonIconComponent } from '@shared/addon-icon/addon-icon.component';
 import { CalcLoaderComponent } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
@@ -161,11 +161,11 @@ export class OsagoPage {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly policyService = inject(ClientDetailService);
-  private readonly motivationService = inject(MotivationService);
+  private readonly financeService = inject(FinanceService);
 
-  // Снимок мотивации для полосы прогресса на экране котировок.
-  protected readonly motivation = toSignal(
-    this.motivationService.snapshot().pipe(map((r) => r.data)),
+  // «Мои результаты» для полосы мотивации (общий источник с разделом «Мои финансы»).
+  protected readonly financeResults = toSignal(
+    this.financeService.results().pipe(map((r) => r.data)),
     { initialValue: null },
   );
   // Премия предложения под курсором — полоса прогресса «дорастает».

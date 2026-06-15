@@ -32,60 +32,6 @@
       </span>
     </header>
 
-    <!-- ─── Motivation dashboard ─── -->
-    @if (motivation(); as m) {
-      <section class="pr-card pr-mot">
-        <header class="pr-card__head">
-          <h2 class="pr-card__title">Моя мотивация</h2>
-          <span class="pr-card__hint">Категория присваивается по прогнозу сборов за месяц</span>
-        </header>
-
-        <app-motivation-strip [snapshot]="m" />
-
-        <div class="pr-metrics">
-          <div class="pr-metric">
-            <span class="pr-metric__val">{{ progress()?.currentTier?.kv }}%</span>
-            <span class="pr-metric__label">КВ категории</span>
-          </div>
-          <div class="pr-metric">
-            <span class="pr-metric__val">{{ m.penetration }}%</span>
-            <span class="pr-metric__label">Проникновение</span>
-          </div>
-          <div class="pr-metric">
-            <span class="pr-metric__val">{{ m.poolShare }}%</span>
-            <span class="pr-metric__label">ОСАГО в пуле</span>
-          </div>
-          <div class="pr-metric">
-            <span class="pr-metric__val">{{ m.policiesThisMonth }}</span>
-            <span class="pr-metric__label">Договоров за {{ m.monthLabel }}</span>
-          </div>
-        </div>
-
-        <div class="pr-ladder" role="table" aria-label="Категории мотивации">
-          @for (t of m.tiers; track t.name) {
-            <div
-              class="pr-ladder__row"
-              [class.pr-ladder__row--current]="progress()?.currentTier?.name === t.name"
-              role="row"
-            >
-              <span class="pr-ladder__name">{{ t.name }}</span>
-              <span class="pr-ladder__th">
-                @if (t.minProjection > 0) {
-                  прогноз от {{ t.minProjection | number: '1.0-0' }} ₽
-                } @else {
-                  стартовая категория
-                }
-              </span>
-              <span class="pr-ladder__kv">КВ {{ t.kv }}%</span>
-              @if (progress()?.currentTier?.name === t.name) {
-                <span class="pr-ladder__you">вы здесь</span>
-              }
-            </div>
-          }
-        </div>
-      </section>
-    }
-
     <!-- ─── Personal + payout ─── -->
     <div class="pr-grid">
       <section class="pr-card">

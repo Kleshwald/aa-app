@@ -1,42 +1,39 @@
 <div class="mot" role="group" aria-label="Прогресс по системе мотивации">
   <div class="mot__head">
     <span class="mot__cat">
-      <span class="mot__cat-label">Категория месяца</span>
-      <span class="mot__cat-name">{{ base().currentTier.name }}</span>
+      <span class="mot__cat-label">Категория</span>
+      <span class="mot__cat-name">{{ results().category }}</span>
     </span>
     <span class="mot__figures">
-      Сборы за {{ snapshot().monthLabel }}
-      <b>{{ snapshot().monthCollections | number: '1.0-0' }} ₽</b>
-      · прогноз
-      <b [class.mot__proj--up]="hasPreview()"
-        >{{ (hasPreview() ? preview().projection : base().projection) | number: '1.0-0' }} ₽</b
-      >
+      Сборы за {{ results().periodLabel }}
+      <b>{{ results().collected | number: '1.0-0' }} ₽</b>
     </span>
   </div>
 
   <div
     class="mot__bar"
-    [class.mot__bar--max]="!base().nextTier"
+    [class.mot__bar--max]="!results().nextCategory"
     role="progressbar"
-    [attr.aria-valuenow]="base().bandPct"
+    [attr.aria-valuenow]="basePct()"
     aria-valuemin="0"
     aria-valuemax="100"
   >
-    <span class="mot__bar-fill" [style.width.%]="base().bandPct"></span>
+    <span class="mot__bar-fill" [style.width.%]="basePct()"></span>
     @if (hasPreview()) {
       <span
         class="mot__bar-ghost"
-        [style.left.%]="base().bandPct"
-        [style.width.%]="preview().bandPct - base().bandPct"
+        [style.left.%]="basePct()"
+        [style.width.%]="previewPct() - basePct()"
       ></span>
     }
   </div>
 
   <div class="mot__foot">
-    @if (base().nextTier; as nt) {
+    @if (results().nextCategory; as next) {
       <span class="mot__next">
-        До категории «{{ nt.name }}» — ещё
-        <b>{{ base().collectionsToNext | number: '1.0-0' }} ₽</b> сборов
+        До категории «{{ next }}» — ещё
+        <b>{{ (hasPreview() ? previewToNext() : results().amountToNext) | number: '1.0-0' }} ₽</b>
+        сборов
       </span>
       @if (hasPreview()) {
         <span class="mot__gain"
