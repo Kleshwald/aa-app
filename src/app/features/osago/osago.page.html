@@ -47,6 +47,11 @@
 
       <!-- Base info -->
       <article class="osago-section" formGroupName="base">
+        <header class="osago-section__head">
+          <h2 class="osago-section__title">
+            <span class="osago-section__num">1</span> Параметры и контакты
+          </h2>
+        </header>
         <div class="osago-row osago-row--gap-large">
           <label class="osago-field osago-field--narrow">
             <span class="osago-field__label">Дата начала</span>
@@ -89,7 +94,7 @@
       <article class="osago-section" formGroupName="vehicle">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
-            <span class="osago-section__marker"></span> Транспортное средство
+            <span class="osago-section__num">2</span> Транспортное средство
           </h2>
           <div class="osago-section__head-actions">
             <label class="osago-check"
@@ -196,7 +201,7 @@
       <article class="osago-section" formGroupName="policyholder">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
-            <span class="osago-section__marker"></span> Страхователь
+            <span class="osago-section__num">3</span> Страхователь
           </h2>
         </header>
         <div class="osago-row">
@@ -257,7 +262,7 @@
       <article class="osago-section" formGroupName="owner">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
-            <span class="osago-section__marker"></span> Собственник
+            <span class="osago-section__num">4</span> Собственник
           </h2>
           <label class="osago-check"
             ><input type="checkbox" formControlName="isSameAsPolicyholder" /><span
@@ -326,7 +331,7 @@
       <!-- Drivers -->
       <article class="osago-section">
         <header class="osago-section__head">
-          <h2 class="osago-section__title"><span class="osago-section__marker"></span> Водители</h2>
+          <h2 class="osago-section__title"><span class="osago-section__num">5</span> Водители</h2>
           <div class="osago-tab-pills">
             @for (n of [1, 2, 3, 4, 5]; track n) {
               <button
