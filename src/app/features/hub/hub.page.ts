@@ -79,6 +79,7 @@ export class HubPage {
       desc: 'CLAUDE.md, .cursorrules, память',
       href: '/hub/doc/ai',
     },
+    { title: 'Карта моков / API', desc: 'Эндпоинты и фикстуры', href: '/hub/doc/api' },
     { title: 'Карта экранов', desc: 'Что собрано и где — маршруты', href: '/hub/doc/screens' },
     { title: 'Доменные факты', desc: 'Что неочевидно из API и кода', href: '/hub/doc/domain' },
     {
@@ -86,6 +87,9 @@ export class HubPage {
       desc: 'Что не переоткрываем без причины',
       href: '/hub/doc/decisions',
     },
+    { title: 'Чеклист демо', desc: 'Сценарий показа по шагам', href: '/hub/doc/demo' },
+    { title: 'Глоссарий', desc: 'ИКП, КВ, НСИС, сегмент, пул…', href: '/hub/doc/glossary' },
+    { title: 'Профиль аудитории', desc: 'Для кого делаем продукт', href: '/hub/doc/audience' },
     { title: 'Бэклог', desc: 'Что делаем дальше, технический долг', href: '/hub/doc/backlog' },
   ];
 }
