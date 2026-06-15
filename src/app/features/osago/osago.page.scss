@@ -185,6 +185,20 @@
   }
 }
 
+// Taiga textfield как поле в строке формы (те же пропорции, что у .osago-field).
+.osago-tf {
+  flex: 1 1 200px;
+  min-width: 160px;
+
+  &--narrow {
+    flex: 0 0 200px;
+  }
+
+  &--grow {
+    flex: 2 1 280px;
+  }
+}
+
 .osago-field__label {
   font-size: var(--text-sm);
   line-height: 1.4;

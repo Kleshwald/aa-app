@@ -28,6 +28,10 @@ import { CalcLoaderComponent } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
+import { TuiDay, type TuiValueTransformer } from '@taiga-ui/cdk';
+import { TuiLabel, TuiTextfield } from '@taiga-ui/core';
+import { TuiInputDate, TuiSelect, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
+
 const VEHICLE_PURPOSES = [
   { value: 'personal', label: 'Личная' },
   { value: 'taxi', label: 'Такси' },
@@ -140,6 +144,22 @@ interface CoefRow {
   value: number;
 }
 
+// ISO-строка ('yyyy-mm-dd') ↔ TuiDay: контролы дат остаются строками, как раньше,
+// поэтому логика расчёта/оформления не меняется — только UI переходит на Taiga.
+class IsoDayTransformer implements TuiValueTransformer<TuiDay | null, string> {
+  fromControlValue(value: string): TuiDay | null {
+    if (!value) return null;
+    const [y, m, d] = value.split('-').map(Number);
+    return new TuiDay(y, m - 1, d);
+  }
+  toControlValue(day: TuiDay | null): string {
+    if (!day) return '';
+    const mm = String(day.month + 1).padStart(2, '0');
+    const dd = String(day.day).padStart(2, '0');
+    return `${day.year}-${mm}-${dd}`;
+  }
+}
+
 @Component({
   selector: 'app-osago-page',
   imports: [
@@ -150,11 +170,16 @@ interface CoefRow {
     AddonIconComponent,
     CalcLoaderComponent,
     MotivationStripComponent,
+    TuiTextfield,
+    TuiLabel,
+    TuiInputDate,
+    TuiSelect,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './osago.page.html',
   styleUrl: './osago.page.scss',
   host: { '(document:keydown.escape)': 'onEscape()' },
+  providers: [tuiInputDateOptionsProvider({ valueTransformer: new IsoDayTransformer() })],
 })
 export class OsagoPage {
   private readonly fb = inject(FormBuilder);

@@ -59,6 +59,10 @@ export default tseslint.config(
       ...angular.configs.templateRecommended,
       ...angular.configs.templateAccessibility,
     ],
-    rules: {},
+    rules: {
+      // Taiga UI связывает <label tuiLabel> с полем внутри <tui-textfield> в рантайме;
+      // статическое правило этого не видит, поэтому отключаем для нашей дизайн-системы.
+      '@angular-eslint/template/label-has-associated-control': 'off',
+    },
   },
 );

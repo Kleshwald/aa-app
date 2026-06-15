@@ -53,40 +53,30 @@
           </h2>
         </header>
         <div class="osago-row osago-row--gap-large">
-          <label class="osago-field osago-field--narrow">
-            <span class="osago-field__label">Дата начала</span>
-            <input type="date" class="osago-field__input" formControlName="startDate" />
-          </label>
-          <label class="osago-field osago-field--narrow">
-            <span class="osago-field__label">Дата окончания</span>
-            <input type="date" class="osago-field__input" formControlName="endDate" readonly />
-          </label>
-          <label class="osago-field">
-            <span class="osago-field__label">Цель использования</span>
-            <select class="osago-field__input osago-field__input--select" formControlName="purpose">
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Дата начала</label>
+            <input tuiInputDate formControlName="startDate" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Дата окончания</label>
+            <input tuiInputDate formControlName="endDate" readonly />
+          </tui-textfield>
+          <tui-textfield class="osago-tf">
+            <label tuiLabel>Цель использования</label>
+            <select tuiSelect formControlName="purpose">
               @for (p of purposes; track p.value) {
                 <option [value]="p.value">{{ p.label }}</option>
               }
             </select>
-          </label>
-          <label class="osago-field">
-            <span class="osago-field__label">Телефон клиента</span>
-            <input
-              type="tel"
-              class="osago-field__input"
-              formControlName="clientPhone"
-              placeholder="+7 (___) ___-__-__"
-            />
-          </label>
-          <label class="osago-field">
-            <span class="osago-field__label">Email</span>
-            <input
-              type="email"
-              class="osago-field__input"
-              formControlName="email"
-              placeholder="example@mail.ru"
-            />
-          </label>
+          </tui-textfield>
+          <tui-textfield class="osago-tf">
+            <label tuiLabel>Телефон клиента</label>
+            <input formControlName="clientPhone" inputmode="tel" placeholder="+7 (___) ___-__-__" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf">
+            <label tuiLabel>Email</label>
+            <input formControlName="email" inputmode="email" placeholder="example@mail.ru" />
+          </tui-textfield>
         </div>
       </article>
 
