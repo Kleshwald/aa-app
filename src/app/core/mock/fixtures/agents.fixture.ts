@@ -78,7 +78,7 @@ function makeAgent(): AgentFixture {
     region: faker.helpers.arrayElement(SIBERIAN_REGIONS),
     district: faker.location.city(),
     legalType: pickWeighted(LEGAL_TYPES),
-    category: `Категория ${faker.number.int({ min: 1, max: 5 })}`,
+    category: faker.helpers.arrayElement(['Основная', 'Основная', 'Основная', 'Индивидуальная']),
     curatorName: `${faker.person.lastName('female')} ${faker.person.firstName('female')} ${faker.person.middleName('female')}`,
     joinDate: join.toISOString().slice(0, 10),
     firstSaleDate:
@@ -91,5 +91,5 @@ function makeAgent(): AgentFixture {
 }
 
 // One canonical "current agent" plus a small pool for lists/search.
-export const currentAgent: AgentFixture = makeAgent();
+export const currentAgent: AgentFixture = { ...makeAgent(), category: 'Основная' };
 export const agents: AgentFixture[] = [currentAgent, ...Array.from({ length: 50 }, makeAgent)];

@@ -93,6 +93,97 @@
         <p class="pr-note">Реквизиты — демо-данные прототипа.</p>
       </section>
     </div>
+
+    <!-- ─── Документы ─── -->
+    <section class="pr-card">
+      <header class="pr-card__head">
+        <h2 class="pr-card__title">Документы</h2>
+      </header>
+
+      <!-- 1. Документы от агента -->
+      <div class="pr-docgroup">
+        <h3 class="pr-docgroup__title">Мои документы</h3>
+        <ul class="pr-docs">
+          @for (d of agentDocs(); track d.name) {
+            <li class="pr-doc">
+              <span class="pr-doc__ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 3v5h5" />
+                </svg>
+              </span>
+              <span class="pr-doc__main">
+                <span class="pr-doc__name">{{ d.name }}</span>
+                @if (d.meta) {
+                  <span class="pr-doc__meta">{{ d.meta }}</span>
+                }
+              </span>
+              <span class="pr-doc__status" [attr.data-status]="d.status">
+                {{ docStatusLabels[d.status] }}
+              </span>
+              @if (d.status === 'missing') {
+                <button type="button" class="pr-doc__act" (click)="upload()">Загрузить</button>
+              } @else {
+                <button type="button" class="pr-doc__act" (click)="download(d.name)">
+                  Скачать
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+
+      <!-- 2. Подписанные электронной подписью -->
+      <div class="pr-docgroup">
+        <h3 class="pr-docgroup__title">Подписаны электронной подписью</h3>
+        <ul class="pr-docs">
+          @for (d of signedDocs; track d.name) {
+            <li class="pr-doc">
+              <span class="pr-doc__ico pr-doc__ico--signed" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              </span>
+              <span class="pr-doc__main">
+                <span class="pr-doc__name">{{ d.name }}</span>
+                <span class="pr-doc__meta"
+                  >Подписан ЭП · {{ d.signedDate | date: 'dd.MM.yyyy' }}</span
+                >
+              </span>
+              <span class="pr-doc__status pr-doc__status--signed">ЭП</span>
+              <button type="button" class="pr-doc__act" (click)="download(d.name)">Скачать</button>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <!-- 3. Условия сотрудничества -->
+      <div class="pr-docgroup">
+        <h3 class="pr-docgroup__title">Условия сотрудничества</h3>
+        <p class="pr-docgroup__sub">
+          Категория «{{ p.category }}». Базовое КВ по продуктам; растёт с прогнозом сборов — см.
+          <a routerLink="/finance">Мои финансы</a>.
+        </p>
+        <table class="pr-comm">
+          <thead>
+            <tr>
+              <th>Продукт</th>
+              <th class="pr-comm__num">КВ, базовое</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of commissions; track c.product) {
+              <tr>
+                <td>{{ c.product }}</td>
+                <td class="pr-comm__num pr-comm__kv">{{ c.kv }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <p class="pr-note">Комиссии — демо-данные прототипа.</p>
+      </div>
+    </section>
   </section>
 } @else {
   <section class="pr">

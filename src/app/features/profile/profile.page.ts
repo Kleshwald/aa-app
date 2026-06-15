@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { ProfileService, type AgentProfile } from '@core/services/profile.service';
@@ -12,9 +13,30 @@ const LEGAL_TYPE_LABELS: Record<AgentProfile['legalType'], string> = {
   ul: 'Юридическое лицо',
 };
 
+type DocStatus = 'ok' | 'pending' | 'missing';
+interface AgentDoc {
+  name: string;
+  status: DocStatus;
+  meta?: string;
+}
+interface SignedDoc {
+  name: string;
+  signedDate: string;
+}
+interface CommissionRow {
+  product: string;
+  kv: string;
+}
+
+const DOC_STATUS_LABELS: Record<DocStatus, string> = {
+  ok: 'Загружен',
+  pending: 'На проверке',
+  missing: 'Не загружен',
+};
+
 @Component({
   selector: 'app-profile-page',
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',
@@ -66,6 +88,74 @@ export class ProfilePage {
     account: '•••• •••• •••• 4567',
     bik: '044525225',
   };
+
+  // ─── Документы (демо-данные прототипа) ───
+  protected readonly docStatusLabels = DOC_STATUS_LABELS;
+
+  // Документы от агента — состав зависит от правовой формы.
+  protected readonly agentDocs = computed<AgentDoc[]>(() => {
+    const legal = this.profile()?.legalType;
+    const legalExtra: AgentDoc[] =
+      legal === 'ip'
+        ? [
+            {
+              name: 'Свидетельство о регистрации ИП (ОГРНИП)',
+              status: 'ok',
+              meta: 'загружено 15.01.2024',
+            },
+          ]
+        : legal === 'sz'
+          ? [
+              {
+                name: 'Справка о постановке на учёт (НПД)',
+                status: 'ok',
+                meta: 'загружено 15.01.2024',
+              },
+            ]
+          : legal === 'ul'
+            ? [{ name: 'Учредительные документы', status: 'ok', meta: 'загружено 15.01.2024' }]
+            : [];
+    return [
+      { name: 'Паспорт РФ', status: 'ok', meta: 'загружен 15.01.2024' },
+      { name: 'СНИЛС', status: 'ok', meta: 'загружен 15.01.2024' },
+      { name: 'ИНН', status: 'ok', meta: 'загружен 15.01.2024' },
+      ...legalExtra,
+      { name: 'Реквизиты банковского счёта', status: 'ok', meta: 'загружено 15.01.2024' },
+      { name: 'Фото для профиля', status: 'missing' },
+    ];
+  });
+
+  // Документы, подписанные электронной подписью.
+  protected readonly signedDocs: SignedDoc[] = [
+    { name: 'Агентский договор (оферта о присоединении)', signedDate: '2024-01-15' },
+    { name: 'Согласие на обработку персональных данных', signedDate: '2024-01-15' },
+    { name: 'Тарифное соглашение (условия КВ)', signedDate: '2024-01-15' },
+  ];
+
+  // Условия сотрудничества — базовое КВ по продуктам (демо).
+  protected readonly commissions: CommissionRow[] = [
+    { product: 'ОСАГО', kv: '20 %' },
+    { product: 'Страхование от несчастного случая', kv: '35 %' },
+    { product: 'Страхование спортсменов', kv: '30 %' },
+    { product: 'Страхование от укуса клеща', kv: '25 %' },
+    { product: 'Ипотека', kv: '28 %' },
+  ];
+
+  download(name: string): void {
+    const blob = new Blob([`«${name}»\nДемо-файл прототипа Agent Academy.`], {
+      type: 'text/plain;charset=utf-8',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  upload(): void {
+    alert('Загрузка документа появится позже (заглушка прототипа)');
+  }
 
   notImplemented(): void {
     alert('Редактирование появится позже (заглушка прототипа)');
