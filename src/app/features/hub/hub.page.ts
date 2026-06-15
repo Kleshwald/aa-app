@@ -79,6 +79,13 @@ export class HubPage {
       desc: 'CLAUDE.md, .cursorrules, память',
       href: '/hub/doc/ai',
     },
+    { title: 'Карта экранов', desc: 'Что собрано и где — маршруты', href: '/hub/doc/screens' },
+    { title: 'Доменные факты', desc: 'Что неочевидно из API и кода', href: '/hub/doc/domain' },
+    {
+      title: 'Залоченные решения',
+      desc: 'Что не переоткрываем без причины',
+      href: '/hub/doc/decisions',
+    },
     { title: 'Бэклог', desc: 'Что делаем дальше, технический долг', href: '/hub/doc/backlog' },
   ];
 }
