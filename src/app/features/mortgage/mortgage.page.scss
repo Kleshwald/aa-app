@@ -1,0 +1,34 @@
+:host {
+  display: block;
+}
+
+.mortgage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mortgage__title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--header-bg);
+  text-align: center;
+}
+
+.mortgage__subtitle {
+  margin: 0 0 8px;
+  font-size: var(--text-base);
+  color: var(--gray-600);
+  text-align: center;
+}
+
+// Контейнер стороннего виджета — белая карточка, чтобы не «прыгало» до загрузки.
+.mortgage__widget {
+  min-height: 600px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+}
