@@ -445,6 +445,37 @@ const DOC_CONTENT: Record<string, DocContent> = {
       },
     ],
   },
+  release: {
+    title: 'Релиз / деплой',
+    intro: 'Текущая версия публикуется на GitHub Pages автоматически.',
+    source: '.github/workflows/deploy.yml · STATUS.md',
+    sections: [
+      {
+        heading: 'Как это работает',
+        items: [
+          'Пуш в ветку main → GitHub Actions собирает прод-сборку и публикует на Pages.',
+          'base-href берётся из имени репозитория; добавляются 404.html (SPA-fallback) и .nojekyll.',
+          'index.html помечен noindex — ссылка не индексируется поисковиками.',
+        ],
+      },
+      {
+        heading: 'Доступ',
+        items: [
+          'Вход закрыт тестовым логином и паролем (форма входа).',
+          'Сами креды — в STATUS.md репозитория (здесь не показываем: /hub публичен).',
+          'Страница /hub открыта по прямой ссылке — только документация.',
+        ],
+      },
+      {
+        heading: 'Включить Pages (один раз)',
+        items: [
+          'Создать репозиторий на GitHub и запушить ветку main.',
+          'Settings → Pages → Source: GitHub Actions.',
+          'Дальше каждый пуш в main обновляет демо.',
+        ],
+      },
+    ],
+  },
 };
 
 @Component({

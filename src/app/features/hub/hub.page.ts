@@ -80,6 +80,7 @@ export class HubPage {
       href: '/hub/doc/ai',
     },
     { title: 'Карта моков / API', desc: 'Эндпоинты и фикстуры', href: '/hub/doc/api' },
+    { title: 'Релиз / деплой', desc: 'GitHub Pages, доступ, обновление', href: '/hub/doc/release' },
     { title: 'Карта экранов', desc: 'Что собрано и где — маршруты', href: '/hub/doc/screens' },
     { title: 'Доменные факты', desc: 'Что неочевидно из API и кода', href: '/hub/doc/domain' },
     {
