@@ -198,9 +198,18 @@
         <p class="hl__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
       </header>
 
+      @if (motivation(); as m) {
+        <app-motivation-strip [snapshot]="m" [previewPremium]="previewPremium()" />
+      }
+
       <div class="hl-offers">
         @for (o of offers(); track o.id) {
-          <div class="hl-offer" [class.hl-offer--best]="bestOfferId() === o.id">
+          <div
+            class="hl-offer"
+            [class.hl-offer--best]="bestOfferId() === o.id"
+            (mouseenter)="previewPremium.set(offerPrice(o))"
+            (mouseleave)="previewPremium.set(0)"
+          >
             <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
 
             <div class="hl-offer__main">

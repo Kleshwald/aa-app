@@ -478,12 +478,18 @@
         <p class="results__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
       </header>
 
+      @if (motivation(); as m) {
+        <app-motivation-strip [snapshot]="m" [previewPremium]="previewPremium()" />
+      }
+
       <div class="results__offers">
         @for (q of quotes(); track q.id; let i = $index) {
           <article
             class="results__offer results__offer--enter"
             [class.results__offer--best]="$first"
             [style.animation-delay]="220 + i * 220 + 'ms'"
+            (mouseenter)="previewPremium.set(q.osagoPrice)"
+            (mouseleave)="previewPremium.set(0)"
           >
             <app-insurer-logo
               class="results__offer-logo"

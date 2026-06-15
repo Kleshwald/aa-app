@@ -10,14 +10,16 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { type FormArray, FormBuilder, type FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { startWith } from 'rxjs';
+import { map, startWith } from 'rxjs';
 
 import {
   type CreatePolicyPayload,
   ClientDetailService,
 } from '@core/services/client-detail.service';
+import { MotivationService } from '@core/services/motivation.service';
 import { CalcLoaderComponent, type CalcStep } from '@shared/calc-loader/calc-loader.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
+import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
 type HealthProduct = 'accident' | 'sport' | 'tick';
 type InsureType = 'individual' | 'group';
@@ -98,6 +100,7 @@ const HL_DONE_HOLD_MS = 700;
     NgTemplateOutlet,
     InsurerLogoComponent,
     CalcLoaderComponent,
+    MotivationStripComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './health.page.html',
@@ -109,6 +112,15 @@ export class HealthPage {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly policyService = inject(ClientDetailService);
+  private readonly motivationService = inject(MotivationService);
+
+  // Снимок мотивации для полосы прогресса на экране предложений.
+  protected readonly motivation = toSignal(
+    this.motivationService.snapshot().pipe(map((r) => r.data)),
+    { initialValue: null },
+  );
+  // Премия предложения под курсором — полоса прогресса «дорастает».
+  protected readonly previewPremium = signal(0);
 
   protected readonly products = PRODUCTS;
   protected readonly terms = TERMS;
