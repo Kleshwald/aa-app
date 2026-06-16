@@ -409,8 +409,11 @@ export class OsagoPage {
     drivers: this.fb.nonNullable.array([this.makeDriverGroup()]),
   });
 
-  protected readonly ownerSameAsPolicyholder = computed(
-    () => this.form.controls.owner.controls.isSameAsPolicyholder.value,
+  // Реактивно следим за тумблером (value формы — не сигнал, поэтому через toSignal,
+  // иначе computed «застывает» на начальном значении и поля не раскрываются).
+  protected readonly ownerSameAsPolicyholder = toSignal(
+    this.form.controls.owner.controls.isSameAsPolicyholder.valueChanges,
+    { initialValue: this.form.controls.owner.controls.isSameAsPolicyholder.value },
   );
 
   // Payment method is derived from the payer type chosen on the form:
