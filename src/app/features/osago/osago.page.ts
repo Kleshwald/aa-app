@@ -433,6 +433,15 @@ export class OsagoPage {
           modelCtrl.setValue('');
         }
       });
+
+    // Когда собственник = страхователь, поля собственника скрыты — отключаем их,
+    // иначе их required-валидаторы держат форму невалидной и «Рассчитать» молчит.
+    const ownerSame = this.form.controls.owner.controls.isSameAsPolicyholder;
+    const ownerPerson = this.form.controls.owner.controls.person;
+    const syncOwnerPerson = (same: boolean): void =>
+      same ? ownerPerson.disable({ emitEvent: false }) : ownerPerson.enable({ emitEvent: false });
+    syncOwnerPerson(ownerSame.value);
+    ownerSame.valueChanges.pipe(takeUntilDestroyed()).subscribe(syncOwnerPerson);
   }
 
   /** Плейсхолдер поля идентификатора по выбранному типу (VIN / кузов / шасси). */
@@ -468,7 +477,8 @@ export class OsagoPage {
     return !!(p.lastName && p.firstName);
   }
   get ownerFilled(): boolean {
-    if (this.ownerSameAsPolicyholder()) return true;
+    // «Совпадает» считается заполненным только если заполнен сам страхователь.
+    if (this.ownerSameAsPolicyholder()) return this.policyholderFilled;
     const o = this.form.controls.owner.controls.person.getRawValue();
     return !!(o.lastName && o.firstName);
   }
