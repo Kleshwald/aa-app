@@ -130,7 +130,8 @@
   margin: 0;
 }
 
-// Индикатор заполнения секции: пустой кружок → зелёная галочка, когда заполнено.
+// Индикатор заполнения секции: серая точка «ещё не заполнено» → зелёная галочка.
+// (Без белого пустого кружка — он читался как «сломано».)
 .osago-section__status {
   display: inline-flex;
   align-items: center;
@@ -139,15 +140,25 @@
   width: 28px;
   height: 28px;
   border-radius: var(--radius-full);
-  border: 2px solid var(--gray-300);
+  background: var(--gray-200);
   color: #ffffff;
-  transition:
-    background 150ms ease-out,
-    border-color 150ms ease-out;
+  transition: background 150ms ease-out;
+
+  // «Не заполнено» — мягкая серая точка по центру.
+  &::before {
+    content: '';
+    width: 9px;
+    height: 9px;
+    border-radius: var(--radius-full);
+    background: var(--gray-400);
+  }
 
   &--done {
     background: var(--success-600);
-    border-color: var(--success-600);
+
+    &::before {
+      display: none;
+    }
   }
 }
 
@@ -332,20 +343,20 @@
 
 .osago-tab-pills {
   display: inline-flex;
-  gap: 2px;
-  padding: 2px;
+  gap: 3px;
+  padding: 3px;
   background: var(--gray-100);
-  border-radius: var(--radius-base);
+  border-radius: var(--radius-md);
 }
 
 .osago-tab-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  height: 40px;
-  padding: 0 14px;
-  font-size: var(--text-sm);
+  min-width: 48px;
+  height: 44px;
+  padding: 0 18px;
+  font-size: var(--text-base);
   font-family: inherit;
   font-weight: var(--weight-medium);
   color: var(--gray-700);
@@ -373,23 +384,19 @@
   }
 
   &--wide {
-    padding: 0 16px;
+    padding: 0 20px;
   }
 }
 
+// Вторичный сегмент (источник водителя) — тот же стиль трека, без рамок.
 .osago-tab-pills--secondary {
-  background: transparent;
-  padding: 0;
-  gap: 4px;
-
   .osago-tab-pill {
-    border: 1px solid var(--gray-300);
-    background: #ffffff;
+    border: none;
+    background: transparent;
 
     &--active {
       background: var(--header-bg);
       color: #ffffff;
-      border-color: var(--header-bg);
     }
   }
 }

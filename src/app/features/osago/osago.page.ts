@@ -29,7 +29,7 @@ import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.componen
 import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
 import { TuiDay, type TuiValueTransformer } from '@taiga-ui/cdk';
-import { TuiInput, TuiTextfield } from '@taiga-ui/core';
+import { TuiInput, TuiTextfield, tuiTextfieldOptionsProvider } from '@taiga-ui/core';
 import { TuiInputDate, TuiSelect, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
 
 const VEHICLE_PURPOSES = [
@@ -179,7 +179,11 @@ class IsoDayTransformer implements TuiValueTransformer<TuiDay | null, string> {
   templateUrl: './osago.page.html',
   styleUrl: './osago.page.scss',
   host: { '(document:keydown.escape)': 'onEscape()' },
-  providers: [tuiInputDateOptionsProvider({ valueTransformer: new IsoDayTransformer() })],
+  providers: [
+    tuiInputDateOptionsProvider({ valueTransformer: new IsoDayTransformer() }),
+    // Убираем «крестик» очистки (tuiButtonX) из полей — он отвлекал агентов.
+    tuiTextfieldOptionsProvider({ cleaner: signal(false) }),
+  ],
 })
 export class OsagoPage {
   private readonly fb = inject(FormBuilder);
