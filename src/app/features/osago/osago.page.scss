@@ -304,55 +304,12 @@
   color: var(--gray-900);
 }
 
-// Блок «данные скопированы» (собственник/водитель = страхователь): не повторяем
-// поля, а показываем кого подставили — понятно и без лишней вёрстки.
-.osago-copy {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+// Скопированные поля (собственник/водитель = страхователь) отключены, но должны
+// читаться (это данные, а не «выключенный» контрол): убираем блёклость, даём
+// серый фон — видно, что заполнено и что поле «только для чтения».
+.osago-section tui-textfield._disabled {
+  opacity: 1;
   background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-}
-
-.osago-copy__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-full);
-  background: var(--brand-50);
-  color: var(--header-bg);
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-.osago-copy__body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.osago-copy__name {
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  color: var(--gray-900);
-}
-
-.osago-copy__sub {
-  font-size: var(--text-sm);
-  color: var(--gray-600);
-}
-
-.osago-copy__empty {
-  font-size: var(--text-base);
-  color: var(--gray-600);
 }
 
 .osago-section__head-actions {

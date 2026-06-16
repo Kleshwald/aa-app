@@ -434,14 +434,43 @@ export class OsagoPage {
         }
       });
 
-    // Когда собственник = страхователь, поля собственника скрыты — отключаем их,
-    // иначе их required-валидаторы держат форму невалидной и «Рассчитать» молчит.
+    // Собственник = страхователь: показываем те же поля, заполняем данными
+    // страхователя и делаем их «только для чтения» (disabled). Видно, что
+    // заполнено; required-поля при этом не держат форму невалидной.
     const ownerSame = this.form.controls.owner.controls.isSameAsPolicyholder;
     const ownerPerson = this.form.controls.owner.controls.person;
-    const syncOwnerPerson = (same: boolean): void =>
-      same ? ownerPerson.disable({ emitEvent: false }) : ownerPerson.enable({ emitEvent: false });
-    syncOwnerPerson(ownerSame.value);
-    ownerSame.valueChanges.pipe(takeUntilDestroyed()).subscribe(syncOwnerPerson);
+    const copyToOwner = (): void => {
+      const p = this.form.controls.policyholder.getRawValue();
+      ownerPerson.patchValue(
+        {
+          lastName: p.lastName,
+          firstName: p.firstName,
+          middleName: p.middleName,
+          noMiddleName: p.noMiddleName,
+          birthDate: p.birthDate,
+          docType: p.docType,
+          docSeries: p.docSeries,
+          docNumber: p.docNumber,
+          docDate: p.docDate,
+          address: p.address,
+        },
+        { emitEvent: false },
+      );
+    };
+    const syncOwner = (same: boolean): void => {
+      if (same) {
+        copyToOwner();
+        ownerPerson.disable({ emitEvent: false });
+      } else {
+        ownerPerson.enable({ emitEvent: false });
+      }
+    };
+    syncOwner(ownerSame.value);
+    ownerSame.valueChanges.pipe(takeUntilDestroyed()).subscribe(syncOwner);
+    // Пока «совпадает» — зеркалим правки страхователя в собственника.
+    this.form.controls.policyholder.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      if (ownerSame.value) copyToOwner();
+    });
   }
 
   /** Плейсхолдер поля идентификатора по выбранному типу (VIN / кузов / шасси). */
@@ -493,22 +522,32 @@ export class OsagoPage {
     return control.invalid && (control.touched || this.submitted()) ? message : '';
   }
 
-  /** ФИО страхователя — для блоков «совпадает со страхователем». */
-  policyholderName(): string {
-    const p = this.form.controls.policyholder.getRawValue();
-    return [p.lastName, p.firstName, p.middleName].filter(Boolean).join(' ');
-  }
-
-  /** ФИО собственника: если совпадает со страхователем — берём страхователя. */
-  ownerDisplayName(): string {
-    if (this.ownerSameAsPolicyholder()) return this.policyholderName();
-    const o = this.form.controls.owner.controls.person.getRawValue();
-    return [o.lastName, o.firstName, o.middleName].filter(Boolean).join(' ');
-  }
-
-  /** ФИО для водителя-«страхователя»/«собственника» (копия данных). */
-  driverSourceName(source: string): string {
-    return source === 'owner' ? this.ownerDisplayName() : this.policyholderName();
+  /**
+   * Источник данных водителя. Для «страхователя»/«собственника» копируем ФИО+дату
+   * и делаем поля «только для чтения» (disabled); для «иного лица» — редактируем.
+   */
+  setDriverSource(driver: FormGroup, source: 'policyholder' | 'owner' | 'other'): void {
+    driver.patchValue({ source }, { emitEvent: false });
+    const nameKeys = ['lastName', 'firstName', 'middleName', 'noMiddleName', 'birthDate'];
+    if (source === 'other') {
+      nameKeys.forEach((k) => driver.get(k)?.enable({ emitEvent: false }));
+      return;
+    }
+    const src =
+      source === 'owner'
+        ? this.form.controls.owner.controls.person.getRawValue()
+        : this.form.controls.policyholder.getRawValue();
+    driver.patchValue(
+      {
+        lastName: src.lastName,
+        firstName: src.firstName,
+        middleName: src.middleName,
+        noMiddleName: src.noMiddleName,
+        birthDate: src.birthDate,
+      },
+      { emitEvent: false },
+    );
+    nameKeys.forEach((k) => driver.get(k)?.disable({ emitEvent: false }));
   }
 
   setInsurerType(type: 'individual' | 'ip' | 'legal'): void {
@@ -584,13 +623,16 @@ export class OsagoPage {
 
     this.setDriversMode('limited');
     this.setDriverCount(1);
-    this.driversArray.at(0)?.patchValue({
-      source: 'policyholder',
-      licenseSeries: `${num(1000, 9999)}`,
-      licenseNumber: `${num(100000, 999999)}`,
-      licenseDate: '2012-08-15',
-      startExperienceDate: '2012-08-15',
-    });
+    const driver0 = this.driversArray.at(0) as FormGroup | null;
+    if (driver0) {
+      driver0.patchValue({
+        licenseSeries: `${num(1000, 9999)}`,
+        licenseNumber: `${num(100000, 999999)}`,
+        licenseDate: '2012-08-15',
+        startExperienceDate: '2012-08-15',
+      });
+      this.setDriverSource(driver0, 'policyholder');
+    }
   }
 
   private randomVin(): string {
