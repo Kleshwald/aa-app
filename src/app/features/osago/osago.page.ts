@@ -234,6 +234,42 @@ export class OsagoPage {
     { value: 'epts', label: 'ЭПТС' },
   ] as const;
 
+  // ─── Поиск ТС / ручной ввод ───
+  protected readonly vehicleSearchBy = signal<'plate' | 'vin' | 'body'>('plate');
+  protected readonly vehicleManual = signal(true);
+  protected readonly searchPlaceholder = computed(() => {
+    switch (this.vehicleSearchBy()) {
+      case 'vin':
+        return 'Укажите VIN';
+      case 'body':
+        return 'Укажите номер кузова';
+      default:
+        return 'Укажите гос. номер ТС';
+    }
+  });
+
+  toggleVehicleManual(): void {
+    this.vehicleManual.update((v) => !v);
+  }
+
+  /** Мок поиска ТС: подставляем данные и показываем поля (как будто нашли по номеру). */
+  findVehicle(): void {
+    this.form.controls.vehicle.patchValue({
+      licensePlate: 'А123БС777',
+      category: 'B',
+      make: 'Toyota',
+      model: 'Camry',
+      year: 2018,
+      power: 181,
+      identifierType: 'vin',
+      identifierValue: 'JTNB11HJ8K0123456',
+      documentSubType: 'sts',
+      documentSeries: '99 ОВ 123456',
+      documentDate: '2018-05-10',
+    });
+    this.vehicleManual.set(true);
+  }
+
   protected readonly driversMode = signal<'limited' | 'unlimited'>('limited');
   protected readonly driverCount = signal<number>(1);
   protected readonly today = new Date();

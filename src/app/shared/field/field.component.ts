@@ -59,6 +59,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     :host(.field--grow) {
       flex: 2 1 340px;
     }
+    :host(.field--wide) {
+      flex: 3 1 460px;
+    }
     .field__top {
       display: flex;
       flex-direction: column;
@@ -92,11 +95,12 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   host: {
     '[class.field--narrow]': "width() === 'narrow'",
     '[class.field--grow]': "width() === 'grow'",
+    '[class.field--wide]': "width() === 'wide'",
   },
 })
 export class FieldComponent {
   readonly label = input.required<string>();
   readonly hint = input('');
   readonly error = input('');
-  readonly width = input<'narrow' | 'grow' | ''>('');
+  readonly width = input<'narrow' | 'grow' | 'wide' | ''>('');
 }

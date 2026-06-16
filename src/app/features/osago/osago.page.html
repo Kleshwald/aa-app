@@ -87,11 +87,15 @@
           </app-field>
           <app-field
             label="Телефон клиента"
-            hint="например, +7 (916) 123-45-67"
             [error]="err(form.controls.base.controls.clientPhone, 'Укажите телефон клиента')"
           >
             <tui-textfield>
-              <input tuiInput formControlName="clientPhone" inputmode="tel" />
+              <input
+                tuiInput
+                formControlName="clientPhone"
+                inputmode="tel"
+                placeholder="+7 (916) 123-45-67"
+              />
             </tui-textfield>
           </app-field>
           <app-field label="Email">
@@ -128,99 +132,158 @@
           </h2>
           <div class="osago-section__head-actions">
             <label class="osago-check">
-              <input type="checkbox" formControlName="hasTrailer" /><span>ТС с прицепом</span>
+              <input type="checkbox" formControlName="hasTrailer" /><span>С прицепом</span>
             </label>
             <label class="osago-check">
               <input type="checkbox" formControlName="customMakeModel" /><span
                 >Произвольная марка/модель</span
               >
             </label>
-            <button type="button" class="osago-link">Марка или модель отсутствует?</button>
           </div>
         </header>
 
-        <div class="osago-row">
-          <app-field label="Гос.знак" width="narrow" hint="например, А123ВС777">
-            <tui-textfield><input tuiInput formControlName="licensePlate" /></tui-textfield>
-          </app-field>
-          <label class="osago-check osago-check--inline-with-field">
-            <input type="checkbox" formControlName="noLicensePlate" /><span>без номера</span>
+        <!-- Поиск ТС по госномеру / VIN / кузову + переключатель ручного ввода -->
+        <div class="osago-search">
+          <span class="osago-search__label">Поиск по</span>
+          <div class="osago-tab-pills">
+            <button
+              type="button"
+              class="osago-tab-pill"
+              [class.osago-tab-pill--active]="vehicleSearchBy() === 'plate'"
+              (click)="vehicleSearchBy.set('plate')"
+            >
+              Гос.номер
+            </button>
+            <button
+              type="button"
+              class="osago-tab-pill"
+              [class.osago-tab-pill--active]="vehicleSearchBy() === 'vin'"
+              (click)="vehicleSearchBy.set('vin')"
+            >
+              VIN
+            </button>
+            <button
+              type="button"
+              class="osago-tab-pill"
+              [class.osago-tab-pill--active]="vehicleSearchBy() === 'body'"
+              (click)="vehicleSearchBy.set('body')"
+            >
+              Кузов
+            </button>
+          </div>
+          <tui-textfield class="osago-search__field">
+            <input tuiInput [placeholder]="searchPlaceholder()" />
+          </tui-textfield>
+          <button type="button" class="osago-search__btn" (click)="findVehicle()">Найти</button>
+          <span class="osago-search__spacer"></span>
+          <label class="osago-switch">
+            <input
+              type="checkbox"
+              class="osago-switch__input"
+              [checked]="vehicleManual()"
+              (change)="toggleVehicleManual()"
+            />
+            <span class="osago-switch__track"><span class="osago-switch__knob"></span></span>
+            <span class="osago-switch__label">Ручной ввод</span>
           </label>
-          <button type="button" class="osago-link osago-link--button">Найти</button>
-          <app-field label="Категория" width="narrow">
-            <tui-textfield [stringify]="stringifyCategory">
-              <select tuiSelect formControlName="category" [items]="categoryItems"></select>
-            </tui-textfield>
-          </app-field>
-          <app-field label="Марка">
-            <tui-textfield><input tuiInput formControlName="make" /></tui-textfield>
-          </app-field>
-          <app-field label="Модель">
-            <tui-textfield><input tuiInput formControlName="model" /></tui-textfield>
-          </app-field>
-          <app-field label="Год выпуска" width="narrow">
-            <tui-textfield>
-              <input
-                tuiInput
-                type="number"
-                formControlName="year"
-                [min]="1980"
-                [max]="today.getFullYear()"
-              />
-            </tui-textfield>
-          </app-field>
-          <app-field label="Мощность (л.с.)" width="narrow">
-            <tui-textfield>
-              <input tuiInput type="number" formControlName="power" step="0.01" />
-            </tui-textfield>
-          </app-field>
         </div>
 
-        <div class="osago-row">
-          <div class="osago-radio-group">
-            @for (id of identifierTypes; track id.value) {
-              <label class="osago-radio"
-                ><input type="radio" [value]="id.value" formControlName="identifierType" /><span>{{
-                  id.label
-                }}</span></label
-              >
-            }
+        @if (vehicleManual()) {
+          <div class="osago-row">
+            <app-field label="Гос.знак" width="narrow">
+              <tui-textfield>
+                <input tuiInput formControlName="licensePlate" placeholder="А123ВС777" />
+              </tui-textfield>
+            </app-field>
+            <label class="osago-check osago-check--inline-with-field">
+              <input type="checkbox" formControlName="noLicensePlate" /><span>без номера</span>
+            </label>
+            <app-field label="Категория" width="narrow">
+              <tui-textfield [stringify]="stringifyCategory">
+                <select tuiSelect formControlName="category" [items]="categoryItems"></select>
+              </tui-textfield>
+            </app-field>
+            <app-field label="Марка">
+              <tui-textfield><input tuiInput formControlName="make" /></tui-textfield>
+            </app-field>
+            <app-field label="Модель">
+              <tui-textfield><input tuiInput formControlName="model" /></tui-textfield>
+            </app-field>
           </div>
-          <app-field
-            label="VIN / № кузова / № шасси"
-            width="grow"
-            hint="VIN — 17 символов (латиница и цифры)"
-          >
-            <tui-textfield>
-              <input tuiInput formControlName="identifierValue" maxlength="17" />
-            </tui-textfield>
-          </app-field>
-          <div class="osago-tab-pills">
-            @for (d of documentSubTypes; track d.value) {
-              <label
-                class="osago-tab-pill"
-                [class.osago-tab-pill--active]="
-                  form.controls.vehicle.controls.documentSubType.value === d.value
-                "
-                ><input
-                  type="radio"
-                  [value]="d.value"
-                  formControlName="documentSubType"
-                  class="visually-hidden"
-                />{{ d.label }}</label
-              >
-            }
+
+          <div class="osago-row">
+            <app-field label="Год выпуска" width="narrow">
+              <tui-textfield>
+                <input
+                  tuiInput
+                  type="number"
+                  formControlName="year"
+                  [min]="1980"
+                  [max]="today.getFullYear()"
+                />
+              </tui-textfield>
+            </app-field>
+            <app-field label="Мощность (л.с.)" width="narrow">
+              <tui-textfield>
+                <input tuiInput type="number" formControlName="power" step="0.01" />
+              </tui-textfield>
+            </app-field>
+            <div class="osago-radio-group">
+              @for (id of identifierTypes; track id.value) {
+                <label class="osago-radio"
+                  ><input
+                    type="radio"
+                    [value]="id.value"
+                    formControlName="identifierType"
+                  /><span>{{ id.label }}</span></label
+                >
+              }
+            </div>
+            <app-field label="VIN / № кузова / № шасси" width="grow">
+              <tui-textfield>
+                <input
+                  tuiInput
+                  formControlName="identifierValue"
+                  maxlength="17"
+                  placeholder="17 символов"
+                />
+              </tui-textfield>
+            </app-field>
           </div>
-          <app-field label="Серия и номер">
-            <tui-textfield><input tuiInput formControlName="documentSeries" /></tui-textfield>
-          </app-field>
-          <app-field label="Дата выдачи" width="narrow">
-            <tui-textfield>
-              <input tuiInputDate formControlName="documentDate" />
-              <tui-calendar *tuiDropdown />
-            </tui-textfield>
-          </app-field>
-        </div>
+
+          <div class="osago-row">
+            <div class="osago-tab-pills">
+              @for (d of documentSubTypes; track d.value) {
+                <label
+                  class="osago-tab-pill"
+                  [class.osago-tab-pill--active]="
+                    form.controls.vehicle.controls.documentSubType.value === d.value
+                  "
+                  ><input
+                    type="radio"
+                    [value]="d.value"
+                    formControlName="documentSubType"
+                    class="visually-hidden"
+                  />{{ d.label }}</label
+                >
+              }
+            </div>
+            <app-field label="Серия и номер">
+              <tui-textfield><input tuiInput formControlName="documentSeries" /></tui-textfield>
+            </app-field>
+            <app-field label="Дата выдачи" width="narrow">
+              <tui-textfield>
+                <input tuiInputDate formControlName="documentDate" />
+                <tui-calendar *tuiDropdown />
+              </tui-textfield>
+            </app-field>
+          </div>
+        } @else {
+          <p class="osago__search-note">
+            Найдите ТС по госномеру, VIN или номеру кузова — данные подставятся автоматически. Или
+            включите «Ручной ввод».
+          </p>
+        }
       </article>
 
       <!-- Policyholder -->
@@ -295,7 +358,7 @@
               <tui-calendar *tuiDropdown />
             </tui-textfield>
           </app-field>
-          <app-field label="Адрес регистрации" width="grow">
+          <app-field label="Адрес регистрации" width="wide">
             <tui-textfield><input tuiInput formControlName="address" /></tui-textfield>
           </app-field>
         </div>
@@ -371,7 +434,7 @@
                   <tui-calendar *tuiDropdown />
                 </tui-textfield>
               </app-field>
-              <app-field label="Адрес регистрации" width="grow">
+              <app-field label="Адрес регистрации" width="wide">
                 <tui-textfield><input tuiInput formControlName="address" /></tui-textfield>
               </app-field>
             </div>
