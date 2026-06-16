@@ -549,14 +549,13 @@ export class OsagoPage {
 
   /**
    * Показывать ли пилюлю источника для водителя №index. «Иное лицо» — всегда.
-   * Текущий источник — всегда (как активный). Страхователь/собственник — только если
-   * заполнен, не дублируется (собственник≠страхователь) и не «занят» другим водителем.
+   * Текущий источник — всегда (как активный). Страхователь — всегда, если не занят
+   * другим водителем. Собственник — так же, но скрыт, если совпадает со страхователем.
    */
   canPickSource(index: number, source: 'policyholder' | 'owner' | 'other'): boolean {
     if (source === 'other') return true;
     if (this.isDriverSource(index, source)) return true;
-    if (source === 'policyholder' && !this.policyholderFilled) return false;
-    if (source === 'owner' && (this.ownerSameAsPolicyholder() || !this.ownerFilled)) return false;
+    if (source === 'owner' && this.ownerSameAsPolicyholder()) return false;
     return !this.driversArray.controls.some(
       (c, i) => i !== index && c.get('source')?.value === source,
     );
