@@ -347,50 +347,52 @@
             <span class="osago-switch__label">Совпадает со страхователем</span>
           </label>
         </header>
-        <ng-container formGroupName="person">
-          <div class="osago-row">
-            <app-field label="Фамилия">
-              <tui-textfield><input tuiInput formControlName="lastName" /></tui-textfield>
-            </app-field>
-            <app-field label="Имя">
-              <tui-textfield><input tuiInput formControlName="firstName" /></tui-textfield>
-            </app-field>
-            <app-field label="Отчество" width="grow">
-              <tui-textfield><input tuiInput formControlName="middleName" /></tui-textfield>
-            </app-field>
-            <label class="osago-check osago-check--inline-with-field">
-              <input type="checkbox" formControlName="noMiddleName" /><span>Без отчества</span>
-            </label>
-            <app-field label="Дата рождения" width="narrow">
-              <tui-textfield>
-                <input tuiInputDate formControlName="birthDate" />
-                <tui-calendar *tuiDropdown />
-              </tui-textfield>
-            </app-field>
-          </div>
-          <div class="osago-row">
-            <app-field label="Тип документа">
-              <tui-textfield [stringify]="stringifyDocType">
-                <select tuiSelect formControlName="docType" [items]="docTypeItems"></select>
-              </tui-textfield>
-            </app-field>
-            <app-field label="Серия" width="small">
-              <tui-textfield><input tuiInput formControlName="docSeries" /></tui-textfield>
-            </app-field>
-            <app-field label="Номер" width="small">
-              <tui-textfield><input tuiInput formControlName="docNumber" /></tui-textfield>
-            </app-field>
-            <app-field label="Дата выдачи" width="narrow">
-              <tui-textfield>
-                <input tuiInputDate formControlName="docDate" />
-                <tui-calendar *tuiDropdown />
-              </tui-textfield>
-            </app-field>
-            <app-field label="Адрес регистрации" width="wide">
-              <tui-textfield><input tuiInput formControlName="address" /></tui-textfield>
-            </app-field>
-          </div>
-        </ng-container>
+        @if (!ownerSameAsPolicyholder()) {
+          <ng-container formGroupName="person">
+            <div class="osago-row">
+              <app-field label="Фамилия">
+                <tui-textfield><input tuiInput formControlName="lastName" /></tui-textfield>
+              </app-field>
+              <app-field label="Имя">
+                <tui-textfield><input tuiInput formControlName="firstName" /></tui-textfield>
+              </app-field>
+              <app-field label="Отчество" width="grow">
+                <tui-textfield><input tuiInput formControlName="middleName" /></tui-textfield>
+              </app-field>
+              <label class="osago-check osago-check--inline-with-field">
+                <input type="checkbox" formControlName="noMiddleName" /><span>Без отчества</span>
+              </label>
+              <app-field label="Дата рождения" width="narrow">
+                <tui-textfield>
+                  <input tuiInputDate formControlName="birthDate" />
+                  <tui-calendar *tuiDropdown />
+                </tui-textfield>
+              </app-field>
+            </div>
+            <div class="osago-row">
+              <app-field label="Тип документа">
+                <tui-textfield [stringify]="stringifyDocType">
+                  <select tuiSelect formControlName="docType" [items]="docTypeItems"></select>
+                </tui-textfield>
+              </app-field>
+              <app-field label="Серия" width="small">
+                <tui-textfield><input tuiInput formControlName="docSeries" /></tui-textfield>
+              </app-field>
+              <app-field label="Номер" width="small">
+                <tui-textfield><input tuiInput formControlName="docNumber" /></tui-textfield>
+              </app-field>
+              <app-field label="Дата выдачи" width="narrow">
+                <tui-textfield>
+                  <input tuiInputDate formControlName="docDate" />
+                  <tui-calendar *tuiDropdown />
+                </tui-textfield>
+              </app-field>
+              <app-field label="Адрес регистрации" width="wide">
+                <tui-textfield><input tuiInput formControlName="address" /></tui-textfield>
+              </app-field>
+            </div>
+          </ng-container>
+        }
       </article>
 
       <!-- Drivers -->
@@ -449,7 +451,7 @@
                     type="button"
                     class="osago-tab-pill"
                     [class.osago-tab-pill--active]="driver.get('source')?.value === 'policyholder'"
-                    (click)="setDriverSource(driver, 'policyholder')"
+                    (click)="driver.patchValue({ source: 'policyholder' })"
                   >
                     Страхователь
                   </button>
@@ -457,7 +459,7 @@
                     type="button"
                     class="osago-tab-pill"
                     [class.osago-tab-pill--active]="driver.get('source')?.value === 'owner'"
-                    (click)="setDriverSource(driver, 'owner')"
+                    (click)="driver.patchValue({ source: 'owner' })"
                   >
                     Собственник
                   </button>
@@ -465,33 +467,35 @@
                     type="button"
                     class="osago-tab-pill"
                     [class.osago-tab-pill--active]="driver.get('source')?.value === 'other'"
-                    (click)="setDriverSource(driver, 'other')"
+                    (click)="driver.patchValue({ source: 'other' })"
                   >
                     Иное лицо
                   </button>
                 </div>
-                <div class="osago-row">
-                  <app-field label="Фамилия">
-                    <tui-textfield><input tuiInput formControlName="lastName" /></tui-textfield>
-                  </app-field>
-                  <app-field label="Имя">
-                    <tui-textfield><input tuiInput formControlName="firstName" /></tui-textfield>
-                  </app-field>
-                  <app-field label="Отчество" width="grow">
-                    <tui-textfield><input tuiInput formControlName="middleName" /></tui-textfield>
-                  </app-field>
-                  <label class="osago-check osago-check--inline-with-field">
-                    <input type="checkbox" formControlName="noMiddleName" /><span
-                      >Без отчества</span
-                    >
-                  </label>
-                  <app-field label="Дата рождения" width="narrow">
-                    <tui-textfield>
-                      <input tuiInputDate formControlName="birthDate" />
-                      <tui-calendar *tuiDropdown />
-                    </tui-textfield>
-                  </app-field>
-                </div>
+                @if (driver.get('source')?.value === 'other') {
+                  <div class="osago-row">
+                    <app-field label="Фамилия">
+                      <tui-textfield><input tuiInput formControlName="lastName" /></tui-textfield>
+                    </app-field>
+                    <app-field label="Имя">
+                      <tui-textfield><input tuiInput formControlName="firstName" /></tui-textfield>
+                    </app-field>
+                    <app-field label="Отчество" width="grow">
+                      <tui-textfield><input tuiInput formControlName="middleName" /></tui-textfield>
+                    </app-field>
+                    <label class="osago-check osago-check--inline-with-field">
+                      <input type="checkbox" formControlName="noMiddleName" /><span
+                        >Без отчества</span
+                      >
+                    </label>
+                    <app-field label="Дата рождения" width="narrow">
+                      <tui-textfield>
+                        <input tuiInputDate formControlName="birthDate" />
+                        <tui-calendar *tuiDropdown />
+                      </tui-textfield>
+                    </app-field>
+                  </div>
+                }
                 <div class="osago-row">
                   <app-field label="В/У серия" width="narrow">
                     <tui-textfield>

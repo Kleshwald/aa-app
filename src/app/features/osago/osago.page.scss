@@ -304,14 +304,6 @@
   color: var(--gray-900);
 }
 
-// Скопированные поля (собственник/водитель = страхователь) отключены, но должны
-// читаться (это данные, а не «выключенный» контрол): убираем блёклость, даём
-// серый фон — видно, что заполнено и что поле «только для чтения».
-.osago-section tui-textfield._disabled {
-  opacity: 1;
-  background: var(--gray-50);
-}
-
 .osago-section__head-actions {
   display: flex;
   align-items: center;
