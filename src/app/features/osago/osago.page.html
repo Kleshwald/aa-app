@@ -61,6 +61,11 @@
               }
             </span>
           </h2>
+          <div class="osago-section__head-actions">
+            <label class="osago-check">
+              <input type="checkbox" formControlName="hasTrailer" /><span>С прицепом</span>
+            </label>
+          </div>
         </header>
 
         <!-- Поиск ТС по госномеру / VIN / кузову -->
@@ -170,9 +175,6 @@
         </div>
 
         <div class="osago-row">
-          <label class="osago-check osago-check--inline-with-field">
-            <input type="checkbox" formControlName="hasTrailer" /><span>С прицепом</span>
-          </label>
           <div class="osago-ident">
             <span class="osago-ident__label">Идентификатор</span>
             <div class="osago-ident__row">
@@ -202,9 +204,6 @@
               </tui-textfield>
             </div>
           </div>
-        </div>
-
-        <div class="osago-row">
           <div class="osago-seg">
             <span class="osago-seg__label">Документ ТС</span>
             <div class="osago-tab-pills">
