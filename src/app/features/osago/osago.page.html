@@ -49,10 +49,11 @@
       <article class="osago-section" formGroupName="base">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
-            <span class="osago-section__status" [class.osago-section__status--done]="baseFilled">
+            Параметры и контакты
+            <span class="osago-section__badge" [class.osago-section__badge--done]="baseFilled">
               @if (baseFilled) {
                 <svg
-                  class="osago-section__check"
+                  class="osago-section__badge-check"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -62,9 +63,11 @@
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
+                Заполнено
+              } @else {
+                Не заполнено
               }
             </span>
-            Параметры и контакты
           </h2>
         </header>
         <div class="osago-row osago-row--gap-large">
@@ -103,10 +106,11 @@
       <article class="osago-section" formGroupName="vehicle">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
-            <span class="osago-section__status" [class.osago-section__status--done]="vehicleFilled">
+            Транспортное средство
+            <span class="osago-section__badge" [class.osago-section__badge--done]="vehicleFilled">
               @if (vehicleFilled) {
                 <svg
-                  class="osago-section__check"
+                  class="osago-section__badge-check"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -116,9 +120,11 @@
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
+                Заполнено
+              } @else {
+                Не заполнено
               }
             </span>
-            Транспортное средство
           </h2>
           <div class="osago-section__head-actions">
             <label class="osago-check">
@@ -221,13 +227,14 @@
       <article class="osago-section" formGroupName="policyholder">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
+            Страхователь
             <span
-              class="osago-section__status"
-              [class.osago-section__status--done]="policyholderFilled"
+              class="osago-section__badge"
+              [class.osago-section__badge--done]="policyholderFilled"
             >
               @if (policyholderFilled) {
                 <svg
-                  class="osago-section__check"
+                  class="osago-section__badge-check"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -237,9 +244,11 @@
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
+                Заполнено
+              } @else {
+                Не заполнено
               }
             </span>
-            Страхователь
           </h2>
         </header>
         <div class="osago-row">
@@ -296,10 +305,11 @@
       <article class="osago-section" formGroupName="owner">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
-            <span class="osago-section__status" [class.osago-section__status--done]="ownerFilled">
+            Собственник
+            <span class="osago-section__badge" [class.osago-section__badge--done]="ownerFilled">
               @if (ownerFilled) {
                 <svg
-                  class="osago-section__check"
+                  class="osago-section__badge-check"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -309,9 +319,11 @@
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
+                Заполнено
+              } @else {
+                Не заполнено
               }
             </span>
-            Собственник
           </h2>
           <label class="osago-check">
             <input type="checkbox" formControlName="isSameAsPolicyholder" /><span
@@ -371,10 +383,11 @@
       <article class="osago-section">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
-            <span class="osago-section__status" [class.osago-section__status--done]="driversFilled">
+            Водители
+            <span class="osago-section__badge" [class.osago-section__badge--done]="driversFilled">
               @if (driversFilled) {
                 <svg
-                  class="osago-section__check"
+                  class="osago-section__badge-check"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -384,9 +397,11 @@
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
+                Заполнено
+              } @else {
+                Не заполнено
               }
             </span>
-            Водители
           </h2>
           <div class="osago-tab-pills">
             @for (n of [1, 2, 3, 4, 5]; track n) {
