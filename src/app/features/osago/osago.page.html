@@ -295,11 +295,15 @@
               <select tuiSelect formControlName="docType" [items]="docTypeItems"></select>
             </tui-textfield>
           </app-field>
-          <app-field label="Серия" width="tiny">
-            <tui-textfield><input tuiInput formControlName="docSeries" /></tui-textfield>
-          </app-field>
-          <app-field label="Номер" width="tiny">
-            <tui-textfield><input tuiInput formControlName="docNumber" /></tui-textfield>
+          <app-field label="Серия и номер" width="narrow">
+            <tui-textfield>
+              <input
+                tuiInput
+                formControlName="docSeriesNumber"
+                [maskito]="seriesNumberMask"
+                placeholder="1234 567890"
+              />
+            </tui-textfield>
           </app-field>
           <app-field label="Дата выдачи" width="narrow">
             <tui-textfield>
@@ -375,11 +379,15 @@
                   <select tuiSelect formControlName="docType" [items]="docTypeItems"></select>
                 </tui-textfield>
               </app-field>
-              <app-field label="Серия" width="tiny">
-                <tui-textfield><input tuiInput formControlName="docSeries" /></tui-textfield>
-              </app-field>
-              <app-field label="Номер" width="tiny">
-                <tui-textfield><input tuiInput formControlName="docNumber" /></tui-textfield>
+              <app-field label="Серия и номер" width="narrow">
+                <tui-textfield>
+                  <input
+                    tuiInput
+                    formControlName="docSeriesNumber"
+                    [maskito]="seriesNumberMask"
+                    placeholder="1234 567890"
+                  />
+                </tui-textfield>
               </app-field>
               <app-field label="Дата выдачи" width="narrow">
                 <tui-textfield>
@@ -526,21 +534,25 @@
                 </div>
 
                 <div class="osago-row">
-                  <app-field label="В/У серия" width="narrow">
-                    <tui-textfield>
-                      <input tuiInput formControlName="licenseSeries" />
+                  <app-field label="Тип документа">
+                    <tui-textfield [stringify]="stringifyDriverDocType">
+                      <select
+                        tuiSelect
+                        formControlName="licenseDocType"
+                        [items]="driverDocTypeItems"
+                      ></select>
                     </tui-textfield>
                   </app-field>
-                  <app-field label="В/У номер" width="narrow">
+                  <app-field label="Серия и номер" width="narrow">
                     <tui-textfield>
-                      <input tuiInput formControlName="licenseNumber" />
+                      <input
+                        tuiInput
+                        formControlName="licenseSeriesNumber"
+                        [maskito]="seriesNumberMask"
+                        placeholder="1234 567890"
+                      />
                     </tui-textfield>
                   </app-field>
-                  <label class="osago-check osago-check--inline-with-field">
-                    <input type="checkbox" formControlName="isForeignLicense" /><span
-                      >Иностранное В/У</span
-                    >
-                  </label>
                   <app-field label="Дата выдачи В/У" width="narrow">
                     <tui-textfield>
                       <input tuiInputDate formControlName="licenseDate" />

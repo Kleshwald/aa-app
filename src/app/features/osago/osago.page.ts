@@ -30,6 +30,8 @@ import { FieldComponent } from '@shared/field/field.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
+import { MaskitoDirective } from '@maskito/angular';
+import type { MaskitoOptions } from '@maskito/core';
 import { TuiDay, type TuiValueTransformer } from '@taiga-ui/cdk';
 import { TuiInput, TuiTextfield, tuiTextfieldOptionsProvider } from '@taiga-ui/core';
 import { TuiInputDate, TuiSelect, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
@@ -56,6 +58,18 @@ const DOCUMENT_TYPES = [
   { value: 'birth-certificate', label: 'Свидетельство о рождении' },
   { value: 'temporary-id', label: 'Временное удостоверение' },
 ] as const;
+
+const DRIVER_DOC_TYPES = [
+  { value: 'license-rf', label: 'Водительское удостоверение РФ' },
+  { value: 'license-foreign', label: 'Водительское удостоверение иностранного государства' },
+  { value: 'tractor', label: 'Удостоверение тракториста-машиниста (тракториста)' },
+  { value: 'temporary', label: 'Временное удостоверение на право управления самоходными машинами' },
+] as const;
+
+// Маска «серия + номер» (4 + 6 цифр) — для паспорта и В/У: «1234 567890».
+const SERIES_NUMBER_MASK: MaskitoOptions = {
+  mask: [/\d/, /\d/, /\d/, /\d/, ' ', /\d/, /\d/, /\d/, /\d/, /\d/, /\d/],
+};
 
 // Справочник марок/моделей (мок). Если марки нет в списке — агент ставит
 // «Произвольная марка/модель» и вводит вручную.
@@ -216,6 +230,7 @@ class IsoDayTransformer implements TuiValueTransformer<TuiDay | null, string> {
     TuiInput,
     TuiInputDate,
     TuiSelect,
+    MaskitoDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './osago.page.html',
@@ -288,6 +303,12 @@ export class OsagoPage {
 
   protected readonly brandItems = CAR_BRANDS;
   protected readonly stringifySelf = (v: string): string => v;
+  protected readonly seriesNumberMask = SERIES_NUMBER_MASK;
+
+  // Тип документа водителя (В/У РФ / иностранное / тракторист / временное).
+  protected readonly driverDocTypeItems = DRIVER_DOC_TYPES.map((d) => d.value);
+  protected readonly stringifyDriverDocType = (v: string): string =>
+    DRIVER_DOC_TYPES.find((d) => d.value === v)?.label ?? v;
   /** Модели выбранной марки (справочник); пусто, пока марка не выбрана. */
   modelItems(): readonly string[] {
     return CAR_CATALOG[this.form.controls.vehicle.controls.make.value] ?? [];
@@ -488,7 +509,7 @@ export class OsagoPage {
   get driversFilled(): boolean {
     if (this.driversMode() === 'unlimited') return true;
     const d = this.driversArray.at(0)?.getRawValue() as Record<string, unknown> | undefined;
-    return !!(d?.['licenseSeries'] && d?.['licenseNumber']);
+    return !!d?.['licenseSeriesNumber'];
   }
 
   /** Текст ошибки для обязательного поля — показываем после touch или попытки расчёта. */
@@ -600,8 +621,7 @@ export class OsagoPage {
         middleName: person.middleName,
         birthDate: person.birthDate,
         docType: 'passport-rf',
-        docSeries: `${num(1000, 9999)}`,
-        docNumber: `${num(100000, 999999)}`,
+        docSeriesNumber: `${num(1000, 9999)} ${num(100000, 999999)}`,
         docDate: '2008-05-20',
         address: pick(RANDOM_ADDRESSES),
       },
@@ -612,8 +632,8 @@ export class OsagoPage {
     const driver0 = this.driversArray.at(0) as FormGroup | null;
     if (driver0) {
       driver0.patchValue({
-        licenseSeries: `${num(1000, 9999)}`,
-        licenseNumber: `${num(100000, 999999)}`,
+        licenseDocType: 'license-rf',
+        licenseSeriesNumber: `${num(1000, 9999)} ${num(100000, 999999)}`,
         licenseDate: '2012-08-15',
         startExperienceDate: '2012-08-15',
       });
@@ -877,8 +897,7 @@ export class OsagoPage {
       noMiddleName: [false],
       birthDate: [''],
       docType: ['passport-rf' as const],
-      docSeries: [''],
-      docNumber: [''],
+      docSeriesNumber: [''],
       docDate: [''],
       address: [''],
     });
@@ -892,9 +911,8 @@ export class OsagoPage {
       middleName: [''],
       noMiddleName: [false],
       birthDate: [''],
-      licenseSeries: [''],
-      licenseNumber: [''],
-      isForeignLicense: [false],
+      licenseDocType: ['license-rf' as 'license-rf' | 'license-foreign' | 'tractor' | 'temporary'],
+      licenseSeriesNumber: [''],
       licenseDate: [''],
       startExperienceDate: [''],
       hasPreviousLicense: [false],
