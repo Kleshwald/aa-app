@@ -166,10 +166,10 @@
           </tui-textfield>
           <button type="button" class="osago-search__btn" (click)="findVehicle()">Найти</button>
           <span class="osago-search__spacer"></span>
-          <label class="osago-check">
-            <input type="checkbox" formControlName="customMakeModel" /><span
-              >Произвольная марка/модель</span
-            >
+          <label class="osago-switch">
+            <input type="checkbox" class="osago-switch__input" formControlName="customMakeModel" />
+            <span class="osago-switch__track"><span class="osago-switch__knob"></span></span>
+            <span class="osago-switch__label">Произвольная марка/модель</span>
           </label>
         </div>
 
@@ -407,13 +407,45 @@
               }
             </span>
           </h2>
-          <label class="osago-check">
-            <input type="checkbox" formControlName="isSameAsPolicyholder" /><span
-              >Является страхователем</span
-            >
+          <label class="osago-switch">
+            <input
+              type="checkbox"
+              class="osago-switch__input"
+              formControlName="isSameAsPolicyholder"
+            />
+            <span class="osago-switch__track"><span class="osago-switch__knob"></span></span>
+            <span class="osago-switch__label">Совпадает со страхователем</span>
           </label>
         </header>
-        @if (!ownerSameAsPolicyholder()) {
+        @if (ownerSameAsPolicyholder()) {
+          <div class="osago-copy">
+            <span class="osago-copy__icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            @if (policyholderName(); as name) {
+              <div class="osago-copy__body">
+                <span class="osago-copy__name">{{ name }}</span>
+                <span class="osago-copy__sub">Данные совпадают со страхователем</span>
+              </div>
+            } @else {
+              <span class="osago-copy__empty"
+                >Будут использованы данные страхователя — заполните раздел «Страхователь»
+                выше.</span
+              >
+            }
+          </div>
+        } @else {
           <ng-container formGroupName="person">
             <div class="osago-row">
               <app-field label="Фамилия">
@@ -560,6 +592,44 @@
                         <tui-calendar *tuiDropdown />
                       </tui-textfield>
                     </app-field>
+                  </div>
+                } @else {
+                  <div class="osago-copy">
+                    <span class="osago-copy__icon">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </span>
+                    @if (driverSourceName(driver.get('source')?.value ?? ''); as name) {
+                      <div class="osago-copy__body">
+                        <span class="osago-copy__name">{{ name }}</span>
+                        <span class="osago-copy__sub">
+                          Данные совпадают
+                          {{
+                            driver.get('source')?.value === 'owner'
+                              ? 'с собственником'
+                              : 'со страхователем'
+                          }}
+                        </span>
+                      </div>
+                    } @else {
+                      <span class="osago-copy__empty">
+                        Будут использованы данные
+                        {{
+                          driver.get('source')?.value === 'owner' ? 'собственника' : 'страхователя'
+                        }}
+                        — заполните их выше.
+                      </span>
+                    }
                   </div>
                 }
                 <div class="osago-row">

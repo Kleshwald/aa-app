@@ -462,6 +462,24 @@ export class OsagoPage {
     return control.invalid && (control.touched || this.submitted()) ? message : '';
   }
 
+  /** ФИО страхователя — для блоков «совпадает со страхователем». */
+  policyholderName(): string {
+    const p = this.form.controls.policyholder.getRawValue();
+    return [p.lastName, p.firstName, p.middleName].filter(Boolean).join(' ');
+  }
+
+  /** ФИО собственника: если совпадает со страхователем — берём страхователя. */
+  ownerDisplayName(): string {
+    if (this.ownerSameAsPolicyholder()) return this.policyholderName();
+    const o = this.form.controls.owner.controls.person.getRawValue();
+    return [o.lastName, o.firstName, o.middleName].filter(Boolean).join(' ');
+  }
+
+  /** ФИО для водителя-«страхователя»/«собственника» (копия данных). */
+  driverSourceName(source: string): string {
+    return source === 'owner' ? this.ownerDisplayName() : this.policyholderName();
+  }
+
   setInsurerType(type: 'individual' | 'ip' | 'legal'): void {
     this.insurerType.set(type);
   }
