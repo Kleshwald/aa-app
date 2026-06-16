@@ -56,6 +56,10 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       flex: 0 0 190px;
       min-width: 0;
     }
+    :host(.field--small) {
+      flex: 1 1 150px;
+      min-width: 140px;
+    }
     :host(.field--grow) {
       flex: 2 1 340px;
     }
@@ -102,5 +106,5 @@ export class FieldComponent {
   readonly label = input.required<string>();
   readonly hint = input('');
   readonly error = input('');
-  readonly width = input<'narrow' | 'grow' | 'wide' | ''>('');
+  readonly width = input<'narrow' | 'small' | 'grow' | 'wide' | ''>('');
 }

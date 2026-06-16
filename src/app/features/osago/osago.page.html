@@ -119,18 +119,18 @@
             </tui-textfield>
           </app-field>
           @if (form.controls.vehicle.controls.customMakeModel.value) {
-            <app-field label="Марка">
+            <app-field label="Марка" width="small">
               <tui-textfield>
                 <input tuiInput formControlName="make" placeholder="Марка ТС" />
               </tui-textfield>
             </app-field>
-            <app-field label="Модель">
+            <app-field label="Модель" width="small">
               <tui-textfield>
                 <input tuiInput formControlName="model" placeholder="Модель ТС" />
               </tui-textfield>
             </app-field>
           } @else {
-            <app-field label="Марка">
+            <app-field label="Марка" width="small">
               <tui-textfield [stringify]="stringifySelf">
                 <select
                   tuiSelect
@@ -140,7 +140,7 @@
                 ></select>
               </tui-textfield>
             </app-field>
-            <app-field label="Модель">
+            <app-field label="Модель" width="small">
               <tui-textfield [stringify]="stringifySelf">
                 <select
                   tuiSelect
@@ -151,9 +151,6 @@
               </tui-textfield>
             </app-field>
           }
-        </div>
-
-        <div class="osago-row">
           <app-field label="Год выпуска" width="narrow">
             <tui-textfield>
               <input
@@ -170,6 +167,9 @@
               <input tuiInput type="number" formControlName="power" step="0.01" />
             </tui-textfield>
           </app-field>
+        </div>
+
+        <div class="osago-row">
           <label class="osago-check osago-check--inline-with-field">
             <input type="checkbox" formControlName="hasTrailer" /><span>С прицепом</span>
           </label>
@@ -224,7 +224,7 @@
               }
             </div>
           </div>
-          <app-field label="Серия и номер">
+          <app-field label="Серия и номер" width="narrow">
             <tui-textfield><input tuiInput formControlName="documentSeries" /></tui-textfield>
           </app-field>
           <app-field label="Дата выдачи" width="narrow">
