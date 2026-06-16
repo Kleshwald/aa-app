@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
   type AbstractControl,
   type FormArray,
@@ -372,7 +372,7 @@ export class OsagoPage {
       model: [''],
       year: [null as number | null],
       power: [null as number | null],
-      identifierType: ['vin' as const],
+      identifierType: ['vin' as 'vin' | 'body' | 'chassis'],
       identifierValue: [''],
       documentSubType: ['sts' as const],
       documentSeries: [''],
@@ -400,6 +400,30 @@ export class OsagoPage {
 
   constructor() {
     this.destroyRef.onDestroy(() => this.clearTimers());
+
+    // Смена марки сбрасывает модель (если она не из справочника новой марки).
+    // В режиме «Произвольная марка/модель» не трогаем — там свободный ввод.
+    this.form.controls.vehicle.controls.make.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((make) => {
+        if (this.form.controls.vehicle.controls.customMakeModel.value) return;
+        const modelCtrl = this.form.controls.vehicle.controls.model;
+        if (modelCtrl.value && !(CAR_CATALOG[make] ?? []).includes(modelCtrl.value)) {
+          modelCtrl.setValue('');
+        }
+      });
+  }
+
+  /** Плейсхолдер поля идентификатора по выбранному типу (VIN / кузов / шасси). */
+  identPlaceholder(): string {
+    switch (this.form.controls.vehicle.controls.identifierType.value) {
+      case 'body':
+        return 'Номер кузова';
+      case 'chassis':
+        return 'Номер шасси';
+      default:
+        return '17 символов';
+    }
   }
 
   // ─── Form helpers ───

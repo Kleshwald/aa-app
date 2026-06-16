@@ -236,6 +236,36 @@
   color: var(--gray-700);
 }
 
+// Идентификатор ТС: одна подпись + (тип-переключатель + поле) в одну строку —
+// без дублирующей длинной подписи «VIN / № кузова / № шасси».
+.osago-ident {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 2 1 460px;
+  min-width: 320px;
+  // Выровнять по контролам app-field (под ними зарезервирован слот сообщения).
+  margin-bottom: 24px;
+}
+
+.osago-ident__label {
+  font-size: var(--text-sm);
+  line-height: 1.3;
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+}
+
+.osago-ident__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.osago-ident__field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .osago-section__head-actions {
   display: flex;
   align-items: center;

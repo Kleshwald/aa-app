@@ -130,11 +130,6 @@
               }
             </span>
           </h2>
-          <div class="osago-section__head-actions">
-            <label class="osago-check">
-              <input type="checkbox" formControlName="hasTrailer" /><span>С прицепом</span>
-            </label>
-          </div>
         </header>
 
         <!-- Поиск ТС по госномеру / VIN / кузову -->
@@ -244,35 +239,38 @@
               <input tuiInput type="number" formControlName="power" step="0.01" />
             </tui-textfield>
           </app-field>
-          <div class="osago-seg">
-            <span class="osago-seg__label">Тип идентификатора</span>
-            <div class="osago-tab-pills">
-              @for (id of identifierTypes; track id.value) {
-                <label
-                  class="osago-tab-pill"
-                  [class.osago-tab-pill--active]="
-                    form.controls.vehicle.controls.identifierType.value === id.value
-                  "
-                  ><input
-                    type="radio"
-                    [value]="id.value"
-                    formControlName="identifierType"
-                    class="visually-hidden"
-                  />{{ id.label }}</label
-                >
-              }
+          <label class="osago-check osago-check--inline-with-field">
+            <input type="checkbox" formControlName="hasTrailer" /><span>С прицепом</span>
+          </label>
+          <div class="osago-ident">
+            <span class="osago-ident__label">Идентификатор</span>
+            <div class="osago-ident__row">
+              <div class="osago-tab-pills">
+                @for (id of identifierTypes; track id.value) {
+                  <label
+                    class="osago-tab-pill"
+                    [class.osago-tab-pill--active]="
+                      form.controls.vehicle.controls.identifierType.value === id.value
+                    "
+                    ><input
+                      type="radio"
+                      [value]="id.value"
+                      formControlName="identifierType"
+                      class="visually-hidden"
+                    />{{ id.label }}</label
+                  >
+                }
+              </div>
+              <tui-textfield class="osago-ident__field">
+                <input
+                  tuiInput
+                  formControlName="identifierValue"
+                  maxlength="17"
+                  [placeholder]="identPlaceholder()"
+                />
+              </tui-textfield>
             </div>
           </div>
-          <app-field label="VIN / № кузова / № шасси" width="grow">
-            <tui-textfield>
-              <input
-                tuiInput
-                formControlName="identifierValue"
-                maxlength="17"
-                placeholder="17 символов"
-              />
-            </tui-textfield>
-          </app-field>
         </div>
 
         <div class="osago-row">
