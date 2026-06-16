@@ -61,31 +61,17 @@
             <label tuiLabel>Дата окончания</label>
             <input tuiInputDate formControlName="endDate" readonly />
           </tui-textfield>
-          <tui-textfield class="osago-tf">
+          <tui-textfield class="osago-tf" [stringify]="stringifyPurpose">
             <label tuiLabel>Цель использования</label>
-            <select tuiSelect formControlName="purpose">
-              @for (p of purposes; track p.value) {
-                <option [value]="p.value">{{ p.label }}</option>
-              }
-            </select>
+            <select tuiSelect formControlName="purpose" [items]="purposeItems"></select>
           </tui-textfield>
           <tui-textfield class="osago-tf">
             <label tuiLabel>Телефон клиента</label>
-            <input
-              tuiInput
-              formControlName="clientPhone"
-              inputmode="tel"
-              placeholder="+7 (___) ___-__-__"
-            />
+            <input tuiInput formControlName="clientPhone" inputmode="tel" />
           </tui-textfield>
           <tui-textfield class="osago-tf">
             <label tuiLabel>Email</label>
-            <input
-              tuiInput
-              formControlName="email"
-              inputmode="email"
-              placeholder="example@mail.ru"
-            />
+            <input tuiInput formControlName="email" inputmode="email" />
           </tui-textfield>
         </div>
       </article>
@@ -97,66 +83,56 @@
             <span class="osago-section__num">2</span> Транспортное средство
           </h2>
           <div class="osago-section__head-actions">
-            <label class="osago-check"
-              ><input type="checkbox" formControlName="hasTrailer" /><span
-                >ТС с прицепом</span
-              ></label
-            >
-            <label class="osago-check"
-              ><input type="checkbox" formControlName="customMakeModel" /><span
+            <label class="osago-check">
+              <input type="checkbox" formControlName="hasTrailer" /><span>ТС с прицепом</span>
+            </label>
+            <label class="osago-check">
+              <input type="checkbox" formControlName="customMakeModel" /><span
                 >Произвольная марка/модель</span
-              ></label
-            >
+              >
+            </label>
             <button type="button" class="osago-link">Марка или модель отсутствует?</button>
           </div>
         </header>
 
         <div class="osago-row">
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Гос.знак</span
-            ><input type="text" class="osago-field__input" formControlName="licensePlate"
-          /></label>
-          <label class="osago-check osago-check--inline-with-field"
-            ><input type="checkbox" formControlName="noLicensePlate" /><span
-              >без номера</span
-            ></label
-          >
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Гос.знак</label>
+            <input tuiInput formControlName="licensePlate" />
+          </tui-textfield>
+          <label class="osago-check osago-check--inline-with-field">
+            <input type="checkbox" formControlName="noLicensePlate" /><span>без номера</span>
+          </label>
           <button type="button" class="osago-link osago-link--button">Найти</button>
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Категория</span
-            ><select
-              class="osago-field__input osago-field__input--select"
-              formControlName="category"
-            >
-              @for (c of categories; track c.value) {
-                <option [value]="c.value">{{ c.value }}</option>
-              }
-            </select></label
-          >
-          <label class="osago-field"
-            ><span class="osago-field__label">Марка</span
-            ><input type="text" class="osago-field__input" formControlName="make"
-          /></label>
-          <label class="osago-field"
-            ><span class="osago-field__label">Модель</span
-            ><input type="text" class="osago-field__input" formControlName="model"
-          /></label>
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Год выпуска</span
-            ><input
+          <tui-textfield class="osago-tf osago-tf--narrow" [stringify]="stringifyCategory">
+            <label tuiLabel>Категория</label>
+            <select tuiSelect formControlName="category" [items]="categoryItems"></select>
+          </tui-textfield>
+          <tui-textfield class="osago-tf">
+            <label tuiLabel>Марка</label>
+            <input tuiInput formControlName="make" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf">
+            <label tuiLabel>Модель</label>
+            <input tuiInput formControlName="model" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Год выпуска</label>
+            <input
+              tuiInput
               type="number"
-              class="osago-field__input"
               formControlName="year"
               [min]="1980"
               [max]="today.getFullYear()"
-          /></label>
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Мощность (л.с.)</span
-            ><input type="number" class="osago-field__input" formControlName="power" step="0.01"
-          /></label>
+            />
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Мощность (л.с.)</label>
+            <input tuiInput type="number" formControlName="power" step="0.01" />
+          </tui-textfield>
         </div>
 
-        <div class="osago-row osago-row--align-bottom">
+        <div class="osago-row">
           <div class="osago-radio-group">
             @for (id of identifierTypes; track id.value) {
               <label class="osago-radio"
@@ -166,10 +142,10 @@
               >
             }
           </div>
-          <label class="osago-field osago-field--grow"
-            ><span class="osago-field__label visually-hidden">Значение</span
-            ><input type="text" class="osago-field__input" formControlName="identifierValue"
-          /></label>
+          <tui-textfield class="osago-tf osago-tf--grow">
+            <label tuiLabel>VIN / № кузова / № шасси</label>
+            <input tuiInput formControlName="identifierValue" />
+          </tui-textfield>
           <div class="osago-tab-pills">
             @for (d of documentSubTypes; track d.value) {
               <label
@@ -186,14 +162,14 @@
               >
             }
           </div>
-          <label class="osago-field"
-            ><span class="osago-field__label">Серия и номер</span
-            ><input type="text" class="osago-field__input" formControlName="documentSeries"
-          /></label>
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Дата выдачи</span
-            ><input type="date" class="osago-field__input" formControlName="documentDate"
-          /></label>
+          <tui-textfield class="osago-tf">
+            <label tuiLabel>Серия и номер</label>
+            <input tuiInput formControlName="documentSeries" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Дата выдачи</label>
+            <input tuiInputDate formControlName="documentDate" />
+          </tui-textfield>
         </div>
       </article>
 
@@ -205,56 +181,47 @@
           </h2>
         </header>
         <div class="osago-row">
-          <label class="osago-field"
-            ><span class="osago-field__label">Фамилия</span
-            ><input type="text" class="osago-field__input" formControlName="lastName"
-          /></label>
-          <label class="osago-field"
-            ><span class="osago-field__label">Имя</span
-            ><input type="text" class="osago-field__input" formControlName="firstName"
-          /></label>
-          <label class="osago-field osago-field--grow"
-            ><span class="osago-field__label">Отчество</span
-            ><input type="text" class="osago-field__input" formControlName="middleName"
-          /></label>
-          <label class="osago-check osago-check--inline-with-field"
-            ><input type="checkbox" formControlName="noMiddleName" /><span
-              >Без отчества</span
-            ></label
-          >
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Дата рождения</span
-            ><input type="date" class="osago-field__input" formControlName="birthDate"
-          /></label>
+          <tui-textfield class="osago-tf">
+            <label tuiLabel>Фамилия</label>
+            <input tuiInput formControlName="lastName" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf">
+            <label tuiLabel>Имя</label>
+            <input tuiInput formControlName="firstName" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--grow">
+            <label tuiLabel>Отчество</label>
+            <input tuiInput formControlName="middleName" />
+          </tui-textfield>
+          <label class="osago-check osago-check--inline-with-field">
+            <input type="checkbox" formControlName="noMiddleName" /><span>Без отчества</span>
+          </label>
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Дата рождения</label>
+            <input tuiInputDate formControlName="birthDate" />
+          </tui-textfield>
         </div>
         <div class="osago-row">
-          <label class="osago-field"
-            ><span class="osago-field__label">Тип документа</span
-            ><select
-              class="osago-field__input osago-field__input--select"
-              formControlName="docType"
-            >
-              @for (d of documentTypes; track d.value) {
-                <option [value]="d.value">{{ d.label }}</option>
-              }
-            </select></label
-          >
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Серия</span
-            ><input type="text" class="osago-field__input" formControlName="docSeries"
-          /></label>
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Номер</span
-            ><input type="text" class="osago-field__input" formControlName="docNumber"
-          /></label>
-          <label class="osago-field osago-field--narrow"
-            ><span class="osago-field__label">Дата выдачи</span
-            ><input type="date" class="osago-field__input" formControlName="docDate"
-          /></label>
-          <label class="osago-field osago-field--grow"
-            ><span class="osago-field__label">Адрес регистрации</span
-            ><input type="text" class="osago-field__input" formControlName="address"
-          /></label>
+          <tui-textfield class="osago-tf" [stringify]="stringifyDocType">
+            <label tuiLabel>Тип документа</label>
+            <select tuiSelect formControlName="docType" [items]="docTypeItems"></select>
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Серия</label>
+            <input tuiInput formControlName="docSeries" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Номер</label>
+            <input tuiInput formControlName="docNumber" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--narrow">
+            <label tuiLabel>Дата выдачи</label>
+            <input tuiInputDate formControlName="docDate" />
+          </tui-textfield>
+          <tui-textfield class="osago-tf osago-tf--grow">
+            <label tuiLabel>Адрес регистрации</label>
+            <input tuiInput formControlName="address" />
+          </tui-textfield>
         </div>
       </article>
 
@@ -264,65 +231,56 @@
           <h2 class="osago-section__title">
             <span class="osago-section__num">4</span> Собственник
           </h2>
-          <label class="osago-check"
-            ><input type="checkbox" formControlName="isSameAsPolicyholder" /><span
+          <label class="osago-check">
+            <input type="checkbox" formControlName="isSameAsPolicyholder" /><span
               >Является страхователем</span
-            ></label
-          >
+            >
+          </label>
         </header>
         @if (!ownerSameAsPolicyholder()) {
           <ng-container formGroupName="person">
             <div class="osago-row">
-              <label class="osago-field"
-                ><span class="osago-field__label">Фамилия</span
-                ><input type="text" class="osago-field__input" formControlName="lastName"
-              /></label>
-              <label class="osago-field"
-                ><span class="osago-field__label">Имя</span
-                ><input type="text" class="osago-field__input" formControlName="firstName"
-              /></label>
-              <label class="osago-field osago-field--grow"
-                ><span class="osago-field__label">Отчество</span
-                ><input type="text" class="osago-field__input" formControlName="middleName"
-              /></label>
-              <label class="osago-check osago-check--inline-with-field"
-                ><input type="checkbox" formControlName="noMiddleName" /><span
-                  >Без отчества</span
-                ></label
-              >
-              <label class="osago-field osago-field--narrow"
-                ><span class="osago-field__label">Дата рождения</span
-                ><input type="date" class="osago-field__input" formControlName="birthDate"
-              /></label>
+              <tui-textfield class="osago-tf">
+                <label tuiLabel>Фамилия</label>
+                <input tuiInput formControlName="lastName" />
+              </tui-textfield>
+              <tui-textfield class="osago-tf">
+                <label tuiLabel>Имя</label>
+                <input tuiInput formControlName="firstName" />
+              </tui-textfield>
+              <tui-textfield class="osago-tf osago-tf--grow">
+                <label tuiLabel>Отчество</label>
+                <input tuiInput formControlName="middleName" />
+              </tui-textfield>
+              <label class="osago-check osago-check--inline-with-field">
+                <input type="checkbox" formControlName="noMiddleName" /><span>Без отчества</span>
+              </label>
+              <tui-textfield class="osago-tf osago-tf--narrow">
+                <label tuiLabel>Дата рождения</label>
+                <input tuiInputDate formControlName="birthDate" />
+              </tui-textfield>
             </div>
             <div class="osago-row">
-              <label class="osago-field"
-                ><span class="osago-field__label">Тип документа</span
-                ><select
-                  class="osago-field__input osago-field__input--select"
-                  formControlName="docType"
-                >
-                  @for (d of documentTypes; track d.value) {
-                    <option [value]="d.value">{{ d.label }}</option>
-                  }
-                </select></label
-              >
-              <label class="osago-field osago-field--narrow"
-                ><span class="osago-field__label">Серия</span
-                ><input type="text" class="osago-field__input" formControlName="docSeries"
-              /></label>
-              <label class="osago-field osago-field--narrow"
-                ><span class="osago-field__label">Номер</span
-                ><input type="text" class="osago-field__input" formControlName="docNumber"
-              /></label>
-              <label class="osago-field osago-field--narrow"
-                ><span class="osago-field__label">Дата выдачи</span
-                ><input type="date" class="osago-field__input" formControlName="docDate"
-              /></label>
-              <label class="osago-field osago-field--grow"
-                ><span class="osago-field__label">Адрес регистрации</span
-                ><input type="text" class="osago-field__input" formControlName="address"
-              /></label>
+              <tui-textfield class="osago-tf" [stringify]="stringifyDocType">
+                <label tuiLabel>Тип документа</label>
+                <select tuiSelect formControlName="docType" [items]="docTypeItems"></select>
+              </tui-textfield>
+              <tui-textfield class="osago-tf osago-tf--narrow">
+                <label tuiLabel>Серия</label>
+                <input tuiInput formControlName="docSeries" />
+              </tui-textfield>
+              <tui-textfield class="osago-tf osago-tf--narrow">
+                <label tuiLabel>Номер</label>
+                <input tuiInput formControlName="docNumber" />
+              </tui-textfield>
+              <tui-textfield class="osago-tf osago-tf--narrow">
+                <label tuiLabel>Дата выдачи</label>
+                <input tuiInputDate formControlName="docDate" />
+              </tui-textfield>
+              <tui-textfield class="osago-tf osago-tf--grow">
+                <label tuiLabel>Адрес регистрации</label>
+                <input tuiInput formControlName="address" />
+              </tui-textfield>
             </div>
           </ng-container>
         }
@@ -387,59 +345,56 @@
                 </div>
                 @if (driver.get('source')?.value === 'other') {
                   <div class="osago-row">
-                    <label class="osago-field"
-                      ><span class="osago-field__label">Фамилия</span
-                      ><input type="text" class="osago-field__input" formControlName="lastName"
-                    /></label>
-                    <label class="osago-field"
-                      ><span class="osago-field__label">Имя</span
-                      ><input type="text" class="osago-field__input" formControlName="firstName"
-                    /></label>
-                    <label class="osago-field osago-field--grow"
-                      ><span class="osago-field__label">Отчество</span
-                      ><input type="text" class="osago-field__input" formControlName="middleName"
-                    /></label>
-                    <label class="osago-check osago-check--inline-with-field"
-                      ><input type="checkbox" formControlName="noMiddleName" /><span
+                    <tui-textfield class="osago-tf">
+                      <label tuiLabel>Фамилия</label>
+                      <input tuiInput formControlName="lastName" />
+                    </tui-textfield>
+                    <tui-textfield class="osago-tf">
+                      <label tuiLabel>Имя</label>
+                      <input tuiInput formControlName="firstName" />
+                    </tui-textfield>
+                    <tui-textfield class="osago-tf osago-tf--grow">
+                      <label tuiLabel>Отчество</label>
+                      <input tuiInput formControlName="middleName" />
+                    </tui-textfield>
+                    <label class="osago-check osago-check--inline-with-field">
+                      <input type="checkbox" formControlName="noMiddleName" /><span
                         >Без отчества</span
-                      ></label
-                    >
-                    <label class="osago-field osago-field--narrow"
-                      ><span class="osago-field__label">Дата рождения</span
-                      ><input type="date" class="osago-field__input" formControlName="birthDate"
-                    /></label>
+                      >
+                    </label>
+                    <tui-textfield class="osago-tf osago-tf--narrow">
+                      <label tuiLabel>Дата рождения</label>
+                      <input tuiInputDate formControlName="birthDate" />
+                    </tui-textfield>
                   </div>
                 }
                 <div class="osago-row">
-                  <label class="osago-field osago-field--narrow"
-                    ><span class="osago-field__label">В/У серия</span
-                    ><input type="text" class="osago-field__input" formControlName="licenseSeries"
-                  /></label>
-                  <label class="osago-field osago-field--narrow"
-                    ><span class="osago-field__label">В/У номер</span
-                    ><input type="text" class="osago-field__input" formControlName="licenseNumber"
-                  /></label>
-                  <label class="osago-check osago-check--inline-with-field"
-                    ><input type="checkbox" formControlName="isForeignLicense" /><span
+                  <tui-textfield class="osago-tf osago-tf--narrow">
+                    <label tuiLabel>В/У серия</label>
+                    <input tuiInput formControlName="licenseSeries" />
+                  </tui-textfield>
+                  <tui-textfield class="osago-tf osago-tf--narrow">
+                    <label tuiLabel>В/У номер</label>
+                    <input tuiInput formControlName="licenseNumber" />
+                  </tui-textfield>
+                  <label class="osago-check osago-check--inline-with-field">
+                    <input type="checkbox" formControlName="isForeignLicense" /><span
                       >Иностранное В/У</span
-                    ></label
-                  >
-                  <label class="osago-field osago-field--narrow"
-                    ><span class="osago-field__label">Дата выдачи В/У</span
-                    ><input type="date" class="osago-field__input" formControlName="licenseDate"
-                  /></label>
-                  <label class="osago-field osago-field--narrow"
-                    ><span class="osago-field__label">Дата начала стажа</span
-                    ><input
-                      type="date"
-                      class="osago-field__input"
-                      formControlName="startExperienceDate"
-                  /></label>
-                  <label class="osago-check osago-check--inline-with-field"
-                    ><input type="checkbox" formControlName="hasPreviousLicense" /><span
+                    >
+                  </label>
+                  <tui-textfield class="osago-tf osago-tf--narrow">
+                    <label tuiLabel>Дата выдачи В/У</label>
+                    <input tuiInputDate formControlName="licenseDate" />
+                  </tui-textfield>
+                  <tui-textfield class="osago-tf osago-tf--narrow">
+                    <label tuiLabel>Дата начала стажа</label>
+                    <input tuiInputDate formControlName="startExperienceDate" />
+                  </tui-textfield>
+                  <label class="osago-check osago-check--inline-with-field">
+                    <input type="checkbox" formControlName="hasPreviousLicense" /><span
                       >Указать предыдущее В/У</span
-                    ></label
-                  >
+                    >
+                  </label>
                 </div>
               </div>
             }

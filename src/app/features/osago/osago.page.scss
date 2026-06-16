@@ -158,14 +158,16 @@
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  align-items: flex-end;
+  // Taiga textfield — единый бокс (метка плавает внутри), поэтому в строке
+  // выравниваем всё по центру: поля, чекбоксы, пилюли — на одной линии.
+  align-items: center;
 
   &--gap-large {
     gap: 20px;
   }
 
   &--align-bottom {
-    align-items: flex-end;
+    align-items: center;
   }
 }
 
@@ -270,7 +272,6 @@
 
   &--inline-with-field {
     flex: 0 0 auto;
-    padding-bottom: 14px;
     color: var(--gray-700);
     font-size: var(--text-sm);
   }
@@ -282,7 +283,6 @@
   display: inline-flex;
   align-items: center;
   gap: 16px;
-  padding-bottom: 8px;
 }
 
 .osago-radio {

@@ -202,6 +202,18 @@ export class OsagoPage {
   protected readonly documentTypes = DOCUMENT_TYPES;
   protected readonly addOnPresets = ADD_ON_PRESETS;
 
+  // Для Taiga select: списки кодов + «stringify» (код → подпись). Значение
+  // контрола остаётся кодом, в поле показывается человеческая подпись.
+  protected readonly purposeItems = VEHICLE_PURPOSES.map((p) => p.value);
+  protected readonly categoryItems = VEHICLE_CATEGORIES.map((c) => c.value);
+  protected readonly docTypeItems = DOCUMENT_TYPES.map((d) => d.value);
+  protected readonly stringifyPurpose = (v: string): string =>
+    VEHICLE_PURPOSES.find((p) => p.value === v)?.label ?? v;
+  protected readonly stringifyCategory = (v: string): string =>
+    VEHICLE_CATEGORIES.find((c) => c.value === v)?.label ?? v;
+  protected readonly stringifyDocType = (v: string): string =>
+    DOCUMENT_TYPES.find((d) => d.value === v)?.label ?? v;
+
   protected readonly insurerType = signal<'individual' | 'ip' | 'legal'>('individual');
 
   protected readonly identifierTypes = [
