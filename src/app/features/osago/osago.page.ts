@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
+  type AbstractControl,
   type FormArray,
   FormBuilder,
   type FormGroup,
@@ -25,6 +26,7 @@ import {
 import { FinanceService } from '@core/services/finance.service';
 import { AddonIconComponent } from '@shared/addon-icon/addon-icon.component';
 import { CalcLoaderComponent } from '@shared/calc-loader/calc-loader.component';
+import { FieldComponent } from '@shared/field/field.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
@@ -170,6 +172,7 @@ class IsoDayTransformer implements TuiValueTransformer<TuiDay | null, string> {
     AddonIconComponent,
     CalcLoaderComponent,
     MotivationStripComponent,
+    FieldComponent,
     TuiTextfield,
     TuiInput,
     TuiInputDate,
@@ -237,6 +240,9 @@ export class OsagoPage {
 
   // ─── Flow state ───
   protected readonly view = signal<View>('form');
+
+  // Показ ошибок включается после первой попытки расчёта (или по touched поля).
+  protected readonly submitted = signal(false);
 
   // Экран ожидания — крупная сменяющаяся строка статуса (вариант «минимал»).
   protected readonly steps = CALC_STEPS;
@@ -372,6 +378,11 @@ export class OsagoPage {
     return !!(d?.['licenseSeries'] && d?.['licenseNumber']);
   }
 
+  /** Текст ошибки для обязательного поля — показываем после touch или попытки расчёта. */
+  err(control: AbstractControl, message: string): string {
+    return control.invalid && (control.touched || this.submitted()) ? message : '';
+  }
+
   setInsurerType(type: 'individual' | 'ip' | 'legal'): void {
     this.insurerType.set(type);
   }
@@ -449,6 +460,12 @@ export class OsagoPage {
   // ─── Calculation flow ───
 
   calculate(): void {
+    // Обязательные поля должны быть заполнены — иначе показываем ошибки и не идём дальше.
+    if (this.form.invalid) {
+      this.submitted.set(true);
+      this.form.markAllAsTouched();
+      return;
+    }
     this.clearTimers();
     // Котировки считаются сразу, но НЕ показываются до экрана результатов
     // (алгоритм вывода СК скрыт).
