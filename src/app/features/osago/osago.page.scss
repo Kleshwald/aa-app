@@ -414,19 +414,6 @@
   }
 }
 
-// Вторичный сегмент (источник водителя) — тот же стиль трека, без рамок.
-.osago-tab-pills--secondary {
-  .osago-tab-pill {
-    border: none;
-    background: transparent;
-
-    &--active {
-      background: var(--header-bg);
-      color: #ffffff;
-    }
-  }
-}
-
 // ─── Inline link / "Find" button ───
 
 .osago-link {
@@ -478,11 +465,145 @@
   border-radius: var(--radius-base);
 }
 
+.osago-driver__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .osago-driver__title {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   color: var(--gray-900);
   margin: 0;
+}
+
+.osago-driver__remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-600);
+  background: none;
+  border: none;
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: var(--error-50);
+    color: var(--error-600);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
+}
+
+// Помощь в предзаполнении водителя данными страхователя/собственника.
+.osago-prefill {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.osago-prefill__label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+}
+
+.osago-prefill__chip {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--header-bg);
+  background: var(--brand-50);
+  border: 1px solid var(--accent-400);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+
+  &:hover {
+    background: var(--brand-100);
+    border-color: var(--accent-500);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
+}
+
+// Добавление водителя.
+.osago-drivers__add {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.osago-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 20px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--header-bg);
+  background: #ffffff;
+  border: 1px dashed var(--accent-400);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--brand-50);
+    border-color: var(--accent-500);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
+
+  &:disabled {
+    color: var(--gray-400);
+    border-color: var(--gray-300);
+    cursor: not-allowed;
+  }
+}
+
+.osago-add__hint {
+  font-size: var(--text-xs);
+  color: var(--gray-500);
 }
 
 .osago__unlimited-note {

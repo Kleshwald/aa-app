@@ -311,7 +311,7 @@ export class OsagoPage {
   }
 
   protected readonly driversMode = signal<'limited' | 'unlimited'>('limited');
-  protected readonly driverCount = signal<number>(1);
+  protected readonly maxDrivers = 5;
   protected readonly today = new Date();
 
   // ─── Flow state ───
@@ -506,19 +506,55 @@ export class OsagoPage {
       while (this.driversArray.length > 0) this.driversArray.removeAt(0);
     } else if (this.driversArray.length === 0) {
       this.driversArray.push(this.makeDriverGroup());
-      this.driverCount.set(1);
     }
   }
 
-  setDriverCount(n: number): void {
-    if (this.driversMode() !== 'limited') return;
-    this.driverCount.set(n);
-    while (this.driversArray.length < n) this.driversArray.push(this.makeDriverGroup());
-    while (this.driversArray.length > n) this.driversArray.removeAt(this.driversArray.length - 1);
+  get canAddDriver(): boolean {
+    return this.driversArray.length < this.maxDrivers;
   }
 
-  isActiveDriverTab(n: number): boolean {
-    return this.driversMode() === 'limited' && this.driverCount() === n;
+  addDriver(): void {
+    if (this.canAddDriver) this.driversArray.push(this.makeDriverGroup());
+  }
+
+  removeDriver(index: number): void {
+    if (this.driversArray.length > 1) this.driversArray.removeAt(index);
+  }
+
+  /**
+   * Источники предзаполнения, доступные водителю №index: страхователь/собственник,
+   * которые заполнены и ещё не «заняты» другим водителем (и не им самим).
+   */
+  availableSources(index: number): { policyholder: boolean; owner: boolean } {
+    const ctrls = this.driversArray.controls;
+    const usedByOther = (src: string): boolean =>
+      ctrls.some((c, i) => i !== index && c.get('source')?.value === src);
+    const self = ctrls[index]?.get('source')?.value;
+    return {
+      policyholder:
+        this.policyholderFilled && self !== 'policyholder' && !usedByOther('policyholder'),
+      owner:
+        !this.ownerSameAsPolicyholder() &&
+        this.ownerFilled &&
+        self !== 'owner' &&
+        !usedByOther('owner'),
+    };
+  }
+
+  /** Предзаполнить водителя данными страхователя/собственника (ФИО + дата). */
+  fillDriverFrom(driver: FormGroup, source: 'policyholder' | 'owner'): void {
+    const src =
+      source === 'owner'
+        ? this.form.controls.owner.controls.person.getRawValue()
+        : this.form.controls.policyholder.getRawValue();
+    driver.patchValue({
+      source,
+      lastName: src.lastName,
+      firstName: src.firstName,
+      middleName: src.middleName,
+      noMiddleName: src.noMiddleName,
+      birthDate: src.birthDate,
+    });
   }
 
   // ─── Ассистент: случайное заполнение (прототип) ───
@@ -568,14 +604,17 @@ export class OsagoPage {
     });
 
     this.setDriversMode('limited');
-    this.setDriverCount(1);
-    this.driversArray.at(0)?.patchValue({
-      source: 'policyholder',
-      licenseSeries: `${num(1000, 9999)}`,
-      licenseNumber: `${num(100000, 999999)}`,
-      licenseDate: '2012-08-15',
-      startExperienceDate: '2012-08-15',
-    });
+    const driver0 = this.driversArray.at(0) as FormGroup | null;
+    if (driver0) {
+      driver0.patchValue({
+        licenseSeries: `${num(1000, 9999)}`,
+        licenseNumber: `${num(100000, 999999)}`,
+        licenseDate: '2012-08-15',
+        startExperienceDate: '2012-08-15',
+      });
+      // Первый водитель — страхователь (ФИО подставляются из него).
+      this.fillDriverFrom(driver0, 'policyholder');
+    }
   }
 
   private randomVin(): string {

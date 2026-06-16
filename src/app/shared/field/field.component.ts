@@ -64,7 +64,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       flex: 2 1 340px;
     }
     :host(.field--wide) {
-      flex: 3 1 460px;
+      flex: 5 1 520px;
     }
     .field__top {
       display: flex;

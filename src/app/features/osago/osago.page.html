@@ -420,16 +420,14 @@
             </span>
           </h2>
           <div class="osago-tab-pills">
-            @for (n of [1, 2, 3, 4, 5]; track n) {
-              <button
-                type="button"
-                class="osago-tab-pill"
-                [class.osago-tab-pill--active]="isActiveDriverTab(n)"
-                (click)="setDriversMode('limited'); setDriverCount(n)"
-              >
-                {{ n }}
-              </button>
-            }
+            <button
+              type="button"
+              class="osago-tab-pill osago-tab-pill--wide"
+              [class.osago-tab-pill--active]="driversMode() === 'limited'"
+              (click)="setDriversMode('limited')"
+            >
+              Ограниченный список
+            </button>
             <button
               type="button"
               class="osago-tab-pill osago-tab-pill--wide"
@@ -445,57 +443,83 @@
           <div formArrayName="drivers" class="osago-drivers">
             @for (driver of driversArray.controls; track $index) {
               <div class="osago-driver" [formGroupName]="$index">
-                <h3 class="osago-driver__title">Водитель {{ $index + 1 }}</h3>
-                <div class="osago-tab-pills osago-tab-pills--secondary">
-                  <button
-                    type="button"
-                    class="osago-tab-pill"
-                    [class.osago-tab-pill--active]="driver.get('source')?.value === 'policyholder'"
-                    (click)="driver.patchValue({ source: 'policyholder' })"
-                  >
-                    Страхователь
-                  </button>
-                  <button
-                    type="button"
-                    class="osago-tab-pill"
-                    [class.osago-tab-pill--active]="driver.get('source')?.value === 'owner'"
-                    (click)="driver.patchValue({ source: 'owner' })"
-                  >
-                    Собственник
-                  </button>
-                  <button
-                    type="button"
-                    class="osago-tab-pill"
-                    [class.osago-tab-pill--active]="driver.get('source')?.value === 'other'"
-                    (click)="driver.patchValue({ source: 'other' })"
-                  >
-                    Иное лицо
-                  </button>
-                </div>
-                @if (driver.get('source')?.value === 'other') {
-                  <div class="osago-row">
-                    <app-field label="Фамилия">
-                      <tui-textfield><input tuiInput formControlName="lastName" /></tui-textfield>
-                    </app-field>
-                    <app-field label="Имя">
-                      <tui-textfield><input tuiInput formControlName="firstName" /></tui-textfield>
-                    </app-field>
-                    <app-field label="Отчество" width="grow">
-                      <tui-textfield><input tuiInput formControlName="middleName" /></tui-textfield>
-                    </app-field>
-                    <label class="osago-check osago-check--inline-with-field">
-                      <input type="checkbox" formControlName="noMiddleName" /><span
-                        >Без отчества</span
+                <div class="osago-driver__head">
+                  <h3 class="osago-driver__title">Водитель {{ $index + 1 }}</h3>
+                  @if (driversArray.length > 1) {
+                    <button
+                      type="button"
+                      class="osago-driver__remove"
+                      (click)="removeDriver($index)"
+                      [attr.aria-label]="'Удалить водителя ' + ($index + 1)"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
                       >
-                    </label>
-                    <app-field label="Дата рождения" width="narrow">
-                      <tui-textfield>
-                        <input tuiInputDate formControlName="birthDate" />
-                        <tui-calendar *tuiDropdown />
-                      </tui-textfield>
-                    </app-field>
-                  </div>
+                        <polyline points="3 6 5 6 21 6" />
+                        <path
+                          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                        />
+                      </svg>
+                      Удалить
+                    </button>
+                  }
+                </div>
+
+                @if (availableSources($index); as src) {
+                  @if (src.policyholder || src.owner) {
+                    <div class="osago-prefill">
+                      <span class="osago-prefill__label">Заполнить из:</span>
+                      @if (src.policyholder) {
+                        <button
+                          type="button"
+                          class="osago-prefill__chip"
+                          (click)="fillDriverFrom(driver, 'policyholder')"
+                        >
+                          Страхователя
+                        </button>
+                      }
+                      @if (src.owner) {
+                        <button
+                          type="button"
+                          class="osago-prefill__chip"
+                          (click)="fillDriverFrom(driver, 'owner')"
+                        >
+                          Собственника
+                        </button>
+                      }
+                    </div>
+                  }
                 }
+
+                <div class="osago-row">
+                  <app-field label="Фамилия">
+                    <tui-textfield><input tuiInput formControlName="lastName" /></tui-textfield>
+                  </app-field>
+                  <app-field label="Имя">
+                    <tui-textfield><input tuiInput formControlName="firstName" /></tui-textfield>
+                  </app-field>
+                  <app-field label="Отчество" width="grow">
+                    <tui-textfield><input tuiInput formControlName="middleName" /></tui-textfield>
+                  </app-field>
+                  <label class="osago-check osago-check--inline-with-field">
+                    <input type="checkbox" formControlName="noMiddleName" /><span
+                      >Без отчества</span
+                    >
+                  </label>
+                  <app-field label="Дата рождения" width="narrow">
+                    <tui-textfield>
+                      <input tuiInputDate formControlName="birthDate" />
+                      <tui-calendar *tuiDropdown />
+                    </tui-textfield>
+                  </app-field>
+                </div>
+
                 <div class="osago-row">
                   <app-field label="В/У серия" width="narrow">
                     <tui-textfield>
@@ -531,6 +555,31 @@
                   </label>
                 </div>
               </div>
+            }
+          </div>
+          <div class="osago-drivers__add">
+            <button
+              type="button"
+              class="osago-add"
+              (click)="addDriver()"
+              [disabled]="!canAddDriver"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Добавить водителя
+            </button>
+            @if (!canAddDriver) {
+              <span class="osago-add__hint">Максимум 5 водителей</span>
             }
           </div>
         } @else {
