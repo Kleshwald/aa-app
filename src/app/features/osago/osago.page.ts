@@ -57,6 +57,24 @@ const DOCUMENT_TYPES = [
   { value: 'temporary-id', label: 'Временное удостоверение' },
 ] as const;
 
+// Справочник марок/моделей (мок). Если марки нет в списке — агент ставит
+// «Произвольная марка/модель» и вводит вручную.
+const CAR_CATALOG: Record<string, readonly string[]> = {
+  Lada: ['Granta', 'Vesta', 'Largus', 'Niva', 'XRAY'],
+  Toyota: ['Camry', 'Corolla', 'RAV4', 'Land Cruiser', 'Highlander'],
+  Kia: ['Rio', 'Sportage', 'Cerato', 'Sorento', 'K5'],
+  Hyundai: ['Solaris', 'Creta', 'Tucson', 'Santa Fe', 'Elantra'],
+  Volkswagen: ['Polo', 'Tiguan', 'Passat', 'Touareg'],
+  Renault: ['Logan', 'Duster', 'Sandero', 'Kaptur'],
+  Nissan: ['Almera', 'Qashqai', 'X-Trail', 'Terrano'],
+  Skoda: ['Octavia', 'Rapid', 'Kodiaq', 'Karoq'],
+  BMW: ['3 серии', '5 серии', 'X3', 'X5'],
+  'Mercedes-Benz': ['C-класс', 'E-класс', 'GLC', 'GLE'],
+  Ford: ['Focus', 'Mondeo', 'Kuga', 'Explorer'],
+  Chevrolet: ['Niva', 'Cruze', 'Aveo', 'Captiva'],
+};
+const CAR_BRANDS: readonly string[] = Object.keys(CAR_CATALOG);
+
 // Экран ожидания — сменяющаяся строка статуса (формулировки из первой версии).
 // У шагов с компанией показываем логотип (фиксированный список, не «кто ответил»).
 const CALC_STEPS: readonly { text: string; carrierId?: string }[] = [
@@ -234,9 +252,8 @@ export class OsagoPage {
     { value: 'epts', label: 'ЭПТС' },
   ] as const;
 
-  // ─── Поиск ТС / ручной ввод ───
+  // ─── Поиск ТС / справочник марок ───
   protected readonly vehicleSearchBy = signal<'plate' | 'vin' | 'body'>('plate');
-  protected readonly vehicleManual = signal(true);
   protected readonly searchPlaceholder = computed(() => {
     switch (this.vehicleSearchBy()) {
       case 'vin':
@@ -248,11 +265,14 @@ export class OsagoPage {
     }
   });
 
-  toggleVehicleManual(): void {
-    this.vehicleManual.update((v) => !v);
+  protected readonly brandItems = CAR_BRANDS;
+  protected readonly stringifySelf = (v: string): string => v;
+  /** Модели выбранной марки (справочник); пусто, пока марка не выбрана. */
+  modelItems(): readonly string[] {
+    return CAR_CATALOG[this.form.controls.vehicle.controls.make.value] ?? [];
   }
 
-  /** Мок поиска ТС: подставляем данные и показываем поля (как будто нашли по номеру). */
+  /** Мок поиска ТС: подставляем данные (как будто нашли по номеру/VIN/кузову). */
   findVehicle(): void {
     this.form.controls.vehicle.patchValue({
       licensePlate: 'А123БС777',
@@ -267,7 +287,6 @@ export class OsagoPage {
       documentSeries: '99 ОВ 123456',
       documentDate: '2018-05-10',
     });
-    this.vehicleManual.set(true);
   }
 
   protected readonly driversMode = signal<'limited' | 'unlimited'>('limited');
