@@ -75,6 +75,27 @@ const CAR_CATALOG: Record<string, readonly string[]> = {
 };
 const CAR_BRANDS: readonly string[] = Object.keys(CAR_CATALOG);
 
+// Пулы для «Ассистент, заполни!» — случайное правдоподобное заполнение (прототип).
+const RANDOM_PEOPLE: readonly {
+  lastName: string;
+  firstName: string;
+  middleName: string;
+  birthDate: string;
+}[] = [
+  { lastName: 'Иванова', firstName: 'Мария', middleName: 'Сергеевна', birthDate: '1978-04-12' },
+  { lastName: 'Петров', firstName: 'Алексей', middleName: 'Иванович', birthDate: '1985-09-30' },
+  { lastName: 'Смирнова', firstName: 'Ольга', middleName: 'Викторовна', birthDate: '1969-02-17' },
+  { lastName: 'Кузнецов', firstName: 'Дмитрий', middleName: 'Андреевич', birthDate: '1991-11-05' },
+  { lastName: 'Новикова', firstName: 'Елена', middleName: 'Павловна', birthDate: '1974-07-23' },
+  { lastName: 'Морозов', firstName: 'Сергей', middleName: 'Николаевич', birthDate: '1982-12-08' },
+];
+const RANDOM_ADDRESSES: readonly string[] = [
+  'г. Минусинск, ул. Ленина, д. 14, кв. 7',
+  'г. Абакан, ул. Щетинкина, д. 32, кв. 15',
+  'г. Красноярск, пр. Мира, д. 90, кв. 41',
+  'г. Кызыл, ул. Кочетова, д. 5, кв. 23',
+];
+
 // Экран ожидания — сменяющаяся строка статуса (формулировки из первой версии).
 // У шагов с компанией показываем логотип (фиксированный список, не «кто ответил»).
 const CALC_STEPS: readonly { text: string; carrierId?: string }[] = [
@@ -505,53 +526,68 @@ export class OsagoPage {
     return this.driversMode() === 'limited' && this.driverCount() === n;
   }
 
-  // ─── Test data pre-fill (for the prototype) ───
+  // ─── Ассистент: случайное заполнение (прототип) ───
 
-  fillTestData(): void {
+  fillRandom(): void {
+    const pick = <T>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)];
+    const L = 'АВЕКМНОРСТУХ';
+    const ru = (): string => L[Math.floor(Math.random() * L.length)];
+    const num = (min: number, max: number): number =>
+      min + Math.floor(Math.random() * (max - min + 1));
+
+    const plate = `${ru()}${num(100, 999)}${ru()}${ru()}${num(1, 99)}`;
+    const brand = pick(CAR_BRANDS);
+    const model = pick(CAR_CATALOG[brand] ?? ['—']);
+    const person = pick(RANDOM_PEOPLE);
+    const phone = `+7 (9${pick(['16', '03', '25', '62', '99'])}) ${num(100, 999)}-${num(10, 99)}-${num(10, 99)}`;
+
+    // Сначала режим справочника, чтобы марка/модель встали из каталога.
+    this.form.controls.vehicle.controls.customMakeModel.setValue(false);
     this.form.patchValue({
-      base: {
-        clientPhone: '+7 (916) 555-12-34',
-        email: 'klient@example.ru',
-        purpose: 'personal',
-      },
+      base: { clientPhone: phone, email: '', purpose: 'personal' },
       vehicle: {
-        licensePlate: 'А123БС777',
+        licensePlate: plate,
         category: 'B',
-        make: 'Toyota',
-        model: 'Camry',
-        year: 2018,
-        power: 181,
+        make: brand,
+        model,
+        year: num(2008, 2023),
+        power: num(70, 300),
         identifierType: 'vin',
-        identifierValue: 'JTNB11HJ8K0123456',
+        identifierValue: this.randomVin(),
         documentSubType: 'sts',
-        documentSeries: '99 ОВ 123456',
-        documentDate: '2018-05-10',
+        documentSeries: `${num(10, 99)} ${ru()}${ru()} ${num(100000, 999999)}`,
+        documentDate: '2019-06-14',
       },
       policyholder: {
-        lastName: 'Иванов',
-        firstName: 'Иван',
-        middleName: 'Иванович',
-        birthDate: '1985-03-15',
+        lastName: person.lastName,
+        firstName: person.firstName,
+        middleName: person.middleName,
+        birthDate: person.birthDate,
         docType: 'passport-rf',
-        docSeries: '4509',
-        docNumber: '123456',
-        docDate: '2005-04-20',
-        address: 'г. Москва, ул. Ленина, д. 10, кв. 5',
+        docSeries: `${num(1000, 9999)}`,
+        docNumber: `${num(100000, 999999)}`,
+        docDate: '2008-05-20',
+        address: pick(RANDOM_ADDRESSES),
       },
       owner: { isSameAsPolicyholder: true },
     });
 
+    this.setDriversMode('limited');
+    this.setDriverCount(1);
     this.driversArray.at(0)?.patchValue({
       source: 'policyholder',
-      lastName: 'Иванов',
-      firstName: 'Иван',
-      middleName: 'Иванович',
-      birthDate: '1985-03-15',
-      licenseSeries: '7723',
-      licenseNumber: '456789',
-      licenseDate: '2010-08-15',
-      startExperienceDate: '2010-08-15',
+      licenseSeries: `${num(1000, 9999)}`,
+      licenseNumber: `${num(100000, 999999)}`,
+      licenseDate: '2012-08-15',
+      startExperienceDate: '2012-08-15',
     });
+  }
+
+  private randomVin(): string {
+    const chars = 'ABCDEFGHJKLMNPRSTUVWXYZ0123456789';
+    let vin = '';
+    for (let i = 0; i < 17; i++) vin += chars[Math.floor(Math.random() * chars.length)];
+    return vin;
   }
 
   // ─── Calculation flow ───

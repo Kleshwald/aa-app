@@ -4,14 +4,6 @@
     <section class="osago" [formGroup]="form">
       <header class="osago__title-row">
         <h1 class="osago__title">ОСАГО</h1>
-        <button
-          type="button"
-          class="osago__test-fill"
-          (click)="fillTestData()"
-          title="Pre-fill для прототипа"
-        >
-          Заполнить тестовыми данными
-        </button>
       </header>
 
       <!-- Insurer-type tabs -->
@@ -44,67 +36,6 @@
           Юридическое лицо
         </button>
       </div>
-
-      <!-- Base info -->
-      <article class="osago-section" formGroupName="base">
-        <header class="osago-section__head">
-          <h2 class="osago-section__title">
-            Параметры и контакты
-            <span class="osago-section__badge" [class.osago-section__badge--done]="baseFilled">
-              @if (baseFilled) {
-                <svg
-                  class="osago-section__badge-check"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="3"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                Заполнено
-              } @else {
-                Не заполнено
-              }
-            </span>
-          </h2>
-        </header>
-        <div class="osago-row osago-row--gap-large">
-          <app-field label="Дата начала" width="narrow">
-            <tui-textfield>
-              <input tuiInputDate formControlName="startDate" />
-              <tui-calendar *tuiDropdown />
-            </tui-textfield>
-          </app-field>
-          <app-field label="Дата окончания" width="narrow">
-            <tui-textfield><input tuiInputDate formControlName="endDate" readonly /></tui-textfield>
-          </app-field>
-          <app-field label="Цель использования">
-            <tui-textfield [stringify]="stringifyPurpose">
-              <select tuiSelect formControlName="purpose" [items]="purposeItems"></select>
-            </tui-textfield>
-          </app-field>
-          <app-field
-            label="Телефон клиента"
-            [error]="err(form.controls.base.controls.clientPhone, 'Укажите телефон клиента')"
-          >
-            <tui-textfield>
-              <input
-                tuiInput
-                formControlName="clientPhone"
-                inputmode="tel"
-                placeholder="+7 (916) 123-45-67"
-              />
-            </tui-textfield>
-          </app-field>
-          <app-field label="Email">
-            <tui-textfield>
-              <input tuiInput formControlName="email" inputmode="email" />
-            </tui-textfield>
-          </app-field>
-        </div>
-      </article>
 
       <!-- Vehicle -->
       <article class="osago-section" formGroupName="vehicle">
@@ -677,7 +608,84 @@
         }
       </article>
 
+      <!-- Параметры и контакты (период, цель, контакты) — в конце, перед расчётом -->
+      <article class="osago-section" formGroupName="base">
+        <header class="osago-section__head">
+          <h2 class="osago-section__title">
+            Параметры и контакты
+            <span class="osago-section__badge" [class.osago-section__badge--done]="baseFilled">
+              @if (baseFilled) {
+                <svg
+                  class="osago-section__badge-check"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Заполнено
+              } @else {
+                Не заполнено
+              }
+            </span>
+          </h2>
+        </header>
+        <div class="osago-row osago-row--gap-large">
+          <app-field label="Дата начала" width="narrow">
+            <tui-textfield>
+              <input tuiInputDate formControlName="startDate" />
+              <tui-calendar *tuiDropdown />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Дата окончания" width="narrow">
+            <tui-textfield><input tuiInputDate formControlName="endDate" readonly /></tui-textfield>
+          </app-field>
+          <app-field label="Цель использования">
+            <tui-textfield [stringify]="stringifyPurpose">
+              <select tuiSelect formControlName="purpose" [items]="purposeItems"></select>
+            </tui-textfield>
+          </app-field>
+          <app-field
+            label="Телефон клиента"
+            [error]="err(form.controls.base.controls.clientPhone, 'Укажите телефон клиента')"
+          >
+            <tui-textfield>
+              <input
+                tuiInput
+                formControlName="clientPhone"
+                inputmode="tel"
+                placeholder="+7 (916) 123-45-67"
+              />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Email">
+            <tui-textfield>
+              <input tuiInput formControlName="email" inputmode="email" />
+            </tui-textfield>
+          </app-field>
+        </div>
+      </article>
+
       <footer class="osago__actions">
+        <button type="button" class="osago__assist" (click)="fillRandom()">
+          <svg
+            class="osago__assist-ico"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z" />
+            <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14Z" />
+          </svg>
+          Ассистент, заполни!
+        </button>
         <span class="osago__draft-hint">Дата расчёта: {{ today | date: 'dd.MM.yyyy HH:mm' }}</span>
         <button type="button" class="osago__btn osago__btn--secondary" (click)="saveDraft()">
           Сохранить черновик

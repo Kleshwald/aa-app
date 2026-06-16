@@ -50,10 +50,10 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       flex-direction: column;
       gap: 6px;
       flex: 1 1 240px;
-      min-width: 220px;
+      min-width: 190px;
     }
     :host(.field--narrow) {
-      flex: 0 0 200px;
+      flex: 0 0 190px;
       min-width: 0;
     }
     :host(.field--grow) {
