@@ -32,7 +32,12 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              { "glob": "**/*", "input": "public" }
+              { "glob": "**/*", "input": "public" },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@taiga-ui/icons/src",
+                "output": "taiga-icons"
+              }
             ],
             "styles": [
               "node_modules/@taiga-ui/styles/taiga-ui-fonts.less",
@@ -113,7 +118,12 @@
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              { "glob": "**/*", "input": "public" }
+              { "glob": "**/*", "input": "public" },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@taiga-ui/icons/src",
+                "output": "taiga-icons"
+              }
             ],
             "styles": [
               "node_modules/@taiga-ui/styles/taiga-ui-fonts.less",

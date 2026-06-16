@@ -29,7 +29,7 @@ import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.componen
 import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
 import { TuiDay, type TuiValueTransformer } from '@taiga-ui/cdk';
-import { TuiInput, TuiLabel, TuiTextfield } from '@taiga-ui/core';
+import { TuiInput, TuiTextfield } from '@taiga-ui/core';
 import { TuiInputDate, TuiSelect, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
 
 const VEHICLE_PURPOSES = [
@@ -171,7 +171,6 @@ class IsoDayTransformer implements TuiValueTransformer<TuiDay | null, string> {
     CalcLoaderComponent,
     MotivationStripComponent,
     TuiTextfield,
-    TuiLabel,
     TuiInput,
     TuiInputDate,
     TuiSelect,
@@ -342,6 +341,31 @@ export class OsagoPage {
 
   protected get driversArray(): FormArray<FormGroup> {
     return this.form.controls.drivers as FormArray<FormGroup>;
+  }
+
+  // ─── Индикатор заполнения секции (галочка vs пустой кружок) ───
+  // Геттеры пересчитываются на CD (ввод в поля внутри компонента её запускает).
+  get baseFilled(): boolean {
+    const b = this.form.controls.base.getRawValue();
+    return !!(b.startDate && b.clientPhone);
+  }
+  get vehicleFilled(): boolean {
+    const v = this.form.controls.vehicle.getRawValue();
+    return !!(v.licensePlate && v.make && v.model);
+  }
+  get policyholderFilled(): boolean {
+    const p = this.form.controls.policyholder.getRawValue();
+    return !!(p.lastName && p.firstName);
+  }
+  get ownerFilled(): boolean {
+    if (this.ownerSameAsPolicyholder()) return true;
+    const o = this.form.controls.owner.controls.person.getRawValue();
+    return !!(o.lastName && o.firstName);
+  }
+  get driversFilled(): boolean {
+    if (this.driversMode() === 'unlimited') return true;
+    const d = this.driversArray.at(0)?.getRawValue() as Record<string, unknown> | undefined;
+    return !!(d?.['licenseSeries'] && d?.['licenseNumber']);
   }
 
   setInsurerType(type: 'individual' | 'ip' | 'legal'): void {

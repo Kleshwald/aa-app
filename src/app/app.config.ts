@@ -13,7 +13,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 
-import { provideTaiga } from '@taiga-ui/core';
+import { TUI_ICON_RESOLVER, provideTaiga } from '@taiga-ui/core';
 import { provideEventPlugins } from '@taiga-ui/event-plugins';
 import { TUI_LANGUAGE, TUI_RUSSIAN_LANGUAGE } from '@taiga-ui/i18n';
 
@@ -40,6 +40,13 @@ export const appConfig: ApplicationConfig = {
     provideEventPlugins(),
     provideTaiga({ scrollbars: 'native' }),
     { provide: LOCALE_ID, useValue: 'ru-RU' },
+    // Иконки Taiga отдаём из локальных ассетов (assets-glob → /taiga-icons).
+    // Относительный путь учитывает base-href (и на GitHub Pages под /aa-app/).
+    {
+      provide: TUI_ICON_RESOLVER,
+      useValue: (icon: string): string =>
+        icon.startsWith('@tui.') ? `taiga-icons/${icon.slice(5).replaceAll('.', '/')}.svg` : icon,
+    },
     { provide: TUI_LANGUAGE, useValue: signal(TUI_RUSSIAN_LANGUAGE) },
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

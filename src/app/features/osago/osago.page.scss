@@ -130,19 +130,30 @@
   margin: 0;
 }
 
-// Номер шага секции — navy-кружок (порядок заполнения формы).
-.osago-section__num {
+// Индикатор заполнения секции: пустой кружок → зелёная галочка, когда заполнено.
+.osago-section__status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-full);
-  background: var(--header-bg);
+  border: 2px solid var(--gray-300);
   color: #ffffff;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+  transition:
+    background 150ms ease-out,
+    border-color 150ms ease-out;
+
+  &--done {
+    background: var(--success-600);
+    border-color: var(--success-600);
+  }
+}
+
+.osago-section__check {
+  width: 16px;
+  height: 16px;
 }
 
 .osago-section__head-actions {
@@ -158,16 +169,16 @@
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  // Taiga textfield — единый бокс (метка плавает внутри), поэтому в строке
-  // выравниваем всё по центру: поля, чекбоксы, пилюли — на одной линии.
-  align-items: center;
+  // Подпись сверху → выравниваем по нижнему краю: поля, чекбоксы и пилюли
+  // встают на одну линию (по нижней кромке поля ввода).
+  align-items: flex-end;
 
   &--gap-large {
     gap: 20px;
   }
 
   &--align-bottom {
-    align-items: center;
+    align-items: flex-end;
   }
 }
 
@@ -188,19 +199,33 @@
 }
 
 // Taiga textfield как поле в строке формы (те же пропорции, что у .osago-field).
-.osago-tf {
+// Поле формы: подпись СВЕРХУ (всегда видна, не обрезается) + Taiga textfield.
+// Лучший вариант для нашей аудитории, чем плавающая подпись внутри.
+.osago-fld {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   flex: 1 1 240px;
   min-width: 220px;
 
-  // «Узкие» поля всё равно достаточно широкие, чтобы подпись Taiga (с иконкой
-  // календаря) не обрезалась — напр. «Дата начала стажа», «Дата окончания».
+  tui-textfield {
+    width: 100%;
+  }
+
   &--narrow {
-    flex: 0 0 256px;
+    flex: 0 0 200px;
   }
 
   &--grow {
     flex: 2 1 340px;
   }
+}
+
+.osago-fld__label {
+  font-size: var(--text-sm);
+  line-height: 1.3;
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
 }
 
 .osago-field__label {
