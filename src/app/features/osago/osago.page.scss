@@ -512,48 +512,6 @@
   }
 }
 
-// Помощь в предзаполнении водителя данными страхователя/собственника.
-.osago-prefill {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.osago-prefill__label {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--gray-700);
-}
-
-.osago-prefill__chip {
-  display: inline-flex;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  font-family: inherit;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--header-bg);
-  background: var(--brand-50);
-  border: 1px solid var(--accent-400);
-  border-radius: var(--radius-base);
-  cursor: pointer;
-  transition:
-    background 120ms ease-out,
-    border-color 120ms ease-out;
-
-  &:hover {
-    background: var(--brand-100);
-    border-color: var(--accent-500);
-  }
-
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--brand-100);
-  }
-}
-
 // Добавление водителя.
 .osago-drivers__add {
   display: flex;

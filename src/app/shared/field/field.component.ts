@@ -56,6 +56,10 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       flex: 0 0 190px;
       min-width: 0;
     }
+    :host(.field--tiny) {
+      flex: 0 0 130px;
+      min-width: 0;
+    }
     :host(.field--small) {
       flex: 1 1 150px;
       min-width: 140px;
@@ -64,7 +68,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       flex: 2 1 340px;
     }
     :host(.field--wide) {
-      flex: 5 1 520px;
+      flex: 3 1 320px;
     }
     .field__top {
       display: flex;
@@ -97,7 +101,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     }
   `,
   host: {
+    '[class.field--tiny]': "width() === 'tiny'",
     '[class.field--narrow]': "width() === 'narrow'",
+    '[class.field--small]': "width() === 'small'",
     '[class.field--grow]': "width() === 'grow'",
     '[class.field--wide]': "width() === 'wide'",
   },
@@ -106,5 +112,5 @@ export class FieldComponent {
   readonly label = input.required<string>();
   readonly hint = input('');
   readonly error = input('');
-  readonly width = input<'narrow' | 'small' | 'grow' | 'wide' | ''>('');
+  readonly width = input<'tiny' | 'narrow' | 'small' | 'grow' | 'wide' | ''>('');
 }

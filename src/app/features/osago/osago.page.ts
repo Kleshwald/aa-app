@@ -521,24 +521,29 @@ export class OsagoPage {
     if (this.driversArray.length > 1) this.driversArray.removeAt(index);
   }
 
+  /** Текущий источник данных водителя (страхователь/собственник/иное лицо). */
+  isDriverSource(index: number, source: string): boolean {
+    return this.driversArray.at(index)?.get('source')?.value === source;
+  }
+
   /**
-   * Источники предзаполнения, доступные водителю №index: страхователь/собственник,
-   * которые заполнены и ещё не «заняты» другим водителем (и не им самим).
+   * Показывать ли пилюлю источника для водителя №index. «Иное лицо» — всегда.
+   * Текущий источник — всегда (как активный). Страхователь/собственник — только если
+   * заполнен, не дублируется (собственник≠страхователь) и не «занят» другим водителем.
    */
-  availableSources(index: number): { policyholder: boolean; owner: boolean } {
-    const ctrls = this.driversArray.controls;
-    const usedByOther = (src: string): boolean =>
-      ctrls.some((c, i) => i !== index && c.get('source')?.value === src);
-    const self = ctrls[index]?.get('source')?.value;
-    return {
-      policyholder:
-        this.policyholderFilled && self !== 'policyholder' && !usedByOther('policyholder'),
-      owner:
-        !this.ownerSameAsPolicyholder() &&
-        this.ownerFilled &&
-        self !== 'owner' &&
-        !usedByOther('owner'),
-    };
+  canPickSource(index: number, source: 'policyholder' | 'owner' | 'other'): boolean {
+    if (source === 'other') return true;
+    if (this.isDriverSource(index, source)) return true;
+    if (source === 'policyholder' && !this.policyholderFilled) return false;
+    if (source === 'owner' && (this.ownerSameAsPolicyholder() || !this.ownerFilled)) return false;
+    return !this.driversArray.controls.some(
+      (c, i) => i !== index && c.get('source')?.value === source,
+    );
+  }
+
+  /** Водитель — иное лицо: снимаем привязку к источнику (поля остаются для правки). */
+  setDriverOther(driver: FormGroup): void {
+    driver.patchValue({ source: 'other' }, { emitEvent: false });
   }
 
   /** Предзаполнить водителя данными страхователя/собственника (ФИО + дата). */

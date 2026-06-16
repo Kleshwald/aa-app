@@ -295,10 +295,10 @@
               <select tuiSelect formControlName="docType" [items]="docTypeItems"></select>
             </tui-textfield>
           </app-field>
-          <app-field label="Серия" width="small">
+          <app-field label="Серия" width="tiny">
             <tui-textfield><input tuiInput formControlName="docSeries" /></tui-textfield>
           </app-field>
-          <app-field label="Номер" width="small">
+          <app-field label="Номер" width="tiny">
             <tui-textfield><input tuiInput formControlName="docNumber" /></tui-textfield>
           </app-field>
           <app-field label="Дата выдачи" width="narrow">
@@ -375,10 +375,10 @@
                   <select tuiSelect formControlName="docType" [items]="docTypeItems"></select>
                 </tui-textfield>
               </app-field>
-              <app-field label="Серия" width="small">
+              <app-field label="Серия" width="tiny">
                 <tui-textfield><input tuiInput formControlName="docSeries" /></tui-textfield>
               </app-field>
-              <app-field label="Номер" width="small">
+              <app-field label="Номер" width="tiny">
                 <tui-textfield><input tuiInput formControlName="docNumber" /></tui-textfield>
               </app-field>
               <app-field label="Дата выдачи" width="narrow">
@@ -471,31 +471,36 @@
                   }
                 </div>
 
-                @if (availableSources($index); as src) {
-                  @if (src.policyholder || src.owner) {
-                    <div class="osago-prefill">
-                      <span class="osago-prefill__label">Заполнить из:</span>
-                      @if (src.policyholder) {
-                        <button
-                          type="button"
-                          class="osago-prefill__chip"
-                          (click)="fillDriverFrom(driver, 'policyholder')"
-                        >
-                          Страхователя
-                        </button>
-                      }
-                      @if (src.owner) {
-                        <button
-                          type="button"
-                          class="osago-prefill__chip"
-                          (click)="fillDriverFrom(driver, 'owner')"
-                        >
-                          Собственника
-                        </button>
-                      }
-                    </div>
+                <div class="osago-tab-pills">
+                  @if (canPickSource($index, 'policyholder')) {
+                    <button
+                      type="button"
+                      class="osago-tab-pill"
+                      [class.osago-tab-pill--active]="isDriverSource($index, 'policyholder')"
+                      (click)="fillDriverFrom(driver, 'policyholder')"
+                    >
+                      Страхователь
+                    </button>
                   }
-                }
+                  @if (canPickSource($index, 'owner')) {
+                    <button
+                      type="button"
+                      class="osago-tab-pill"
+                      [class.osago-tab-pill--active]="isDriverSource($index, 'owner')"
+                      (click)="fillDriverFrom(driver, 'owner')"
+                    >
+                      Собственник
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="osago-tab-pill"
+                    [class.osago-tab-pill--active]="isDriverSource($index, 'other')"
+                    (click)="setDriverOther(driver)"
+                  >
+                    Иное лицо
+                  </button>
+                </div>
 
                 <div class="osago-row">
                   <app-field label="Фамилия">
