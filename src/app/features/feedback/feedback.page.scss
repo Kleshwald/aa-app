@@ -440,8 +440,311 @@
   text-align: center;
 }
 
+// ─── Back link ───
+.fb-bar__back {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #ffffff;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: var(--radius-base);
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+}
+
+// ─── Section tabs ───
+.fb-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fb-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease-out,
+    background 120ms ease-out,
+    color 120ms ease-out;
+}
+.fb-tab:hover {
+  border-color: var(--gray-400);
+}
+.fb-tab--active {
+  color: #ffffff;
+  background: var(--header-bg);
+  border-color: var(--header-bg);
+}
+.fb-tab__count {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  opacity: 0.7;
+}
+
+// ─── Form extras ───
+.fb-form__into {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+
+  b {
+    color: var(--gray-900);
+  }
+}
+.fb-field--page {
+  flex: 1 1 220px;
+}
+.fb-select {
+  cursor: pointer;
+  appearance: auto;
+}
+
+// ─── Post page badge ───
+.fb-post__page {
+  padding: 2px 8px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-full);
+  background: var(--info-50);
+  color: var(--accent-600);
+}
+
+// ─── Post actions / likes / reply ───
+.fb-post__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.fb-like,
+.fb-reply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease-out,
+    background 120ms ease-out,
+    color 120ms ease-out;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+.fb-like:hover,
+.fb-reply-btn:hover {
+  border-color: var(--gray-400);
+}
+.fb-like--on {
+  color: var(--header-bg);
+  background: var(--brand-100);
+  border-color: var(--brand-100);
+
+  svg {
+    fill: var(--header-bg);
+  }
+}
+.fb-like--sm {
+  min-height: 30px;
+  padding: 0 10px;
+}
+.fb-like__count {
+  font-weight: var(--weight-semibold);
+}
+
+// ─── Replies ───
+.fb-reply {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  padding-left: 14px;
+  border-left: 2px solid var(--gray-200);
+}
+.fb-reply__avatar {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--accent-600);
+  background: var(--info-50);
+  border-radius: var(--radius-full);
+}
+.fb-reply__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// ─── Reply box ───
+.fb-replybox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-base);
+}
+.fb-replybox__name {
+  max-width: 280px;
+}
+.fb-replybox__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.fb-reply-cancel {
+  font-family: inherit;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px;
+}
+.fb-submit--sm {
+  height: 40px;
+  padding: 0 18px;
+  font-size: var(--text-sm);
+}
+
+// ─── Reply actions row ───
+.fb-reply__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+// ─── Moderation: delete ───
+.fb-del,
+.fb-del--sm {
+  min-height: 36px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--error-600);
+  background: var(--error-50);
+  border: 1px solid var(--error-100);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+.fb-del:hover {
+  background: var(--error-100);
+}
+.fb-del--sm {
+  min-height: 30px;
+  padding: 0 10px;
+}
+.fb-del-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-sm);
+  color: var(--error-700);
+}
+.fb-del-yes,
+.fb-del-no {
+  min-height: 32px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+.fb-del-yes {
+  color: #ffffff;
+  background: var(--error-600);
+  border: 1px solid var(--error-600);
+}
+.fb-del-no {
+  color: var(--gray-700);
+  background: #ffffff;
+  border: 1px solid var(--gray-300);
+}
+
+// ─── Moderation panel ───
+.fb-mod {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 4px 2px;
+}
+.fb-mod__on {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+}
+.fb-mod__link {
+  font-family: inherit;
+  font-size: var(--text-sm);
+  color: var(--gray-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 0;
+}
+.fb-mod__link:hover {
+  color: var(--gray-700);
+}
+.fb-mod__input {
+  max-width: 240px;
+  height: 40px;
+}
+.fb-mod__btn {
+  height: 40px;
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #ffffff;
+  background: var(--header-bg);
+  border: none;
+  border-radius: var(--radius-base);
+  cursor: pointer;
+}
+
 @media (max-width: 600px) {
   .fb-row {
     flex-direction: column;
+  }
+  .fb-bar__back {
+    padding: 6px 8px;
   }
 }

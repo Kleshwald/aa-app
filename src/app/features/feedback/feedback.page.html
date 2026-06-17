@@ -6,23 +6,42 @@
       <h1 class="fb-bar__title">Обратная связь</h1>
       <p class="fb-bar__sub">Идеи, вопросы и замечания по прототипу. Видят все.</p>
     </div>
+    <a class="fb-bar__back" routerLink="/hub">← Панель управления</a>
   </div>
 </header>
 
 <div class="fb">
   @if (!configured) {
-    <!-- Видна только владельцу до подключения хранилища -->
     <section class="fb-setup">
       <h2 class="fb-setup__title">Доска ещё не подключена к хранилищу</h2>
       <p class="fb-setup__text">
         Чтобы записи были общими для всех и принимали скриншоты, нужен бесплатный проект Supabase.
-        Откройте <b>docs/FEEDBACK.md</b> в репозитории — там 4 шага и готовый SQL. После этого
+        Откройте <b>docs/FEEDBACK.md</b> в репозитории — там шаги и готовый SQL. После этого
         вставьте URL и anon-ключ в <b>src/app/features/feedback/feedback.config.ts</b>.
       </p>
     </section>
   } @else {
+    <!-- ─── Разделы ─── -->
+    <nav class="fb-tabs" aria-label="Разделы">
+      @for (s of sections; track s.id) {
+        <button
+          type="button"
+          class="fb-tab"
+          [class.fb-tab--active]="activeSection() === s.id"
+          (click)="pickSection(s.id)"
+        >
+          {{ s.label }}
+          <span class="fb-tab__count">{{ sectionCounts()[s.id] }}</span>
+        </button>
+      }
+    </nav>
+
     <!-- ─── Форма новой записи ─── -->
     <section class="fb-form" (paste)="onPaste($event)">
+      <p class="fb-form__into">
+        Пишем в раздел: <b>{{ sectionLabel(activeSection()) }}</b>
+      </p>
+
       <div class="fb-row">
         <label class="fb-field fb-field--name">
           <span class="fb-field__label">Ваше имя</span>
@@ -37,21 +56,35 @@
           />
         </label>
 
-        <div class="fb-field fb-field--cat">
-          <span class="fb-field__label">Тип</span>
-          <div class="fb-pills" role="group" aria-label="Тип записи">
-            @for (c of categories; track c.id) {
-              <button
-                type="button"
-                class="fb-pill"
-                [class.fb-pill--active]="category() === c.id"
-                [attr.data-kind]="c.id"
-                (click)="pickCategory(c.id)"
-              >
-                {{ c.label }}
-              </button>
-            }
-          </div>
+        @if (activeSection() === 'client') {
+          <label class="fb-field fb-field--page">
+            <span class="fb-field__label">Страница / экран</span>
+            <select
+              class="fb-input fb-select"
+              [value]="newPage()"
+              (change)="setNewPage($any($event.target).value)"
+            >
+              @for (pg of pages; track pg.id) {
+                <option [value]="pg.id">{{ pg.label }}</option>
+              }
+            </select>
+          </label>
+        }
+      </div>
+
+      <div class="fb-field">
+        <span class="fb-field__label">Тип</span>
+        <div class="fb-pills" role="group" aria-label="Тип записи">
+          @for (c of categories; track c.id) {
+            <button
+              type="button"
+              class="fb-pill"
+              [class.fb-pill--active]="category() === c.id"
+              (click)="pickCategory(c.id)"
+            >
+              {{ c.label }}
+            </button>
+          }
         </div>
       </div>
 
@@ -119,7 +152,23 @@
       </div>
     </section>
 
-    <!-- ─── Лента записей ─── -->
+    <!-- ─── Рубрикатор страниц (только client) ─── -->
+    @if (pageChips().length > 1) {
+      <div class="fb-filter" role="group" aria-label="Фильтр по странице">
+        @for (f of pageChips(); track f.id) {
+          <button
+            type="button"
+            class="fb-filter__chip"
+            [class.fb-filter__chip--active]="pageFilter() === f.id"
+            (click)="setPageFilter(f.id)"
+          >
+            {{ f.label }} <span class="fb-filter__count">{{ f.count }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- ─── Лента ─── -->
     <section class="fb-feed">
       @switch (status()) {
         @case ('loading') {
@@ -132,52 +181,198 @@
           </div>
         }
         @default {
-          @if (posts().length === 0) {
-            <p class="fb-state">Пока нет записей — будьте первым.</p>
-          } @else {
-            <div class="fb-filter" role="group" aria-label="Фильтр по типу">
-              @for (f of filters(); track f.id) {
-                <button
-                  type="button"
-                  class="fb-filter__chip"
-                  [class.fb-filter__chip--active]="activeFilter() === f.id"
-                  (click)="setFilter(f.id)"
-                >
-                  {{ f.label }} <span class="fb-filter__count">{{ f.count }}</span>
-                </button>
-              }
-            </div>
+          @if (visiblePosts().length === 0) {
+            <p class="fb-state">В этом разделе пока нет записей — будьте первым.</p>
+          }
 
-            @if (visiblePosts().length === 0) {
-              <p class="fb-state">Нет записей этого типа.</p>
-            }
+          @for (p of visiblePosts(); track p.id) {
+            <article class="fb-post">
+              <span class="fb-post__avatar" aria-hidden="true">{{
+                initials(p.author) || '?'
+              }}</span>
+              <div class="fb-post__body">
+                <div class="fb-post__head">
+                  <span class="fb-post__author">{{ p.author }}</span>
+                  <span class="fb-post__badge" [attr.data-kind]="p.category">
+                    {{ categoryLabel(p.category) }}
+                  </span>
+                  @if (p.section === 'client' && p.page) {
+                    <span class="fb-post__page">{{ pageLabel(p.page) }}</span>
+                  }
+                  <span class="fb-post__time">{{ timeAgo(p.created_at) }}</span>
+                </div>
+                <p class="fb-post__text">{{ p.message }}</p>
+                @if (p.image_url) {
+                  <a class="fb-post__shot" [href]="p.image_url" target="_blank" rel="noopener">
+                    <img [src]="p.image_url" alt="Скриншот к записи" loading="lazy" />
+                  </a>
+                }
 
-            @for (p of visiblePosts(); track p.id) {
-              <article class="fb-post">
-                <span class="fb-post__avatar" aria-hidden="true">{{
-                  initials(p.author) || '?'
-                }}</span>
-                <div class="fb-post__body">
-                  <div class="fb-post__head">
-                    <span class="fb-post__author">{{ p.author }}</span>
-                    <span class="fb-post__badge" [attr.data-kind]="p.category">
-                      {{ categoryLabel(p.category) }}
-                    </span>
-                    <span class="fb-post__time">{{ timeAgo(p.created_at) }}</span>
-                  </div>
-                  <p class="fb-post__text">{{ p.message }}</p>
-                  @if (p.image_url) {
-                    <a class="fb-post__shot" [href]="p.image_url" target="_blank" rel="noopener">
-                      <img [src]="p.image_url" alt="Скриншот к записи" loading="lazy" />
-                    </a>
+                <div class="fb-post__actions">
+                  <button
+                    type="button"
+                    class="fb-like"
+                    [class.fb-like--on]="isLiked(p.id)"
+                    (click)="toggleLike(p)"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zM7 10l4-7a2 2 0 0 1 2 2v3h6a2 2 0 0 1 2 2.3l-1.4 7A2 2 0 0 1 17.6 21H7"
+                      />
+                    </svg>
+                    Нравится
+                    @if (p.likes > 0) {
+                      <span class="fb-like__count">{{ p.likes }}</span>
+                    }
+                  </button>
+                  <button type="button" class="fb-reply-btn" (click)="toggleReply(p.id)">
+                    Ответить
+                  </button>
+                  @if (isModerator()) {
+                    @if (pendingDeleteId() === p.id) {
+                      <span class="fb-del-confirm">
+                        Удалить запись и ответы?
+                        <button type="button" class="fb-del-yes" (click)="confirmDelete(p)">
+                          Да
+                        </button>
+                        <button type="button" class="fb-del-no" (click)="cancelDelete()">
+                          Нет
+                        </button>
+                      </span>
+                    } @else {
+                      <button type="button" class="fb-del" (click)="askDelete(p.id)">
+                        Удалить
+                      </button>
+                    }
                   }
                 </div>
-              </article>
-            }
+
+                <!-- Ответы -->
+                @for (r of repliesByParent().get(p.id) ?? []; track r.id) {
+                  <div class="fb-reply">
+                    <span class="fb-reply__avatar" aria-hidden="true">{{
+                      initials(r.author) || '?'
+                    }}</span>
+                    <div class="fb-reply__body">
+                      <div class="fb-post__head">
+                        <span class="fb-post__author">{{ r.author }}</span>
+                        <span class="fb-post__time">{{ timeAgo(r.created_at) }}</span>
+                      </div>
+                      <p class="fb-post__text">{{ r.message }}</p>
+                      <div class="fb-reply__actions">
+                        <button
+                          type="button"
+                          class="fb-like fb-like--sm"
+                          [class.fb-like--on]="isLiked(r.id)"
+                          (click)="toggleLike(r)"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zM7 10l4-7a2 2 0 0 1 2 2v3h6a2 2 0 0 1 2 2.3l-1.4 7A2 2 0 0 1 17.6 21H7"
+                            />
+                          </svg>
+                          @if (r.likes > 0) {
+                            <span class="fb-like__count">{{ r.likes }}</span>
+                          }
+                        </button>
+                        @if (isModerator()) {
+                          @if (pendingDeleteId() === r.id) {
+                            <span class="fb-del-confirm">
+                              Удалить?
+                              <button type="button" class="fb-del-yes" (click)="confirmDelete(r)">
+                                Да
+                              </button>
+                              <button type="button" class="fb-del-no" (click)="cancelDelete()">
+                                Нет
+                              </button>
+                            </span>
+                          } @else {
+                            <button
+                              type="button"
+                              class="fb-del fb-del--sm"
+                              (click)="askDelete(r.id)"
+                            >
+                              Удалить
+                            </button>
+                          }
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- Форма ответа -->
+                @if (openReplyId() === p.id) {
+                  <div class="fb-replybox">
+                    <input
+                      class="fb-input fb-replybox__name"
+                      type="text"
+                      [value]="author()"
+                      (input)="setAuthor($any($event.target).value)"
+                      placeholder="Ваше имя"
+                      maxlength="60"
+                    />
+                    <textarea
+                      class="fb-input fb-textarea"
+                      [value]="replyText()"
+                      (input)="setReplyText($any($event.target).value)"
+                      placeholder="Ваш ответ…"
+                      rows="2"
+                      maxlength="2000"
+                    ></textarea>
+                    <div class="fb-replybox__foot">
+                      <button type="button" class="fb-reply-cancel" (click)="toggleReply(p.id)">
+                        Отмена
+                      </button>
+                      <button
+                        type="button"
+                        class="fb-submit fb-submit--sm"
+                        [disabled]="!author().trim() || !replyText().trim() || submitting()"
+                        (click)="submitReply(p)"
+                      >
+                        Ответить
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </article>
           }
         }
       }
     </section>
+
+    <!-- ─── Модерация ─── -->
+    <div class="fb-mod">
+      @if (isModerator()) {
+        <span class="fb-mod__on">Режим модерации включён — у записей доступно «Удалить».</span>
+        <button type="button" class="fb-mod__link" (click)="disableModeration()">Выключить</button>
+      } @else if (modOpen()) {
+        <input
+          class="fb-input fb-mod__input"
+          type="password"
+          [value]="modInput()"
+          (input)="setModInput($any($event.target).value)"
+          placeholder="Пароль модерации"
+        />
+        <button type="button" class="fb-mod__btn" (click)="enableModeration()">Включить</button>
+        <button type="button" class="fb-mod__link" (click)="toggleModPanel()">Отмена</button>
+      } @else {
+        <button type="button" class="fb-mod__link" (click)="toggleModPanel()">Модерация</button>
+      }
+    </div>
   }
 
   <footer class="fb__foot">
