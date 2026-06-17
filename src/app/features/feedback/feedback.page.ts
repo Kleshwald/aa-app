@@ -46,6 +46,27 @@ export class FeedbackPage {
     () => this.author().trim().length > 0 && this.message().trim().length > 0 && !this.submitting(),
   );
 
+  // Фильтр ленты по типу (read-only, форму публикации не трогает).
+  protected readonly activeFilter = signal<string>('all');
+
+  protected readonly filters = computed(() => {
+    const list = this.posts();
+    return [
+      { id: 'all', label: 'Все', count: list.length },
+      ...CATEGORIES.map((c) => ({
+        id: c.id,
+        label: c.label,
+        count: list.filter((p) => p.category === c.id).length,
+      })),
+    ];
+  });
+
+  protected readonly visiblePosts = computed(() => {
+    const f = this.activeFilter();
+    const list = this.posts();
+    return f === 'all' ? list : list.filter((p) => p.category === f);
+  });
+
   constructor() {
     if (this.configured) {
       void this.load();
@@ -78,6 +99,10 @@ export class FeedbackPage {
 
   protected pickCategory(id: string): void {
     this.category.set(id);
+  }
+
+  protected setFilter(id: string): void {
+    this.activeFilter.set(id);
   }
 
   protected onFileInput(event: Event): void {

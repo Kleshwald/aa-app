@@ -135,7 +135,24 @@
           @if (posts().length === 0) {
             <p class="fb-state">Пока нет записей — будьте первым.</p>
           } @else {
-            @for (p of posts(); track p.id) {
+            <div class="fb-filter" role="group" aria-label="Фильтр по типу">
+              @for (f of filters(); track f.id) {
+                <button
+                  type="button"
+                  class="fb-filter__chip"
+                  [class.fb-filter__chip--active]="activeFilter() === f.id"
+                  (click)="setFilter(f.id)"
+                >
+                  {{ f.label }} <span class="fb-filter__count">{{ f.count }}</span>
+                </button>
+              }
+            </div>
+
+            @if (visiblePosts().length === 0) {
+              <p class="fb-state">Нет записей этого типа.</p>
+            }
+
+            @for (p of visiblePosts(); track p.id) {
               <article class="fb-post">
                 <span class="fb-post__avatar" aria-hidden="true">{{
                   initials(p.author) || '?'
