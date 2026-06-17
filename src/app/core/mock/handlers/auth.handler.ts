@@ -6,12 +6,10 @@ import { type ApiResponse } from '@core/models';
 import { currentAgent } from '../fixtures/agents.fixture';
 import { mockFail, mockOk } from '../helpers/response';
 
-// POST /auth/login — закрытое демо: проверяем фиксированные тестовые креды.
-// Логин — номер телефона (сверяем последние 10 цифр, формат не важен),
+// POST /auth/login — демо-вход: логин — любой номер телефона (не сверяем),
 // пароль — точное совпадение. Реальная авторизация появится с 1С HTTP-сервисом.
 
-const TEST_LOGIN_DIGITS = '9161093560';
-const TEST_PASSWORD = '123';
+const TEST_PASSWORD = '6767';
 
 export function handleLogin(
   req: HttpRequest<unknown>,
@@ -21,8 +19,7 @@ export function handleLogin(
     return mockFail('VALIDATION_ERROR', 'Введите логин и пароль', 401);
   }
 
-  const digits = body.login.replace(/\D/g, '').slice(-10);
-  if (digits !== TEST_LOGIN_DIGITS || body.password !== TEST_PASSWORD) {
+  if (body.password !== TEST_PASSWORD) {
     return mockFail('AUTH_INVALID', 'Неверный логин или пароль', 401);
   }
 
