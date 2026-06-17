@@ -133,6 +133,11 @@
     background: var(--info-50);
     color: var(--accent-600);
   }
+
+  &--platform {
+    background: var(--accent-50, var(--brand-50));
+    color: var(--accent-600);
+  }
 }
 
 .hub-card__body {
@@ -168,11 +173,99 @@
     background: var(--warning-50);
     color: var(--warning-700);
   }
+  &[data-kind='ext'] {
+    background: var(--info-50);
+    color: var(--accent-600);
+  }
 }
 
 .hub-card__desc {
   font-size: var(--text-sm);
   color: var(--gray-600);
+}
+
+// ─── Обратная связь (CTA) ───
+
+.hub-cta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--header-bg);
+  border: 1px solid var(--header-bg);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition:
+    box-shadow 120ms ease-out,
+    transform 120ms ease-out;
+
+  &:hover {
+    box-shadow: var(--shadow-md, var(--shadow-sm));
+    transform: translateY(-1px);
+  }
+}
+
+.hub-cta__ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+
+  svg {
+    width: 26px;
+    height: 26px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.hub-cta__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hub-cta__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: #ffffff;
+}
+
+.hub-cta__desc {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: rgba(255, 255, 255, 0.85);
+
+  b {
+    color: #ffffff;
+    font-weight: var(--weight-medium);
+  }
+}
+
+.hub-cta__go {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 12px;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .hub-cta {
+    flex-wrap: wrap;
+  }
+  .hub-cta__go {
+    margin-left: 0;
+    padding-left: 0;
+  }
 }
 
 .hub__foot {

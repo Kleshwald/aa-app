@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -6,7 +7,9 @@ interface HubCard {
   desc: string;
   href: string;
   badge?: string;
-  badgeKind?: 'ok' | 'soon';
+  badgeKind?: 'ok' | 'soon' | 'ext';
+  /** Внешняя ссылка (открывается в новой вкладке через href, не через router). */
+  external?: boolean;
 }
 
 /**
@@ -16,19 +19,58 @@ interface HubCard {
  */
 @Component({
   selector: 'app-hub-page',
-  imports: [RouterLink],
+  imports: [RouterLink, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './hub.page.html',
   styleUrl: './hub.page.scss',
 })
 export class HubPage {
   protected readonly systemLogins: HubCard[] = [
-    { title: 'Обычный вход', desc: 'Стандартная форма входа по телефону', href: '/login' },
+    {
+      title: 'Обычный вход',
+      desc: 'Окно входа в платформу: телефон и пароль',
+      href: '/login',
+      badge: 'доступно',
+      badgeKind: 'ok',
+    },
     {
       title: 'Вход с регистрацией',
       desc: 'Самостоятельная регистрация агента',
       href: '/register',
-      badge: 'отдельно',
+      badge: 'в разработке',
+      badgeKind: 'soon',
+    },
+    {
+      title: 'Вход в ЛК поддержки',
+      desc: 'Кабинет оператора поддержки (Webim, внешний сервис)',
+      href: 'https://webim.ru/chat-for-site/',
+      badge: 'внешний',
+      badgeKind: 'ext',
+      external: true,
+    },
+  ];
+
+  /** Версии и платформы — намечены на будущее, пока в разработке. */
+  protected readonly platforms: HubCard[] = [
+    {
+      title: 'Мобильная версия',
+      desc: 'Адаптив и нативное приложение для смартфона',
+      href: '/hub/doc/mobile',
+      badge: 'в разработке',
+      badgeKind: 'soon',
+    },
+    {
+      title: 'Версия для планшета',
+      desc: 'Раскладка интерфейса под планшет',
+      href: '/hub/doc/tablet',
+      badge: 'в разработке',
+      badgeKind: 'soon',
+    },
+    {
+      title: 'Вариант на React',
+      desc: 'Альтернативная реализация фронтенда на React',
+      href: '/hub/doc/react',
+      badge: 'в разработке',
       badgeKind: 'soon',
     },
   ];
@@ -92,5 +134,10 @@ export class HubPage {
     { title: 'Глоссарий', desc: 'ИКП, КВ, НСИС, сегмент, пул…', href: '/hub/doc/glossary' },
     { title: 'Профиль аудитории', desc: 'Для кого делаем продукт', href: '/hub/doc/audience' },
     { title: 'Бэклог', desc: 'Что делаем дальше, технический долг', href: '/hub/doc/backlog' },
+    {
+      title: 'Обратная связь — настройка',
+      desc: 'Как подключить доску /feedback (Supabase)',
+      href: '/hub/doc/feedback',
+    },
   ];
 }
