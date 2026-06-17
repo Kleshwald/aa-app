@@ -22,13 +22,12 @@ import { HUB_PASSWORD, HUB_UNLOCK_KEY } from '@core/guards/hub.guard';
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="hu-form" novalidate>
           <label class="hu-field">
-            <span class="hu-field__label">Номер телефона</span>
+            <span class="hu-field__label">Имя</span>
             <input
-              type="tel"
-              autocomplete="tel"
-              inputmode="tel"
-              formControlName="login"
-              placeholder="+7 (___) ___-__-__"
+              type="text"
+              autocomplete="name"
+              formControlName="name"
+              placeholder="Например, Сергей"
               class="hu-field__input"
             />
           </label>
@@ -309,9 +308,10 @@ export class HubUnlockPage {
   protected readonly error = signal(false);
   protected readonly showPassword = signal(false);
 
-  // Логин — любой телефон (только непустой), пароль сверяем точно.
+  // Логин — любое имя (только непустое), пароль сверяем точно. Имя сохраняем
+  // (общий ключ aa_user_name) и подставляем по умолчанию на доске /feedback.
   protected readonly form = this.fb.nonNullable.group({
-    login: ['', [Validators.required]],
+    name: [localStorage.getItem('aa_user_name') ?? '', [Validators.required]],
     password: ['', [Validators.required]],
   });
 
@@ -321,7 +321,9 @@ export class HubUnlockPage {
 
   onSubmit(): void {
     if (this.form.invalid) return;
-    if (this.form.getRawValue().password === HUB_PASSWORD) {
+    const { name, password } = this.form.getRawValue();
+    if (password === HUB_PASSWORD) {
+      localStorage.setItem('aa_user_name', name.trim());
       sessionStorage.setItem(HUB_UNLOCK_KEY, '1');
       const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/hub';
       void this.router.navigateByUrl(returnUrl);
