@@ -35,6 +35,12 @@ export const routes: Routes = [
     loadComponent: () => import('@pages/register.page').then((m) => m.RegisterPage),
     title: 'Регистрация — Agent Academy',
   },
+  // Публичная доска обратной связи — без гарда, ссылку даём тестировщикам напрямую.
+  {
+    path: 'feedback',
+    loadComponent: () => import('@features/feedback/feedback.page').then((m) => m.FeedbackPage),
+    title: 'Обратная связь — Agent Academy',
+  },
 
   {
     path: '',
