@@ -710,6 +710,10 @@
   font-size: var(--text-sm);
   color: var(--gray-600);
 }
+.fb-mod__error {
+  font-size: var(--text-sm);
+  color: var(--error-700);
+}
 .fb-mod__link {
   font-family: inherit;
   font-size: var(--text-sm);

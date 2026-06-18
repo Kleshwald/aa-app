@@ -87,6 +87,7 @@ export class FeedbackPage {
   protected readonly modInput = signal('');
   protected readonly modOpen = signal(false);
   protected readonly pendingDeleteId = signal<string | null>(null);
+  protected readonly modError = signal<string | null>(null);
   protected readonly isModerator = computed(() => this.modPass().length > 0);
 
   protected readonly canSubmit = computed(
@@ -344,6 +345,7 @@ export class FeedbackPage {
   protected toggleModPanel(): void {
     this.modOpen.update((v) => !v);
     this.modInput.set('');
+    this.modError.set(null);
   }
 
   protected setModInput(value: string): void {
@@ -357,6 +359,7 @@ export class FeedbackPage {
     this.modPass.set(pass);
     this.modOpen.set(false);
     this.modInput.set('');
+    this.modError.set(null);
   }
 
   protected disableModeration(): void {
@@ -375,17 +378,18 @@ export class FeedbackPage {
 
   protected async confirmDelete(row: FeedbackPost): Promise<void> {
     this.pendingDeleteId.set(null);
+    this.modError.set(null);
     try {
       const ok = await this.svc.remove(row.id, this.modPass());
       if (ok) {
         // убираем сам пост и его ответы
         this.posts.update((list) => list.filter((p) => p.id !== row.id && p.parent_id !== row.id));
       } else {
-        this.formError.set('Неверный пароль модерации.');
+        this.modError.set('Неверный пароль модерации — удаление отклонено.');
         this.disableModeration();
       }
     } catch {
-      this.formError.set('Не удалось удалить. Попробуйте ещё раз.');
+      this.modError.set('Не удалось удалить. Проверьте интернет и попробуйте ещё раз.');
     }
   }
 

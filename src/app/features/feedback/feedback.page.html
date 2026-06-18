@@ -372,6 +372,9 @@
       } @else {
         <button type="button" class="fb-mod__link" (click)="toggleModPanel()">Модерация</button>
       }
+      @if (modError(); as e) {
+        <span class="fb-mod__error" role="alert">{{ e }}</span>
+      }
     </div>
   }
 
