@@ -162,7 +162,7 @@ export interface AddOnPreset {
 }
 
 const ADD_ON_PRESETS: AddOnPreset[] = [
-  { id: 'mini-kasko', name: 'МиниКАСКО', defaultPrice: 2190, priceOptions: [2190] },
+  { id: 'mini-kasko', name: 'МиниКАСКО', defaultPrice: 2450, priceOptions: [2450] },
   {
     id: 'legal',
     name: 'Юрист поможет',
@@ -792,7 +792,9 @@ export class OsagoPage {
     };
     this.policyService.create(payload).subscribe((res) => {
       const id = res.success && res.data ? res.data.id : null;
-      void this.router.navigate(id ? ['/clients', id] : ['/clients']);
+      void this.router.navigate(id ? ['/clients', id] : ['/clients'], {
+        queryParams: id ? { issued: '1' } : undefined,
+      });
     });
   }
 

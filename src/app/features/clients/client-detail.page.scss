@@ -18,14 +18,61 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  // Вся ширина .app-content (без узкого кэпа) — чтобы справа не зияла пустота.
+  max-width: 1320px;
+}
+
+// ─── Breadcrumbs (заметная навигация для 45+: ≥16px, ссылка возврата со стрелкой) ───
+
+.detail__crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-base);
+}
+
+// Общий видимый фокус для текстовых ссылок/кнопок (a11y).
+%focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+.detail__crumb-link {
+  @extend %focus-ring;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--brand-500);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--brand-600);
+    text-decoration: underline;
+  }
+}
+
+.detail__crumb-arrow {
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+
+.detail__crumb-sep {
+  color: var(--gray-400);
+}
+
+.detail__crumb-current {
+  color: var(--gray-700);
 }
 
 .detail__title {
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
   font-weight: var(--weight-semibold);
-  color: var(--brand-500);
-  text-align: center;
+  color: var(--gray-900);
   margin: 0;
 }
 
@@ -44,12 +91,72 @@
   color: var(--error-700);
 }
 
-.detail__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+// ─── Success banner (горячий сценарий) ───
 
-  @media (max-width: 1023px) {
+.detail__success {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--success-50);
+  border: 1px solid var(--success-600);
+  border-radius: var(--radius-lg);
+}
+
+.detail__success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--success-600);
+  color: #ffffff;
+}
+
+.detail__success-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail__success-title {
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--success-700);
+  margin: 0;
+}
+
+.detail__success-sub {
+  font-size: var(--text-base);
+  color: var(--gray-700);
+  margin: 0;
+}
+
+// ─── Layout ───
+// Две колонки на десктопе (≈60/40), чтобы заполнить ширину и убрать пустое
+// правое поле. Ниже 960px схлопывается в одну колонку (мобайл вторичен).
+// Единый скролл живёт в .app-content — вложенных скроллов не добавляем.
+
+.detail__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  align-items: start;
+  gap: 20px;
+}
+
+// Колонка — стопка карточек; карточки тянутся на всю ширину своей колонки.
+.detail__col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+@media (max-width: 960px) {
+  .detail__layout {
     grid-template-columns: 1fr;
   }
 }
@@ -64,6 +171,12 @@
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
+
+  // Карточка главного действия — лёгкий акцент, чтобы притягивала взгляд.
+  &--accent {
+    border-color: var(--brand-200);
+    background: var(--brand-50);
+  }
 }
 
 .detail-card__head {
@@ -76,9 +189,28 @@
 
 .detail-card__head-left {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 16px;
-  flex-wrap: wrap;
+  min-width: 0;
+}
+
+// Логотип СК в шапке карточки — «посвежее», узнаваемость страховой.
+.detail-card__logo {
+  --ins-logo-size: 52px;
+  flex: 0 0 auto;
+}
+
+.detail-card__title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.detail-card__insurer {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--gray-700);
 }
 
 .detail-card__product {
@@ -99,11 +231,24 @@
 }
 
 .detail-card__heading {
-  font-size: var(--text-xl);
-  line-height: var(--leading-xl);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
   font-weight: var(--weight-semibold);
   color: var(--gray-900);
   margin: 0;
+}
+
+.detail-card__lead {
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--gray-700);
+  margin: 0;
+}
+
+.detail-card__doc-count {
+  font-size: var(--text-base);
+  color: var(--gray-700);
+  white-space: nowrap;
 }
 
 .detail-card__status {
@@ -138,6 +283,53 @@
   }
 }
 
+// ─── Стоимость: ОСАГО + допы = итого ───
+
+.detail-card__cost {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+}
+
+.cost-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: var(--text-base);
+  color: var(--gray-900);
+
+  &__label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__num {
+    font-size: var(--text-sm);
+    color: var(--gray-500);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__val {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  &--total {
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-200);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--brand-700);
+  }
+}
+
 // ─── Key-value list ───
 
 .detail-card__kv {
@@ -148,12 +340,12 @@
   margin: 0;
 
   dt {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     color: var(--gray-700);
   }
 
   dd {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     color: var(--gray-900);
     margin: 0;
   }
@@ -163,7 +355,20 @@
   }
 }
 
+.detail-card__tel {
+  @extend %focus-ring;
+  color: var(--brand-500);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+
+  &:hover {
+    color: var(--brand-600);
+    text-decoration: underline;
+  }
+}
+
 .detail-card__more {
+  @extend %focus-ring;
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
@@ -173,7 +378,7 @@
   border: none;
   color: var(--brand-500);
   font-family: inherit;
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   cursor: pointer;
 
   &:hover {
@@ -226,68 +431,127 @@
   font-variant-numeric: tabular-nums;
 }
 
-// ─── Counters in Процессы card ───
+// ─── Actions (главное действие) ───
 
-.detail-card__counters {
+.detail-card__actions {
   display: flex;
-  gap: 20px;
   flex-wrap: wrap;
-
-  span {
-    font-size: var(--text-sm);
-    color: var(--gray-700);
-  }
-
-  strong {
-    font-weight: var(--weight-medium);
-    color: var(--gray-700);
-    margin-right: 4px;
-  }
-
-  span > strong + * {
-    color: var(--gray-900);
-  }
+  gap: 12px;
 }
 
-// ─── Radio group ───
-
-.detail-card__radio-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 0;
-  border: none;
-  margin: 0;
+.detail-card__done {
+  align-self: flex-start;
 }
 
-.detail-card__radio {
+// ─── QR для клиента ───
+
+.detail-card__qr {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+}
+
+.detail-card__qr-img {
+  display: block;
+  width: 200px;
+  height: 200px;
+  flex: 0 0 auto;
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-base);
+  background: #ffffff;
+}
+
+.detail-card__qr-cap {
+  flex: 1 1 220px;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--gray-700);
+}
+
+// ─── Buttons (общие варианты) ───
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
+  text-decoration: none;
+  border-radius: var(--radius-base);
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: background 120ms ease-out;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out,
+    box-shadow 120ms ease-out;
 
-  &:hover {
-    background: var(--gray-50);
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--brand-100);
   }
 
-  input[type='radio'] {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    accent-color: var(--brand-500);
-    cursor: pointer;
-  }
-
-  span {
-    font-size: var(--text-sm);
-    color: var(--gray-900);
+  &:disabled {
+    cursor: not-allowed;
   }
 }
 
-// ─── Doc list / checkboxes ───
+.btn--primary {
+  color: #ffffff;
+  background: var(--brand-500);
+
+  &:hover:not(:disabled) {
+    background: var(--brand-600);
+  }
+  &:active:not(:disabled) {
+    background: var(--brand-700);
+  }
+  &:disabled {
+    background: var(--gray-300);
+    color: var(--gray-600);
+  }
+}
+
+.btn--secondary {
+  color: var(--brand-500);
+  background: #ffffff;
+  border-color: var(--brand-300);
+
+  &:hover:not(:disabled) {
+    background: var(--brand-50);
+    border-color: var(--brand-500);
+  }
+  &:active:not(:disabled) {
+    background: var(--brand-100);
+  }
+  &:disabled {
+    color: var(--gray-500);
+    border-color: var(--gray-200);
+    background: var(--gray-50);
+  }
+}
+
+.btn--ghost {
+  color: var(--brand-500);
+  background: transparent;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    background: var(--brand-50);
+  }
+}
+
+// ─── Doc picker (детальный режим) ───
 
 .detail-card__doc-list {
   display: flex;
@@ -295,30 +559,36 @@
   gap: 4px;
 }
 
-.detail-card__check {
+// Общий выбираемый ряд (чекбокс/радио): тач-цель ≥44px, единый вид.
+%selectable-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  min-height: 44px;
+  padding: 8px 12px;
   border-radius: var(--radius-base);
   cursor: pointer;
   transition: background 120ms ease-out;
+
+  input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--brand-500);
+    cursor: pointer;
+  }
+}
+
+.detail-card__check {
+  @extend %selectable-row;
 
   &:hover {
     background: var(--gray-50);
   }
 
-  input[type='checkbox'] {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    accent-color: var(--brand-500);
-    cursor: pointer;
-  }
-
   span:not(.detail-card__pdf-badge) {
     flex: 1;
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     color: var(--gray-900);
   }
 
@@ -338,50 +608,142 @@
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  font-size: 11px;
+  font-size: var(--text-xs);
   line-height: 1.4;
   font-weight: var(--weight-semibold);
   color: #ffffff;
   background: var(--error-600);
   border-radius: var(--radius-sm);
-  letter-spacing: 0.02em;
 }
 
-// ─── Action button ───
+.detail-card__doc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
 
-.detail-card__action {
-  align-self: stretch;
-  height: 48px;
-  margin-top: auto;
-  padding: 0 24px;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  font-family: inherit;
-  color: #ffffff;
-  background: var(--brand-500);
-  border: none;
-  border-radius: var(--radius-base);
+// ─── Кросс-сел: «Предложите клиенту ещё» ───
+
+.cross__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cross__limit {
+  font-size: var(--text-base);
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+.cross__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cross__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+}
+
+.cross__item-text {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.cross__item-name {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.cross__item-benefit {
+  font-size: var(--text-base);
+  color: var(--gray-700);
+  margin: 4px 0 0;
+}
+
+.cross__item-price {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+  margin: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cross__item-btn {
+  flex: 0 0 auto;
+}
+
+// ─── Обслуживание договора — онлайн (процессы как преимущество) ───
+
+.service__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.service__sub {
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--gray-700);
+  margin: 0;
+}
+
+.service__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.service-tile {
+  @extend %focus-ring;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 72px;
+  padding: 16px;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid var(--brand-300);
+  border-radius: var(--radius-md);
   cursor: pointer;
+  font-family: inherit;
   transition:
     background 120ms ease-out,
-    box-shadow 120ms ease-out;
+    border-color 120ms ease-out;
 
-  &:hover:not(:disabled) {
-    background: var(--brand-600);
+  &:hover {
+    background: var(--brand-50);
+    border-color: var(--brand-500);
   }
+  &:active {
+    background: var(--brand-100);
+  }
+}
 
-  &:active:not(:disabled) {
-    background: var(--brand-700);
-  }
+.service-tile__label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--brand-500);
+}
 
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 4px var(--brand-100);
-  }
-
-  &:disabled {
-    background: var(--gray-300);
-    color: var(--gray-600);
-    cursor: not-allowed;
-  }
+.service-tile__benefit {
+  font-size: var(--text-base);
+  color: var(--gray-700);
 }

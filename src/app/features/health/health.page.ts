@@ -385,7 +385,9 @@ export class HealthPage {
     };
     this.policyService.create(payload).subscribe((res) => {
       const id = res.success && res.data ? res.data.id : null;
-      void this.router.navigate(id ? ['/clients', id] : ['/clients']);
+      void this.router.navigate(id ? ['/clients', id] : ['/clients'], {
+        queryParams: id ? { issued: '1' } : undefined,
+      });
     });
   }
 

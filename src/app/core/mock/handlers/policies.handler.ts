@@ -65,12 +65,18 @@ export function handleGetPolicy(
   const policy = policies.find((p) => p.id === id);
   if (!policy) return mockOk(null);
 
-  // Mock "addon" policies tied to the same contract (cross-sell of НС при ДТП etc.).
-  // Real 1C joins these via parentPolicyId — we just pick a couple from the fixture pool.
-  const possibleAddOns = policies
-    .filter((p) => p.id !== policy.id && p.type !== policy.type && p.type !== 'OSAGO')
-    .slice(0, 2);
+  // Mock "addon" policies в составе договора ОСАГО — только реальные кроссы
+  // (НС при ДТП). Ипотеку/клеща в примеры НЕ берём — это не кроссы к ОСАГО.
+  const possibleAddOns = policies.filter((p) => p.id !== policy.id && p.type === 'NS').slice(0, 2);
   const addOns = policy.type === 'OSAGO' && Math.random() < 0.65 ? possibleAddOns.slice(0, 1) : [];
+
+  // Водители ОСАГО: страхователь + 0–2 других (из пула клиентов). Для не-ОСАГО — пусто.
+  const driverPool = policies
+    .filter((p) => p.id !== policy.id && p.clientName !== policy.clientName)
+    .map((p) => p.clientName);
+  const driverCount = 1 + Math.floor(Math.random() * 3); // 1..3
+  const drivers =
+    policy.type === 'OSAGO' ? [policy.clientName, ...driverPool].slice(0, driverCount) : [];
 
   // Process counters (история операций по полису).
   const processCounters = {
@@ -81,38 +87,80 @@ export function handleGetPolicy(
 
   // Available downloadable documents. У продуктов «Здоровья» (НС/Антиклещ) —
   // свой пакет: полис, таблица выплат, КИД (ключевой информационный документ).
+  // Демо-файлы для прототипа (реальных PDF/бэкенда нет): полис и доп.
+  const POLIS_PDF = 'docs/polis-osago-demo.pdf';
+  const DOP_PDF = 'docs/dop-demo.pdf';
   const isHealth = policy.type === 'NS' || policy.type === 'TICK';
   const documents = isHealth
     ? [
-        { id: 'policy', name: 'Полис', format: 'pdf' as const },
-        { id: 'payouts', name: 'Таблица выплат', format: 'pdf' as const },
-        { id: 'kid', name: 'КИД', format: 'pdf' as const },
+        { id: 'policy', name: 'Полис', format: 'pdf' as const, url: POLIS_PDF },
+        { id: 'payouts', name: 'Таблица выплат', format: 'pdf' as const, url: DOP_PDF },
+        { id: 'kid', name: 'КИД', format: 'pdf' as const, url: DOP_PDF },
       ]
     : [
-        { id: 'policy', name: `Полис ${productLabel(policy.type)}`, format: 'pdf' as const },
+        {
+          id: 'policy',
+          name: `Полис ${productLabel(policy.type)}`,
+          format: 'pdf' as const,
+          url: POLIS_PDF,
+        },
         ...addOns.map((a) => ({
           id: `addon-${a.id}`,
           name: `Полис ${productLabel(a.type)}`,
           format: 'pdf' as const,
+          url: DOP_PDF,
         })),
-        { id: 'application', name: 'Заявление на страхование', format: 'pdf' as const },
+        {
+          id: 'application',
+          name: 'Заявление на страхование',
+          format: 'pdf' as const,
+          url: DOP_PDF,
+        },
       ];
 
-  // Cross-sell services (что ещё можно оформить этому клиенту).
+  // Cross-sell services (что ещё можно предложить клиенту). priceLabel —
+  // цены допов из ADD_ON_PRESETS (osago): МиниКАСКО 2 450 ₽, Юрист от 500 ₽,
+  // НС при ДТП от 800 ₽. Для «Здоровья» — свои разумные подписи.
   const services = (
     isHealth
       ? [
-          { id: 'tick', name: 'Оформить Антиклещ', available: policy.type !== 'TICK' },
-          { id: 'ns-sport', name: 'Оформить НС Спорт', available: true },
+          {
+            id: 'tick',
+            name: 'Антиклещ',
+            benefit: 'защита от укуса клеща',
+            priceLabel: 'от 350 ₽',
+            available: policy.type !== 'TICK',
+          },
+          {
+            id: 'ns-sport',
+            name: 'НС Спорт',
+            benefit: 'травмы на тренировках и соревнованиях',
+            priceLabel: 'от 900 ₽',
+            available: true,
+          },
         ]
       : [
-          { id: 'mini-kasko', name: 'Оформить МиниКАСКО', available: true },
+          {
+            id: 'legal',
+            name: 'Юрист поможет',
+            benefit: 'споры по ДТП и выплатам',
+            priceLabel: 'от 500 ₽',
+            available: true,
+          },
           {
             id: 'ns-dtp',
-            name: 'Оформить НС при ДТП',
+            name: 'НС при ДТП',
+            benefit: 'защита водителя и пассажиров',
+            priceLabel: 'от 800 ₽',
             available: !addOns.some((a) => a.type === 'NS'),
           },
-          { id: 'legal', name: 'Оформить Юрист поможет', available: true },
+          {
+            id: 'mini-kasko',
+            name: 'МиниКАСКО',
+            benefit: 'ремонт без полного КАСКО',
+            priceLabel: '2 450 ₽',
+            available: true,
+          },
         ]
   ).filter((s) => s.available);
 
@@ -120,11 +168,14 @@ export function handleGetPolicy(
     ...policy,
     ikp: currentAgent.ikp,
     curatorName: currentAgent.curatorName,
+    drivers,
     addOns: addOns.map((a) => ({
       id: a.id,
       type: a.type,
       number: a.number,
-      premium: a.premium,
+      // Цена допа = как у кросса к ОСАГО (НС при ДТП ~1000 ₽), а не полная
+      // премия случайного НС-полиса (та давала «странную» цену 3500–28000).
+      premium: 1000,
       productLabel: productLabel(a.type),
     })),
     processCounters,

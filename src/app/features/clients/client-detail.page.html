@@ -1,10 +1,26 @@
 @if (isLoading()) {
   <section class="detail">
+    <nav class="detail__crumbs" aria-label="Хлебные крошки">
+      <a routerLink="/clients" class="detail__crumb-link">
+        <span class="detail__crumb-arrow" aria-hidden="true">←</span>
+        Мои клиенты
+      </a>
+      <span class="detail__crumb-sep" aria-hidden="true">/</span>
+      <span class="detail__crumb-current">Информация о договоре</span>
+    </nav>
     <h1 class="detail__title">Информация о договоре</h1>
     <div class="detail__loading">Загружаем данные договора…</div>
   </section>
 } @else if (hasError() || !policy()) {
   <section class="detail">
+    <nav class="detail__crumbs" aria-label="Хлебные крошки">
+      <a routerLink="/clients" class="detail__crumb-link">
+        <span class="detail__crumb-arrow" aria-hidden="true">←</span>
+        Мои клиенты
+      </a>
+      <span class="detail__crumb-sep" aria-hidden="true">/</span>
+      <span class="detail__crumb-current">Информация о договоре</span>
+    </nav>
     <h1 class="detail__title">Информация о договоре</h1>
     <div class="detail__error">
       Договор не найден или произошла ошибка. Попробуйте обновить страницу.
@@ -12,26 +28,117 @@
   </section>
 } @else if (policy(); as p) {
   <section class="detail">
-    <h1 class="detail__title">Информация о договоре</h1>
+    <nav class="detail__crumbs" aria-label="Хлебные крошки">
+      <a routerLink="/clients" class="detail__crumb-link">
+        <span class="detail__crumb-arrow" aria-hidden="true">←</span>
+        Мои клиенты
+      </a>
+      <span class="detail__crumb-sep" aria-hidden="true">/</span>
+      <span class="detail__crumb-current">Информация о договоре</span>
+    </nav>
 
-    <div class="detail__grid">
-      <!-- Card 1: Полис -->
+    <!-- ─── Горячий сценарий: только что оформили ─── -->
+    @if (justIssued()) {
+      <div class="detail__success" role="status">
+        <span class="detail__success-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M5 12.5l4.5 4.5L19 7.5"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        <div class="detail__success-text">
+          <p class="detail__success-title">Полис оформлен</p>
+          <p class="detail__success-sub">
+            {{ p.productName || productLabel[p.type] }} · {{ p.clientName }}
+          </p>
+        </div>
+      </div>
+    } @else {
+      <h1 class="detail__title">Информация о договоре</h1>
+    }
+
+    <div class="detail__layout">
+      @if (justIssued()) {
+        <!-- ─── Горячий сценарий ───
+             Левая колонка: резюме договора + передать полис (главное действие рядом с клиентом).
+             Правая колонка: допродажа сверху (апсейл-момент) → процессы ниже. -->
+        <div class="detail__col detail__col--main">
+          <ng-container [ngTemplateOutlet]="summary" />
+          <ng-container [ngTemplateOutlet]="handover" />
+        </div>
+        <div class="detail__col detail__col--side">
+          <ng-container [ngTemplateOutlet]="crossSell" />
+          <ng-container [ngTemplateOutlet]="serviceCard" />
+        </div>
+      } @else {
+        <!-- ─── Холодный сценарий ───
+             Левая колонка: резюме договора + передать полис.
+             Правая колонка: процессы сверху (обслуживание важнее допродажи) → допродажа ниже. -->
+        <div class="detail__col detail__col--main">
+          <ng-container [ngTemplateOutlet]="summary" />
+          <ng-container [ngTemplateOutlet]="handover" />
+        </div>
+        <div class="detail__col detail__col--side">
+          <ng-container [ngTemplateOutlet]="serviceCard" />
+          <ng-container [ngTemplateOutlet]="crossSell" />
+        </div>
+      }
+    </div>
+
+    <!-- ════════ Резюме договора ════════ -->
+    <ng-template #summary>
       <article class="detail-card">
         <header class="detail-card__head">
           <div class="detail-card__head-left">
-            <h2 class="detail-card__product">{{ p.productName || productLabel[p.type] }}</h2>
-            <p class="detail-card__price">{{ p.premium | number: '1.2-2' }} ₽</p>
+            <app-insurer-logo
+              class="detail-card__logo"
+              [id]="p.insuranceCompanyId"
+              [name]="p.insuranceCompanyName"
+            />
+            <div class="detail-card__title-wrap">
+              <h2 class="detail-card__product">{{ p.productName || productLabel[p.type] }}</h2>
+              <p class="detail-card__insurer">{{ p.insuranceCompanyName }}</p>
+            </div>
           </div>
-          <span class="detail-card__status" [attr.data-status]="p.status">
-            {{ statusLabel[p.status] }}
-          </span>
+          @if (!justIssued()) {
+            <span class="detail-card__status" [attr.data-status]="p.status">
+              {{ statusLabel[p.status] }}
+            </span>
+          }
         </header>
 
+        <!-- Стоимость: ОСАГО + допы (с номерами) = итого (что оплатил клиент) -->
+        <div class="detail-card__cost">
+          <div class="cost-row">
+            <span class="cost-row__label">
+              {{ p.productName || productLabel[p.type] }}
+              <span class="cost-row__num">{{ p.number }}</span>
+            </span>
+            <span class="cost-row__val">{{ p.premium | number: '1.2-2' }} ₽</span>
+          </div>
+          @for (addon of p.addOns; track addon.id) {
+            <div class="cost-row">
+              <span class="cost-row__label">
+                {{ addon.productLabel }}
+                <span class="cost-row__num">{{ addon.number }}</span>
+              </span>
+              <span class="cost-row__val">{{ addon.premium | number: '1.2-2' }} ₽</span>
+            </div>
+          }
+          @if (p.addOns.length > 0) {
+            <div class="cost-row cost-row--total">
+              <span class="cost-row__label">Итого, клиент оплатил</span>
+              <span class="cost-row__val">{{ totalPaid() | number: '1.2-2' }} ₽</span>
+            </div>
+          }
+        </div>
+
         <dl class="detail-card__kv">
-          <dt>№ договора</dt>
-          <dd>{{ p.number }}</dd>
-          <dt>Страховая компания</dt>
-          <dd>{{ p.insuranceCompanyName }}</dd>
           <dt>Период страхования</dt>
           <dd>{{ p.startDate | date: 'dd.MM.yyyy' }} — {{ p.endDate | date: 'dd.MM.yyyy' }}</dd>
           @if (p.type === 'OSAGO') {
@@ -40,24 +147,32 @@
           }
           <dt>Страхователь</dt>
           <dd>{{ p.clientName }}</dd>
+          <dt>Телефон клиента</dt>
+          <dd>
+            <a class="detail-card__tel" [href]="telHref(p.clientPhone)">{{ p.clientPhone }}</a>
+          </dd>
 
           @if (showMore()) {
             @if (p.type === 'OSAGO') {
-              <dt>VIN</dt>
-              <dd>{{ p.vehicleVin }}</dd>
-              <dt>Год выпуска</dt>
-              <dd>{{ p.vehicleYear }}</dd>
+              @if (p.drivers.length > 0) {
+                @for (driver of p.drivers; track i; let i = $index) {
+                  <dt>Водитель {{ i + 1 }}</dt>
+                  <dd>{{ driver }}</dd>
+                }
+              } @else {
+                <dt>Водители</dt>
+                <dd>Без ограничений</dd>
+              }
+            } @else {
+              <dt>ИКП</dt>
+              <dd>{{ p.ikp }}</dd>
+              <dt>Куратор</dt>
+              <dd>{{ p.curatorName }}</dd>
+              <dt>Комиссия</dt>
+              <dd>{{ p.commission | number: '1.2-2' }} ₽</dd>
+              <dt>Дата оформления</dt>
+              <dd>{{ p.createdAt | date: 'dd.MM.yyyy HH:mm' }}</dd>
             }
-            <dt>Телефон клиента</dt>
-            <dd>{{ p.clientPhone }}</dd>
-            <dt>ИКП</dt>
-            <dd>{{ p.ikp }}</dd>
-            <dt>Куратор</dt>
-            <dd>{{ p.curatorName }}</dd>
-            <dt>Комиссия</dt>
-            <dd>{{ p.commission | number: '1.2-2' }} ₽</dd>
-            <dt>Дата оформления</dt>
-            <dd>{{ p.createdAt | date: 'dd.MM.yyyy HH:mm' }}</dd>
           }
         </dl>
 
@@ -68,75 +183,24 @@
             <span class="detail-card__more-arrow">▶</span> Ещё
           }
         </button>
-
-        @if (p.addOns.length > 0) {
-          <div class="detail-card__addons">
-            @for (addon of p.addOns; track addon.id) {
-              <div class="detail-card__addon">
-                <div class="detail-card__addon-head">
-                  <h3 class="detail-card__addon-product">{{ addon.productLabel }}</h3>
-                  <p class="detail-card__addon-price">{{ addon.premium | number: '1.0-0' }} ₽</p>
-                </div>
-                <dl class="detail-card__kv detail-card__kv--compact">
-                  <dt>№ договора</dt>
-                  <dd>{{ addon.number }}</dd>
-                </dl>
-              </div>
-            }
-          </div>
-        }
       </article>
+    </ng-template>
 
-      <!-- Card 2: Процессы -->
-      <article class="detail-card">
-        <header class="detail-card__head">
-          <h2 class="detail-card__heading">Процессы</h2>
-          <div class="detail-card__counters">
-            <span><strong>Изменения</strong> {{ p.processCounters.changes }}</span>
-            <span><strong>Расторжения</strong> {{ p.processCounters.cancellations }}</span>
-            <span><strong>Убытки</strong> {{ p.processCounters.losses }}</span>
-          </div>
-        </header>
-
-        <fieldset class="detail-card__radio-group">
-          <legend class="visually-hidden">Выберите процесс</legend>
-          @for (
-            option of [
-              { value: 'change', label: 'Внести изменения' },
-              { value: 'cancel', label: 'Оформить расторжение' },
-              { value: 'loss', label: 'Урегулировать убыток' },
-            ];
-            track option.value
-          ) {
-            <label class="detail-card__radio">
-              <input
-                type="radio"
-                name="process"
-                [value]="option.value"
-                [checked]="selectedProcess() === option.value"
-                (change)="selectedProcess.set(option.value)"
-              />
-              <span>{{ option.label }}</span>
-            </label>
-          }
-        </fieldset>
-
-        <button
-          type="button"
-          class="detail-card__action"
-          [disabled]="!selectedProcess()"
-          (click)="submitProcess()"
-        >
-          Продолжить
-        </button>
-      </article>
-
-      <!-- Card 3: Документы -->
+    <!-- ════════ Документы клиенту ════════ -->
+    <ng-template #handover>
       <article class="detail-card">
         <header class="detail-card__head">
           <h2 class="detail-card__heading">Документы</h2>
+          <span class="detail-card__doc-count">
+            Выбрано {{ selectedCount() }} из {{ p.documents.length }}
+          </span>
         </header>
 
+        <p class="detail-card__lead">
+          Полис, доп. продукты и заявление — скачайте и передайте клиенту (печать из PDF).
+        </p>
+
+        <!-- Все документы видны сразу; по умолчанию выбраны все. -->
         <div class="detail-card__doc-list">
           <label class="detail-card__check detail-card__check--all">
             <input type="checkbox" [checked]="allDocsSelected()" (change)="toggleAllDocs()" />
@@ -156,49 +220,109 @@
           }
         </div>
 
-        <button
-          type="button"
-          class="detail-card__action"
-          [disabled]="!hasAnyDocs()"
-          (click)="downloadDocs()"
-        >
-          Скачать
-        </button>
-      </article>
-
-      <!-- Card 4: Сервисы -->
-      @if (p.services.length > 0) {
-        <article class="detail-card">
-          <header class="detail-card__head">
-            <h2 class="detail-card__heading">Сервисы</h2>
-          </header>
-
-          <fieldset class="detail-card__radio-group">
-            <legend class="visually-hidden">Выберите дополнительный сервис</legend>
-            @for (service of p.services; track service.id) {
-              <label class="detail-card__radio">
-                <input
-                  type="radio"
-                  name="service"
-                  [value]="service.id"
-                  [checked]="selectedService() === service.id"
-                  (change)="selectedService.set(service.id)"
-                />
-                <span>{{ service.name }}</span>
-              </label>
-            }
-          </fieldset>
-
+        <div class="detail-card__actions">
           <button
             type="button"
-            class="detail-card__action"
-            [disabled]="!selectedService()"
-            (click)="submitService()"
+            class="btn"
+            [class.btn--primary]="justIssued()"
+            [class.btn--secondary]="!justIssued()"
+            [disabled]="!hasAnyDocs()"
+            (click)="downloadDocs()"
           >
-            Оформить
+            Скачать
           </button>
+          <button type="button" class="btn btn--secondary" (click)="toggleQr()">
+            {{ showQr() ? 'Скрыть QR' : 'Показать QR клиенту' }}
+          </button>
+        </div>
+
+        @if (showQr()) {
+          <div class="detail-card__qr">
+            <img
+              [src]="qrUrl()"
+              alt="QR-код для скачивания полиса"
+              width="200"
+              height="200"
+              class="detail-card__qr-img"
+            />
+            <p class="detail-card__qr-cap">
+              Наведите камеру телефона клиента — он скачает полис и сохранит или отправит в
+              мессенджер.
+            </p>
+          </div>
+        }
+
+        @if (justIssued()) {
+          <a routerLink="/clients" class="btn btn--ghost detail-card__done">
+            Готово, к списку клиентов
+          </a>
+        }
+      </article>
+    </ng-template>
+
+    <!-- ════════ Кросс-сел: предложите клиенту ещё ════════ -->
+    <ng-template #crossSell>
+      @if (p.services.length > 0) {
+        <article class="detail-card cross">
+          <header class="cross__head">
+            <h2 class="detail-card__heading">Предложите клиенту ещё</h2>
+            <span class="cross__limit">Добавлено {{ addedAddOns() }} из 3 — можно ещё</span>
+          </header>
+
+          <p class="detail-card__lead">
+            @if (justIssued()) {
+              Клиент рядом и в настрое — лучший момент допродать. Минута, без новой анкеты.
+            } @else {
+              Один звонок клиенту — плюс к доходу и его защите. Оформление займёт минуту.
+            }
+          </p>
+
+          <ul class="cross__list">
+            @for (service of p.services; track service.id) {
+              <li class="cross__item">
+                <div class="cross__item-text">
+                  <p class="cross__item-name">{{ service.name }}</p>
+                  @if (service.benefit) {
+                    <p class="cross__item-benefit">{{ service.benefit }}</p>
+                  }
+                </div>
+                @if (service.priceLabel) {
+                  <p class="cross__item-price">{{ service.priceLabel }}</p>
+                }
+                <button
+                  type="button"
+                  class="btn btn--secondary cross__item-btn"
+                  (click)="addCrossSell(service.name)"
+                >
+                  Добавить
+                </button>
+              </li>
+            }
+          </ul>
         </article>
       }
-    </div>
+    </ng-template>
+
+    <!-- ════════ Обслуживание договора — онлайн (процессы) ════════ -->
+    <ng-template #serviceCard>
+      <article class="detail-card service">
+        <header class="service__head">
+          <h2 class="detail-card__heading">Обслуживание договора — онлайн</h2>
+          <p class="service__sub">
+            Изменения, расторжение и урегулирование убытка — за пару кликов. Без писем и поездок в
+            офис.
+          </p>
+        </header>
+
+        <div class="service__tiles">
+          @for (proc of processes; track proc.kind) {
+            <button type="button" class="service-tile" (click)="startProcess(proc.label)">
+              <span class="service-tile__label">{{ proc.label }}</span>
+              <span class="service-tile__benefit">{{ proc.benefit }}</span>
+            </button>
+          }
+        </div>
+      </article>
+    </ng-template>
   </section>
 }

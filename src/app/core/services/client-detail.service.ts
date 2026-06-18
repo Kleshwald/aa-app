@@ -16,11 +16,17 @@ export interface PolicyDocument {
   id: string;
   name: string;
   format: 'pdf';
+  url: string;
 }
 
 export interface PolicyService {
   id: string;
+  /** Термин из 1С (название действия). */
   name: string;
+  /** Выгода/подпись под названием («данные, водители, авто»). */
+  benefit?: string;
+  /** Цена кросс-продукта для показа на карточке («от 500 ₽», «2 450 ₽»). */
+  priceLabel?: string;
   available: boolean;
 }
 
@@ -67,6 +73,9 @@ export interface PolicyDetail {
   vehicleBrand: string;
   vehicleModel: string;
   vehicleYear: number;
+
+  // Водители, допущенные к управлению (ОСАГО). Пусто = без ограничений.
+  drivers: string[];
 
   insuranceCompanyId: string;
   insuranceCompanyName: string;
