@@ -31,7 +31,8 @@ export interface ClientsQuery {
   type?: string;
   insuranceCompanyId?: string;
   search?: string;
-  period?: 'this-month' | 'this-quarter' | 'this-year' | 'all';
+  dateFrom?: string; // yyyy-mm-dd включительно
+  dateTo?: string; // yyyy-mm-dd включительно
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }

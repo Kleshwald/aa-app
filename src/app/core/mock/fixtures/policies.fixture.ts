@@ -49,12 +49,10 @@ function makePolicy(agentId: string): PolicyFixture {
     { value: 'TICK', weight: 8 },
     { value: 'MORTGAGE', weight: 7 },
   ]);
+  // Пока используем только два статуса: «Оформлен» (active) и «Черновик» (pending).
   const status: PolicyStatus = faker.helpers.weightedArrayElement([
-    { value: 'active', weight: 65 },
-    { value: 'expired', weight: 15 },
-    { value: 'cancelled', weight: 5 },
-    { value: 'pending', weight: 10 },
-    { value: 'processing', weight: 5 },
+    { value: 'active', weight: 80 },
+    { value: 'pending', weight: 20 },
   ]);
   const created = faker.date.past({ years: 1 });
   const start = faker.date.between({ from: created, to: new Date() });
@@ -63,9 +61,12 @@ function makePolicy(agentId: string): PolicyFixture {
   const premium = faker.number.float({ min: 3500, max: 28000, fractionDigits: 2 });
   const commissionRate = faker.number.float({ min: 0.07, max: 0.15 });
   const sex = faker.helpers.arrayElement(['male', 'female'] as const);
+  // Серия ОСАГО — всегда «ХХХ» (как у реальных е-полисов и при оформлении).
+  const number =
+    type === 'OSAGO' ? `ХХХ ${faker.string.numeric(10)}` : `РРР-${faker.string.numeric(8)}`;
   return {
     id: faker.string.uuid(),
-    number: `РРР-${faker.string.numeric(8)}`,
+    number,
     type,
     status,
     clientName: `${faker.person.lastName(sex)} ${faker.person.firstName(sex)} ${faker.person.middleName(sex)}`,
@@ -89,9 +90,19 @@ function makePolicy(agentId: string): PolicyFixture {
 // 100 policies attributed to the current agent for richer demo data.
 import { currentAgent } from './agents.fixture';
 
-export const policies: PolicyFixture[] = Array.from({ length: 100 }, () =>
-  makePolicy(currentAgent.id),
-);
+// Несколько «свежих за сегодня» с разным временем — чтобы фильтр «Сегодня»
+// был наглядным и показывал дату + время.
+const todayPolicies: PolicyFixture[] = Array.from({ length: 6 }, (_, i): PolicyFixture => {
+  const policy = makePolicy(currentAgent.id);
+  const created = new Date();
+  created.setHours(9 + i, (i * 17) % 60, 0, 0);
+  return { ...policy, status: 'active', createdAt: created.toISOString() };
+});
+
+export const policies: PolicyFixture[] = [
+  ...todayPolicies,
+  ...Array.from({ length: 100 }, () => makePolicy(currentAgent.id)),
+];
 
 export interface CreatePolicyInput {
   type: PolicyType;

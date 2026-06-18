@@ -4,51 +4,89 @@
   </header>
 
   <div class="clients__toolbar">
-    <div class="clients__toolbar-row">
+    <div class="clients__field clients__field--search">
+      <label class="clients__field-label" for="clients-search">Поиск</label>
       <div class="clients__search">
+        <svg class="clients__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <line x1="16" y1="16" x2="21" y2="21" />
+        </svg>
         <input
+          id="clients-search"
           type="search"
           [formControl]="searchControl"
-          placeholder="Поиск по ФИО, номеру полиса или госномеру (Ctrl+F)"
+          placeholder="например, Иванова, ХХХ0123456789 или А123ВС777"
           class="clients__search-input"
-          aria-label="Поиск"
         />
       </div>
+    </div>
 
-      <div class="clients__filter-group">
-        <label class="clients__filter">
-          <span class="clients__filter-label">Фильтры:</span>
-          <select
-            class="clients__filter-select"
-            [value]="period()"
-            (change)="setPeriod($any($event.target).value)"
-          >
-            <option value="this-month">Этот месяц</option>
-            <option value="this-quarter">Этот квартал</option>
-            <option value="this-year">Этот год</option>
-            <option value="all">Всё время</option>
-          </select>
-        </label>
-
+    <div class="clients__filters">
+      <div class="clients__field">
+        <label class="clients__field-label" for="clients-period">Период</label>
         <select
+          id="clients-period"
+          class="clients__filter-select"
+          [value]="period()"
+          (change)="setPeriod($any($event.target).value)"
+        >
+          <option value="today">Сегодня</option>
+          <option value="this-month">Этот месяц</option>
+          <option value="this-quarter">Этот квартал</option>
+          <option value="this-year">Этот год</option>
+          <option value="all">Всё время</option>
+          <option value="custom">Произвольный период</option>
+        </select>
+      </div>
+
+      @if (period() === 'custom') {
+        <div class="clients__field clients__field--date">
+          <label class="clients__field-label" for="clients-from">Начало</label>
+          <tui-textfield>
+            <input
+              id="clients-from"
+              tuiInputDate
+              [formControl]="fromControl"
+              placeholder="дд.мм.гггг"
+            />
+            <tui-calendar *tuiDropdown />
+          </tui-textfield>
+        </div>
+        <div class="clients__field clients__field--date">
+          <label class="clients__field-label" for="clients-to">Конец</label>
+          <tui-textfield>
+            <input
+              id="clients-to"
+              tuiInputDate
+              [formControl]="toControl"
+              placeholder="дд.мм.гггг"
+            />
+            <tui-calendar *tuiDropdown />
+          </tui-textfield>
+        </div>
+      }
+
+      <div class="clients__field">
+        <label class="clients__field-label" for="clients-status">Статус</label>
+        <select
+          id="clients-status"
           class="clients__filter-select"
           [value]="status()"
           (change)="status.set($any($event.target).value)"
-          aria-label="Статус"
         >
           <option value="">Все статусы</option>
           <option value="active">Оформлен</option>
           <option value="pending">Черновик</option>
-          <option value="processing">В обработке</option>
-          <option value="expired">Истёк</option>
-          <option value="cancelled">Расторгнут</option>
         </select>
+      </div>
 
+      <div class="clients__field">
+        <label class="clients__field-label" for="clients-type">Продукт</label>
         <select
+          id="clients-type"
           class="clients__filter-select"
           [value]="type()"
           (change)="type.set($any($event.target).value)"
-          aria-label="Продукт"
         >
           <option value="">Все продукты</option>
           <option value="OSAGO">ОСАГО</option>
@@ -56,12 +94,15 @@
           <option value="TICK">Антиклещ</option>
           <option value="MORTGAGE">Ипотека</option>
         </select>
+      </div>
 
+      <div class="clients__field">
+        <label class="clients__field-label" for="clients-company">Страховая компания</label>
         <select
+          id="clients-company"
           class="clients__filter-select"
           [value]="insuranceCompany()"
           (change)="insuranceCompany.set($any($event.target).value)"
-          aria-label="Страховая компания"
         >
           <option value="">Все СК</option>
           <option value="renessans">Ренессанс</option>
@@ -81,39 +122,72 @@
     <table class="clients__table" aria-label="Список полисов">
       <thead>
         <tr>
-          <th scope="col">ИКП</th>
-          <th scope="col">Дата</th>
-          <th scope="col">Куратор</th>
-          <th scope="col">Страхователь</th>
-          <th scope="col">Объект страхования</th>
-          <th scope="col">№ полиса</th>
-          <th scope="col">Продукт</th>
-          <th scope="col" class="clients__cell--num">Цена</th>
-          <th scope="col">Статус</th>
-          <th scope="col">Страховая компания</th>
+          @for (col of columns; track col.label) {
+            <th
+              scope="col"
+              [class.clients__cell--num]="col.num"
+              [attr.aria-sort]="col.key ? ariaSort(col.key) : null"
+            >
+              @if (col.key) {
+                <button
+                  type="button"
+                  class="clients__sort"
+                  [class.clients__sort--active]="sortKey() === col.key"
+                  (click)="toggleSort(col.key)"
+                >
+                  <span>{{ col.label }}</span>
+                  <svg
+                    class="clients__sort-arrow"
+                    [class.clients__sort-arrow--desc]="
+                      sortKey() === col.key && sortOrder() === 'desc'
+                    "
+                    viewBox="0 0 12 12"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 7.5 6 4l3 3.5" />
+                  </svg>
+                </button>
+              } @else {
+                {{ col.label }}
+              }
+            </th>
+          }
         </tr>
       </thead>
       <tbody>
         @if (isLoading()) {
           @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
             <tr class="clients__row clients__row--skeleton">
-              <td colspan="10"><span class="clients__skeleton"></span></td>
+              <td colspan="8"><span class="clients__skeleton"></span></td>
             </tr>
           }
         } @else if (hasError()) {
           <tr>
-            <td colspan="10" class="clients__state clients__state--error">
-              Не удалось загрузить данные{{ errorMessage() ? ': ' + errorMessage() : '' }}.
-              Попробуйте обновить страницу.
+            <td colspan="8" class="clients__state clients__state--error">
+              <svg class="clients__state-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <line x1="12" y1="8" x2="12" y2="13" />
+                <line x1="12" y1="16" x2="12" y2="16.01" />
+              </svg>
+              <span class="clients__state-text">
+                Не удалось загрузить данные{{ errorMessage() ? ': ' + errorMessage() : '' }}.
+                Попробуйте обновить страницу.
+              </span>
             </td>
           </tr>
         } @else if (rows().length === 0) {
           <tr>
-            <td colspan="10" class="clients__state">
-              По выбранным фильтрам полисов не найдено.
-              <button type="button" class="clients__reset" (click)="resetFilters()">
-                Сбросить фильтры
-              </button>
+            <td colspan="8" class="clients__state">
+              <svg class="clients__state-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <line x1="16" y1="16" x2="21" y2="21" />
+              </svg>
+              <span class="clients__state-text">
+                По выбранным фильтрам полисов не найдено.
+                <button type="button" class="clients__reset" (click)="resetFilters()">
+                  Сбросить фильтры
+                </button>
+              </span>
             </td>
           </tr>
         } @else {
@@ -125,36 +199,57 @@
               tabindex="0"
               [attr.aria-label]="'Открыть договор ' + row.number"
             >
-              <td>{{ row.ikp }}</td>
-              <td>{{ row.createdAt | date: 'dd.MM.yyyy' }}</td>
-              <td>{{ row.curatorName }}</td>
+              <td>
+                {{
+                  row.createdAt | date: (period() === 'today' ? 'dd.MM.yyyy, HH:mm' : 'dd.MM.yyyy')
+                }}
+              </td>
               <td>{{ row.clientName }}</td>
               <td>
-                {{ row.vehicleBrand }} {{ row.vehicleModel }}
-                <span class="clients__plate">({{ row.vehicleLicensePlate }})</span>
+                @if (row.type === 'OSAGO') {
+                  {{ row.vehicleBrand }} {{ row.vehicleModel }}
+                  <span class="clients__plate">({{ row.vehicleLicensePlate }})</span>
+                } @else {
+                  {{ objectLabel(row) }}
+                }
               </td>
               <td>{{ row.number }}</td>
               <td>{{ productLabel[row.type] }}</td>
               <td class="clients__cell--num">{{ row.premium | number: '1.0-0' }}</td>
               <td>
-                <span class="clients__status" [attr.data-status]="row.status">{{
-                  statusLabel[row.status]
-                }}</span>
+                <span class="clients__status" [attr.data-status]="row.status">
+                  <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    @switch (row.status) {
+                      @case ('active') {
+                        <polyline points="5 12 10 17 19 7" />
+                      }
+                      @case ('cancelled') {
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                      }
+                      @case ('expired') {
+                        <circle cx="12" cy="12" r="8" />
+                        <polyline points="12 8 12 12 15 14" />
+                      }
+                      @case ('processing') {
+                        <circle cx="12" cy="12" r="8" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12" y2="16.01" />
+                      }
+                      @default {
+                        <path d="M5 19 19 5" />
+                        <path d="M14 5h5v5" />
+                      }
+                    }
+                  </svg>
+                  <span class="clients__status-label">{{ statusLabel[row.status] }}</span>
+                </span>
               </td>
               <td>{{ row.insuranceCompanyName }}</td>
             </tr>
           }
         }
       </tbody>
-      @if (!isLoading() && !hasError() && rows().length > 0) {
-        <tfoot>
-          <tr class="clients__total-row">
-            <td colspan="7">Итого по {{ summary().total }} полисам</td>
-            <td class="clients__cell--num">{{ summary().premium | number: '1.0-0' }}</td>
-            <td colspan="2"></td>
-          </tr>
-        </tfoot>
-      }
     </table>
   </div>
 </section>

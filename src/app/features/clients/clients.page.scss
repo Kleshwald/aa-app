@@ -25,31 +25,70 @@
 
 .clients__toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: flex-end;
+  gap: 16px;
   padding: 16px;
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
+  flex-wrap: wrap;
 }
 
-.clients__toolbar-row {
+// Поле тулбара: подпись сверху + контрол (как в формах — §1 DESIGN.md).
+.clients__field {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.clients__field--search {
+  flex: 1 1 280px;
+  min-width: 240px;
+}
+
+.clients__field--date {
+  min-width: 168px;
+}
+
+.clients__field-label {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+}
+
+.clients__filters {
+  display: flex;
+  align-items: flex-end;
   gap: 16px;
   flex-wrap: wrap;
 }
 
 .clients__search {
-  flex: 1;
-  min-width: 280px;
+  position: relative;
+  display: flex;
+}
+
+.clients__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--gray-500);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 
 .clients__search-input {
   width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  font-size: var(--text-sm);
+  height: var(--size-input);
+  padding: 0 14px 0 42px;
+  font-size: var(--text-base);
   font-family: inherit;
   color: var(--gray-900);
   background: #ffffff;
@@ -74,30 +113,11 @@
   }
 }
 
-.clients__filter-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.clients__filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.clients__filter-label {
-  font-size: var(--text-sm);
-  color: var(--gray-700);
-  font-weight: var(--weight-medium);
-}
-
 .clients__filter-select {
-  height: 44px;
-  min-width: 160px;
-  padding: 0 12px;
-  font-size: var(--text-sm);
+  height: var(--size-input);
+  min-width: 168px;
+  padding: 0 36px 0 12px;
+  font-size: var(--text-base);
   font-family: inherit;
   color: var(--gray-900);
   background: #ffffff
@@ -107,7 +127,6 @@
   border-radius: var(--radius-base);
   appearance: none;
   -webkit-appearance: none;
-  padding-right: 36px;
   cursor: pointer;
   outline: none;
   transition:
@@ -128,15 +147,15 @@
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-  overflow: auto;
-  max-height: calc(100vh - 240px);
+  // Без собственного скролла: вертикальную прокрутку даёт .app-content,
+  // а thead — sticky к нему. Так на странице один скролл, а не два.
 }
 
 .clients__table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   line-height: var(--leading-sm);
   color: var(--gray-900);
 
@@ -147,18 +166,17 @@
     padding: 12px 16px;
     background: var(--brand-50);
     color: var(--brand-700);
-    font-size: var(--text-xs);
-    line-height: var(--leading-xs);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
     font-weight: var(--weight-semibold);
     text-align: left;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
     border-bottom: 1px solid var(--brand-100);
     white-space: nowrap;
   }
 
   tbody td {
-    padding: 14px 16px;
+    height: var(--size-row);
+    padding: 12px 16px;
     border-bottom: 1px solid var(--gray-100);
     vertical-align: middle;
   }
@@ -182,7 +200,7 @@
   }
 
   tbody tr:nth-child(even) td {
-    background: #fbfcfd;
+    background: var(--gray-50);
   }
 
   tbody tr:nth-child(even):hover td {
@@ -196,18 +214,52 @@
   white-space: nowrap;
 }
 
-// ─── Totals footer (continuity with the previous platform version) ───
+// ─── Сортировка по столбцам ───
+.clients__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
 
-.clients__total-row td {
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
-  padding: 14px 16px;
-  background: var(--brand-50);
-  color: var(--brand-700);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  border-top: 2px solid var(--brand-100);
+  &:hover {
+    color: var(--accent-600);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
+}
+
+.clients__sort-arrow {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.3;
+  transition:
+    transform 120ms ease-out,
+    opacity 120ms ease-out;
+}
+
+.clients__sort--active .clients__sort-arrow {
+  opacity: 1;
+}
+
+.clients__sort-arrow--desc {
+  transform: rotate(180deg);
 }
 
 .clients__plate {
@@ -219,11 +271,11 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   font-size: var(--text-xs);
   line-height: 1.2;
   font-weight: var(--weight-medium);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   white-space: nowrap;
 
   &[data-status='active'] {
@@ -252,6 +304,18 @@
   }
 }
 
+// Иконка в бейдже — чтобы статус читался не только цветом (§5 DESIGN.md).
+.clients__status-icon {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .clients__row--skeleton td {
   padding: 14px 16px;
 }
@@ -277,17 +341,40 @@
 
 .clients__state {
   padding: 48px 16px;
-  text-align: center;
   color: var(--gray-700);
   font-size: var(--text-base);
+  text-align: center;
+}
+
+.clients__state-icon {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  fill: none;
+  stroke: var(--gray-400);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.clients__state-text {
+  display: block;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 .clients__state--error {
   color: var(--error-700);
+
+  .clients__state-icon {
+    stroke: var(--error-500);
+  }
 }
 
 .clients__reset {
-  margin-left: 12px;
+  display: inline-block;
+  margin-top: 8px;
   padding: 0;
   background: none;
   border: none;
@@ -296,8 +383,15 @@
   font-size: inherit;
   cursor: pointer;
   text-decoration: underline;
+  text-underline-offset: 2px;
 
   &:hover {
     color: var(--brand-600);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 }

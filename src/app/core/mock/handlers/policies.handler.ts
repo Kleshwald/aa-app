@@ -19,6 +19,8 @@ export function handleGetPolicies(
   const pageSize = Number(params.get('pageSize') ?? 20);
   const status = params.get('status');
   const type = params.get('type');
+  const dateFrom = params.get('dateFrom');
+  const dateTo = params.get('dateTo');
   const search = (params.get('search') ?? '').toLowerCase();
   const sortBy = params.get('sortBy') ?? 'createdAt';
   const sortOrder = params.get('sortOrder') ?? 'desc';
@@ -26,6 +28,9 @@ export function handleGetPolicies(
   let result = policies.slice();
   if (status) result = result.filter((p) => p.status === status);
   if (type) result = result.filter((p) => p.type === type);
+  // Фильтр по дате оформления (createdAt — ISO datetime; сравниваем по дню).
+  if (dateFrom) result = result.filter((p) => p.createdAt.slice(0, 10) >= dateFrom);
+  if (dateTo) result = result.filter((p) => p.createdAt.slice(0, 10) <= dateTo);
   if (search) {
     result = result.filter(
       (p) =>
