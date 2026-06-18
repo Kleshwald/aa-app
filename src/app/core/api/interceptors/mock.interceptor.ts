@@ -6,7 +6,6 @@ import { type ApiResponse } from '@core/models';
 
 import { handleLogin, handleLogout, handleRefresh } from '../../mock/handlers/auth.handler';
 import { handleGetCurrentAgent } from '../../mock/handlers/agent.handler';
-import { handleDashboard } from '../../mock/handlers/dashboard.handler';
 import {
   handleCreatePolicy,
   handleGetPolicies,
@@ -40,7 +39,6 @@ const routes: Route[] = [
   { method: 'POST', match: /\/auth\/logout$/, handler: handleLogout },
   { method: 'POST', match: /\/auth\/refresh$/, handler: handleRefresh },
   { method: 'GET', match: /\/agents\/me$/, handler: handleGetCurrentAgent },
-  { method: 'GET', match: /\/dashboard$/, handler: handleDashboard },
   { method: 'POST', match: /\/policies$/, handler: handleCreatePolicy },
   { method: 'GET', match: /\/policies\/[^/]+$/, handler: handleGetPolicy },
   { method: 'GET', match: /\/policies(\?.*)?$/, handler: handleGetPolicies },

@@ -109,12 +109,6 @@ export const routes: Routes = [
         title: 'Сообщения — Agent Academy',
       },
       {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('@features/dashboard/dashboard.page').then((m) => m.DashboardPage),
-        title: 'Главная — Agent Academy',
-      },
-      {
         path: 'profile',
         loadComponent: () => import('@features/profile/profile.page').then((m) => m.ProfilePage),
         title: 'Профиль — Agent Academy',
