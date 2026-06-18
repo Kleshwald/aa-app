@@ -7,7 +7,10 @@
 .app-shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  // Высота строго в экран: шапка+сайдбар фиксированы, скролл — только в контенте
+  // (один скролл вместо двух, как в 1С). См. .app-content.
+  height: 100vh;
+  overflow: hidden;
   // Subtle brand-tinted canvas so white cards/header/sidebar read as "branded", not blank.
   background: var(--brand-50);
 }
@@ -90,18 +93,21 @@
 }
 
 .app-header__user-name {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: var(--weight-medium);
   color: #ffffff;
+  // Полное ФИО с отчеством показываем целиком — не обрезаем многоточием.
+  white-space: nowrap;
 }
 
 .app-header__user-location {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.72);
   margin-top: 2px;
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
 }
 
 .app-header__pin {
@@ -138,9 +144,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 40px;
+  height: 48px;
   padding: 0 12px;
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-family: inherit;
   color: var(--gray-900);
   background: transparent;
@@ -190,7 +196,7 @@
   gap: 8px;
 }
 
-// ─── Avatar ───
+// ─── Avatar (нейтральный силуэт; имя рядом — главный якорь личности) ───
 
 .app-header__avatar {
   display: inline-flex;
@@ -199,13 +205,10 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-full);
-  background: var(--accent-500);
+  background: rgba(255, 255, 255, 0.16);
   color: #ffffff;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.02em;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
 // ─── Body (sidebar + content) ───
@@ -306,7 +309,7 @@
 
 .app-sidebar__social {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 16px;
   border-top: 1px solid var(--gray-200);
   display: flex;
   flex-direction: column;
@@ -314,9 +317,9 @@
 }
 
 .app-sidebar__social-title {
-  padding: 4px 12px 6px;
+  padding: 4px 16px 6px;
   font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   color: var(--gray-500);
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -325,14 +328,14 @@
 .app-sidebar__social-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 40px;
-  padding: 0 12px;
-  border-radius: var(--radius-base);
+  gap: 14px;
+  height: var(--size-input); // 48px — meets the ≥44px touch target (DESIGN.md §1.5/§5)
+  padding: 0 16px;
+  border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--gray-700);
-  font-size: var(--text-sm);
-  line-height: var(--leading-sm);
+  font-size: var(--text-base);
+  line-height: 1.3;
   font-weight: var(--weight-medium);
   transition:
     background 120ms ease-out,
@@ -354,10 +357,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
 
+  // Brand colours of the social networks — intentional exception to the token rule
+  // (these are external brand identities, not part of our palette).
   &--tg {
     color: #29a9eb;
   }
@@ -373,8 +378,12 @@
 .app-content {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   padding: 24px 32px;
-  overflow-x: auto;
+  // Единственная область прокрутки приложения (по обеим осям).
+  // Внутри страниц НЕ делать вложенный вертикальный скролл — sticky-шапки
+  // таблиц «липнут» именно к этому контейнеру.
+  overflow: auto;
 }
 
 // ─── Mobile compaction (PROJECT_BRIEF: mobile is secondary, but should still work) ───

@@ -91,5 +91,14 @@ function makeAgent(): AgentFixture {
 }
 
 // One canonical "current agent" plus a small pool for lists/search.
-export const currentAgent: AgentFixture = { ...makeAgent(), category: 'Основная' };
+// Имя и куратор — фиксированные (а не faker), чтобы демо было узнаваемым.
+export const currentAgent: AgentFixture = {
+  ...makeAgent(),
+  gender: 'female',
+  fullName: 'Филь Виктория Викторовна',
+  curatorName: 'Парфенова Оксана Анатольевна',
+  region: 'Красноярский край',
+  district: 'Шушенское',
+  category: 'Основная',
+};
 export const agents: AgentFixture[] = [currentAgent, ...Array.from({ length: 50 }, makeAgent)];

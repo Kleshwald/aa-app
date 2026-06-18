@@ -18,6 +18,7 @@ export interface AuthenticatedAgent {
   email?: string;
   region?: string;
   district?: string;
+  curatorName?: string;
 }
 
 export interface LoginResponse {
@@ -51,6 +52,22 @@ export class AuthService {
         }
       }),
     );
+  }
+
+  /**
+   * Подтягивает свежий профиль из /agents/me и обновляет шапку. Нужно, чтобы
+   * имя/локация не «застревали» на снимке, сохранённом при прошлом входе.
+   */
+  refreshAgent(): void {
+    if (!this.isAuthenticated()) return;
+    this.api.get<AuthenticatedAgent>('/agents/me').subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          localStorage.setItem(AGENT_PROFILE_KEY, JSON.stringify(response.data));
+          this.currentAgent.set(response.data);
+        }
+      },
+    });
   }
 
   logout(): void {

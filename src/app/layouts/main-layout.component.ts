@@ -53,21 +53,10 @@ export class MainLayoutComponent {
   protected readonly nav = NAV;
   protected readonly agent = this.auth.currentAgent;
   protected readonly agentName = computed(() => this.agent()?.fullName ?? 'Агент');
+  // Территория + район — тихой второй строкой под именем (не якорь, а контекст).
   protected readonly agentLocation = computed(() => {
     const a = this.agent();
-    if (!a?.region && !a?.district) return '';
-    if (a.region && a.district) return `${a.region}, ${a.district}`;
-    return a.region ?? a.district ?? '';
-  });
-
-  // Avatar initials in «Имя + Фамилия» order. Full name is stored as
-  // "Фамилия Имя Отчество", so "Гринвальд Сергей Александрович" → "СГ".
-  protected readonly agentInitials = computed(() => {
-    const parts = (this.agent()?.fullName ?? '').trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return 'А';
-    const surnameInitial = parts[0]?.[0] ?? '';
-    const nameInitial = parts[1]?.[0] ?? '';
-    return (nameInitial + surnameInitial || surnameInitial).toUpperCase();
+    return [a?.district, a?.region].filter(Boolean).join(', ');
   });
 
   private readonly chat = inject(ChatService);
@@ -77,6 +66,12 @@ export class MainLayoutComponent {
   protected readonly messagesUnread = this.chat.unread;
 
   protected readonly userMenuOpen = signal(false);
+
+  constructor() {
+    // Обновляем профиль в шапке из /agents/me — чтобы имя/локация были свежими,
+    // а не из снимка, сохранённого при прошлом входе.
+    this.auth.refreshAgent();
+  }
 
   toggleUserMenu(): void {
     this.userMenuOpen.update((v) => !v);
