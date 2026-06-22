@@ -8,6 +8,7 @@ import * as QRCode from 'qrcode';
 
 import { ClientDetailService, type PolicyDetail } from '@core/services/client-detail.service';
 import { type ApiResponse } from '@core/models';
+import { BreadcrumbsComponent } from '@shared/breadcrumbs/breadcrumbs.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 
 const STATUS_LABEL: Record<PolicyDetail['status'], string> = {
@@ -27,7 +28,14 @@ const PRODUCT_LABEL: Record<PolicyDetail['type'], string> = {
 
 @Component({
   selector: 'app-client-detail-page',
-  imports: [DatePipe, DecimalPipe, NgTemplateOutlet, RouterLink, InsurerLogoComponent],
+  imports: [
+    DatePipe,
+    DecimalPipe,
+    NgTemplateOutlet,
+    RouterLink,
+    InsurerLogoComponent,
+    BreadcrumbsComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './client-detail.page.html',
   styleUrl: './client-detail.page.scss',

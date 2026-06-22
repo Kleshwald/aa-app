@@ -17,19 +17,17 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { map } from 'rxjs';
 
 import {
   type CreatePolicyPayload,
   ClientDetailService,
 } from '@core/services/client-detail.service';
-import { FinanceService } from '@core/services/finance.service';
 import { AddonIconComponent } from '@shared/addon-icon/addon-icon.component';
-import { CalcLoaderComponent } from '@shared/calc-loader/calc-loader.component';
+import { BackLinkComponent } from '@shared/back-link/back-link.component';
+import { CalcLoaderComponent, type CalcStep } from '@shared/calc-loader/calc-loader.component';
 import { FieldComponent } from '@shared/field/field.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
 import { IsoDayTransformer } from '@shared/iso-day.transformer';
-import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
 
 import { MaskitoDirective } from '@maskito/angular';
 import type { MaskitoOptions } from '@maskito/core';
@@ -112,8 +110,7 @@ const RANDOM_ADDRESSES: readonly string[] = [
 
 // Экран ожидания — сменяющаяся строка статуса (формулировки из первой версии).
 // У шагов с компанией показываем логотип (фиксированный список, не «кто ответил»).
-const CALC_STEPS: readonly { text: string; carrierId?: string }[] = [
-  { text: 'Скоринг Agent Academy' },
+const CALC_STEPS: readonly CalcStep[] = [
   { text: 'Направляем информацию в страховые компании' },
   { text: 'Ренессанс', carrierId: 'renessans' },
   { text: 'Югория', carrierId: 'ugoria' },
@@ -122,10 +119,7 @@ const CALC_STEPS: readonly { text: string; carrierId?: string }[] = [
   { text: 'СОГАЗ', carrierId: 'sogaz' },
   { text: 'Росгосстрах', carrierId: 'rosgosstrah' },
   { text: 'Евроинс', carrierId: 'euroins' },
-  { text: 'Сегментация' },
   { text: 'Проверка НСИС' },
-  { text: 'Получаем ответы от страховых компаний' },
-  { text: 'Ещё несколько секунд' },
 ];
 
 const CALC_COMPLETE_AT_MS = 38_500; // короткий момент «Готово»
@@ -207,8 +201,8 @@ interface CoefRow {
     DecimalPipe,
     InsurerLogoComponent,
     AddonIconComponent,
+    BackLinkComponent,
     CalcLoaderComponent,
-    MotivationStripComponent,
     FieldComponent,
     TuiTextfield,
     TuiInput,
@@ -231,15 +225,6 @@ export class OsagoPage {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly policyService = inject(ClientDetailService);
-  private readonly financeService = inject(FinanceService);
-
-  // «Мои результаты» для полосы мотивации (общий источник с разделом «Мои финансы»).
-  protected readonly financeResults = toSignal(
-    this.financeService.results().pipe(map((r) => r.data)),
-    { initialValue: null },
-  );
-  // Премия предложения под курсором — полоса прогресса «дорастает».
-  protected readonly previewPremium = signal(0);
 
   protected readonly purposes = VEHICLE_PURPOSES;
   protected readonly categories = VEHICLE_CATEGORIES;
@@ -330,6 +315,9 @@ export class OsagoPage {
   protected readonly stepIndex = signal<number>(0);
   protected readonly calcComplete = signal<boolean>(false);
 
+  // «Магия» автозаполнения: волна подсветки секций после «Ассистент, заполни!».
+  protected readonly fillPulse = signal(false);
+
   protected readonly quotes = signal<Quote[]>([]);
   protected readonly selectedQuoteId = signal<string | null>(null);
   protected readonly selectedQuote = computed<Quote | null>(() => {
@@ -378,6 +366,7 @@ export class OsagoPage {
   private calcTimers: ReturnType<typeof setTimeout>[] = [];
   private stepTimer: ReturnType<typeof setInterval> | null = null;
   private paymentTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private fillPulseTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly form = this.fb.nonNullable.group({
     base: this.fb.nonNullable.group({
@@ -623,6 +612,22 @@ export class OsagoPage {
       // Первый водитель — страхователь (ФИО подставляются из него).
       this.fillDriverFrom(driver0, 'policyholder');
     }
+
+    this.runFillMagic();
+  }
+
+  /** Волна подсветки секций сверху вниз — «магия» заполнения (дофамин, тонко). */
+  private runFillMagic(): void {
+    // reduced-motion → данные уже подставлены, без анимации.
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    if (this.fillPulseTimer) clearTimeout(this.fillPulseTimer);
+    this.fillPulse.set(false);
+    // rAF: снять класс, затем поставить заново — перезапуск волны при повторном клике.
+    requestAnimationFrame(() => {
+      this.fillPulse.set(true);
+      // 5 секций × 120мс стаггер + 600мс анимация ≈ 1.3 c.
+      this.fillPulseTimer = setTimeout(() => this.fillPulse.set(false), 1300);
+    });
   }
 
   private randomVin(): string {
@@ -925,6 +930,10 @@ export class OsagoPage {
     if (this.paymentTimeoutId) {
       clearTimeout(this.paymentTimeoutId);
       this.paymentTimeoutId = null;
+    }
+    if (this.fillPulseTimer) {
+      clearTimeout(this.fillPulseTimer);
+      this.fillPulseTimer = null;
     }
   }
 }

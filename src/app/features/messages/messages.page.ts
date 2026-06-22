@@ -47,7 +47,6 @@ export class MessagesPage implements OnInit {
     'Не проходит котировка',
     'Подгрузить полис',
     'Вопрос по оплате',
-    'Сбросить доступ',
   ];
   protected readonly showQuickReplies = computed(
     () => !this.messages().some((m) => m.author === 'agent'),
@@ -88,10 +87,24 @@ export class MessagesPage implements OnInit {
     this.chat.send(this.draft(), this.pendingFiles());
     this.draft.set('');
     this.pendingFiles.set([]);
+    const el = this.inputEl()?.nativeElement;
+    if (el) el.style.height = 'auto';
   }
 
-  quickSend(text: string): void {
-    this.chat.send(text);
+  /** Чип-подсказка вставляет текст в поле (не отправляет молча) — агент дочитает и нажмёт сам. */
+  quickFill(text: string): void {
+    this.draft.set(text);
+    const el = this.inputEl()?.nativeElement;
+    if (el) {
+      el.focus();
+      this.autoGrow(el);
+    }
+  }
+
+  /** Авто-рост textarea по строкам (до 140px), чтобы длинное сообщение было видно. */
+  autoGrow(el: HTMLTextAreaElement): void {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
   }
 
   onKeydown(event: KeyboardEvent): void {

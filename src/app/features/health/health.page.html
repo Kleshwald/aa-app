@@ -2,7 +2,10 @@
   <!-- ─────────────── PARAMS ─────────────── -->
   @case ('params') {
     <section class="hl" [formGroup]="params">
-      <h1 class="hl__title">Линейка продуктов «Здоровье»</h1>
+      <header class="hl-head">
+        <h1 class="hl__title">Здоровье</h1>
+        <p class="hl__lead">Выберите продукт — рассчитаем цены у страховых компаний</p>
+      </header>
 
       <!-- Product selector cards -->
       <div class="hl-products" role="tablist" aria-label="Продукт">
@@ -89,82 +92,89 @@
       </div>
 
       <div class="hl-card">
-        <!-- Type segment -->
-        <div class="hl-seg">
-          <button
-            type="button"
-            class="hl-seg__btn"
-            [class.hl-seg__btn--active]="insureType() === 'individual'"
-            (click)="setInsureType('individual')"
-          >
-            Индивидуальный
-          </button>
-          <button
-            type="button"
-            class="hl-seg__btn"
-            [class.hl-seg__btn--active]="insureType() === 'group'"
-            (click)="setInsureType('group')"
-          >
-            Для группы от 2-х человек
-          </button>
+        <h2 class="hl-card__title">Параметры · {{ productMeta().label }}</h2>
+
+        <!-- Segments: кого страхуем + возраст (с постоянными подписями) -->
+        <div class="hl-seg-row">
+          <div class="hl-seg-group">
+            <span class="hl-seg__label">Кого страхуем</span>
+            <div class="hl-seg">
+              <button
+                type="button"
+                class="hl-seg__btn"
+                [class.hl-seg__btn--active]="insureType() === 'individual'"
+                (click)="setInsureType('individual')"
+              >
+                Индивидуальный
+              </button>
+              <button
+                type="button"
+                class="hl-seg__btn"
+                [class.hl-seg__btn--active]="insureType() === 'group'"
+                (click)="setInsureType('group')"
+              >
+                Для группы от 2-х человек
+              </button>
+            </div>
+          </div>
+
+          <div class="hl-seg-group">
+            <span class="hl-seg__label">Возраст</span>
+            <div class="hl-seg">
+              <button
+                type="button"
+                class="hl-seg__btn"
+                [class.hl-seg__btn--active]="category() === 'child'"
+                (click)="setCategory('child')"
+              >
+                Ребёнок (2–16 лет)
+              </button>
+              <button
+                type="button"
+                class="hl-seg__btn"
+                [class.hl-seg__btn--active]="category() === 'adult'"
+                (click)="setCategory('adult')"
+              >
+                Взрослый (16–70 лет)
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Category segment -->
-        <div class="hl-seg">
-          <button
-            type="button"
-            class="hl-seg__btn"
-            [class.hl-seg__btn--active]="category() === 'child'"
-            (click)="setCategory('child')"
-          >
-            Ребёнок (2–16 лет)
-          </button>
-          <button
-            type="button"
-            class="hl-seg__btn"
-            [class.hl-seg__btn--active]="category() === 'adult'"
-            (click)="setCategory('adult')"
-          >
-            Взрослый (16–70 лет)
-          </button>
-        </div>
+        <!-- Fields — фикс. ширина слева, «Страховая сумма» прижата к правому краю -->
+        <div class="hl-row hl-row--params">
+          <app-field label="Срок страхования" width="narrow">
+            <tui-textfield [stringify]="stringifyTerm">
+              <select tuiSelect formControlName="term" [items]="termItems"></select>
+            </tui-textfield>
+          </app-field>
 
-        <!-- Fields -->
-        <div class="hl-row">
-          <label class="hl-field">
-            <span class="hl-field__label">Срок страхования</span>
-            <select class="hl-input hl-input--select" formControlName="term">
-              @for (t of terms; track t.value) {
-                <option [value]="t.value">{{ t.label }}</option>
-              }
-            </select>
-          </label>
+          <app-field label="Дата начала" width="narrow">
+            <tui-textfield>
+              <input tuiInputDate formControlName="startDate" />
+              <tui-calendar *tuiDropdown />
+            </tui-textfield>
+          </app-field>
 
-          <label class="hl-field">
-            <span class="hl-field__label">Страховая сумма</span>
-            <select class="hl-input hl-input--select" formControlName="sum">
-              @for (s of sums; track s) {
-                <option [value]="s">{{ s | number: '1.0-0' }} ₽</option>
-              }
-            </select>
-          </label>
-
-          <label class="hl-field">
-            <span class="hl-field__label">Дата начала действия полиса</span>
-            <input type="date" class="hl-input" formControlName="startDate" />
-          </label>
-
-          <label class="hl-field">
-            <span class="hl-field__label">Дата окончания действия полиса</span>
-            <input type="text" class="hl-input" [value]="endDate() | date: 'dd.MM.yyyy'" readonly />
-          </label>
+          <app-field label="Дата окончания" width="narrow">
+            <tui-textfield>
+              <input tuiInput [value]="endDate() | date: 'dd.MM.yyyy'" readonly />
+            </tui-textfield>
+          </app-field>
 
           @if (insureType() === 'group') {
-            <label class="hl-field hl-field--narrow">
-              <span class="hl-field__label">Количество застрахованных</span>
-              <input type="number" class="hl-input" formControlName="count" min="2" />
-            </label>
+            <app-field label="Количество" width="narrow">
+              <tui-textfield>
+                <input tuiInput type="number" formControlName="count" [min]="2" />
+              </tui-textfield>
+            </app-field>
           }
+
+          <app-field label="Страховая сумма" width="narrow">
+            <tui-textfield [stringify]="stringifySum">
+              <select tuiSelect formControlName="sum" [items]="sumItems"></select>
+            </tui-textfield>
+          </app-field>
         </div>
       </div>
 
@@ -182,10 +192,8 @@
   <!-- ─────────────── РАСЧЁТ ─────────────── -->
   @case ('loading') {
     <app-calc-loader
-      eyebrow="Расчёт стоимости"
       [step]="calcSteps()[stepIndex()]"
       [complete]="calcComplete()"
-      hint="Обычно занимает несколько секунд · не закрывайте окно"
       (cancelled)="cancelCalculation()"
     />
   }
@@ -193,23 +201,15 @@
   <!-- ─────────────── QUOTES ─────────────── -->
   @case ('quotes') {
     <section class="hl hl--quotes">
+      <app-back-link label="Вернуться к расчёту" (back)="backToParams()" />
       <header class="hl__quotes-head">
         <h1 class="hl__heading">Результаты расчёта</h1>
         <p class="hl__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
       </header>
 
-      @if (financeResults(); as m) {
-        <app-motivation-strip [results]="m" [previewPremium]="previewPremium()" />
-      }
-
       <div class="hl-offers">
         @for (o of offers(); track o.id) {
-          <div
-            class="hl-offer"
-            [class.hl-offer--best]="bestOfferId() === o.id"
-            (mouseenter)="previewPremium.set(offerPrice(o))"
-            (mouseleave)="previewPremium.set(0)"
-          >
+          <div class="hl-offer" [class.hl-offer--best]="bestOfferId() === o.id">
             <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
 
             <div class="hl-offer__main">
@@ -303,12 +303,6 @@
         ></button>
       }
 
-      <footer class="hl__footer hl__footer--center">
-        <button type="button" class="hl-btn hl-btn--secondary" (click)="backToParams()">
-          Вернуться к расчёту
-        </button>
-      </footer>
-
       <!-- Shared price-breakdown popover (rendered inside the open offer). -->
       <ng-template #priceInfo let-o>
         <div class="hl-popover" role="dialog" aria-label="Расчёт стоимости">
@@ -351,6 +345,7 @@
   <!-- ─────────────── ISSUE ─────────────── -->
   @case ('issue') {
     <section class="hl" [formGroup]="issueForm">
+      <app-back-link label="Вернуться к предложениям" (back)="backToQuotes()" />
       <header class="hl-issue-head">
         <h1 class="hl-issue-head__title">{{ productMeta().label }}</h1>
         <p class="hl-issue-head__sub">Оформление полиса</p>
@@ -358,90 +353,101 @@
 
       <div class="hl-card">
         <div class="hl-row">
-          <label class="hl-field">
-            <span class="hl-field__label">Страховая сумма</span>
-            <input
-              type="text"
-              class="hl-input"
-              [value]="(params.controls.sum.value | number: '1.0-0') + ' ₽'"
-              readonly
-            />
-          </label>
-          <label class="hl-field">
-            <span class="hl-field__label">Дата начала действия полиса</span>
-            <input
-              type="text"
-              class="hl-input"
-              [value]="params.controls.startDate.value | date: 'dd.MM.yyyy'"
-              readonly
-            />
-          </label>
-          <label class="hl-field">
-            <span class="hl-field__label">Дата окончания действия полиса</span>
-            <input type="text" class="hl-input" [value]="endDate() | date: 'dd.MM.yyyy'" readonly />
-          </label>
+          <app-field label="Страховая сумма" width="narrow">
+            <tui-textfield>
+              <input
+                tuiInput
+                [value]="(params.controls.sum.value | number: '1.0-0') + ' ₽'"
+                readonly
+              />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Дата начала" width="narrow">
+            <tui-textfield>
+              <input
+                tuiInput
+                [value]="params.controls.startDate.value | date: 'dd.MM.yyyy'"
+                readonly
+              />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Дата окончания" width="narrow">
+            <tui-textfield>
+              <input tuiInput [value]="endDate() | date: 'dd.MM.yyyy'" readonly />
+            </tui-textfield>
+          </app-field>
         </div>
       </div>
 
       <article class="hl-card" formGroupName="policyholder">
         <h3 class="hl-card__title">Страхователь</h3>
         <div class="hl-row">
-          <label class="hl-field"
-            ><span class="hl-field__label">Фамилия</span
-            ><input type="text" class="hl-input" formControlName="lastName"
-          /></label>
-          <label class="hl-field"
-            ><span class="hl-field__label">Имя</span
-            ><input type="text" class="hl-input" formControlName="firstName"
-          /></label>
-          <label class="hl-field"
-            ><span class="hl-field__label">Отчество</span
-            ><input type="text" class="hl-input" formControlName="middleName"
-          /></label>
-          <label class="hl-field hl-field--narrow"
-            ><span class="hl-field__label">Дата рождения</span
-            ><input type="date" class="hl-input" formControlName="birthDate"
-          /></label>
+          <app-field label="Фамилия" width="small">
+            <tui-textfield>
+              <input tuiInput formControlName="lastName" />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Имя" width="small">
+            <tui-textfield>
+              <input tuiInput formControlName="firstName" />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Отчество" width="small">
+            <tui-textfield>
+              <input tuiInput formControlName="middleName" />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Дата рождения" width="narrow">
+            <tui-textfield>
+              <input tuiInputDate formControlName="birthDate" />
+              <tui-calendar *tuiDropdown />
+            </tui-textfield>
+          </app-field>
         </div>
         <div class="hl-row">
-          <label class="hl-field"
-            ><span class="hl-field__label">Серия и номер паспорта РФ</span
-            ><input
-              type="text"
-              class="hl-input"
-              formControlName="passport"
-              placeholder="0000 000000"
-          /></label>
-          <label class="hl-field hl-field--narrow"
-            ><span class="hl-field__label">Дата выдачи</span
-            ><input type="date" class="hl-input" formControlName="passportDate"
-          /></label>
-          <label class="hl-field"
-            ><span class="hl-field__label">Кем выдан</span
-            ><input
-              type="text"
-              class="hl-input"
-              formControlName="passportDept"
-              placeholder="код подразделения"
-          /></label>
+          <app-field label="Серия и номер паспорта РФ" width="narrow">
+            <tui-textfield>
+              <input
+                tuiInput
+                formControlName="passport"
+                [maskito]="seriesNumberMask"
+                placeholder="0000 000000"
+              />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Дата выдачи" width="narrow">
+            <tui-textfield>
+              <input tuiInputDate formControlName="passportDate" />
+              <tui-calendar *tuiDropdown />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Кем выдан" width="grow">
+            <tui-textfield>
+              <input tuiInput formControlName="passportDept" placeholder="код подразделения" />
+            </tui-textfield>
+          </app-field>
         </div>
         <div class="hl-row">
-          <label class="hl-field"
-            ><span class="hl-field__label">Телефон</span
-            ><input
-              type="tel"
-              class="hl-input"
-              formControlName="phone"
-              placeholder="+7 (___) ___-__-__"
-          /></label>
-          <label class="hl-field"
-            ><span class="hl-field__label">Email</span
-            ><input
-              type="email"
-              class="hl-input"
-              formControlName="email"
-              placeholder="example@mail.ru"
-          /></label>
+          <app-field label="Телефон" width="small">
+            <tui-textfield>
+              <input
+                tuiInput
+                formControlName="phone"
+                inputmode="tel"
+                placeholder="+7 (916) 123-45-67"
+              />
+            </tui-textfield>
+          </app-field>
+          <app-field label="Email" width="small">
+            <tui-textfield>
+              <input
+                tuiInput
+                formControlName="email"
+                inputmode="email"
+                placeholder="example@mail.ru"
+              />
+            </tui-textfield>
+          </app-field>
         </div>
       </article>
 
@@ -461,22 +467,27 @@
             }
           </header>
           <div class="hl-row">
-            <label class="hl-field"
-              ><span class="hl-field__label">Фамилия</span
-              ><input type="text" class="hl-input" formControlName="lastName"
-            /></label>
-            <label class="hl-field"
-              ><span class="hl-field__label">Имя</span
-              ><input type="text" class="hl-input" formControlName="firstName"
-            /></label>
-            <label class="hl-field"
-              ><span class="hl-field__label">Отчество</span
-              ><input type="text" class="hl-input" formControlName="middleName"
-            /></label>
-            <label class="hl-field hl-field--narrow"
-              ><span class="hl-field__label">Дата рождения</span
-              ><input type="date" class="hl-input" formControlName="birthDate"
-            /></label>
+            <app-field label="Фамилия" width="small">
+              <tui-textfield>
+                <input tuiInput formControlName="lastName" />
+              </tui-textfield>
+            </app-field>
+            <app-field label="Имя" width="small">
+              <tui-textfield>
+                <input tuiInput formControlName="firstName" />
+              </tui-textfield>
+            </app-field>
+            <app-field label="Отчество" width="small">
+              <tui-textfield>
+                <input tuiInput formControlName="middleName" />
+              </tui-textfield>
+            </app-field>
+            <app-field label="Дата рождения" width="narrow">
+              <tui-textfield>
+                <input tuiInputDate formControlName="birthDate" />
+                <tui-calendar *tuiDropdown />
+              </tui-textfield>
+            </app-field>
           </div>
         </article>
       }
@@ -513,9 +524,6 @@
           <span class="hl-paybar__metric-value">{{ insuredControls.length }} чел.</span>
         </span>
         <span class="hl-paybar__spacer"></span>
-        <button type="button" class="hl-btn hl-btn--secondary" (click)="backToQuotes()">
-          Назад
-        </button>
         <button type="button" class="hl-btn hl-btn--secondary" (click)="saveDraft()">
           Сохранить черновик
         </button>

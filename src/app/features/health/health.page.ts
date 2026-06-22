@@ -10,16 +10,21 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { type FormArray, FormBuilder, type FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { map, startWith } from 'rxjs';
+import { startWith } from 'rxjs';
 
 import {
   type CreatePolicyPayload,
   ClientDetailService,
 } from '@core/services/client-detail.service';
-import { FinanceService } from '@core/services/finance.service';
+import { MaskitoDirective } from '@maskito/angular';
+import type { MaskitoOptions } from '@maskito/core';
+import { BackLinkComponent } from '@shared/back-link/back-link.component';
 import { CalcLoaderComponent, type CalcStep } from '@shared/calc-loader/calc-loader.component';
+import { FieldComponent } from '@shared/field/field.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
-import { MotivationStripComponent } from '@shared/motivation-strip/motivation-strip.component';
+import { IsoDayTransformer } from '@shared/iso-day.transformer';
+import { TuiInput, TuiTextfield, tuiTextfieldOptionsProvider } from '@taiga-ui/core';
+import { TuiInputDate, TuiSelect, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
 
 type HealthProduct = 'accident' | 'sport' | 'tick';
 type InsureType = 'individual' | 'group';
@@ -86,10 +91,15 @@ const SUMS = [50000, 100000, 150000, 300000, 500000, 1000000];
 const DISCOUNT_PCT = 15;
 const DISCOUNT_TIERS = [0, DISCOUNT_PCT] as const;
 
-// Тайминги лоадера «Здоровья»: фиксированная длительность фразы (читаемо),
-// затем короткая выдержка на «Готово» перед переходом к предложениям.
-const HL_STEP_MS = 1400;
-const HL_DONE_HOLD_MS = 700;
+// Тайминги лоадера «Здоровья»: фиксированная длительность фразы (читаемо,
+// спокойнее старого 1400), затем короткая выдержка на «Готово» перед предложениями.
+const HL_STEP_MS = 1700;
+const HL_DONE_HOLD_MS = 800;
+
+// Маска «серия + номер» (4 + 6 цифр) для паспорта РФ: «0000 000000» (как в ОСАГО).
+const SERIES_NUMBER_MASK: MaskitoOptions = {
+  mask: [/\d/, /\d/, /\d/, /\d/, ' ', /\d/, /\d/, /\d/, /\d/, /\d/, /\d/],
+};
 
 @Component({
   selector: 'app-health-page',
@@ -99,33 +109,42 @@ const HL_DONE_HOLD_MS = 700;
     DecimalPipe,
     NgTemplateOutlet,
     InsurerLogoComponent,
+    BackLinkComponent,
     CalcLoaderComponent,
-    MotivationStripComponent,
+    FieldComponent,
+    TuiTextfield,
+    TuiInput,
+    TuiInputDate,
+    TuiSelect,
+    MaskitoDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './health.page.html',
   styleUrl: './health.page.scss',
   host: { '(document:keydown.escape)': 'closePriceInfo()' },
+  providers: [
+    tuiInputDateOptionsProvider({ valueTransformer: new IsoDayTransformer() }),
+    // Без «крестика» очистки в полях (как в ОСАГО) — отвлекал агентов.
+    tuiTextfieldOptionsProvider({ cleaner: signal(false) }),
+  ],
 })
 export class HealthPage {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly policyService = inject(ClientDetailService);
-  private readonly financeService = inject(FinanceService);
-
-  // «Мои результаты» для полосы мотивации (общий источник с разделом «Мои финансы»).
-  protected readonly financeResults = toSignal(
-    this.financeService.results().pipe(map((r) => r.data)),
-    { initialValue: null },
-  );
-  // Премия предложения под курсором — полоса прогресса «дорастает».
-  protected readonly previewPremium = signal(0);
 
   protected readonly products = PRODUCTS;
-  protected readonly terms = TERMS;
-  protected readonly sums = SUMS;
   protected readonly today = new Date();
+
+  // Taiga select: списки значений + «stringify» (значение → подпись в поле).
+  protected readonly termItems = TERMS.map((t) => t.value);
+  protected readonly sumItems = SUMS;
+  protected readonly stringifyTerm = (v: string): string =>
+    TERMS.find((t) => t.value === v)?.label ?? v;
+  protected readonly stringifySum = (v: number): string =>
+    `${new Intl.NumberFormat('ru-RU').format(v)} ₽`;
+  protected readonly seriesNumberMask = SERIES_NUMBER_MASK;
 
   protected readonly product = signal<HealthProduct>('accident');
   protected readonly insureType = signal<InsureType>('individual');

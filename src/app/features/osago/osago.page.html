@@ -38,7 +38,11 @@
       </div>
 
       <!-- Vehicle -->
-      <article class="osago-section" formGroupName="vehicle">
+      <article
+        class="osago-section osago-section--m1"
+        [class.osago-section--magic]="fillPulse()"
+        formGroupName="vehicle"
+      >
         <header class="osago-section__head">
           <h2 class="osago-section__title">
             Транспортное средство
@@ -236,7 +240,11 @@
       </article>
 
       <!-- Policyholder -->
-      <article class="osago-section" formGroupName="policyholder">
+      <article
+        class="osago-section osago-section--m2"
+        [class.osago-section--magic]="fillPulse()"
+        formGroupName="policyholder"
+      >
         <header class="osago-section__head">
           <h2 class="osago-section__title">
             Страхователь
@@ -318,7 +326,11 @@
       </article>
 
       <!-- Owner -->
-      <article class="osago-section" formGroupName="owner">
+      <article
+        class="osago-section osago-section--m3"
+        [class.osago-section--magic]="fillPulse()"
+        formGroupName="owner"
+      >
         <header class="osago-section__head">
           <h2 class="osago-section__title">
             Собственник
@@ -404,7 +416,7 @@
       </article>
 
       <!-- Drivers -->
-      <article class="osago-section">
+      <article class="osago-section osago-section--m4" [class.osago-section--magic]="fillPulse()">
         <header class="osago-section__head">
           <h2 class="osago-section__title">
             Водители
@@ -608,7 +620,11 @@
       </article>
 
       <!-- Параметры и контакты (период, цель, контакты) — в конце, перед расчётом -->
-      <article class="osago-section" formGroupName="base">
+      <article
+        class="osago-section osago-section--m5"
+        [class.osago-section--magic]="fillPulse()"
+        formGroupName="base"
+      >
         <header class="osago-section__head">
           <h2 class="osago-section__title">
             Параметры и контакты
@@ -699,10 +715,8 @@
   <!-- ─────────────────────────── РАСЧЁТ ─────────────────────────── -->
   @case ('loading') {
     <app-calc-loader
-      eyebrow="Расчёт ОСАГО"
       [step]="steps[stepIndex()]"
       [complete]="calcComplete()"
-      hint="Обычно занимает до 40 секунд · не закрывайте окно"
       (cancelled)="cancelCalculation()"
     />
   }
@@ -710,14 +724,11 @@
   <!-- ─────────────────────────── RESULTS ─────────────────────────── -->
   @case ('results') {
     <section class="results">
+      <app-back-link label="Вернуться к расчёту" (back)="backToForm()" />
       <header class="results__head">
         <h1 class="results__title">Результаты расчёта</h1>
         <p class="results__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
       </header>
-
-      @if (financeResults(); as m) {
-        <app-motivation-strip [results]="m" [previewPremium]="previewPremium()" />
-      }
 
       <div class="results__offers">
         @for (q of quotes(); track q.id; let i = $index) {
@@ -725,8 +736,6 @@
             class="results__offer results__offer--enter"
             [class.results__offer--best]="$first"
             [style.animation-delay]="220 + i * 220 + 'ms'"
-            (mouseenter)="previewPremium.set(q.osagoPrice)"
-            (mouseleave)="previewPremium.set(0)"
           >
             <app-insurer-logo
               class="results__offer-logo"
@@ -862,12 +871,6 @@
           </article>
         }
       </div>
-
-      <footer class="results__footer">
-        <button type="button" class="osago__btn osago__btn--secondary" (click)="backToForm()">
-          Вернуться к расчёту
-        </button>
-      </footer>
 
       @if (priceInfoQuoteId()) {
         <button

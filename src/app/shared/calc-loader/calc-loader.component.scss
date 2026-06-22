@@ -9,60 +9,51 @@
   min-height: calc(100vh - 64px - 48px);
 }
 
+// Минимализм: без карточки/рамки/тени/фона — чистый экран, фраза в центре.
 .calc__inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 540px;
-  min-height: 340px;
-  padding: 48px 44px;
+  max-width: 560px;
+  min-height: 320px;
+  padding: 48px 24px;
   text-align: center;
-  background: #ffffff;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
 }
 
-.calc__eyebrow {
-  margin-bottom: 22px;
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent-500);
-}
-
+// Слот под фразу: резерв под 2 строки, чтобы экран не «прыгал».
 .calc__phrase {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 96px;
-}
-
-.calc__phrase-item {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
   gap: 16px;
-  animation: calc-phrase-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  margin: 0;
+  min-height: calc(1.35em * 2);
+  max-width: 20em;
+  font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1.35;
+  font-weight: var(--weight-medium);
+  color: var(--gray-900);
+  text-wrap: balance;
+  // Спокойный premium fade-up входа новой фразы (только opacity/transform).
+  animation: calc-phrase-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.calc__check {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: var(--success-600);
+}
+
+// Лого СК рядом с фразой — крупно.
 .calc__phrase-logo {
-  --ins-logo-size: 52px;
+  --ins-logo-size: 64px;
   flex-shrink: 0;
 }
 
-.calc__phrase-item span {
-  font-size: clamp(22px, 3vw, 32px);
-  line-height: 1.2;
-  font-weight: var(--weight-semibold);
-  color: var(--gray-900);
-  text-wrap: balance;
-}
-
+// Бегущая линия загрузки под фразой.
 .calc__line {
   position: relative;
   width: 320px;
@@ -82,65 +73,44 @@
   width: 40%;
   border-radius: var(--radius-full);
   background: linear-gradient(90deg, var(--header-bg), var(--accent-500));
-  animation: calc-slide 1.7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: calc-slide 2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-.calc__hint {
-  margin: 26px 0 0;
-  font-size: var(--text-sm);
-  color: var(--gray-500);
-}
-
+// Тихий текстовый выход — не «кнопка-коробка», но тач-цель ≥44px.
 .calc__cancel {
+  display: inline-flex;
+  align-items: center;
   margin-top: 20px;
-  padding: 8px 16px;
+  padding: 0 12px;
   min-height: 44px;
-  background: none;
+  background: transparent;
   border: none;
-  color: var(--gray-600);
+  color: var(--gray-500);
   font-family: inherit;
   font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
+  transition: color 140ms ease;
 
   &:hover {
-    color: var(--error-600);
+    color: var(--gray-700);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 }
 
-// ─── Позитивный финал: мягкое свечение + «Готово» ───
-
-.calc__done {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 124px;
-}
-
-.calc__done-bloom {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(57, 146, 228, 0.4), transparent 68%);
-  animation: calc-bloom 1000ms ease-out both;
-}
-
-.calc__done-text {
-  position: relative;
-  font-size: clamp(24px, 3.4vw, 34px);
-  font-weight: var(--weight-semibold);
-  color: var(--header-bg);
-  animation: calc-done-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes calc-phrase-in {
-  from {
+@keyframes calc-phrase-up {
+  0% {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
-  to {
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
@@ -155,35 +125,9 @@
   }
 }
 
-@keyframes calc-bloom {
-  0% {
-    transform: scale(0.3);
-    opacity: 0;
-  }
-  35% {
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.7);
-    opacity: 0;
-  }
-}
-
-@keyframes calc-done-in {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .calc__phrase-item,
-  .calc__done-bloom,
-  .calc__done-text {
+  .calc__phrase,
+  .calc__phrase--done {
     animation: none;
   }
   .calc__line i {

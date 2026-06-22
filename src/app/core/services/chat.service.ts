@@ -25,17 +25,19 @@ export interface ChatMessage {
   read: boolean; // for company messages: seen by the agent
 }
 
-const STORAGE_KEY = 'agent_academy_support_chat_v2';
+const STORAGE_KEY = 'agent_academy_support_chat_v3';
 
-// Single thread, two roles answer (attributed). Names are demo placeholders.
-const SUPPORT: ChatSender = { name: 'Анна Котова', role: 'support' };
-const CURATOR: ChatSender = { name: 'Галина Маслова', role: 'curator' };
+// Single thread, two roles answer (attributed). Полное ФИО с отчеством; куратор —
+// демо-куратор агента (совпадает с профилем), не безымянный.
+const SUPPORT: ChatSender = { name: 'Котова Анна Сергеевна', role: 'support' };
+const CURATOR: ChatSender = { name: 'Парфенова Оксана Анатольевна', role: 'curator' };
 
 const CURATOR_INTRO =
-  'Здравствуйте! Я ваш куратор. По обучению, плану продаж и общим вопросам пишите мне прямо здесь.';
+  'Здравствуйте! Я ваш куратор Оксана Анатольевна. По обучению, плану продаж и общим ' +
+  'вопросам пишите мне прямо здесь.';
 const GREETING =
-  'Это поддержка Agent Academy. Опишите вопрос — поможем с котировкой, полисом, ' +
-  'оплатой или доступом. Можно приложить скриншот.';
+  'Это поддержка Agent Academy. Опишите вопрос — поможем с котировкой, полисом ' +
+  'или оплатой. Можно приложить скриншот.';
 
 // Keyword → canned operator reply. Makes the prototype chat feel alive without a backend.
 const CANNED: { match: RegExp; reply: string }[] = [
@@ -53,10 +55,6 @@ const CANNED: { match: RegExp; reply: string }[] = [
     match: /оплат|плат[её]ж|комисс|выплат/i,
     reply:
       'Передал в отдел расчётов. Обычно по оплате отвечаем в течение часа, вернусь с результатом.',
-  },
-  {
-    match: /доступ|парол|вход|логин|войти/i,
-    reply: 'Помогу с доступом. На какой номер телефона отправить новый пароль?',
   },
   {
     match: /ошибк|не работает|баг|зависа|сломал/i,
@@ -152,7 +150,8 @@ export class ChatService {
 
   private seed(): void {
     const now = Date.now();
-    // One thread, two roles: curator intro + support greeting (both unread → badge 2).
+    // One thread, two roles: curator intro + support greeting. Приветствия НЕ считаем
+    // непрочитанными (read: true) — бейдж только на реальные ответы, без ложной тревоги.
     this.messages.set([
       {
         id: this.nextId(),
@@ -162,7 +161,7 @@ export class ChatService {
         attachments: [],
         createdAt: now,
         status: 'sent',
-        read: false,
+        read: true,
       },
       {
         id: this.nextId(),
@@ -172,7 +171,7 @@ export class ChatService {
         attachments: [],
         createdAt: now + 1,
         status: 'sent',
-        read: false,
+        read: true,
       },
     ]);
     this.persist();

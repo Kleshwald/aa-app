@@ -1,26 +1,20 @@
 @if (isLoading()) {
   <section class="detail">
-    <nav class="detail__crumbs" aria-label="Хлебные крошки">
-      <a routerLink="/clients" class="detail__crumb-link">
-        <span class="detail__crumb-arrow" aria-hidden="true">←</span>
-        Мои клиенты
-      </a>
-      <span class="detail__crumb-sep" aria-hidden="true">/</span>
-      <span class="detail__crumb-current">Информация о договоре</span>
-    </nav>
+    <app-breadcrumbs
+      parentLabel="Мои клиенты"
+      parentLink="/clients"
+      current="Информация о договоре"
+    />
     <h1 class="detail__title">Информация о договоре</h1>
     <div class="detail__loading">Загружаем данные договора…</div>
   </section>
 } @else if (hasError() || !policy()) {
   <section class="detail">
-    <nav class="detail__crumbs" aria-label="Хлебные крошки">
-      <a routerLink="/clients" class="detail__crumb-link">
-        <span class="detail__crumb-arrow" aria-hidden="true">←</span>
-        Мои клиенты
-      </a>
-      <span class="detail__crumb-sep" aria-hidden="true">/</span>
-      <span class="detail__crumb-current">Информация о договоре</span>
-    </nav>
+    <app-breadcrumbs
+      parentLabel="Мои клиенты"
+      parentLink="/clients"
+      current="Информация о договоре"
+    />
     <h1 class="detail__title">Информация о договоре</h1>
     <div class="detail__error">
       Договор не найден или произошла ошибка. Попробуйте обновить страницу.
@@ -28,14 +22,11 @@
   </section>
 } @else if (policy(); as p) {
   <section class="detail">
-    <nav class="detail__crumbs" aria-label="Хлебные крошки">
-      <a routerLink="/clients" class="detail__crumb-link">
-        <span class="detail__crumb-arrow" aria-hidden="true">←</span>
-        Мои клиенты
-      </a>
-      <span class="detail__crumb-sep" aria-hidden="true">/</span>
-      <span class="detail__crumb-current">Информация о договоре</span>
-    </nav>
+    <app-breadcrumbs
+      parentLabel="Мои клиенты"
+      parentLink="/clients"
+      current="Информация о договоре"
+    />
 
     <!-- ─── Горячий сценарий: только что оформили ─── -->
     @if (justIssued()) {

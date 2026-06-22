@@ -9,10 +9,10 @@ export interface CalcStep {
 }
 
 /**
- * Shared «расчёт» wait screen: eyebrow + large cycling phrase (with insurer logo
- * for carrier steps) + running line + hint + cancel, and a positive «Готово»
- * glow finish. Presentational — the parent drives `step`/`complete` over time.
- * Used by ОСАГО and «Здоровье».
+ * Shared «расчёт» wait screen — минимализм: центрированная сменяющаяся надпись
+ * с крупным лого СК на их шагах, мягкий fade-up, бегущая линия загрузки и тихий
+ * выход. Финал — фраза «Готово». Presentational: родитель ведёт `step`/`complete`.
+ * Используется ОСАГО и «Здоровьем».
  */
 @Component({
   selector: 'app-calc-loader',
@@ -22,9 +22,7 @@ export interface CalcStep {
   styleUrl: './calc-loader.component.scss',
 })
 export class CalcLoaderComponent {
-  readonly eyebrow = input.required<string>();
   readonly step = input<CalcStep | null>(null);
   readonly complete = input<boolean>(false);
-  readonly hint = input<string>('');
   readonly cancelled = output<void>();
 }

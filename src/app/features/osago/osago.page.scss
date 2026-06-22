@@ -91,6 +91,46 @@
   border-radius: var(--radius-lg);
 }
 
+// «Магия» автозаполнения: волна подсветки секций сверху вниз (дофамин, тонко).
+// Анимируем только border/box-shadow (без layout) — дёшево для слабого ноута.
+.osago-section--magic {
+  animation: osago-fill-pulse 600ms ease-out both;
+  animation-delay: var(--magic-delay, 0ms);
+}
+
+.osago-section--m1 {
+  --magic-delay: 0ms;
+}
+.osago-section--m2 {
+  --magic-delay: 120ms;
+}
+.osago-section--m3 {
+  --magic-delay: 240ms;
+}
+.osago-section--m4 {
+  --magic-delay: 360ms;
+}
+.osago-section--m5 {
+  --magic-delay: 480ms;
+}
+
+@keyframes osago-fill-pulse {
+  0% {
+    border-color: var(--accent-500);
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
+  100% {
+    border-color: var(--gray-200);
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .osago-section--magic {
+    animation: none;
+  }
+}
+
 .osago-section__head {
   display: flex;
   align-items: center;
@@ -887,12 +927,13 @@
 }
 
 .results__price-info {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   font-family: inherit;
   font-size: var(--text-xs);
@@ -906,6 +947,13 @@
     color 120ms ease-out,
     border-color 120ms ease-out,
     background 120ms ease-out;
+
+  // Невидимая тач-зона ≥44px для аудитории 45+ (визуальный кружок 24px).
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+  }
 
   &:hover,
   &--open {
