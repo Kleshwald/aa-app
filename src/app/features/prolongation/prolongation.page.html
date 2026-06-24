@@ -51,13 +51,11 @@
       <!-- Toolbar -->
       <div class="prol__toolbar">
         <div class="prol__toolbar-row">
-          <select class="prol__filter-select" disabled>
-            <option>Все агенты/субагенты</option>
-          </select>
           <select
             class="prol__filter-select"
             [value]="statusFilter()"
             (change)="statusFilter.set($any($event.target).value)"
+            aria-label="Фильтр по статусу"
           >
             <option value="">Оформленные и рассчитанные</option>
             <option value="issued">Оформлено</option>
@@ -65,15 +63,12 @@
             <option value="declined">Отказ клиента</option>
             <option value="not-renewed">Не продлён</option>
           </select>
-          <select class="prol__filter-select" disabled>
-            <option>Все продукты</option>
-          </select>
           <input
             type="search"
             class="prol__filter-input prol__filter-input--grow"
             [formControl]="searchControl"
             (input)="onSearchChange()"
-            placeholder="Поиск по ФИО, полису, телефону (Ctrl+F)"
+            placeholder="Поиск по ФИО, полису, телефону"
             aria-label="Поиск"
           />
         </div>
@@ -84,7 +79,6 @@
         <table class="prol__table">
           <thead>
             <tr>
-              <th>ИКП</th>
               <th>ФИО страхователя</th>
               <th>Марка/модель</th>
               <th>Номер полиса</th>
@@ -99,12 +93,12 @@
             @if (isMyLoading()) {
               @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
                 <tr>
-                  <td colspan="9"><span class="prol__skeleton"></span></td>
+                  <td colspan="8"><span class="prol__skeleton"></span></td>
                 </tr>
               }
             } @else if (myFiltered().length === 0) {
               <tr>
-                <td colspan="9" class="prol__empty">
+                <td colspan="8" class="prol__empty">
                   По выбранным фильтрам ничего не найдено.
                   <button type="button" class="prol__reset" (click)="resetMyFilters()">
                     Сбросить
@@ -113,16 +107,40 @@
               </tr>
             } @else {
               @for (row of myFiltered(); track row.id) {
-                <tr class="prol__row" [attr.data-status]="row.status">
-                  <td>{{ row.ikp }}</td>
+                <tr class="prol__row">
                   <td>{{ row.clientName }}</td>
                   <td>{{ row.vehicleBrand }} {{ row.vehicleModel }}</td>
                   <td>{{ row.policyNumber }}</td>
                   <td>{{ row.endDate | date: 'dd.MM.yyyy' }}</td>
                   <td>{{ row.insuranceCompanyName }}</td>
                   <td class="prol__cell--num">{{ row.lastYearPrice | number: '1.0-0' }}</td>
-                  <td>{{ row.phone }}</td>
-                  <td>{{ statusLabel[row.status] }}</td>
+                  <td>
+                    <a class="prol__phone" [href]="telHref(row.phone)">{{ row.phone }}</a>
+                  </td>
+                  <td>
+                    <span class="prol__status" [attr.data-status]="row.status">
+                      <svg class="prol__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        @switch (row.status) {
+                          @case ('issued') {
+                            <polyline points="5 12 10 17 19 7" />
+                          }
+                          @case ('calculated') {
+                            <circle cx="12" cy="12" r="9" />
+                            <line x1="12" y1="11" x2="12" y2="16" />
+                            <line x1="12" y1="8" x2="12" y2="8.01" />
+                          }
+                          @case ('declined') {
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                          }
+                          @case ('not-renewed') {
+                            <line x1="6" y1="12" x2="18" y2="12" />
+                          }
+                        }
+                      </svg>
+                      <span class="prol__status-label">{{ statusLabel[row.status] }}</span>
+                    </span>
+                  </td>
                 </tr>
               }
             }
@@ -130,22 +148,15 @@
         </table>
       </div>
 
-      <!-- Footer: comments + legend -->
+      <!-- Footer: памятка по условиям пролонгации -->
       <footer class="prol__footer">
         <div class="prol__comments">
-          <strong>Комментарии:</strong>
+          <strong>Что считается пролонгацией</strong>
           <ol>
             <li>Дата пролонгации 14 дней до/после даты окончания предыдущего полиса.</li>
             <li>Тот же собственник, страхователи и водители.</li>
             <li>В прошлом году не было убытков.</li>
           </ol>
-        </div>
-        <div class="prol__legend">
-          <span class="prol__legend-label">Цвета строк означают</span>
-          <span class="prol__legend-item" data-status="issued">Оформлено</span>
-          <span class="prol__legend-item" data-status="calculated">Рассчитано</span>
-          <span class="prol__legend-item" data-status="declined">Отказ клиента</span>
-          <span class="prol__legend-item" data-status="not-renewed">Не продлён</span>
         </div>
       </footer>
     }
@@ -194,7 +205,6 @@
         <table class="prol__table">
           <thead>
             <tr>
-              <th>ИКП</th>
               <th>ФИО страхователя</th>
               <th>Марка/модель</th>
               <th>Номер полиса</th>
@@ -209,57 +219,59 @@
             @if (nsisLoading()) {
               @for (i of [1, 2, 3]; track i) {
                 <tr>
-                  <td colspan="9"><span class="prol__skeleton"></span></td>
+                  <td colspan="8"><span class="prol__skeleton"></span></td>
                 </tr>
               }
             } @else if (!nsisSearched()) {
               <tr>
-                <td colspan="9" class="prol__empty prol__empty--nsis">
+                <td colspan="8" class="prol__empty prol__empty--nsis">
                   Введите ФИО, гос. номер или В/У и нажмите «Найти», чтобы подтянуть данные из базы
                   НСИС.
                 </td>
               </tr>
             } @else if (nsisRows().length === 0) {
               <tr>
-                <td colspan="9" class="prol__empty">По указанным параметрам ничего не найдено.</td>
+                <td colspan="8" class="prol__empty">По указанным параметрам ничего не найдено.</td>
               </tr>
             } @else {
               @for (row of nsisRows(); track row.id) {
-                <tr class="prol__row" [attr.data-nsis-status]="row.nsisStatus">
-                  <td>{{ row.ikp }}</td>
+                <tr class="prol__row">
                   <td>{{ row.clientName }}</td>
                   <td>{{ row.vehicleBrand }} {{ row.vehicleModel }}</td>
                   <td>{{ row.policyNumber }}</td>
                   <td>{{ row.endDate | date: 'dd.MM.yyyy' }}</td>
                   <td>{{ row.insuranceCompanyName }}</td>
                   <td class="prol__cell--num">{{ row.lastYearPrice | number: '1.0-0' }}</td>
-                  <td>{{ row.phone }}</td>
-                  <td>{{ nsisStatusLabel[row.nsisStatus] }}</td>
+                  <td>
+                    <a class="prol__phone" [href]="telHref(row.phone)">{{ row.phone }}</a>
+                  </td>
+                  <td>
+                    <span class="prol__status" [attr.data-nsis-status]="row.nsisStatus">
+                      <svg class="prol__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        @switch (row.nsisStatus) {
+                          @case ('renewed') {
+                            <polyline points="5 12 10 17 19 7" />
+                          }
+                          @case ('expiring-soon') {
+                            <circle cx="12" cy="12" r="8" />
+                            <polyline points="12 8 12 12 15 14" />
+                          }
+                          @case ('expired') {
+                            <circle cx="12" cy="12" r="9" />
+                            <line x1="12" y1="8" x2="12" y2="13" />
+                            <line x1="12" y1="16" x2="12" y2="16.01" />
+                          }
+                        }
+                      </svg>
+                      <span class="prol__status-label">{{ nsisStatusLabel[row.nsisStatus] }}</span>
+                    </span>
+                  </td>
                 </tr>
               }
             }
           </tbody>
         </table>
       </div>
-
-      <footer class="prol__footer">
-        <div class="prol__comments">
-          <strong>Комментарии:</strong>
-          <ol>
-            <li>Дата пролонгации 14 дней до/после даты окончания предыдущего полиса.</li>
-            <li>Тот же собственник, страхователь и водители.</li>
-            <li>В прошлом году не было убытков.</li>
-          </ol>
-        </div>
-        <div class="prol__legend">
-          <span class="prol__legend-label">Цвета строк означают</span>
-          <span class="prol__legend-item" data-nsis-status="renewed">Продлён</span>
-          <span class="prol__legend-item" data-nsis-status="expiring-soon"
-            >10 дней до окончания</span
-          >
-          <span class="prol__legend-item" data-nsis-status="expired">Просрочен</span>
-        </div>
-      </footer>
     }
   }
 </section>

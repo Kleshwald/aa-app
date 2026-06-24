@@ -76,6 +76,11 @@ export class ProlongationPage {
   protected readonly nsisLoading = signal<boolean>(false);
   protected readonly nsisRows = signal<NsisSearchRow[]>([]);
 
+  /** Телефон для атрибута tel: — только цифры и ведущий «+». */
+  telHref(phone: string): string {
+    return 'tel:' + phone.replace(/[^\d+]/g, '');
+  }
+
   setTab(tab: 'my' | 'nsis'): void {
     this.activeTab.set(tab);
   }

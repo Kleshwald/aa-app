@@ -12,7 +12,7 @@
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
   font-weight: var(--weight-semibold);
-  color: var(--brand-500);
+  color: var(--brand-700);
   text-align: center;
   margin: 0;
 }
@@ -109,7 +109,7 @@
 
 .prol__filter-select,
 .prol__filter-input {
-  height: 40px;
+  height: var(--size-input);
   padding: 0 12px;
   font-size: var(--text-sm);
   font-family: inherit;
@@ -157,15 +157,16 @@
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-  overflow: auto;
-  max-height: calc(100vh - 380px);
+  // Без собственного скролла — вертикальную прокрутку даёт .app-content,
+  // thead sticky к нему. Один скролл на странице, как в «Мои клиенты».
 }
 
 .prol__table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
+  line-height: var(--leading-sm);
   color: var(--gray-900);
 
   thead th {
@@ -173,21 +174,33 @@
     top: 0;
     z-index: 1;
     padding: 12px 16px;
-    background: var(--gray-50);
-    color: var(--gray-700);
-    font-size: var(--text-xs);
+    background: var(--brand-50);
+    color: var(--brand-700);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
     font-weight: var(--weight-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
     text-align: left;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--brand-100);
     white-space: nowrap;
   }
 
   tbody td {
-    padding: 14px 16px;
+    height: var(--size-row);
+    padding: 12px 16px;
     border-bottom: 1px solid var(--gray-100);
     vertical-align: middle;
+  }
+
+  tbody tr:hover td {
+    background: var(--gray-50);
+  }
+
+  tbody tr:nth-child(even) td {
+    background: var(--gray-50);
+  }
+
+  tbody tr:nth-child(even):hover td {
+    background: var(--gray-100);
   }
 }
 
@@ -197,29 +210,72 @@
   white-space: nowrap;
 }
 
-// Row colors per status — «Мои пролонгации»
-.prol__row[data-status='issued'] td {
-  background: #e8f5e9;
-}
-.prol__row[data-status='calculated'] td {
-  background: #fff8e1;
-}
-.prol__row[data-status='declined'] td {
-  background: #ffe0e0;
-}
-.prol__row[data-status='not-renewed'] td {
-  background: #fce4ec;
+// Кликабельный телефон — первый дешёвый шаг к действию (звонок клиенту).
+.prol__phone {
+  color: var(--brand-500);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
-// Row colors per status — «Поиск НСИС»
-.prol__row[data-nsis-status='renewed'] td {
-  background: #e8f5e9;
+// ─── Статус-бейдж (как в «Мои клиенты»): не только цветом, но иконкой+текстом ───
+.prol__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+
+  // «Мои пролонгации»
+  &[data-status='issued'] {
+    background: var(--success-50);
+    color: var(--success-700);
+  }
+  &[data-status='calculated'] {
+    background: var(--info-50);
+    color: var(--info-600);
+  }
+  &[data-status='declined'] {
+    background: var(--error-50);
+    color: var(--error-700);
+  }
+  &[data-status='not-renewed'] {
+    background: var(--gray-100);
+    color: var(--gray-700);
+  }
+
+  // «Поиск НСИС»
+  &[data-nsis-status='renewed'] {
+    background: var(--success-50);
+    color: var(--success-700);
+  }
+  &[data-nsis-status='expiring-soon'] {
+    background: var(--warning-50);
+    color: var(--warning-700);
+  }
+  &[data-nsis-status='expired'] {
+    background: var(--error-50);
+    color: var(--error-700);
+  }
 }
-.prol__row[data-nsis-status='expiring-soon'] td {
-  background: #fff8e1;
-}
-.prol__row[data-nsis-status='expired'] td {
-  background: #ffe0e0;
+
+.prol__status-icon {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .prol__skeleton {
@@ -292,7 +348,7 @@
 }
 
 .prol-field__input {
-  height: 40px;
+  height: var(--size-input);
   padding: 0 12px;
   font-size: var(--text-sm);
   font-family: inherit;
@@ -313,7 +369,7 @@
 }
 
 .prol__find-btn {
-  height: 40px;
+  height: var(--size-button);
   padding: 0 32px;
   font-size: var(--text-sm);
   font-family: inherit;
@@ -334,19 +390,12 @@
   }
 }
 
-// ─── Footer (comments + legend) ───
+// ─── Footer (памятка по условиям пролонгации) ───
 .prol__footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
   padding: 16px 20px;
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-
-  @media (max-width: 1023px) {
-    flex-direction: column;
-  }
 }
 
 .prol__comments {
@@ -364,64 +413,5 @@
     margin: 0;
     padding-left: 20px;
     line-height: 1.6;
-  }
-}
-
-.prol__legend {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-self: flex-end;
-  font-size: var(--text-xs);
-}
-
-.prol__legend-label {
-  color: var(--gray-700);
-  margin-right: 4px;
-}
-
-.prol__legend-item {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: var(--radius-base);
-  font-weight: var(--weight-medium);
-  color: var(--gray-900);
-  position: relative;
-
-  // Sticky-note look (like the screenshot)
-  &::before {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: 8px;
-    width: 16px;
-    height: 4px;
-    background: rgba(0, 0, 0, 0.06);
-    border-radius: 1px;
-  }
-
-  &[data-status='issued'] {
-    background: #c5e1a5;
-  }
-  &[data-status='calculated'] {
-    background: #ffe082;
-  }
-  &[data-status='declined'] {
-    background: #ef9a9a;
-  }
-  &[data-status='not-renewed'] {
-    background: #f8bbd0;
-  }
-
-  &[data-nsis-status='renewed'] {
-    background: #c5e1a5;
-  }
-  &[data-nsis-status='expiring-soon'] {
-    background: #ffe082;
-  }
-  &[data-nsis-status='expired'] {
-    background: #ef9a9a;
   }
 }
