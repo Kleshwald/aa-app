@@ -85,18 +85,18 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     .field__msg {
       display: flex;
       align-items: center;
-      gap: 4px;
-      min-height: 18px;
-      font-size: var(--text-xs);
-      line-height: 1.25;
+      gap: 6px;
+      min-height: 22px;
+      font-size: var(--text-sm);
+      line-height: 1.3;
       color: var(--gray-600);
     }
     .field__msg--error {
       color: var(--error-600);
     }
     .field__msg-ico {
-      width: 14px;
-      height: 14px;
+      width: 18px;
+      height: 18px;
       flex-shrink: 0;
     }
   `,

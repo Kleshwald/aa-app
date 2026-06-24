@@ -724,7 +724,6 @@
   <!-- ─────────────────────────── RESULTS ─────────────────────────── -->
   @case ('results') {
     <section class="results">
-      <app-back-link label="Вернуться к расчёту" (back)="backToForm()" />
       <header class="results__head">
         <h1 class="results__title">Результаты расчёта</h1>
         <p class="results__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
@@ -870,6 +869,10 @@
             </div>
           </article>
         }
+      </div>
+
+      <div class="results__back">
+        <app-back-link label="Вернуться к расчёту" (back)="backToForm()" />
       </div>
 
       @if (priceInfoQuoteId()) {

@@ -201,7 +201,6 @@
   <!-- ─────────────── QUOTES ─────────────── -->
   @case ('quotes') {
     <section class="hl hl--quotes">
-      <app-back-link label="Вернуться к расчёту" (back)="backToParams()" />
       <header class="hl__quotes-head">
         <h1 class="hl__heading">Результаты расчёта</h1>
         <p class="hl__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
@@ -224,15 +223,13 @@
               </span>
             </div>
 
-            <div class="hl-offer__price">
-              @if (offerDiscount(o) > 0) {
-                <span class="hl-offer__price-old">{{ o.basePrice | number: '1.0-0' }} ₽</span>
-              }
-              <span class="hl-offer__price-row">
-                <span
-                  class="hl-offer__price-val"
-                  [class.hl-offer__price-val--disc]="offerDiscount(o) > 0"
-                >
+            <div class="hl-price">
+              <span class="hl-price__label">Цена клиенту</span>
+              <span class="hl-price__row">
+                @if (offerDiscount(o) > 0) {
+                  <span class="hl-price__old">{{ o.basePrice | number: '1.0-0' }} ₽</span>
+                }
+                <span class="hl-price__now" [class.hl-price__now--disc]="offerDiscount(o) > 0">
                   {{ offerPrice(o) | number: '1.0-0' }} ₽
                 </span>
                 <button
@@ -246,35 +243,30 @@
                   ?
                 </button>
               </span>
-              <span class="hl-offer__price-cap">
-                @if (offerDiscount(o) > 0) {
-                  Цена со скидкой −{{ offerDiscount(o) }}%
-                } @else {
-                  Стоимость полиса
-                }
-              </span>
-            </div>
 
-            @if (o.discountable) {
-              <div class="hl-price-ctl">
-                <span class="hl-price-ctl__label">Скидка из комиссии</span>
-                <div class="hl-price-ctl__chips" role="group" aria-label="Скидка из комиссии">
+              @if (o.discountable) {
+                <div class="hl-toggle" role="group" aria-label="Скидка клиенту из комиссии">
                   @for (tier of discountTiers; track tier) {
                     <button
                       type="button"
-                      class="hl-price-ctl__chip"
-                      [class.hl-price-ctl__chip--active]="offerDiscount(o) === tier"
-                      [class.hl-price-ctl__chip--disc]="tier > 0 && offerDiscount(o) === tier"
+                      class="hl-toggle__btn"
+                      [class.hl-toggle__btn--active]="offerDiscount(o) === tier && tier === 0"
+                      [class.hl-toggle__btn--disc]="offerDiscount(o) === tier && tier > 0"
                       (click)="setDiscount(o.id, tier)"
                     >
-                      {{ tier === 0 ? 'Без скидки' : '−' + tier + '%' }}
+                      {{ tier === 0 ? 'Полная' : 'Скидка −' + tier + '%' }}
                     </button>
                   }
                 </div>
-              </div>
-            } @else {
-              <span class="hl-price-ctl__fixed">Фиксированная цена</span>
-            }
+                @if (offerDiscount(o) > 0) {
+                  <span class="hl-price__save">
+                    Клиент сэкономит {{ o.basePrice - offerPrice(o) | number: '1.0-0' }} ₽
+                  </span>
+                }
+              } @else {
+                <span class="hl-price__fixed">Цена фиксированная</span>
+              }
+            </div>
 
             <button
               type="button"
@@ -292,6 +284,10 @@
             }
           </div>
         }
+      </div>
+
+      <div class="hl-flow-back">
+        <app-back-link label="Вернуться к расчёту" (back)="backToParams()" />
       </div>
 
       @if (priceInfoOfferId()) {
@@ -345,7 +341,6 @@
   <!-- ─────────────── ISSUE ─────────────── -->
   @case ('issue') {
     <section class="hl" [formGroup]="issueForm">
-      <app-back-link label="Вернуться к предложениям" (back)="backToQuotes()" />
       <header class="hl-issue-head">
         <h1 class="hl-issue-head__title">{{ productMeta().label }}</h1>
         <p class="hl-issue-head__sub">Оформление полиса</p>
@@ -509,6 +504,11 @@
       </button>
 
       <footer class="hl-paybar">
+        <app-back-link
+          class="hl-paybar__back"
+          label="Вернуться к предложениям"
+          (back)="backToQuotes()"
+        />
         <app-insurer-logo
           class="hl-paybar__logo"
           [id]="selectedOffer()?.carrierId ?? ''"

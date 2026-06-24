@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -94,7 +95,7 @@ const DISCOUNT_TIERS = [0, DISCOUNT_PCT] as const;
 // Тайминги лоадера «Здоровья»: фиксированная длительность фразы (читаемо,
 // спокойнее старого 1400), затем короткая выдержка на «Готово» перед предложениями.
 const HL_STEP_MS = 1700;
-const HL_DONE_HOLD_MS = 800;
+const HL_DONE_HOLD_MS = 300; // лоадер плавно гаснет перед переходом на котировки
 
 // Маска «серия + номер» (4 + 6 цифр) для паспорта РФ: «0000 000000» (как в ОСАГО).
 const SERIES_NUMBER_MASK: MaskitoOptions = {
@@ -272,6 +273,13 @@ export class HealthPage {
 
   constructor() {
     this.destroyRef.onDestroy(() => this.clearTimers());
+
+    // Смена шага (продукт → расчёт → котировки → оформление) прокручивает контент
+    // наверх, иначе новый экран открывается «в середине» (скролл от предыдущего).
+    effect(() => {
+      this.view();
+      setTimeout(() => document.querySelector('.app-content')?.scrollTo({ top: 0 }), 0);
+    });
   }
 
   // ─── Params ───

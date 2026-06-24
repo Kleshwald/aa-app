@@ -437,11 +437,11 @@
 }
 
 // Карточка предложения — паттерн как в ОСАГО (выровненная сетка, без radio).
-// [logo] [компания + мета] [цена] [управление ценой] [Продолжить]
+// [logo] [компания + мета] [цена клиенту + скидка] [Продолжить]
 .hl-offer {
   position: relative;
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 150px 200px 150px;
+  grid-template-columns: 64px minmax(0, 1fr) 260px 150px;
   align-items: center;
   column-gap: 20px;
   min-height: 96px;
@@ -473,11 +473,10 @@
     grid-template-columns: 64px minmax(0, 1fr) auto;
     row-gap: 14px;
   }
-  .hl-offer__price {
+  .hl-price {
     grid-column: 3;
+    align-items: flex-end;
   }
-  .hl-price-ctl,
-  .hl-price-ctl__fixed,
   .hl-offer__action {
     grid-column: 1 / -1;
   }
@@ -536,29 +535,35 @@
   white-space: nowrap;
 }
 
-// ─── Цена (с учётом скидки) ───
+// ─── Цена клиенту + управление скидкой (единый блок: причина↔следствие рядом) ───
 
-.hl-offer__price {
+.hl-price {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 8px;
   text-align: right;
 }
 
-.hl-offer__price-old {
+.hl-price__label {
   font-size: var(--text-sm);
-  color: var(--gray-600);
+  color: var(--gray-700);
+}
+
+.hl-price__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hl-price__old {
+  font-size: var(--text-base);
+  color: var(--gray-500);
   text-decoration: line-through;
   font-variant-numeric: tabular-nums;
 }
 
-.hl-offer__price-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.hl-offer__price-val {
+.hl-price__now {
   font-size: var(--text-2xl);
   line-height: 1.1;
   font-weight: var(--weight-semibold);
@@ -571,9 +576,15 @@
   }
 }
 
-.hl-offer__price-cap {
-  margin-top: 2px;
-  font-size: var(--text-xs);
+.hl-price__save {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--success-700);
+}
+
+// СК без права на скидку — фиксированная цена.
+.hl-price__fixed {
+  font-size: var(--text-sm);
   color: var(--gray-600);
 }
 
@@ -619,34 +630,21 @@
   }
 }
 
-// ─── Управление ценой: скидка из комиссии (сегментированные чипы) ───
+// ─── Переключатель скидки клиенту (из комиссии агента) ───
 
-.hl-price-ctl {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
-  justify-self: start;
-}
-
-.hl-price-ctl__label {
-  font-size: var(--text-xs);
-  color: var(--gray-600);
-}
-
-.hl-price-ctl__chips {
+.hl-toggle {
   display: inline-flex;
-  gap: 2px;
-  padding: 2px;
+  gap: 3px;
+  padding: 3px;
   background: var(--gray-100);
-  border-radius: var(--radius-base);
+  border-radius: var(--radius-md);
 }
 
-.hl-price-ctl__chip {
+.hl-toggle__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 56px;
+  min-width: 84px;
   height: 44px;
   padding: 0 14px;
   font-family: inherit;
@@ -667,26 +665,24 @@
     color: var(--gray-900);
   }
 
-  // «Без скидки» — нейтральный navy.
+  // «Полная» выбрана — нейтральный navy.
   &--active {
     background: var(--header-bg);
     color: #ffffff;
   }
 
-  // Скидка выбрана — тихий «зелёный» сигнал (клиент экономит).
+  // Скидка выбрана — зелёный сигнал (клиент экономит).
   &--disc {
     background: #ffffff;
     color: var(--success-700);
     font-weight: var(--weight-semibold);
     box-shadow: var(--shadow-xs);
   }
-}
 
-// СК без права на скидку — фиксированная цена (вместо чипов).
-.hl-price-ctl__fixed {
-  justify-self: start;
-  font-size: var(--text-sm);
-  color: var(--gray-500);
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+  }
 }
 
 // Кнопка выбора предложения на карточке (как «Оформить» в ОСАГО).
@@ -809,6 +805,18 @@
 
 .hl-paybar__spacer {
   flex: 1;
+}
+
+// Шаг назад во флоу — слева в липком paybar (тип B: «назад там же, где вперёд»).
+.hl-paybar__back {
+  margin-right: 4px;
+}
+
+// Шаг назад во флоу на экране котировок — внизу слева, отделён от списка.
+.hl-flow-back {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-200);
 }
 
 // ─── States (payment / success) ───

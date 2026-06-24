@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -122,8 +123,8 @@ const CALC_STEPS: readonly CalcStep[] = [
   { text: 'Проверка НСИС' },
 ];
 
-const CALC_COMPLETE_AT_MS = 38_500; // короткий момент «Готово»
 const CALC_TOTAL_MS = 40_000; // переход на результаты
+const CALC_COMPLETE_AT_MS = CALC_TOTAL_MS - 300; // лоадер плавно гаснет перед переходом
 
 // Quote type: a regular "segment" quote, or a "reinsurance pool" quote that
 // typically forces a mandatory МиниКАСКО add-on.
@@ -418,6 +419,13 @@ export class OsagoPage {
 
   constructor() {
     this.destroyRef.onDestroy(() => this.clearTimers());
+
+    // Смена шага (форма → расчёт → котировки) прокручивает контент наверх,
+    // иначе новый экран открывается «в середине» (скролл от предыдущего).
+    effect(() => {
+      this.view();
+      setTimeout(() => document.querySelector('.app-content')?.scrollTo({ top: 0 }), 0);
+    });
 
     // Смена марки сбрасывает модель (если она не из справочника новой марки).
     // В режиме «Произвольная марка/модель» не трогаем — там свободный ввод.

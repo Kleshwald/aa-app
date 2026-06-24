@@ -1,42 +1,30 @@
 <section class="calc">
-  <div class="calc__inner" role="status" aria-live="polite" aria-atomic="true">
-    @if (complete()) {
-      <p class="calc__phrase calc__phrase--done">
-        <svg
-          class="calc__check"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.4"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        Готово
-      </p>
-    } @else {
-      @if (step(); as s) {
-        @for (item of [s]; track item.text) {
-          <p class="calc__phrase">
-            @if (item.carrierId) {
-              <app-insurer-logo
-                class="calc__phrase-logo"
-                [id]="item.carrierId"
-                [name]="item.text"
-              />
-            }
-            <span>{{ item.text }}</span>
-          </p>
-        }
+  <div
+    class="calc__inner"
+    [class.calc__inner--done]="complete()"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    @if (step(); as s) {
+      @for (item of [s]; track item.text) {
+        <p class="calc__phrase">
+          @if (item.carrierId) {
+            <app-insurer-logo class="calc__phrase-logo" [id]="item.carrierId" [name]="item.text" />
+          }
+          <span>{{ item.text }}</span>
+        </p>
       }
+    }
 
-      <div class="calc__line" role="progressbar" aria-label="Идёт расчёт"><i></i></div>
+    <div class="calc__line" role="progressbar" aria-label="Идёт расчёт"><i></i></div>
 
-      <button type="button" class="calc__cancel" (click)="cancelled.emit()">
-        Вернуться к данным
-      </button>
+    @if (complete()) {
+      <span class="calc__sr">Расчёт завершён</span>
     }
   </div>
+
+  @if (!complete()) {
+    <app-back-link class="calc__cancel" label="Вернуться к данным" (back)="cancelled.emit()" />
+  }
 </section>

@@ -1,20 +1,12 @@
 @if (isLoading()) {
   <section class="detail">
-    <app-breadcrumbs
-      parentLabel="Мои клиенты"
-      parentLink="/clients"
-      current="Информация о договоре"
-    />
+    <app-breadcrumbs parentLabel="Мои клиенты" parentLink="/clients" />
     <h1 class="detail__title">Информация о договоре</h1>
     <div class="detail__loading">Загружаем данные договора…</div>
   </section>
 } @else if (hasError() || !policy()) {
   <section class="detail">
-    <app-breadcrumbs
-      parentLabel="Мои клиенты"
-      parentLink="/clients"
-      current="Информация о договоре"
-    />
+    <app-breadcrumbs parentLabel="Мои клиенты" parentLink="/clients" />
     <h1 class="detail__title">Информация о договоре</h1>
     <div class="detail__error">
       Договор не найден или произошла ошибка. Попробуйте обновить страницу.
@@ -22,11 +14,7 @@
   </section>
 } @else if (policy(); as p) {
   <section class="detail">
-    <app-breadcrumbs
-      parentLabel="Мои клиенты"
-      parentLink="/clients"
-      current="Информация о договоре"
-    />
+    <app-breadcrumbs parentLabel="Мои клиенты" parentLink="/clients" />
 
     <!-- ─── Горячий сценарий: только что оформили ─── -->
     @if (justIssued()) {
