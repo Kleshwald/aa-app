@@ -32,158 +32,203 @@
       </span>
     </header>
 
-    <!-- ─── Personal + payout ─── -->
-    <div class="pr-grid">
-      <section class="pr-card">
-        <header class="pr-card__head">
-          <h2 class="pr-card__title">Личные данные</h2>
-          <button type="button" class="pr-edit" (click)="notImplemented()">Изменить</button>
-        </header>
-        <dl class="pr-fields">
-          <div class="pr-fields__row">
-            <dt>ФИО</dt>
-            <dd>{{ p.fullName }}</dd>
-          </div>
-          <div class="pr-fields__row">
-            <dt>Дата рождения</dt>
-            <dd>{{ p.birthDate | date: 'dd.MM.yyyy' }}</dd>
-          </div>
-          <div class="pr-fields__row">
-            <dt>Телефон</dt>
-            <dd>{{ phoneFormatted() }}</dd>
-          </div>
-          <div class="pr-fields__row">
-            <dt>Email</dt>
-            <dd>{{ p.email }}</dd>
-          </div>
-          <div class="pr-fields__row">
-            <dt>Форма</dt>
-            <dd>{{ legalTypeLabel() }}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section class="pr-card">
-        <header class="pr-card__head">
-          <h2 class="pr-card__title">Реквизиты для выплат</h2>
-          <button type="button" class="pr-edit" (click)="notImplemented()">Изменить</button>
-        </header>
-        <dl class="pr-fields">
-          <div class="pr-fields__row">
-            <dt>Получатель</dt>
-            <dd>{{ p.fullName }}</dd>
-          </div>
-          <div class="pr-fields__row">
-            <dt>ИНН</dt>
-            <dd>{{ payout.inn }}</dd>
-          </div>
-          <div class="pr-fields__row">
-            <dt>Банк</dt>
-            <dd>{{ payout.bank }}</dd>
-          </div>
-          <div class="pr-fields__row">
-            <dt>Счёт</dt>
-            <dd>{{ payout.account }}</dd>
-          </div>
-          <div class="pr-fields__row">
-            <dt>БИК</dt>
-            <dd>{{ payout.bik }}</dd>
-          </div>
-        </dl>
-        <p class="pr-note">Реквизиты — демо-данные прототипа.</p>
-      </section>
+    <!-- ─── Tabs ─── -->
+    <div class="pr-tabs" role="tablist" aria-label="Разделы профиля">
+      <button
+        type="button"
+        role="tab"
+        class="pr-tab"
+        [class.pr-tab--active]="activeTab() === 'data'"
+        [attr.aria-selected]="activeTab() === 'data'"
+        (click)="setTab('data')"
+      >
+        Данные и реквизиты
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="pr-tab"
+        [class.pr-tab--active]="activeTab() === 'docs'"
+        [attr.aria-selected]="activeTab() === 'docs'"
+        (click)="setTab('docs')"
+      >
+        Документы
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="pr-tab"
+        [class.pr-tab--active]="activeTab() === 'terms'"
+        [attr.aria-selected]="activeTab() === 'terms'"
+        (click)="setTab('terms')"
+      >
+        Условия и КВ
+      </button>
     </div>
 
-    <!-- ─── Документы ─── -->
-    <section class="pr-card">
-      <header class="pr-card__head">
-        <h2 class="pr-card__title">Документы</h2>
-      </header>
+    @switch (activeTab()) {
+      <!-- ─────────────── ДАННЫЕ И РЕКВИЗИТЫ ─────────────── -->
+      @case ('data') {
+        <div class="pr-grid" role="tabpanel">
+          <section class="pr-card">
+            <header class="pr-card__head">
+              <h2 class="pr-card__title">Личные данные</h2>
+              <button type="button" class="pr-edit" (click)="notImplemented()">Изменить</button>
+            </header>
+            <dl class="pr-fields">
+              <div class="pr-fields__row">
+                <dt>ФИО</dt>
+                <dd>{{ p.fullName }}</dd>
+              </div>
+              <div class="pr-fields__row">
+                <dt>Дата рождения</dt>
+                <dd>{{ p.birthDate | date: 'dd.MM.yyyy' }}</dd>
+              </div>
+              <div class="pr-fields__row">
+                <dt>Телефон</dt>
+                <dd>{{ phoneFormatted() }}</dd>
+              </div>
+              <div class="pr-fields__row">
+                <dt>Email</dt>
+                <dd>{{ p.email }}</dd>
+              </div>
+              <div class="pr-fields__row">
+                <dt>Форма</dt>
+                <dd>{{ legalTypeLabel() }}</dd>
+              </div>
+            </dl>
+          </section>
 
-      <!-- 1. Документы от агента -->
-      <div class="pr-docgroup">
-        <h3 class="pr-docgroup__title">Мои документы</h3>
-        <ul class="pr-docs">
-          @for (d of agentDocs(); track d.name) {
-            <li class="pr-doc">
-              <span class="pr-doc__ico" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                  <path d="M14 3v5h5" />
-                </svg>
-              </span>
-              <span class="pr-doc__main">
-                <span class="pr-doc__name">{{ d.name }}</span>
-                @if (d.meta) {
-                  <span class="pr-doc__meta">{{ d.meta }}</span>
-                }
-              </span>
-              <span class="pr-doc__status" [attr.data-status]="d.status">
-                {{ docStatusLabels[d.status] }}
-              </span>
-              @if (d.status === 'missing') {
-                <button type="button" class="pr-doc__act" (click)="upload()">Загрузить</button>
-              } @else {
-                <button type="button" class="pr-doc__act" (click)="download(d.name)">
-                  Скачать
-                </button>
+          <section class="pr-card">
+            <header class="pr-card__head">
+              <h2 class="pr-card__title">Реквизиты для выплат</h2>
+              <button type="button" class="pr-edit" (click)="notImplemented()">Изменить</button>
+            </header>
+            <dl class="pr-fields">
+              <div class="pr-fields__row">
+                <dt>Получатель</dt>
+                <dd>{{ p.fullName }}</dd>
+              </div>
+              <div class="pr-fields__row">
+                <dt>ИНН</dt>
+                <dd>{{ payout.inn }}</dd>
+              </div>
+              <div class="pr-fields__row">
+                <dt>Банк</dt>
+                <dd>{{ payout.bank }}</dd>
+              </div>
+              <div class="pr-fields__row">
+                <dt>Счёт</dt>
+                <dd>{{ payout.account }}</dd>
+              </div>
+              <div class="pr-fields__row">
+                <dt>БИК</dt>
+                <dd>{{ payout.bik }}</dd>
+              </div>
+            </dl>
+            <p class="pr-note">Реквизиты — демо-данные прототипа.</p>
+          </section>
+        </div>
+      }
+
+      <!-- ─────────────── ДОКУМЕНТЫ ─────────────── -->
+      @case ('docs') {
+        <section class="pr-card" role="tabpanel">
+          <!-- 1. Документы от агента -->
+          <div class="pr-docgroup">
+            <h3 class="pr-docgroup__title">Мои документы</h3>
+            <ul class="pr-docs">
+              @for (d of agentDocs(); track d.name) {
+                <li class="pr-doc">
+                  <span class="pr-doc__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                      <path d="M14 3v5h5" />
+                    </svg>
+                  </span>
+                  <span class="pr-doc__main">
+                    <span class="pr-doc__name">{{ d.name }}</span>
+                    @if (d.meta) {
+                      <span class="pr-doc__meta">{{ d.meta }}</span>
+                    }
+                  </span>
+                  <span class="pr-doc__status" [attr.data-status]="d.status">
+                    {{ docStatusLabels[d.status] }}
+                  </span>
+                  @if (d.status === 'missing') {
+                    <button type="button" class="pr-doc__act" (click)="upload()">Загрузить</button>
+                  } @else {
+                    <button type="button" class="pr-doc__act" (click)="download(d.name)">
+                      Скачать
+                    </button>
+                  }
+                </li>
               }
-            </li>
-          }
-        </ul>
-      </div>
+            </ul>
+          </div>
 
-      <!-- 2. Подписанные электронной подписью -->
-      <div class="pr-docgroup">
-        <h3 class="pr-docgroup__title">Подписаны электронной подписью</h3>
-        <ul class="pr-docs">
-          @for (d of signedDocs; track d.name) {
-            <li class="pr-doc">
-              <span class="pr-doc__ico pr-doc__ico--signed" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  <path d="M9 12l2 2 4-4" />
-                </svg>
-              </span>
-              <span class="pr-doc__main">
-                <span class="pr-doc__name">{{ d.name }}</span>
-                <span class="pr-doc__meta"
-                  >Подписан ЭП · {{ d.signedDate | date: 'dd.MM.yyyy' }}</span
-                >
-              </span>
-              <span class="pr-doc__status pr-doc__status--signed">ЭП</span>
-              <button type="button" class="pr-doc__act" (click)="download(d.name)">Скачать</button>
-            </li>
-          }
-        </ul>
-      </div>
+          <!-- 2. Подписанные электронной подписью -->
+          <div class="pr-docgroup">
+            <h3 class="pr-docgroup__title">Подписаны электронной подписью</h3>
+            <ul class="pr-docs">
+              @for (d of signedDocs; track d.name) {
+                <li class="pr-doc">
+                  <span class="pr-doc__ico pr-doc__ico--signed" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <path d="M9 12l2 2 4-4" />
+                    </svg>
+                  </span>
+                  <span class="pr-doc__main">
+                    <span class="pr-doc__name">{{ d.name }}</span>
+                    <span class="pr-doc__meta"
+                      >Подписан ЭП · {{ d.signedDate | date: 'dd.MM.yyyy' }}</span
+                    >
+                  </span>
+                  <span class="pr-doc__status pr-doc__status--signed">ЭП</span>
+                  <button type="button" class="pr-doc__act" (click)="download(d.name)">
+                    Скачать
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        </section>
+      }
 
-      <!-- 3. Условия сотрудничества -->
-      <div class="pr-docgroup">
-        <h3 class="pr-docgroup__title">Условия сотрудничества</h3>
-        <p class="pr-docgroup__sub">
-          Категория «{{ p.category }}». Базовое КВ по продуктам; растёт с прогнозом сборов — см.
-          <a routerLink="/finance">Мои финансы</a>.
-        </p>
-        <table class="pr-comm">
-          <thead>
-            <tr>
-              <th>Продукт</th>
-              <th class="pr-comm__num">КВ, базовое</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of commissions; track c.product) {
-              <tr>
-                <td>{{ c.product }}</td>
-                <td class="pr-comm__num pr-comm__kv">{{ c.kv }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        <p class="pr-note">Комиссии — демо-данные прототипа.</p>
-      </div>
-    </section>
+      <!-- ─────────────── УСЛОВИЯ И КВ ─────────────── -->
+      @case ('terms') {
+        <section class="pr-card" role="tabpanel">
+          <div class="pr-docgroup">
+            <h3 class="pr-docgroup__title">Условия сотрудничества</h3>
+            <p class="pr-docgroup__sub">
+              Категория «{{ p.category }}». Базовое КВ по продуктам; растёт с прогнозом сборов — см.
+              <a routerLink="/finance">Мои финансы</a>. Тарифное соглашение с подписью — во вкладке
+              <button type="button" class="pr-inline-link" (click)="setTab('docs')">
+                «Документы»</button
+              >.
+            </p>
+            <table class="pr-comm">
+              <thead>
+                <tr>
+                  <th>Продукт</th>
+                  <th class="pr-comm__num">КВ, базовое</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of commissions; track c.product) {
+                  <tr>
+                    <td>{{ c.product }}</td>
+                    <td class="pr-comm__num pr-comm__kv">{{ c.kv }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <p class="pr-note">Комиссии — демо-данные прототипа.</p>
+          </div>
+        </section>
+      }
+    }
   </section>
 } @else {
   <section class="pr">

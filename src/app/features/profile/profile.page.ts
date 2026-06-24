@@ -1,10 +1,15 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { ProfileService, type AgentProfile } from '@core/services/profile.service';
+
+// Профиль — справочник, не флоу: 3 вкладки по поводам захода агента.
+// Названия вкладок = карта поводов (слово «реквизиты» прямо в табе), чтобы
+// агент 45+ с холодного входа сразу видел, куда идти (риск «не заметит вкладку»).
+type Tab = 'data' | 'docs' | 'terms';
 
 const LEGAL_TYPE_LABELS: Record<AgentProfile['legalType'], string> = {
   individual: 'Физическое лицо',
@@ -43,6 +48,12 @@ const DOC_STATUS_LABELS: Record<DocStatus, string> = {
 })
 export class ProfilePage {
   private readonly profileService = inject(ProfileService);
+
+  protected readonly activeTab = signal<Tab>('data');
+
+  setTab(tab: Tab): void {
+    this.activeTab.set(tab);
+  }
 
   protected readonly profile = toSignal(this.profileService.me().pipe(map((r) => r.data)), {
     initialValue: null,

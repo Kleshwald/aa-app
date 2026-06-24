@@ -86,6 +86,50 @@
   }
 }
 
+// ─── Tabs ───
+// Тот же underline-паттерн, что в Finance, но крупнее (под аудиторию 45+)
+// и с гарантированной тач-целью ≥44px. Названия — карта поводов захода.
+
+.pr-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.pr-tab {
+  min-height: 48px;
+  padding: 11px 4px;
+  margin-bottom: -1px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition:
+    color 120ms ease-out,
+    border-color 120ms ease-out;
+
+  &:hover {
+    color: var(--gray-900);
+  }
+
+  &--active {
+    color: var(--header-bg);
+    border-bottom-color: var(--header-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
 // ─── Card shell ───
 
 .pr-card {
@@ -159,7 +203,11 @@
 }
 
 .pr-edit {
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 8px;
+  margin: -6px -8px -6px 0;
   font-family: inherit;
   font-size: var(--text-sm);
   color: var(--accent-600);
@@ -170,6 +218,34 @@
   &:hover {
     color: var(--header-bg);
     text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+// Текстовая ссылка-кнопка внутри абзаца (переход на другую вкладку).
+.pr-inline-link {
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--accent-600);
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--header-bg);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 }
 
@@ -312,8 +388,14 @@
 }
 
 .pr-doc__act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 auto;
-  padding: 0;
+  min-height: 44px;
+  min-width: 88px;
+  padding: 6px 12px;
+  margin: -6px 0;
   font-family: inherit;
   font-size: var(--text-sm);
   color: var(--accent-600);
@@ -324,6 +406,12 @@
   &:hover {
     color: var(--header-bg);
     text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 }
 
