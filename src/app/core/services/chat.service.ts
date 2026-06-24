@@ -25,11 +25,12 @@ export interface ChatMessage {
   read: boolean; // for company messages: seen by the agent
 }
 
-const STORAGE_KEY = 'agent_academy_support_chat_v3';
+const STORAGE_KEY = 'agent_academy_support_chat_v4';
 
-// Single thread, two roles answer (attributed). Полное ФИО с отчеством; куратор —
-// демо-куратор агента (совпадает с профилем), не безымянный.
-const SUPPORT: ChatSender = { name: 'Котова Анна Сергеевна', role: 'support' };
+// Single thread, two roles answer (attributed). Поддержка — ОБОБЩЁННАЯ служба
+// (безлична, взаимозаменяема: агенту важна скорость, а не имя оператора).
+// Куратор — именной, постоянный (отношения вдолгую): полное ФИО с отчеством.
+const SUPPORT: ChatSender = { name: 'Поддержка Agent Academy', role: 'support' };
 const CURATOR: ChatSender = { name: 'Парфенова Оксана Анатольевна', role: 'curator' };
 
 const CURATOR_INTRO =
@@ -78,6 +79,7 @@ export class ChatService {
   readonly messages = signal<ChatMessage[]>([]);
   readonly supportTyping = signal(false);
   readonly support = SUPPORT; // for the "typing…" avatar
+  readonly curator = CURATOR; // named curator shown in the chat header (trust anchor)
   readonly unread = computed(
     () => this.messages().filter((m) => m.author === 'company' && !m.read).length,
   );

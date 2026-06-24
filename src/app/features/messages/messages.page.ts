@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -26,7 +26,7 @@ interface DayGroup {
 
 @Component({
   selector: 'app-messages-page',
-  imports: [DatePipe],
+  imports: [DatePipe, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './messages.page.html',
   styleUrl: './messages.page.scss',
@@ -39,6 +39,7 @@ export class MessagesPage implements OnInit {
   protected readonly messages = this.chat.messages;
   protected readonly supportTyping = this.chat.supportTyping;
   protected readonly support = this.chat.support;
+  protected readonly curator = this.chat.curator;
 
   protected readonly draft = signal('');
   protected readonly pendingFiles = signal<ChatAttachment[]>([]);
@@ -132,6 +133,13 @@ export class MessagesPage implements OnInit {
     if (!name) return '?';
     const parts = name.trim().split(/\s+/).filter(Boolean);
     return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
+  }
+
+  /** «Имя Отчество» без фамилии — тёплое обращение к куратору в шапке (ФИО — в ленте). */
+  givenName(name: string | undefined): string {
+    if (!name) return '';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    return parts.length > 1 ? parts.slice(1).join(' ') : (parts[0] ?? '');
   }
 
   roleLabel(role: ChatRole): string {

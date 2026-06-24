@@ -206,25 +206,31 @@
         <p class="hl__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
       </header>
 
+      <!-- Общий контекст расчёта — один раз, а не дублем в каждой строке. -->
+      <div class="hl-context">
+        <span>Страховая защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span>
+        <span class="hl-context__sep" aria-hidden="true">·</span>
+        <span>Срок: {{ termLabel() }}</span>
+      </div>
+
       <div class="hl-offers">
         @for (o of offers(); track o.id) {
-          <div class="hl-offer" [class.hl-offer--best]="bestOfferId() === o.id">
+          <div class="hl-offer" [class.hl-offer--best]="isBestOffer(o)">
             <app-insurer-logo class="hl-offer__logo" [id]="o.carrierId" [name]="o.carrierShort" />
 
             <div class="hl-offer__main">
-              @if (bestOfferId() === o.id) {
-                <span class="hl-offer__best">Лучшая цена</span>
+              @if (isBestOffer(o)) {
+                <span class="hl-offer__best">
+                  <svg class="hl-offer__best-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Лучшая цена
+                </span>
               }
               <span class="hl-offer__carrier">{{ o.carrierShort }}</span>
-              <span class="hl-offer__meta">
-                <span class="hl-offer__sum"
-                  >Защита {{ params.controls.sum.value | number: '1.0-0' }} ₽</span
-                >
-              </span>
             </div>
 
             <div class="hl-price">
-              <span class="hl-price__label">Цена клиенту</span>
               <span class="hl-price__row">
                 @if (offerDiscount(o) > 0) {
                   <span class="hl-price__old">{{ o.basePrice | number: '1.0-0' }} ₽</span>
@@ -245,7 +251,8 @@
               </span>
 
               @if (o.discountable) {
-                <div class="hl-toggle" role="group" aria-label="Скидка клиенту из комиссии">
+                <span class="hl-toggle__caption">Скидка из комиссии</span>
+                <div class="hl-toggle" role="group" aria-label="Скидка клиенту из комиссии агента">
                   @for (tier of discountTiers; track tier) {
                     <button
                       type="button"
@@ -254,7 +261,7 @@
                       [class.hl-toggle__btn--disc]="offerDiscount(o) === tier && tier > 0"
                       (click)="setDiscount(o.id, tier)"
                     >
-                      {{ tier === 0 ? 'Полная' : 'Скидка −' + tier + '%' }}
+                      {{ tier === 0 ? 'Без скидки' : '−' + tier + '%' }}
                     </button>
                   }
                 </div>

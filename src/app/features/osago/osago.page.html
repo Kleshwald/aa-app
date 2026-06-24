@@ -729,11 +729,20 @@
         <p class="results__subtitle">Отсортированы по цене — самое выгодное предложение сверху</p>
       </header>
 
+      <!-- Заголовки колонок (таблица 1С): один раз сверху, скрыты при зуме/узком. -->
+      <div class="results__cols" aria-hidden="true">
+        <span class="results__col results__col--company">Страховая компания</span>
+        <span class="results__col">ОСАГО</span>
+        <span class="results__col">Дополнительные сервисы</span>
+        <span class="results__col">Итого</span>
+        <span class="results__col"></span>
+      </div>
+
       <div class="results__offers">
         @for (q of quotes(); track q.id; let i = $index) {
           <article
             class="results__offer results__offer--enter"
-            [class.results__offer--best]="$first"
+            [class.results__offer--best]="isBestPrice(q)"
             [style.animation-delay]="220 + i * 220 + 'ms'"
           >
             <app-insurer-logo
@@ -742,19 +751,32 @@
               [name]="q.carrierShortName"
             />
 
-            <div class="results__offer-main">
-              @if ($first) {
-                <span class="results__best">Лучшая цена</span>
-              }
+            <!-- Колонка: страховая компания -->
+            <div class="results__company">
               <div class="results__carrier-name">{{ q.carrierName }}</div>
-              <div class="results__offer-meta">
-                <span class="results__qtype" [class.results__qtype--pool]="q.quoteType === 'pool'">
-                  {{ q.quoteType === 'pool' ? 'Перестраховочный пул' : 'Сегмент' }}
+              <span class="results__qtype" [class.results__qtype--pool]="q.quoteType === 'pool'">
+                {{ q.quoteType === 'pool' ? 'Перестраховочный пул' : 'Сегмент' }}
+              </span>
+              @if (q.claimsInAgentLk) {
+                <span
+                  class="results__process"
+                  title="Убытки урегулируются прямо в личном кабинете агента — без визита в офис и переписки по почте."
+                >
+                  Урегулирование в ЛК Агента
+                  <span class="results__process-info" aria-hidden="true">?</span>
                 </span>
-                <span class="results__sub">с {{ q.effectiveDate }}</span>
-              </div>
+              }
+              @if (isBestPrice(q)) {
+                <span class="results__best">
+                  <svg class="results__best-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Лучшая цена
+                </span>
+              }
             </div>
 
+            <!-- Колонка: ОСАГО — цена (сравнение) + «?», под ней дата начала. -->
             <div class="results__price-block">
               <div class="results__price-row">
                 <span class="results__price">{{ q.osagoPrice | number: '1.0-0' }} ₽</span>
@@ -769,7 +791,7 @@
                   ?
                 </button>
               </div>
-              <div class="results__price-cap">ОСАГО</div>
+              <span class="results__sub">Действует с {{ q.effectiveDate }}</span>
 
               @if (priceInfoQuoteId() === q.id) {
                 <div class="results__popover" role="dialog" aria-label="Расчёт стоимости ОСАГО">
@@ -793,80 +815,54 @@
               }
             </div>
 
-            <!-- Add-on chip (opens modal). Three states: required (locked) / chosen / empty. -->
+            <!-- Колонка: доп. сервисы (борд-лесс, как в макете). 3 состояния. -->
             @if (q.addOn.required) {
-              <button
-                type="button"
-                class="results__addon results__addon--required"
-                (click)="openAddOnModal(q.id)"
-              >
-                <svg class="results__addon-lock" viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="3" y="11" width="18" height="11" rx="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                <span class="results__addon-name">{{ addOnName(q.addOn.presetId) }}</span>
-                <span class="results__addon-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
-                <span class="results__addon-flag">Обязательно</span>
-              </button>
+              <div class="results__svc results__svc--req">
+                <span class="results__svc-line">
+                  <span class="results__svc-name">{{ addOnName(q.addOn.presetId) }}</span>
+                  <span class="results__svc-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
+                </span>
+                <span class="results__svc-flag">Обязательно</span>
+              </div>
             } @else if (q.addOn.presetId === 'off') {
               <button
                 type="button"
-                class="results__addon results__addon--empty"
+                class="results__svc results__svc--add"
                 (click)="openAddOnModal(q.id)"
               >
-                <app-addon-icon id="off" class="results__addon-ico" />
-                <span class="results__addon-name results__addon-name--muted">Добавить сервис</span>
-                <span class="results__addon-chev" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
-                </span>
+                <span class="results__svc-plus" aria-hidden="true">+</span>
+                Добавить сервис
               </button>
             } @else {
               <button
                 type="button"
-                class="results__addon results__addon--editable"
+                class="results__svc results__svc--edit"
                 (click)="openAddOnModal(q.id)"
               >
-                <app-addon-icon [id]="q.addOn.presetId" class="results__addon-ico" />
-                <span class="results__addon-name">{{ addOnName(q.addOn.presetId) }}</span>
-                <span class="results__addon-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
-                <span class="results__addon-chev" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
-                </span>
+                <span class="results__svc-name">{{ addOnName(q.addOn.presetId) }}</span>
+                <span class="results__svc-price">{{ q.addOn.price | number: '1.0-0' }} ₽</span>
+                <svg class="results__svc-chev" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
               </button>
             }
 
-            <div class="results__cta">
-              <div class="results__total">
-                <span class="results__total-cap">Итого</span>
-                <span class="results__total-val">{{ totalFor(q) | number: '1.0-0' }} ₽</span>
-              </div>
-
+            <!-- Колонка: Итого (полис + сервис) + способ оплаты под ним. -->
+            <div class="results__totals">
+              <span class="results__total">{{ totalFor(q) | number: '1.0-0' }} ₽</span>
               <span class="results__pay">
-                @if (paymentKind() === 'invoice') {
-                  <svg class="results__pay-ico" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M6 2h9l4 4v16H6z" />
-                    <path d="M15 2v4h4" />
-                    <path d="M9 12h7" />
-                    <path d="M9 16h7" />
-                  </svg>
-                  Оплата по счёту
-                } @else {
-                  <svg class="results__pay-ico" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="2" y="5" width="20" height="14" rx="2" />
-                    <path d="M2 10h20" />
-                  </svg>
-                  Оплата картой
-                }
+                {{ q.payment === 'invoice' ? 'Оплата по счёту' : 'Банковская карта' }}
               </span>
-
-              <button
-                type="button"
-                class="osago__btn osago__btn--primary results__offer-action"
-                (click)="issue(q.id)"
-              >
-                Оформить
-              </button>
             </div>
+
+            <!-- Колонка: действие -->
+            <button
+              type="button"
+              class="osago__btn osago__btn--primary results__offer-action"
+              (click)="issue(q.id)"
+            >
+              Оформить
+            </button>
           </article>
         }
       </div>

@@ -1,27 +1,34 @@
 <section class="chat">
+  <!-- Иконка обобщённой службы поддержки (одна на все места: шапка, лента, «печатает»). -->
+  <ng-template #supportGlyph>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+      <path
+        d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+      />
+    </svg>
+  </ng-template>
+
   <header class="chat__head">
-    <span class="chat__head-avatar" aria-hidden="true">
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-        <path
-          d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
-        />
-      </svg>
+    <span class="chat__head-avatars" aria-hidden="true">
+      <span class="chat__head-av" data-role="support">
+        <ng-container [ngTemplateOutlet]="supportGlyph" />
+      </span>
+      <span class="chat__head-av" data-role="curator">{{ initials(curator.name) }}</span>
     </span>
     <div class="chat__head-info">
-      <span class="chat__head-title">Поддержка Agent Academy</span>
+      <span class="chat__head-title">Поддержка и ваш куратор {{ givenName(curator.name) }}</span>
       <span class="chat__head-status">
         <span class="chat__status-dot" aria-hidden="true"></span>
-        На связи · отвечаем за несколько минут
+        На связи · обычно отвечаем за несколько минут
       </span>
     </div>
   </header>
@@ -60,14 +67,22 @@
       @for (m of group.messages; track m.id) {
         <div class="chat__row" [class.chat__row--out]="m.author === 'agent'">
           @if (m.author === 'company') {
-            <span class="chat__avatar" [attr.data-role]="m.sender?.role" aria-hidden="true">{{
-              initials(m.sender?.name)
-            }}</span>
+            <span class="chat__avatar" [attr.data-role]="m.sender?.role" aria-hidden="true">
+              @if (m.sender?.role === 'support') {
+                <ng-container [ngTemplateOutlet]="supportGlyph" />
+              } @else {
+                {{ initials(m.sender?.name) }}
+              }
+            </span>
           }
           <div class="chat__bubble">
             @if (m.author === 'company' && m.sender) {
               <span class="chat__sender" [attr.data-role]="m.sender.role">
-                {{ m.sender.name }} · {{ roleLabel(m.sender.role) }}
+                @if (m.sender.role === 'curator') {
+                  {{ m.sender.name }} · {{ roleLabel(m.sender.role) }}
+                } @else {
+                  {{ m.sender.name }}
+                }
               </span>
             }
             @if (m.text) {
@@ -120,9 +135,9 @@
 
     @if (supportTyping()) {
       <div class="chat__row">
-        <span class="chat__avatar" data-role="support" aria-hidden="true">{{
-          initials(support.name)
-        }}</span>
+        <span class="chat__avatar" data-role="support" aria-hidden="true">
+          <ng-container [ngTemplateOutlet]="supportGlyph" />
+        </span>
         <div class="chat__bubble chat__bubble--typing" aria-label="Поддержка печатает">
           <span class="chat__dot"></span>
           <span class="chat__dot"></span>
@@ -165,6 +180,7 @@
         class="chat__icon-btn"
         (click)="fileInput.click()"
         aria-label="Прикрепить файл"
+        title="Прикрепить файл"
       >
         <svg
           width="22"
@@ -216,6 +232,7 @@
           <path d="M22 2L11 13" />
           <path d="M22 2l-7 20-4-9-9-4 20-7z" />
         </svg>
+        <span class="chat__send-label">Отправить</span>
       </button>
     </div>
 

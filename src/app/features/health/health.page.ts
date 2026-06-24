@@ -224,12 +224,16 @@ export class HealthPage {
     return o ? this.offerPrice(o) : 0;
   });
 
-  // Самая выгодная сейчас (по текущей цене с учётом скидки) — «Лучшая цена».
-  protected readonly bestOfferId = computed<string | null>(() => {
+  // Минимальная цена (с учётом скидки). «Лучшая цена» = ВСЕ предложения с этой
+  // ценой — их часто несколько (несколько СК дают одинаковую цену).
+  protected readonly minOfferPrice = computed(() => {
     const list = this.offers();
-    if (list.length === 0) return null;
-    return list.reduce((min, o) => (this.offerPrice(o) < this.offerPrice(min) ? o : min)).id;
+    if (list.length === 0) return 0;
+    return Math.min(...list.map((o) => this.offerPrice(o)));
   });
+  isBestOffer(offer: Offer): boolean {
+    return this.offers().length > 0 && this.offerPrice(offer) === this.minOfferPrice();
+  }
 
   // Шаги лоадера зависят от продукта (его СК), с логотипами.
   protected readonly calcSteps = computed<CalcStep[]>(() => [

@@ -181,7 +181,9 @@ export interface Quote {
   carrierShortName: string;
   quoteType: QuoteType;
   osagoPrice: number;
-  effectiveDate: string; // "9 июня"
+  effectiveDate: string; // "9 июня" — может отличаться у разных СК
+  payment: 'card' | 'invoice'; // способ оплаты тоже зависит от СК
+  claimsInAgentLk: boolean; // урегулирование убытков в ЛК агента (наш процесс)
   addOn: { presetId: AddOnPreset['id']; price: number; required: boolean };
 }
 
@@ -320,6 +322,12 @@ export class OsagoPage {
   protected readonly fillPulse = signal(false);
 
   protected readonly quotes = signal<Quote[]>([]);
+  // Минимальная цена ОСАГО среди котировок — сравниваем именно по ОСАГО.
+  // «Лучшая цена» = ВСЕ котировки с этой ценой (их часто несколько).
+  protected readonly minOsagoPrice = computed(() => {
+    const list = this.quotes();
+    return list.length ? Math.min(...list.map((q) => q.osagoPrice)) : 0;
+  });
   protected readonly selectedQuoteId = signal<string | null>(null);
   protected readonly selectedQuote = computed<Quote | null>(() => {
     const id = this.selectedQuoteId();
@@ -761,6 +769,11 @@ export class OsagoPage {
     return quote.osagoPrice + (quote.addOn?.price ?? 0);
   }
 
+  /** Котировка с лучшей (минимальной) ценой ОСАГО. Таких может быть несколько. */
+  isBestPrice(quote: Quote): boolean {
+    return quote.osagoPrice === this.minOsagoPrice();
+  }
+
   /** Display name of an add-on preset (used in chip, total caption, payment screen). */
   addOnName(id: AddOnPreset['id']): string {
     return ADD_ON_PRESETS.find((p) => p.id === id)?.name ?? '';
@@ -819,9 +832,9 @@ export class OsagoPage {
 
   private generateQuotes(): Quote[] {
     const startDate = this.form.controls.base.controls.startDate.value;
-    const effective = this.formatRussianDate(startDate);
     const power = this.form.controls.vehicle.controls.power.value ?? 100;
     const basePrice = Math.round(2500 + power * 30);
+    const payerIsLegal = this.insurerType() === 'legal';
 
     // Алгоритм вывода СК «под капотом»: на результатах показываем подобранную
     // выборку (4–6 компаний), а не весь опрошенный рынок.
@@ -831,7 +844,9 @@ export class OsagoPage {
 
     const quotes = sample.map((c, idx) => {
       const variance = Math.round((Math.random() - 0.3) * 1500);
-      const osagoPrice = Math.max(3500, basePrice + variance);
+      // Округляем до 100 ₽: цифры чище и СК нередко совпадают в цене — экран
+      // должен переживать «несколько одинаковых цен, в т.ч. лучших».
+      const osagoPrice = Math.max(3500, Math.round((basePrice + variance) / 100) * 100);
       // Every quote ships with a pre-selected add-on. Reinsurance-pool quotes
       // force a mandatory МиниКАСКО; segment quotes get an optional service the
       // agent can remove (then the chip becomes "Добавить сервис").
@@ -842,6 +857,11 @@ export class OsagoPage {
           ? 'ns-dtp'
           : 'legal';
       const preset = ADD_ON_PRESETS.find((p) => p.id === addOnPresetId)!;
+      const payment: 'card' | 'invoice' = payerIsLegal
+        ? 'invoice'
+        : Math.random() < 0.35
+          ? 'invoice'
+          : 'card';
 
       return {
         id: `${c.id}-${idx}`,
@@ -850,7 +870,13 @@ export class OsagoPage {
         carrierShortName: c.shortName,
         quoteType: c.quoteType,
         osagoPrice,
-        effectiveDate: effective,
+        // Дата начала и способ оплаты — атрибуты конкретной СК (могут отличаться),
+        // поэтому живут в строке котировки, а не в общем контексте расчёта.
+        effectiveDate: this.formatRussianDate(startDate, Math.floor(Math.random() * 3)),
+        payment,
+        // Урегулирование убытков в ЛК агента — пока у РГС и СОГАЗ (наш процесс,
+        // отличие от конкурентов: не по почте, а внутри кабинета).
+        claimsInAgentLk: c.id === 'rosgosstrah' || c.id === 'sogaz',
         addOn: {
           presetId: addOnPresetId,
           price: preset.defaultPrice,
@@ -867,9 +893,10 @@ export class OsagoPage {
     });
   }
 
-  private formatRussianDate(iso: string): string {
+  private formatRussianDate(iso: string, offsetDays = 0): string {
     if (!iso) return '';
     const d = new Date(iso);
+    if (offsetDays) d.setDate(d.getDate() + offsetDays);
     const months = [
       'января',
       'февраля',
