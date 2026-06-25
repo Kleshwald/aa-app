@@ -143,6 +143,13 @@ export class ProfilePage {
     { name: 'Тарифное соглашение (условия КВ)', signedDate: '2024-01-15' },
   ];
 
+  // Фото офиса — комплаенс-требование части СК (подтверждение реальной точки продаж).
+  protected readonly officePhotos: AgentDoc[] = [
+    { name: 'Фото офиса 1', status: 'ok', meta: 'загружено 15.01.2024' },
+    { name: 'Фото офиса 2', status: 'ok', meta: 'загружено 15.01.2024' },
+    { name: 'Фото офиса 3', status: 'missing' },
+  ];
+
   // Условия сотрудничества — базовое КВ по продуктам (демо).
   protected readonly commissions: CommissionRow[] = [
     { product: 'ОСАГО', kv: '20 %' },

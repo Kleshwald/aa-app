@@ -193,6 +193,43 @@
               }
             </ul>
           </div>
+
+          <!-- 3. Фото офиса (комплаенс части СК) -->
+          <div class="pr-docgroup">
+            <h3 class="pr-docgroup__title">Фото офиса</h3>
+            <p class="pr-docgroup__sub">
+              Требование части страховых компаний — подтверждение реальной точки продаж.
+            </p>
+            <ul class="pr-docs">
+              @for (d of officePhotos; track d.name) {
+                <li class="pr-doc">
+                  <span class="pr-doc__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                      <circle cx="8.5" cy="10" r="1.5" />
+                      <path d="M21 16l-5-5L5 19" />
+                    </svg>
+                  </span>
+                  <span class="pr-doc__main">
+                    <span class="pr-doc__name">{{ d.name }}</span>
+                    @if (d.meta) {
+                      <span class="pr-doc__meta">{{ d.meta }}</span>
+                    }
+                  </span>
+                  <span class="pr-doc__status" [attr.data-status]="d.status">
+                    {{ docStatusLabels[d.status] }}
+                  </span>
+                  @if (d.status === 'missing') {
+                    <button type="button" class="pr-doc__act" (click)="upload()">Загрузить</button>
+                  } @else {
+                    <button type="button" class="pr-doc__act" (click)="download(d.name)">
+                      Открыть
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
         </section>
       }
 
