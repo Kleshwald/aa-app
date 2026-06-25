@@ -112,4 +112,14 @@ export class FinancePage {
     if (!this.confirmed()) return;
     this.requested.set(true);
   }
+
+  /** Скачать акт об оказании услуг (демо-PDF, как документы договора). */
+  downloadAct(act: PayoutAct): void {
+    const url = new URL('docs/polis-osago-demo.pdf', document.baseURI).href;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Акт-${act.actNumber}.pdf`;
+    a.rel = 'noopener';
+    a.click();
+  }
 }

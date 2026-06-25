@@ -47,12 +47,9 @@
             <div class="fin-hero__main">
               <span class="fin-hero__eyebrow">Прогноз сборов на месяц</span>
               <span class="fin-hero__value">{{ projection() | number: '1.0-0' }} ₽</span>
-              <span class="fin-hero__sub">
-                по текущему темпу · собрано <b>{{ r.collected | number: '1.0-0' }} ₽</b> за
-                {{ r.daysPassed }} дн. · до конца месяца {{ r.daysLeft }} дн.
-              </span>
+              <span class="fin-hero__hint">по текущему темпу продаж</span>
 
-              <!-- Темп: собрано → прогноз, с отметкой минимального порога ОСАГО -->
+              <!-- Темп: собрано → прогноз, с отметкой порога ОСАГО. -->
               <div class="fin-pace">
                 <div class="fin-pace__track">
                   <span class="fin-pace__fill" [style.width.%]="collectedPct()"></span>
@@ -69,11 +66,13 @@
                     порог {{ r.minThreshold | number: '1.0-0' }} ₽
                   </span>
                 </div>
+                <div class="fin-pace__ends">
+                  <span>
+                    Собрано <b>{{ r.collected | number: '1.0-0' }} ₽</b> за {{ r.daysPassed }} дн.
+                  </span>
+                  <span>до конца месяца {{ r.daysLeft }} дн.</span>
+                </div>
               </div>
-
-              <a class="fin__btn fin__btn--primary fin-hero__cta" routerLink="/osago">
-                Оформить полис — поднять прогноз
-              </a>
             </div>
 
             <aside class="fin-cat">
@@ -259,6 +258,14 @@
     <!-- ─────────────── К ВЫПЛАТЕ ─────────────── -->
     @case ('payout') {
       <div class="fin-payout">
+        <!-- Главный ответ вкладки — сколько можно забрать — сразу сверху, до таблицы. -->
+        @if (!payoutsLoading()) {
+          <div class="fin-payout__hero">
+            <span class="fin-payout__hero-label">Доступно к выплате</span>
+            <span class="fin-payout__hero-val">{{ payoutTotal() | number: '1.2-2' }} ₽</span>
+          </div>
+        }
+
         <div class="fin-payout__head">
           <h2 class="fin-payout__title">Информация о заключённых договорах</h2>
           <button type="button" class="fin__link">Сохранить в Excel</button>
@@ -303,10 +310,20 @@
 
         <div class="fin-payout__foot">
           @if (requested()) {
-            <p class="fin-payout__done">
-              ✓ Заявка на выплату {{ payoutTotal() | number: '1.2-2' }} ₽ отправлена. Готовим
-              выплату.
-            </p>
+            <div class="fin-payout__done">
+              <svg class="fin-payout__done-ico" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <div>
+                <p class="fin-payout__done-title">
+                  Заявка на выплату {{ payoutTotal() | number: '1.2-2' }} ₽ отправлена
+                </p>
+                <p class="fin-payout__done-sub">
+                  Выплата придёт на ваши реквизиты в течение 3 рабочих дней. Статус — во вкладке
+                  «История выплат».
+                </p>
+              </div>
+            </div>
           } @else {
             <label class="fin-payout__confirm">
               <input type="checkbox" [checked]="confirmed()" (change)="onConfirmChange($event)" />
@@ -355,11 +372,23 @@
                 @for (act of history(); track act.id) {
                   <tr class="fin__row">
                     <td>
-                      <button type="button" class="fin__link">Акт № {{ act.actNumber }}</button>
+                      <button type="button" class="fin__link" (click)="downloadAct(act)">
+                        Акт № {{ act.actNumber }}
+                      </button>
                     </td>
                     <td>{{ act.date | date: 'dd.MM.yyyy' }}</td>
                     <td>
                       <span class="fin__status" [attr.data-status]="act.status">
+                        @if (act.status === 'paid') {
+                          <svg class="fin__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        } @else {
+                          <svg class="fin__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 8v4l3 2" />
+                          </svg>
+                        }
                         {{ historyStatusLabel[act.status] }}
                       </span>
                     </td>

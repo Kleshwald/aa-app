@@ -36,13 +36,15 @@
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
   font-weight: var(--weight-semibold);
-  color: var(--header-bg);
+  color: var(--brand-700);
+  text-align: center;
 }
 
 .hl__lead {
   margin: 0;
   font-size: var(--text-base);
   color: var(--gray-600);
+  text-align: center;
 }
 
 // Шапка результатов — идентична ОСАГО (.results__head / .results__title).
@@ -58,15 +60,13 @@
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
   font-weight: var(--weight-semibold);
-  color: var(--header-bg);
-  text-align: center;
+  color: var(--brand-700);
 }
 
 .hl__subtitle {
   margin: 0;
   font-size: var(--text-sm);
   color: var(--gray-600);
-  text-align: center;
 }
 
 // ─── Product selector cards ───
@@ -225,13 +225,15 @@
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
   font-weight: var(--weight-semibold);
-  color: var(--header-bg);
+  color: var(--brand-700);
+  text-align: center;
 }
 
 .hl-issue-head__sub {
   margin: 0;
   font-size: var(--text-sm);
   color: var(--gray-600);
+  text-align: center;
 }
 
 // ─── «Добавить застрахованного» ───
