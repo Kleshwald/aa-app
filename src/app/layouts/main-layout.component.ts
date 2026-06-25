@@ -23,8 +23,7 @@ interface NavItem {
     | 'mortgage'
     | 'finance'
     | 'learning'
-    | 'messages'
-    | 'team';
+    | 'messages';
 }
 
 const NAV: readonly NavItem[] = [
@@ -36,7 +35,6 @@ const NAV: readonly NavItem[] = [
   { label: 'Мои финансы', route: '/finance', icon: 'finance' },
   { label: 'Обучение', route: '/learning', icon: 'learning' },
   { label: 'Сообщения', route: '/messages', icon: 'messages' },
-  { label: 'Команда', route: '/team', icon: 'team' },
 ] as const;
 
 const MESSAGES_ROUTE = '/messages';

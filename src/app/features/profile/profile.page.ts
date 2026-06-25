@@ -5,11 +5,13 @@ import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { ProfileService, type AgentProfile } from '@core/services/profile.service';
+import { TeamPanelComponent } from '@features/team/team-panel.component';
 
-// Профиль — справочник, не флоу: 3 вкладки по поводам захода агента.
+// Профиль — справочник, не флоу: вкладки по поводам захода агента.
 // Названия вкладок = карта поводов (слово «реквизиты» прямо в табе), чтобы
 // агент 45+ с холодного входа сразу видел, куда идти (риск «не заметит вкладку»).
-type Tab = 'data' | 'docs' | 'terms';
+// «Команда» — для ИП со штатом (сотрудники/субагенты).
+type Tab = 'data' | 'docs' | 'terms' | 'team';
 
 const LEGAL_TYPE_LABELS: Record<AgentProfile['legalType'], string> = {
   individual: 'Физическое лицо',
@@ -41,7 +43,7 @@ const DOC_STATUS_LABELS: Record<DocStatus, string> = {
 
 @Component({
   selector: 'app-profile-page',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, TeamPanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',

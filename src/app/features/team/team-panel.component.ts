@@ -4,14 +4,18 @@ import { map } from 'rxjs';
 
 import { TeamService } from '@core/services/team.service';
 
+/**
+ * Панель «Команда» — сотрудники и субагенты агента.
+ * Встраивается вкладкой в Профиль (/profile), не отдельный роут.
+ */
 @Component({
-  selector: 'app-team-page',
+  selector: 'app-team-panel',
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './team.page.html',
-  styleUrl: './team.page.scss',
+  templateUrl: './team-panel.component.html',
+  styleUrl: './team-panel.component.scss',
 })
-export class TeamPage {
+export class TeamPanelComponent {
   private readonly teamService = inject(TeamService);
 
   protected readonly team = toSignal(this.teamService.team().pipe(map((r) => r.data)), {

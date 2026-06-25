@@ -1,13 +1,5 @@
 @if (team(); as t) {
-  <section class="tm">
-    <header class="tm-head">
-      <h1 class="tm-head__title">Команда</h1>
-      <p class="tm-head__sub">
-        Ваши сотрудники и субагенты на точке продаж. Управление доступами и начислениями появится
-        позже.
-      </p>
-    </header>
-
+  <div class="tm" role="tabpanel">
     <!-- ─── Сотрудники ─── -->
     <section class="tm-card">
       <header class="tm-card__head">
@@ -130,10 +122,10 @@
         </div>
       }
     </section>
-  </section>
+  </div>
 } @else {
-  <section class="tm">
+  <div class="tm">
     <div class="tm-skeleton"></div>
     <div class="tm-skeleton tm-skeleton--tall"></div>
-  </section>
+  </div>
 }

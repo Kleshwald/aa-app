@@ -109,11 +109,6 @@ export const routes: Routes = [
         title: 'Сообщения — Agent Academy',
       },
       {
-        path: 'team',
-        loadComponent: () => import('@features/team/team.page').then((m) => m.TeamPage),
-        title: 'Команда — Agent Academy',
-      },
-      {
         path: 'profile',
         loadComponent: () => import('@features/profile/profile.page').then((m) => m.ProfilePage),
         title: 'Профиль — Agent Academy',

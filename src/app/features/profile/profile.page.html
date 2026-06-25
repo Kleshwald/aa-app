@@ -64,6 +64,16 @@
       >
         Условия и КВ
       </button>
+      <button
+        type="button"
+        role="tab"
+        class="pr-tab"
+        [class.pr-tab--active]="activeTab() === 'team'"
+        [attr.aria-selected]="activeTab() === 'team'"
+        (click)="setTab('team')"
+      >
+        Команда
+      </button>
     </div>
 
     @switch (activeTab()) {
@@ -264,6 +274,11 @@
             <p class="pr-note">Комиссии — демо-данные прототипа.</p>
           </div>
         </section>
+      }
+
+      <!-- ─────────────── КОМАНДА ─────────────── -->
+      @case ('team') {
+        <app-team-panel />
       }
     }
   </section>
