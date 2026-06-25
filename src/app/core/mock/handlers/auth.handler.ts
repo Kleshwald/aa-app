@@ -6,8 +6,8 @@ import { type ApiResponse } from '@core/models';
 import { currentAgent } from '../fixtures/agents.fixture';
 import { mockFail, mockOk } from '../helpers/response';
 
-// POST /auth/login — демо-вход: логин — любой номер телефона (не сверяем),
-// пароль — точное совпадение. Реальная авторизация появится с 1С HTTP-сервисом.
+// POST /auth/login — демо-вход: логин — любое имя/значение (не сверяем),
+// пароль — точное совпадение (6767). Реальная авторизация появится с 1С HTTP-сервисом.
 
 const TEST_PASSWORD = '6767';
 
