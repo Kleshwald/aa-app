@@ -28,7 +28,7 @@ export class HubPage {
   protected readonly systemLogins: HubCard[] = [
     {
       title: 'Обычный вход',
-      desc: 'Окно входа в платформу: телефон и пароль',
+      desc: 'Окно входа в платформу: имя и пароль (демо: любое имя + 6767)',
       href: '/login',
       badge: 'доступно',
       badgeKind: 'ok',
@@ -78,7 +78,7 @@ export class HubPage {
   protected readonly roleLogins: HubCard[] = [
     {
       title: 'Агент',
-      desc: 'Кабинет агента — основной продукт прототипа',
+      desc: 'Кабинет агента — основной продукт (вход: любое имя + 6767)',
       href: '/login',
       badge: 'доступно',
       badgeKind: 'ok',
