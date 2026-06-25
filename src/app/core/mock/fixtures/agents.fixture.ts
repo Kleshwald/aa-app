@@ -100,5 +100,7 @@ export const currentAgent: AgentFixture = {
   region: 'Красноярский край',
   district: 'Шушенское',
   category: 'Основная',
+  // ИП со штатом — чтобы раздел «Команда» был наполнен (демо).
+  legalType: 'ip',
 };
 export const agents: AgentFixture[] = [currentAgent, ...Array.from({ length: 50 }, makeAgent)];

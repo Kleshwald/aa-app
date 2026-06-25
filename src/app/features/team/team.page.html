@@ -1,0 +1,139 @@
+@if (team(); as t) {
+  <section class="tm">
+    <header class="tm-head">
+      <h1 class="tm-head__title">Команда</h1>
+      <p class="tm-head__sub">
+        Ваши сотрудники и субагенты на точке продаж. Управление доступами и начислениями появится
+        позже.
+      </p>
+    </header>
+
+    <!-- ─── Сотрудники ─── -->
+    <section class="tm-card">
+      <header class="tm-card__head">
+        <h2 class="tm-card__title">Сотрудники</h2>
+        @if (hasEmployees()) {
+          <button type="button" class="tm-btn" (click)="notImplemented()">
+            Добавить сотрудника
+          </button>
+        }
+      </header>
+
+      @if (hasEmployees()) {
+        <ul class="tm-grid">
+          @for (e of t.employees; track e.id) {
+            <li class="tm-emp">
+              <header class="tm-emp__head">
+                <span class="tm-emp__avatar" aria-hidden="true">{{ initials(e.fullName) }}</span>
+                <span class="tm-emp__id">
+                  <span class="tm-emp__name">{{ e.fullName }}</span>
+                  <span class="tm-emp__ikp">ИКП {{ e.ikp }}</span>
+                </span>
+                <span class="tm-emp__cat">{{ e.category }}</span>
+              </header>
+              <dl class="tm-fields">
+                <div class="tm-fields__row">
+                  <dt>Телефон</dt>
+                  <dd>
+                    <a [href]="'tel:' + e.phone">{{ phoneFormatted(e.phone) }}</a>
+                  </dd>
+                </div>
+                <div class="tm-fields__row">
+                  <dt>Email</dt>
+                  <dd>
+                    <a [href]="'mailto:' + e.email">{{ e.email }}</a>
+                  </dd>
+                </div>
+                <div class="tm-fields__row">
+                  <dt>Функции</dt>
+                  <dd>{{ e.role }}</dd>
+                </div>
+                <div class="tm-fields__row">
+                  <dt>Полисов в месяц</dt>
+                  <dd>{{ e.policiesPerMonth }}</dd>
+                </div>
+                <div class="tm-fields__row">
+                  <dt>Адрес</dt>
+                  <dd>{{ e.address }}</dd>
+                </div>
+              </dl>
+              <footer class="tm-emp__foot">
+                <button type="button" class="tm-link" (click)="notImplemented()">Изменить</button>
+              </footer>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="tm-empty">
+          <span class="tm-empty__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <circle cx="9" cy="8" r="3.5" />
+              <path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1" />
+              <path d="M17 9h4M19 7v4" />
+            </svg>
+          </span>
+          <p class="tm-empty__text">Вы работаете без сотрудников</p>
+          <button type="button" class="tm-btn" (click)="notImplemented()">
+            Добавить сотрудника
+          </button>
+        </div>
+      }
+    </section>
+
+    <!-- ─── Субагенты ─── -->
+    <section class="tm-card">
+      <header class="tm-card__head">
+        <h2 class="tm-card__title">Субагенты</h2>
+        @if (hasSubagents()) {
+          <button type="button" class="tm-btn" (click)="notImplemented()">
+            Добавить субагента
+          </button>
+        }
+      </header>
+
+      @if (hasSubagents()) {
+        <ul class="tm-grid">
+          @for (s of t.subagents; track s.id) {
+            <li class="tm-emp">
+              <header class="tm-emp__head">
+                <span class="tm-emp__avatar" aria-hidden="true">{{ initials(s.fullName) }}</span>
+                <span class="tm-emp__id">
+                  <span class="tm-emp__name">{{ s.fullName }}</span>
+                  <span class="tm-emp__ikp">ИКП {{ s.ikp }}</span>
+                </span>
+              </header>
+              <dl class="tm-fields">
+                <div class="tm-fields__row">
+                  <dt>Телефон</dt>
+                  <dd>
+                    <a [href]="'tel:' + s.phone">{{ phoneFormatted(s.phone) }}</a>
+                  </dd>
+                </div>
+              </dl>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="tm-empty">
+          <span class="tm-empty__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <circle cx="12" cy="5" r="2.5" />
+              <circle cx="5" cy="18" r="2.5" />
+              <circle cx="19" cy="18" r="2.5" />
+              <path d="M12 7.5v3.5M12 11l-6 4.5M12 11l6 4.5" />
+            </svg>
+          </span>
+          <p class="tm-empty__text">Вы работаете без субагентов</p>
+          <button type="button" class="tm-btn" (click)="notImplemented()">
+            Добавить субагента
+          </button>
+        </div>
+      }
+    </section>
+  </section>
+} @else {
+  <section class="tm">
+    <div class="tm-skeleton"></div>
+    <div class="tm-skeleton tm-skeleton--tall"></div>
+  </section>
+}
