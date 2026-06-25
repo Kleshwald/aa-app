@@ -811,7 +811,7 @@
 
 // Единый грид шапки и строк — колонки выстроены как таблица (1С-преемственность).
 // [logo] [компания] [ОСАГО+дата] [доп сервисы] [Итого+оплата] [Оформить]
-$results-cols: 64px minmax(0, 1fr) 120px 240px 150px 140px;
+$results-cols: 64px minmax(0, 1fr) 180px 240px 150px 140px;
 
 // Шапка колонок: один раз сверху. При зуме/узком — скрыта (строки схлопываются).
 .results__cols {
@@ -995,10 +995,14 @@ $results-cols: 64px minmax(0, 1fr) 120px 240px 150px 140px;
 }
 
 // Дата начала действия — атрибут СК (может отличаться), под ценой ОСАГО.
+// Клампим, чтобы длинная дата не наезжала на соседнюю колонку «Доп.сервисы».
 .results__sub {
+  max-width: 100%;
   font-size: var(--text-sm);
   color: var(--gray-600);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .results__price-info {

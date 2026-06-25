@@ -389,29 +389,3 @@
     cursor: not-allowed;
   }
 }
-
-// ─── Footer (памятка по условиям пролонгации) ───
-.prol__footer {
-  padding: 16px 20px;
-  background: #ffffff;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-}
-
-.prol__comments {
-  font-size: var(--text-sm);
-  color: var(--gray-700);
-
-  strong {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--gray-900);
-    font-weight: var(--weight-semibold);
-  }
-
-  ol {
-    margin: 0;
-    padding-left: 20px;
-    line-height: 1.6;
-  }
-}
