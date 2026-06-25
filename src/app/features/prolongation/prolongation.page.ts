@@ -24,6 +24,17 @@ const NSIS_STATUS_LABEL: Record<NsisStatus, string> = {
   expired: 'Просрочен',
 };
 
+/** Экранирование значения для CSV (разделитель «;» — как ждёт Excel в ru-локали). */
+function csvCell(value: string): string {
+  return /[";\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+/** ISO-дата → «ДД.ММ.ГГГГ» для выгрузки. */
+function ruDate(iso: string): string {
+  const parts = iso.slice(0, 10).split('-');
+  return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : iso;
+}
+
 @Component({
   selector: 'app-prolongation-page',
   imports: [DatePipe, DecimalPipe, ReactiveFormsModule],
@@ -88,6 +99,47 @@ export class ProlongationPage {
   resetMyFilters(): void {
     this.searchControl.setValue('');
     this.statusFilter.set('');
+  }
+
+  /** Скачать текущий отфильтрованный список как CSV — для обзвона клиентов по пролонгации. */
+  downloadCallList(): void {
+    const rows = this.myFiltered();
+    if (rows.length === 0) return;
+
+    const header = [
+      'ФИО страхователя',
+      'Телефон',
+      'Марка/модель',
+      'Номер полиса',
+      'Дата окончания',
+      'Страховая компания',
+      'Цена (прошл. год)',
+      'Статус',
+    ];
+    const lines = rows.map((r) =>
+      [
+        r.clientName,
+        r.phone,
+        `${r.vehicleBrand} ${r.vehicleModel}`,
+        r.policyNumber,
+        ruDate(r.endDate),
+        r.insuranceCompanyName,
+        String(r.lastYearPrice),
+        this.statusLabel[r.status],
+      ]
+        .map(csvCell)
+        .join(';'),
+    );
+    const csv = [header.map(csvCell).join(';'), ...lines].join('\r\n');
+
+    // BOM — чтобы Excel открыл кириллицу в UTF-8 корректно.
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'пролонгация-прозвон.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   searchNsis(): void {

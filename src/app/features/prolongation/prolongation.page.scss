@@ -62,7 +62,7 @@
 }
 
 .prol-metric {
-  padding: 20px 24px;
+  padding: 14px 18px;
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
@@ -75,8 +75,8 @@
 }
 
 .prol-metric__value {
-  font-size: 32px;
-  line-height: 1.1;
+  font-size: var(--text-xl);
+  line-height: 1.15;
   font-weight: var(--weight-semibold);
   color: var(--gray-900);
   font-variant-numeric: tabular-nums;
@@ -87,7 +87,7 @@
 }
 
 .prol-metric__label {
-  margin-top: 8px;
+  margin-top: 4px;
   font-size: var(--text-sm);
   color: var(--gray-700);
 }
@@ -150,6 +150,48 @@
 
 .prol__filter-input--grow {
   flex: 1 1 240px;
+}
+
+// Экспорт списка для прозвона клиентов — шаг к действию (звонки по пролонгации).
+.prol__download {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--size-input);
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--brand-600);
+  background: #ffffff;
+  border: 1.5px solid var(--brand-500);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+
+  svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--brand-50);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    color: var(--gray-400);
+    border-color: var(--gray-300);
+    cursor: not-allowed;
+  }
 }
 
 // ─── Table ───

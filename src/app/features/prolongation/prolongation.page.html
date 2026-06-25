@@ -57,7 +57,7 @@
             (change)="statusFilter.set($any($event.target).value)"
             aria-label="Фильтр по статусу"
           >
-            <option value="">Оформленные и рассчитанные</option>
+            <option value="">Все статусы</option>
             <option value="issued">Оформлено</option>
             <option value="calculated">Рассчитано</option>
             <option value="declined">Отказ клиента</option>
@@ -71,6 +71,28 @@
             placeholder="Поиск по ФИО, полису, телефону"
             aria-label="Поиск"
           />
+          <button
+            type="button"
+            class="prol__download"
+            (click)="downloadCallList()"
+            [disabled]="myFiltered().length === 0"
+            title="Скачать список (CSV) для обзвона клиентов"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3v12" />
+              <polyline points="7 10 12 15 17 10" />
+              <path d="M5 19h14" />
+            </svg>
+            Скачать для прозвона
+          </button>
         </div>
       </div>
 
