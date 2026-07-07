@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+import { AttentionService } from '@core/services/attention.service';
 import { AuthService } from '@core/services/auth.service';
 import { ChatService } from '@core/services/chat.service';
 
@@ -60,10 +61,16 @@ export class MainLayoutComponent {
   });
 
   private readonly chat = inject(ChatService);
+  private readonly attention = inject(AttentionService);
 
   protected readonly messagesRoute = MESSAGES_ROUTE;
   // Unread support messages — badge on the «Сообщения» nav item.
   protected readonly messagesUnread = this.chat.unread;
+
+  // Сквозной сигнал «Требуют вас» — виден на всех экранах (заявки + чат).
+  // Клик уводит на «Мои клиенты», где полный список-зона. 0 → индикатор скрыт.
+  protected readonly attentionCount = this.attention.count;
+  protected readonly clientsRoute = '/clients';
 
   protected readonly userMenuOpen = signal(false);
 

@@ -15,6 +15,7 @@ import {
 import {
   handleAddProcessComment,
   handleCreateProcess,
+  handleListAwaitingProcesses,
   handleListPolicyProcesses,
   handleUploadProcessDoc,
 } from '../../mock/handlers/processes.handler';
@@ -49,6 +50,7 @@ const routes: Route[] = [
   { method: 'GET', match: /\/agents\/team$/, handler: handleGetTeam },
   { method: 'POST', match: /\/policies$/, handler: handleCreatePolicy },
   // Заявки по договору — до общего GET /policies/:id (3-сегментные пути).
+  { method: 'GET', match: /\/processes\/awaiting$/, handler: handleListAwaitingProcesses },
   { method: 'POST', match: /\/policies\/[^/]+\/processes$/, handler: handleCreateProcess },
   { method: 'GET', match: /\/policies\/[^/]+\/processes$/, handler: handleListPolicyProcesses },
   { method: 'POST', match: /\/processes\/[^/]+\/comments$/, handler: handleAddProcessComment },

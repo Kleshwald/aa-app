@@ -3,7 +3,7 @@ import { type Observable, of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { type ApiResponse } from '@core/models';
-import type { CreateProcessPayload } from '@core/services/process.service';
+import type { AwaitingProcess, CreateProcessPayload } from '@core/services/process.service';
 
 import { policies } from '../fixtures/policies.fixture';
 import { addAttachment, addComment, createProcess, processes } from '../fixtures/processes.fixture';
@@ -34,6 +34,33 @@ export function handleListPolicyProcesses(
   const policyId = policyIdFromUrl(req.url);
   const list = processes.filter((p) => p.policyId === policyId);
   return ok(list);
+}
+
+/**
+ * GET /processes/awaiting — заявки, ждущие действия агента (по всем полисам).
+ * Джойним с полисом за именем клиента (в самой заявке его нет) и вытаскиваем
+ * последний запрос документов для человеческой подписи «что нужно».
+ */
+export function handleListAwaitingProcesses(): Observable<HttpResponse<ApiResponse<unknown>>> {
+  const awaiting: AwaitingProcess[] = processes
+    .filter((p) => p.status === 'awaiting-docs')
+    .map((p) => {
+      const policy = policies.find((x) => x.id === p.policyId);
+      const docRequest = [...p.statusHistory].reverse().find((e) => e.docRequest)?.docRequest;
+      const need = docRequest
+        ? `Ждут документы: ${docRequest.items.join(', ')}`
+        : 'Ждут ваш ход по заявке';
+      return {
+        processId: p.id,
+        requestNumber: p.requestNumber,
+        policyId: p.policyId,
+        policyNumber: p.policyNumber,
+        clientName: policy?.clientName ?? `Полис ${p.policyNumber}`,
+        kind: p.kind,
+        need,
+      };
+    });
+  return ok(awaiting);
 }
 
 /** POST /policies/:id/processes — создать заявку (внесение изменений). */

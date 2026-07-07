@@ -3,6 +3,8 @@
     <h1 class="clients__title">Мои клиенты</h1>
   </header>
 
+  <app-attention-list class="clients__attention" [items]="attentionItems()" />
+
   <div class="clients__toolbar">
     <div class="clients__field clients__field--search">
       <label class="clients__field-label" for="clients-search">Поиск</label>

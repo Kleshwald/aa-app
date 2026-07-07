@@ -7,7 +7,9 @@ import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs';
 import { TuiTextfield, tuiTextfieldOptionsProvider } from '@taiga-ui/core';
 import { TuiInputDate, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
 
+import { AttentionService } from '@core/services/attention.service';
 import { ClientService, type ClientRow, type ClientsQuery } from '@core/services/client.service';
+import { AttentionListComponent } from '@shared/attention-list/attention-list.component';
 import { IsoDayTransformer } from '@shared/iso-day.transformer';
 
 type PeriodKey = 'today' | 'this-month' | 'this-quarter' | 'this-year' | 'all' | 'custom';
@@ -35,7 +37,14 @@ const STATUS_LABEL: Record<ClientRow['status'], string> = {
 
 @Component({
   selector: 'app-clients-page',
-  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TuiTextfield, TuiInputDate],
+  imports: [
+    DatePipe,
+    DecimalPipe,
+    ReactiveFormsModule,
+    TuiTextfield,
+    TuiInputDate,
+    AttentionListComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './clients.page.html',
   styleUrl: './clients.page.scss',
@@ -47,6 +56,11 @@ const STATUS_LABEL: Record<ClientRow['status'], string> = {
 export class ClientsPage {
   private readonly service = inject(ClientService);
   private readonly router = inject(Router);
+  private readonly attention = inject(AttentionService);
+
+  // Зона «Требуют вас» над таблицей — тот же список, что и в сквозном индикаторе
+  // (момент входа: главная открывается после логина). Работает поверх фильтра периода.
+  protected readonly attentionItems = this.attention.items;
 
   openRow(row: ClientRow): void {
     void this.router.navigate(['/clients', row.id]);

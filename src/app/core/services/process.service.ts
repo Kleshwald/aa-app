@@ -69,6 +69,21 @@ export interface CreateProcessPayload {
   formSnapshot?: unknown; // снимок формы изменений (для будущей передачи в 1С)
 }
 
+/**
+ * Заявка, ждущая действия агента («ваш ход») — плоский указатель для единого
+ * индикатора «Требуют вас». Не переписка, а ссылка: клиент+полис+что нужно+куда идти.
+ * Обогащена именем клиента (джойн с полисом на моке) — в самой заявке его нет.
+ */
+export interface AwaitingProcess {
+  processId: string;
+  requestNumber: string;
+  policyId: string;
+  policyNumber: string;
+  clientName: string;
+  kind: ProcessKind;
+  need: string; // что нужно от агента, человеческой строкой (напр. «Ждут документы: …»)
+}
+
 // ─── Каталог причин изменения (из 1С) — единый источник для диалога/ленты/истории ───
 export interface ChangeReason {
   code: string;
@@ -121,6 +136,14 @@ export class ProcessService {
   /** Список заявок по договору (свежие сверху). */
   listForPolicy(policyId: string): Observable<ApiResponse<PolicyProcess[]>> {
     return this.api.get<PolicyProcess[]>(`/policies/${policyId}/processes`);
+  }
+
+  /**
+   * Заявки, ждущие действия агента (статус «Ожидаем документы»), по ВСЕМ полисам —
+   * питает единый индикатор «Требуют вас». Игнорирует фильтр периода списка клиентов.
+   */
+  listAwaiting(): Observable<ApiResponse<AwaitingProcess[]>> {
+    return this.api.get<AwaitingProcess[]>('/processes/awaiting');
   }
 
   /** Создать заявку (внесение изменений). Возвращает id и номер заявки. */
