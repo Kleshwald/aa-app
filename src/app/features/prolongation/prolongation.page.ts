@@ -35,6 +35,15 @@ function ruDate(iso: string): string {
   return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : iso;
 }
 
+/** Сколько дней до окончания полиса (отрицательно, если уже просрочен). */
+function daysUntil(iso: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = new Date(iso);
+  end.setHours(0, 0, 0, 0);
+  return Math.round((end.getTime() - today.getTime()) / 86_400_000);
+}
+
 @Component({
   selector: 'app-prolongation-page',
   imports: [DatePipe, DecimalPipe, ReactiveFormsModule],
@@ -57,6 +66,16 @@ export class ProlongationPage {
   protected readonly searchControl = new FormControl<string>('', { nonNullable: true });
   protected readonly statusFilter = signal<string>('');
 
+  // Период окончания — отвечает на вопрос агента «за какой срок мне это показывают».
+  // 0 = «Все сроки» (без ограничения). Дефолт 60 — привычное окно обзвона.
+  protected readonly periodOptions = [
+    { value: 30, label: '30 дней' },
+    { value: 60, label: '60 дней' },
+    { value: 90, label: '90 дней' },
+    { value: 0, label: 'Все сроки' },
+  ] as const;
+  protected readonly periodFilter = signal<number>(60);
+
   protected readonly myResponse = toSignal(this.service.list(), { initialValue: undefined });
   protected readonly myAll = computed<ProlongationRow[]>(() => this.myResponse()?.data ?? []);
 
@@ -64,7 +83,11 @@ export class ProlongationPage {
     this.searchTick(); // re-evaluate when the (non-signal) search FormControl changes
     const query = (this.searchControl.value ?? '').trim().toLowerCase();
     const status = this.statusFilter();
+    const period = this.periodFilter();
     return this.myAll().filter((row) => {
+      // Период отсекает по верхней границе: «истекает в ближайшие N дней»
+      // (уже просроченные — daysUntil < 0 — остаются, это горячие цели дозвона).
+      if (period !== 0 && daysUntil(row.endDate) > period) return false;
       if (status && row.status !== status) return false;
       if (!query) return true;
       return (
@@ -74,6 +97,14 @@ export class ProlongationPage {
         `${row.vehicleBrand} ${row.vehicleModel}`.toLowerCase().includes(query)
       );
     });
+  });
+
+  // Явная подпись под переключателем — проговариваем границу выборки,
+  // чтобы агент не гадал «а всех ли я вижу».
+  protected readonly periodCaption = computed(() => {
+    const p = this.periodFilter();
+    const phrase = p === 0 ? 'за всё время' : `в ближайшие ${p} дней`;
+    return `Показаны полисы, срок которых истекает ${phrase} — ${this.myFiltered().length} шт.`;
   });
 
   protected readonly isMyLoading = computed(() => this.myResponse() === undefined);
@@ -99,6 +130,7 @@ export class ProlongationPage {
   resetMyFilters(): void {
     this.searchControl.setValue('');
     this.statusFilter.set('');
+    this.periodFilter.set(60);
   }
 
   /** Скачать текущий отфильтрованный список как CSV — для обзвона клиентов по пролонгации. */

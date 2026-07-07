@@ -70,9 +70,11 @@ function makeBase(): Omit<ProlongationRow, 'status'> {
   const [brand, models] = faker.helpers.arrayElement(CAR_MAKES);
   const model = faker.helpers.arrayElement(models);
   const company = faker.helpers.arrayElement(insuranceCompanies);
+  // Окно окончания: немного просроченных (−14 дн — горячие цели дозвона)
+  // до +90 дней вперёд, чтобы фильтр периода 30/60/90 давал разные выборки.
   const endDate = faker.date.between({
-    from: new Date(Date.now() - 60 * 24 * 3600 * 1000),
-    to: new Date(Date.now() + 60 * 24 * 3600 * 1000),
+    from: new Date(Date.now() - 14 * 24 * 3600 * 1000),
+    to: new Date(Date.now() + 90 * 24 * 3600 * 1000),
   });
 
   return {

@@ -1,17 +1,8 @@
 <section class="prol">
   <h1 class="prol__title">Продление полисов</h1>
 
-  <!-- Tabs -->
+  <!-- Tabs: сначала ежедневная работа агента (свои пролонгации), потом поиск по чужой базе -->
   <div class="prol__tabs" role="tablist">
-    <button
-      type="button"
-      role="tab"
-      class="prol__tab"
-      [class.prol__tab--active]="activeTab() === 'nsis'"
-      (click)="setTab('nsis')"
-    >
-      Поиск по базе НСИС
-    </button>
     <button
       type="button"
       role="tab"
@@ -20,6 +11,15 @@
       (click)="setTab('my')"
     >
       Мои пролонгации
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="prol__tab"
+      [class.prol__tab--active]="activeTab() === 'nsis'"
+      (click)="setTab('nsis')"
+    >
+      Поиск по базе НСИС
     </button>
   </div>
 
@@ -47,6 +47,27 @@
           </div>
         </div>
       }
+
+      <!-- Период окончания: отвечает «за какой срок это показано» + даёт управление -->
+      <div class="prol__period">
+        <div class="prol__period-row">
+          <span class="prol__period-label">Срок окончания полиса:</span>
+          <div class="prol__period-chips" role="group" aria-label="Период окончания полисов">
+            @for (opt of periodOptions; track opt.value) {
+              <button
+                type="button"
+                class="prol__period-chip"
+                [class.prol__period-chip--active]="periodFilter() === opt.value"
+                [attr.aria-pressed]="periodFilter() === opt.value"
+                (click)="periodFilter.set(opt.value)"
+              >
+                {{ opt.label }}
+              </button>
+            }
+          </div>
+        </div>
+        <p class="prol__period-caption">{{ periodCaption() }}</p>
+      </div>
 
       <!-- Toolbar -->
       <div class="prol__toolbar">

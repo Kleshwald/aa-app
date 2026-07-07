@@ -92,6 +92,71 @@
   color: var(--gray-700);
 }
 
+// ─── Период окончания ───
+.prol__period {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prol__period-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.prol__period-label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--gray-800);
+}
+
+.prol__period-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prol__period-chip {
+  min-height: 40px;
+  padding: 0 18px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-800);
+  background: #ffffff;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    color 120ms ease-out,
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+
+  &:hover:not(.prol__period-chip--active) {
+    border-color: var(--brand-400);
+    color: var(--brand-600);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    color: #ffffff;
+    background: var(--brand-500);
+    border-color: var(--brand-500);
+  }
+}
+
+.prol__period-caption {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+}
+
 // ─── Toolbar ───
 .prol__toolbar {
   background: #ffffff;
