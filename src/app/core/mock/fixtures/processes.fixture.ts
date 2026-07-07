@@ -112,20 +112,36 @@ export function createProcess(input: CreateProcessInput): PolicyProcess {
   return process;
 }
 
-/** Комментарий агента + отложенный ответ поддержки. */
+// Ответ поддержки по заявке — по ключевым словам (чтобы не был один и тот же на всё).
+const PROCESS_CANNED: { match: RegExp; reply: string }[] = [
+  {
+    match: /когда|срок|сколько|быстро|время|готов/i,
+    reply:
+      'По этой заявке обычно отвечаем в течение рабочего дня. Как проверим документы — статус изменится здесь.',
+  },
+  {
+    match: /документ|ву|удостоверен|паспорт|скан|фото|приложил/i,
+    reply:
+      'Спасибо, проверяем документы по заявке. Если чего-то не хватит — попросим дозагрузить прямо здесь.',
+  },
+  {
+    match: /кбм|коэффициент|цена|стоимост|доплат/i,
+    reply: 'Уточняем расчёт по заявке в системе. Вернёмся с результатом в этой заявке.',
+  },
+];
+const PROCESS_DEFAULT_REPLY =
+  'Приняли ваше сообщение по заявке. Специалист, который её ведёт, ответит здесь же.';
+
+/** Комментарий агента + отложенный ответ поддержки (по ключевым словам). */
 export function addComment(id: string, text: string): PolicyProcess | undefined {
   const proc = find(id);
   if (!proc) return undefined;
   proc.comments.push({ at: nowIso(), author: 'agent', authorName: 'Вы', text });
+  const reply = PROCESS_CANNED.find((c) => c.match.test(text))?.reply ?? PROCESS_DEFAULT_REPLY;
   setTimeout(() => {
     const p = find(id);
     if (!p) return;
-    p.comments.push({
-      at: nowIso(),
-      author: 'support',
-      authorName: SUPPORT_NAME,
-      text: 'Спасибо, зафиксировали. Специалист свяжется по заявке в ближайшее время.',
-    });
+    p.comments.push({ at: nowIso(), author: 'support', authorName: SUPPORT_NAME, text: reply });
   }, 2500);
   return proc;
 }

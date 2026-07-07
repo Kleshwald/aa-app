@@ -14,15 +14,25 @@ import { Subject, startWith, switchMap } from 'rxjs';
 import * as QRCode from 'qrcode';
 
 import { ClientDetailService, type PolicyDetail } from '@core/services/client-detail.service';
-import { ChatService } from '@core/services/chat.service';
 import {
   PROCESS_KIND_LABEL,
   PROCESS_STATUS_LABEL,
   ProcessService,
   reasonLabel,
   type PolicyProcess,
+  type ProcessActor,
   type ProcessStatusEvent,
 } from '@core/services/process.service';
+
+// Одна хронологическая запись «Хода заявки»: событие статуса ИЛИ реплика.
+// Журнал операции (как трекинг Госуслуг), НЕ чат-пузыри — судьба сообщения иная.
+interface JournalEntry {
+  at: string;
+  author: ProcessActor;
+  authorLabel: string;
+  statusLabel?: string;
+  text?: string;
+}
 import { type ApiResponse } from '@core/models';
 import { BreadcrumbsComponent } from '@shared/breadcrumbs/breadcrumbs.component';
 import { InsurerLogoComponent } from '@shared/insurer-logo/insurer-logo.component';
@@ -64,7 +74,6 @@ export class ClientDetailPage {
   private readonly router = inject(Router);
   private readonly service = inject(ClientDetailService);
   private readonly processService = inject(ProcessService);
-  private readonly chat = inject(ChatService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly statusLabel = STATUS_LABEL;
@@ -122,6 +131,26 @@ export class ClientDetailPage {
     () => this.processes().find((p) => p.id === this.historyProcessId()) ?? null,
   );
   protected readonly commentDraft = signal('');
+
+  /** «Ход заявки» — события статуса + реплики в одной хронологии (по времени). */
+  protected readonly journal = computed<JournalEntry[]>(() => {
+    const proc = this.historyProcess();
+    if (!proc) return [];
+    const fromStatus: JournalEntry[] = proc.statusHistory.map((ev) => ({
+      at: ev.at,
+      author: ev.author,
+      authorLabel: ev.author === 'agent' ? 'Вы' : 'Поддержка',
+      statusLabel: PROCESS_STATUS_LABEL[ev.status],
+      text: ev.comment,
+    }));
+    const fromComments: JournalEntry[] = proc.comments.map((c) => ({
+      at: c.at,
+      author: c.author,
+      authorLabel: c.author === 'agent' ? 'Вы' : 'Поддержка',
+      text: c.text,
+    }));
+    return [...fromStatus, ...fromComments].sort((a, b) => a.at.localeCompare(b.at));
+  });
 
   constructor() {
     // Model A: лёгкий поллинг, чтобы «поддержка» продвинула статус/ответила без F5.
@@ -290,15 +319,6 @@ export class ClientDetailPage {
     input.value = '';
     if (!file) return;
     this.processService.uploadDoc(proc.id, file.name).subscribe(() => this.refreshProcesses());
-  }
-
-  /** «Обсудить в чате» — общий чат с контекстным якорем на заявку. */
-  discussInChat(proc: PolicyProcess): void {
-    const kind = PROCESS_KIND_LABEL[proc.kind];
-    this.chat.startWithContext(
-      `Вопрос по заявке №${proc.requestNumber} (${kind}) по полису ${proc.policyNumber}: `,
-    );
-    void this.router.navigate(['/messages']);
   }
 
   /** Добавить кросс-продукт клиенту. Заглушка — реальный флоу появится позже. */

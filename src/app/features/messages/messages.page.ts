@@ -81,12 +81,6 @@ export class MessagesPage implements OnInit {
 
   ngOnInit(): void {
     this.chat.markRead();
-    // Пришли из заявки по кнопке «Обсудить в чате» — подставляем контекст в поле ввода.
-    const ctx = this.chat.pendingContext();
-    if (ctx) {
-      this.draft.set(ctx);
-      this.chat.pendingContext.set(null);
-    }
   }
 
   send(): void {

@@ -84,17 +84,8 @@ export class ChatService {
     () => this.messages().filter((m) => m.author === 'company' && !m.read).length,
   );
 
-  // Контекстный якорь: «Обсудить в чате» из заявки кладёт сюда преамбулу
-  // («Вопрос по заявке №…»), которую страница чата подставит в поле ввода.
-  readonly pendingContext = signal<string | null>(null);
-
   constructor() {
     this.restore();
-  }
-
-  /** Открыть чат с контекстом заявки — преамбула подставится в поле ввода. */
-  startWithContext(intro: string): void {
-    this.pendingContext.set(intro);
   }
 
   send(text: string, attachments: ChatAttachment[] = []): void {

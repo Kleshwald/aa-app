@@ -355,22 +355,35 @@
                   <p class="req__reasons">{{ reasonList(proc) }}</p>
                 }
                 @if (lastEvent(proc); as ev) {
-                  @if (ev.comment) {
-                    <p class="req__comment">{{ ev.comment }}</p>
-                  }
                   @if (ev.docRequest) {
-                    <label class="req__upload">
-                      <input type="file" hidden (change)="uploadProcessDoc(proc, $event)" />
-                      <span>Загрузить документы</span>
-                    </label>
+                    <!-- «Ваш ход» — заметнее пассивных статусов (агент не должен пропустить) -->
+                    <div class="req__call">
+                      <span class="req__call-title">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          aria-hidden="true"
+                        >
+                          <circle cx="12" cy="12" r="9" />
+                          <path d="M12 8v4M12 16h.01" stroke-linecap="round" />
+                        </svg>
+                        Поддержка ждёт от вас документы
+                      </span>
+                      <span class="req__call-text">{{ ev.docRequest.items.join(', ') }}</span>
+                      <label class="req__upload">
+                        <input type="file" hidden (change)="uploadProcessDoc(proc, $event)" />
+                        <span>Загрузить документы</span>
+                      </label>
+                    </div>
+                  } @else if (ev.comment) {
+                    <p class="req__comment">{{ ev.comment }}</p>
                   }
                 }
                 <div class="req__actions">
                   <button type="button" class="req__link" (click)="openHistory(proc)">
-                    Показать историю статусов
-                  </button>
-                  <button type="button" class="req__link" (click)="discussInChat(proc)">
-                    Обсудить в чате
+                    Ход заявки и переписка
                   </button>
                 </div>
               </li>
@@ -398,70 +411,64 @@
       ></button>
       <div class="hist" role="dialog" aria-modal="true" aria-labelledby="hist-title">
         <header class="hist__head">
-          <h2 class="hist__title" id="hist-title">
-            История статусов · {{ processKindLabel[proc.kind] }} №{{ proc.requestNumber }}
-          </h2>
+          <div>
+            <h2 class="hist__title" id="hist-title">
+              Ход заявки · {{ processKindLabel[proc.kind] }} №{{ proc.requestNumber }}
+            </h2>
+            @if (proc.reasons.length > 0) {
+              <p class="hist__reasons">{{ reasonList(proc) }}</p>
+            }
+          </div>
           <button type="button" class="hist__close" (click)="closeHistory()" aria-label="Закрыть">
             ×
           </button>
         </header>
 
+        <!-- Единая хронология: статусы + реплики. Журнал операции, НЕ чат. -->
         <div class="hist__scroll">
-          <table class="hist__table">
-            <thead>
-              <tr>
-                <th>Дата</th>
-                <th>Вид процесса</th>
-                <th>Заявка</th>
-                <th>Статус</th>
-                <th>Комментарий</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (ev of proc.statusHistory; track $index) {
-                <tr>
-                  <td>{{ ev.at | date: 'dd.MM.yyyy HH:mm' }}</td>
-                  <td>{{ processKindLabel[proc.kind] }}</td>
-                  <td>№{{ ev.requestNumber }}</td>
-                  <td>{{ processStatusLabel[ev.status] }}</td>
-                  <td>{{ ev.comment }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-
-          @if (proc.comments.length > 0) {
-            <div class="hist__comments">
-              <h3 class="hist__subtitle">Переписка по заявке</h3>
-              @for (c of proc.comments; track $index) {
-                <div class="cmt" [class.cmt--agent]="c.author === 'agent'">
-                  <div class="cmt__meta">
-                    <span class="cmt__author">{{ c.authorName }}</span>
-                    <span class="cmt__time">{{ c.at | date: 'dd.MM HH:mm' }}</span>
-                  </div>
-                  <p class="cmt__text">{{ c.text }}</p>
+          <ol class="jrn">
+            @for (e of journal(); track $index) {
+              <li class="jrn__item" [class.jrn__item--support]="e.author === 'support'">
+                <div class="jrn__meta">
+                  <span class="jrn__author">{{ e.authorLabel }}</span>
+                  <span class="jrn__time">{{ e.at | date: 'dd.MM.yyyy HH:mm' }}</span>
+                  @if (e.statusLabel) {
+                    <span class="jrn__status">{{ e.statusLabel }}</span>
+                  }
                 </div>
-              }
-            </div>
-          }
+                @if (e.text) {
+                  <p class="jrn__text">{{ e.text }}</p>
+                }
+              </li>
+            }
+          </ol>
         </div>
 
         <footer class="hist__foot">
-          <textarea
-            class="hist__input"
-            rows="2"
-            placeholder="Оставить комментарий поддержке…"
-            [value]="commentDraft()"
-            (input)="commentDraft.set($any($event.target).value)"
-          ></textarea>
-          <button
-            type="button"
-            class="hist__send"
-            [disabled]="!commentDraft().trim()"
-            (click)="submitComment()"
+          <label class="hist__label" for="reqReply"
+            >Уточнение по заявке №{{ proc.requestNumber }}</label
           >
-            Отправить
-          </button>
+          <div class="hist__composer">
+            <textarea
+              id="reqReply"
+              class="hist__input"
+              rows="2"
+              [value]="commentDraft()"
+              (input)="commentDraft.set($any($event.target).value)"
+            ></textarea>
+            <button
+              type="button"
+              class="hist__send"
+              [disabled]="!commentDraft().trim()"
+              (click)="submitComment()"
+            >
+              Ответить по заявке
+            </button>
+          </div>
+          <p class="hist__border">
+            Пишете по этой заявке — её видит специалист, который её ведёт; ответ появится здесь же.
+            Общие вопросы и куратор — в разделе «Сообщения».
+          </p>
         </footer>
       </div>
     }

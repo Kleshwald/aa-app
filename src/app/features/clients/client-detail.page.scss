@@ -876,6 +876,38 @@
   }
 }
 
+// «Ваш ход» — поддержка ждёт действия агента. Заметно громче пассивных статусов
+// (страх аудитории «пропущу и опозорюсь» → нельзя дать утонуть в ленте).
+.req__call {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--warning-50);
+  border: 1px solid var(--warning-100);
+  border-radius: var(--radius-md);
+}
+
+.req__call-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--warning-700);
+
+  svg {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.req__call-text {
+  font-size: var(--text-base);
+  color: var(--gray-800);
+}
+
 .req__actions {
   display: flex;
   flex-wrap: wrap;
@@ -965,80 +997,86 @@
   padding: 0 24px;
 }
 
-.hist__table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+.hist__reasons {
+  margin: 4px 0 0;
   font-size: var(--text-sm);
+  color: var(--gray-600);
+}
 
-  thead th {
-    position: sticky;
-    top: 0;
-    padding: 10px 12px;
-    text-align: left;
-    background: var(--brand-50);
-    color: var(--brand-700);
-    font-weight: var(--weight-semibold);
-    white-space: nowrap;
-    border-bottom: 1px solid var(--brand-100);
+// «Ход заявки» — единый журнал (события статуса + реплики), НЕ чат-пузыри:
+// одна колонка, левый акцент по автору, как трекинг статуса (Госуслуги/доставка).
+.jrn {
+  margin: 0;
+  padding: 8px 0 16px;
+  list-style: none;
+}
+
+.jrn__item {
+  padding: 10px 0 10px 16px;
+  border-left: 2px solid var(--gray-200);
+
+  & + & {
+    border-top: 1px solid var(--gray-100);
   }
 
-  tbody td {
-    padding: 10px 12px;
-    color: var(--gray-900);
-    border-bottom: 1px solid var(--gray-100);
-    vertical-align: top;
+  &--support {
+    border-left-color: var(--brand-400);
   }
 }
 
-.hist__comments {
-  padding: 16px 0 8px;
+.jrn__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-bottom: 2px;
 }
 
-.hist__subtitle {
-  margin: 0 0 10px;
-  font-size: var(--text-base);
+.jrn__author {
+  font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   color: var(--gray-900);
 }
 
-.cmt {
-  max-width: 82%;
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  background: var(--gray-100);
-  border-radius: var(--radius-md);
-
-  &--agent {
-    margin-left: auto;
-    background: var(--brand-100);
-  }
+.jrn__time {
+  font-size: var(--text-sm);
+  color: var(--gray-500);
 }
 
-.cmt__meta {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 2px;
+.jrn__status {
+  padding: 2px 10px;
   font-size: var(--text-xs);
-  color: var(--gray-600);
-}
-
-.cmt__author {
   font-weight: var(--weight-medium);
+  color: var(--brand-700);
+  background: var(--brand-50);
+  border-radius: var(--radius-full);
 }
 
-.cmt__text {
+.jrn__text {
   margin: 0;
   font-size: var(--text-base);
-  color: var(--gray-900);
+  color: var(--gray-800);
 }
 
+// ─── Композер ответа по заявке ───
 .hist__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 24px 20px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.hist__label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-800);
+}
+
+.hist__composer {
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  padding: 12px 24px 20px;
-  border-top: 1px solid var(--gray-100);
 }
 
 .hist__input {
@@ -1080,4 +1118,10 @@
     background: var(--gray-300);
     cursor: not-allowed;
   }
+}
+
+.hist__border {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
 }
