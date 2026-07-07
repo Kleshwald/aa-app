@@ -1,0 +1,738 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+// Все элементы — border-box. Иначе width:100% + padding у карточек (.reg-card,
+// .reg-hero) даёт ширину БОЛЬШЕ колонки → горизонтальный обрез (виден на мобильном).
+:host * {
+  box-sizing: border-box;
+}
+
+.reg-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 40px 16px;
+  background: var(--gray-50);
+}
+
+.reg-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 460px;
+  margin: auto;
+  padding: 40px 32px;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+// Лендинг-карточка шире — под сгруппированную форму, чтобы не было тесно.
+.reg-card--form {
+  max-width: 560px;
+}
+
+.reg-card--wide {
+  max-width: 620px;
+}
+
+// ─── Сплит-лендинг: промо-панель + карточка формы ───
+// Десктоп ≥960px: две колонки в одном контейнере. <960px: колонка (панель сверху).
+.reg-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); // min 0 — иначе длинные <option> распирают колонку
+  align-items: stretch;
+  width: 100%;
+  max-width: 460px; // = ширина формы на мобильном; на десктопе расширяется ниже
+  margin: auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden; // общий скруглённый контур панель+форма
+  box-shadow: var(--shadow-sm);
+}
+
+// В сплите карточка формы теряет собственную тень/скругление/ширину —
+// контур и тень несёт .reg-split. Внутренности формы не трогаем.
+.reg-card--split {
+  max-width: none;
+  min-width: 0; // разрешаем сжатие (иначе select с длинными опциями переполняет колонку)
+  margin: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+// ─── Промо-панель (navy, белый текст — контраст 13.5:1) ───
+.reg-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 32px 28px;
+  background: var(--brand-500);
+  color: #ffffff;
+}
+
+// Светлый вариант панели — включается модификатором в шаблоне (reg-hero--light),
+// если владелец предпочтёт светлый hero вместо navy.
+.reg-hero--light {
+  background: var(--brand-50);
+  color: var(--gray-900);
+
+  // Светлый фон → цветное лого (белое было бы невидимым).
+  .reg-hero__logo--white {
+    display: none;
+  }
+  .reg-hero__logo--color {
+    display: block;
+  }
+
+  .reg-hero__lead {
+    color: var(--gray-700);
+  }
+  .reg-hero__check {
+    color: var(--brand-500);
+  }
+  .reg-hero__insurers {
+    border-top-color: var(--brand-200);
+  }
+  .reg-hero__insurers-title {
+    color: var(--gray-700);
+  }
+}
+
+.reg-hero__logo {
+  display: block;
+  height: 40px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+}
+
+// По умолчанию панель navy → белое лого. Цветное прячем.
+.reg-hero__logo--color {
+  display: none;
+}
+
+.reg-hero__headline {
+  margin: 4px 0 0;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+  font-weight: var(--weight-semibold);
+  color: inherit;
+}
+
+.reg-hero__lead {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: rgb(255 255 255 / 88%); // мягче основного, но контраст на navy > 4.5:1
+}
+
+.reg-hero__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reg-hero__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: inherit;
+}
+
+.reg-hero__check {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 3px; // выравнивание к первой строке текста
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--success-500); // зелёная галочка читается и на navy, и на светлом
+}
+
+// ─── Логотипы страховых-партнёров (доверие: «много и надёжно») ───
+.reg-hero__insurers {
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid rgb(255 255 255 / 18%);
+}
+
+.reg-hero__insurers-title {
+  margin: 0 0 12px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+  color: rgb(255 255 255 / 82%);
+}
+
+// «Стена партнёров» — лого + название на белой карточке (структура, читаемость).
+.reg-hero__logos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 12px;
+  margin: 0;
+  padding: 18px 16px;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid var(--brand-100);
+  border-radius: var(--radius-lg);
+  --ins-logo-size: 52px; // крупнее лого СК (было мелко)
+}
+
+// Вертикальная карточка партнёра: лого сверху, название под ним по центру
+// (полное название влезает, не режется — «стена партнёров»).
+.reg-partner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  text-align: center;
+}
+
+.reg-partner__name {
+  font-size: var(--text-base);
+  line-height: 1.2;
+  font-weight: var(--weight-medium);
+  color: var(--gray-800);
+}
+
+// Десктоп: две колонки. Панель фиксированной ширины, форма забирает остаток.
+@media (min-width: 960px) {
+  // Flex вместо grid: панель фикс-ширины, форма забирает остаток. КЛЮЧ — min-width:0
+  // на форме: без него flex-элемент не сжимается ниже min-content и его правый край
+  // вылезал за колонку и резался overflow:hidden (баг «правый блок обрезается»).
+  .reg-split {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    max-width: 1020px;
+  }
+
+  .reg-hero {
+    flex: 0 0 420px; // шире левая панель (было тесно)
+    justify-content: center; // вертикально центрируем контент относительно формы
+    padding: 48px 40px;
+    gap: 22px;
+  }
+
+  .reg-card--split {
+    flex: 1 1 auto;
+    min-width: 0; // разрешаем сжатие — иначе форма переполняет колонку и режется
+  }
+
+  .reg-hero__headline {
+    font-size: var(--text-3xl);
+    line-height: var(--leading-3xl);
+  }
+}
+
+.reg-card__back {
+  margin: -8px 0 4px;
+}
+
+// Заголовок — канон: по центру, brand-700, text-2xl.
+.reg-title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--brand-700);
+  text-align: center;
+}
+
+.reg-subtitle {
+  margin: 8px 0 28px;
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--gray-700);
+  text-align: center;
+}
+
+.reg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.reg-sms {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// ─── Группа полей (визуальная секция формы) ───
+.reg-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.reg-group__legend {
+  padding: 0;
+  margin-bottom: 4px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--brand-700);
+}
+
+// Две короткие пары полей в ряд; на узком — в столбик.
+.reg-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+// ─── Поле (нативный бордер-инпут в стиле login) ───
+.reg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.reg-field__label {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+  color: var(--gray-700);
+}
+
+.reg-field__input {
+  height: var(--size-input);
+  padding: 0 14px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-family: inherit;
+  color: var(--gray-900);
+  background: #ffffff;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-base);
+  transition:
+    border-color 120ms ease-out,
+    box-shadow 120ms ease-out;
+  appearance: none;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: var(--gray-500);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--gray-400);
+  }
+
+  &:focus {
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 4px var(--brand-100);
+  }
+
+  &--error {
+    border-color: var(--error-500);
+
+    &:focus {
+      border-color: var(--error-500);
+      box-shadow: 0 0 0 4px var(--error-100);
+    }
+  }
+}
+
+// Стабильный слот под подсказку/ошибку — layout не «прыгает».
+.reg-field__slot {
+  display: block;
+  min-height: 20px;
+}
+
+.reg-field__hint {
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--gray-600);
+}
+
+.reg-field__error {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--error-700);
+
+  svg {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+// ─── Плитки «Форма работы» (3 в ряд) ───
+.reg-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.reg-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-height: 60px;
+  padding: 10px 14px;
+  font-family: inherit;
+  text-align: left;
+  background: #ffffff;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease-out,
+    background 120ms ease-out;
+
+  &:hover {
+    border-color: var(--gray-400);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--brand-100);
+  }
+
+  &--active {
+    border-color: var(--brand-500);
+    background: var(--brand-50);
+  }
+}
+
+.reg-tile__name {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+}
+
+.reg-tile__hint {
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  color: var(--gray-600);
+}
+
+// Код из SMS — крупный, разреженный (визуальные сегменты без 4 инпутов).
+.reg-code {
+  text-align: center;
+  font-size: var(--text-2xl);
+  letter-spacing: 0.5em;
+  font-variant-numeric: tabular-nums;
+}
+
+.reg-resend {
+  margin: 4px 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  text-align: center;
+}
+
+.reg-link {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 8px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--brand-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--brand-100);
+    border-radius: var(--radius-sm);
+  }
+}
+
+// ─── Кнопки ───
+
+.reg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--size-button);
+  padding: 0 24px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  border: 1px solid transparent;
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 120ms ease-out,
+    box-shadow 120ms ease-out;
+
+  &--primary {
+    color: #ffffff;
+    background: var(--brand-500);
+
+    &:hover {
+      background: var(--brand-600);
+    }
+
+    &:active {
+      background: var(--brand-700);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 4px var(--brand-100);
+    }
+  }
+
+  &--secondary {
+    color: var(--brand-700);
+    background: #ffffff;
+    border-color: var(--gray-300);
+
+    &:hover {
+      border-color: var(--brand-500);
+      background: var(--brand-50);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 4px var(--brand-100);
+    }
+  }
+
+  // Кнопка на всю ширину — крупная (56px), как основной CTA login.
+  &--block {
+    width: 100%;
+    height: var(--size-button-lg);
+    margin-top: 4px;
+  }
+}
+
+.reg-note {
+  margin: 12px 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--gray-600);
+  text-align: center;
+}
+
+// Строка «что дальше» — это контент, а не юр-сноска: читаемый размер (≥16px),
+// темнее, с воздухом от кнопки. Готовит к подписи оферты на следующем шаге.
+.reg-note--next {
+  margin-top: 16px;
+  padding: 12px 14px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--gray-700);
+  background: var(--gray-50);
+  border-radius: var(--radius-base);
+}
+
+// ─── Страница-статус ───
+
+.reg-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 8px;
+  border-radius: var(--radius-full);
+  background: var(--success-50);
+  color: var(--success-700);
+
+  svg {
+    width: 30px;
+    height: 30px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.reg-progress {
+  margin: 20px 0 24px;
+  padding: 16px;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+}
+
+// Информ-карточки шагов. «Замок» ≠ ошибка → жёлтый/серый/инфо, НИКОГДА красный.
+.reg-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+
+  &--go {
+    border-color: var(--brand-200);
+    background: var(--brand-50);
+  }
+  &--done {
+    border-color: var(--success-100);
+    background: var(--success-50);
+  }
+}
+
+.reg-block__ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  color: var(--gray-600);
+
+  svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .reg-block--done & {
+    background: var(--success-100);
+    color: var(--success-700);
+  }
+  .reg-block--info & {
+    background: var(--info-50);
+    color: var(--info-600);
+  }
+  .reg-block--lock & {
+    background: var(--warning-50);
+    color: var(--warning-700);
+  }
+}
+
+.reg-block__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.reg-block__title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+}
+
+.reg-block__sub {
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+}
+
+.reg-block .reg-btn {
+  flex: 0 0 auto;
+}
+
+// Узкий сплит (<960px): панель СВЕРХУ в сжатом виде, форма — сразу под ней.
+// Цель — first screen сообщает «что и зачем», но форма достижима без долгого скролла
+// (помним 3G и старый ноут). Поэтому цифры-метрики прячем, буллеты компактнее.
+@media (max-width: 959px) {
+  .reg-hero {
+    padding: 24px 24px 20px;
+    gap: 12px;
+  }
+
+  .reg-hero__logo {
+    height: 34px;
+  }
+
+  .reg-hero__headline {
+    font-size: var(--text-xl);
+    line-height: var(--leading-xl);
+  }
+
+  // На мобильном экономим высоту: лид и лого — не первично для «дойти до формы».
+  .reg-hero__lead,
+  .reg-hero__insurers {
+    display: none;
+  }
+
+  .reg-hero__list {
+    gap: 8px;
+  }
+
+  .reg-card--split {
+    border: none; // общий контур .reg-split уже даёт границу
+  }
+}
+
+@media (max-width: 560px) {
+  .reg-card,
+  .reg-card--form {
+    padding: 32px 20px;
+  }
+
+  .reg-card--split {
+    padding: 24px 20px 28px;
+  }
+
+  .reg-hero__item {
+    font-size: var(--text-sm); // ≥16px, минимум для тела на узком
+    line-height: var(--leading-sm);
+  }
+
+  .reg-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .reg-tiles {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .reg-block {
+    flex-wrap: wrap;
+  }
+  .reg-block .reg-btn {
+    width: 100%;
+  }
+}
