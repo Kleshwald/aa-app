@@ -1,5 +1,6 @@
 import { faker } from './seed';
 import { insuranceCompanies } from './insurance-companies.fixture';
+import { osagoPolicyNumber } from './policy-number';
 
 // «Прошлогодние полисы», которые агент может пролонгировать.
 // Колонки и цветовые статусы — как в текущей 1С (см. скриншот).
@@ -83,7 +84,7 @@ function makeBase(): Omit<ProlongationRow, 'status'> {
     clientName: `${faker.person.lastName(sex)} ${faker.person.firstName(sex)} ${faker.person.middleName(sex)}`,
     vehicleBrand: brand,
     vehicleModel: model,
-    policyNumber: `001ДМСА${faker.string.numeric(6)}`,
+    policyNumber: osagoPolicyNumber(),
     endDate: endDate.toISOString().slice(0, 10),
     insuranceCompanyName: company.shortName,
     lastYearPrice: faker.helpers.arrayElement([540, 810, 1080, 1888, 4860, 8100, 27000]),

@@ -1,6 +1,7 @@
 import { faker } from './seed';
 
 import { insuranceCompanies } from './insurance-companies.fixture';
+import { osagoPolicyNumber } from './policy-number';
 
 type PolicyType = 'OSAGO' | 'NS' | 'TICK' | 'MORTGAGE';
 type PolicyStatus = 'active' | 'expired' | 'cancelled' | 'pending' | 'processing';
@@ -61,9 +62,8 @@ function makePolicy(agentId: string): PolicyFixture {
   const premium = faker.number.float({ min: 3500, max: 28000, fractionDigits: 2 });
   const commissionRate = faker.number.float({ min: 0.07, max: 0.15 });
   const sex = faker.helpers.arrayElement(['male', 'female'] as const);
-  // Серия ОСАГО — всегда «ХХХ» (как у реальных е-полисов и при оформлении).
-  const number =
-    type === 'OSAGO' ? `ХХХ ${faker.string.numeric(10)}` : `РРР-${faker.string.numeric(8)}`;
+  // Номер ОСАГО — канонический формат (см. osagoPolicyNumber); не-ОСАГО — свой вид.
+  const number = type === 'OSAGO' ? osagoPolicyNumber() : `РРР-${faker.string.numeric(8)}`;
   return {
     id: faker.string.uuid(),
     number,
@@ -128,9 +128,7 @@ export interface CreatePolicyInput {
 export function createPolicy(input: CreatePolicyInput): PolicyFixture {
   const year = new Date(input.startDate || new Date().toISOString()).getFullYear();
   const number =
-    input.type === 'OSAGO'
-      ? `ХХХ ${faker.string.numeric(10)}`
-      : `001SHG-${faker.string.numeric(6)}/${year}-AKN`;
+    input.type === 'OSAGO' ? osagoPolicyNumber() : `001SHG-${faker.string.numeric(6)}/${year}-AKN`;
   const policy: PolicyFixture = {
     id: faker.string.uuid(),
     number,
