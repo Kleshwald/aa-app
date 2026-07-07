@@ -134,7 +134,6 @@ export class ProfilePage {
       { name: 'ИНН', status: 'ok', meta: 'загружен 15.01.2024' },
       ...legalExtra,
       { name: 'Реквизиты банковского счёта', status: 'ok', meta: 'загружено 15.01.2024' },
-      { name: 'Фото для профиля', status: 'missing' },
     ];
   });
 

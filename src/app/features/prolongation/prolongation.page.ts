@@ -67,12 +67,11 @@ export class ProlongationPage {
   protected readonly statusFilter = signal<string>('');
 
   // Период окончания — отвечает на вопрос агента «за какой срок мне это показывают».
-  // 0 = «Все сроки» (без ограничения). Дефолт 60 — привычное окно обзвона.
+  // Дефолт 60 — привычное окно обзвона.
   protected readonly periodOptions = [
     { value: 30, label: '30 дней' },
     { value: 60, label: '60 дней' },
     { value: 90, label: '90 дней' },
-    { value: 0, label: 'Все сроки' },
   ] as const;
   protected readonly periodFilter = signal<number>(60);
 
@@ -87,7 +86,7 @@ export class ProlongationPage {
     return this.myAll().filter((row) => {
       // Период отсекает по верхней границе: «истекает в ближайшие N дней»
       // (уже просроченные — daysUntil < 0 — остаются, это горячие цели дозвона).
-      if (period !== 0 && daysUntil(row.endDate) > period) return false;
+      if (daysUntil(row.endDate) > period) return false;
       if (status && row.status !== status) return false;
       if (!query) return true;
       return (
@@ -101,11 +100,10 @@ export class ProlongationPage {
 
   // Явная подпись под переключателем — проговариваем границу выборки,
   // чтобы агент не гадал «а всех ли я вижу».
-  protected readonly periodCaption = computed(() => {
-    const p = this.periodFilter();
-    const phrase = p === 0 ? 'за всё время' : `в ближайшие ${p} дней`;
-    return `Показаны полисы, срок которых истекает ${phrase} — ${this.myFiltered().length} шт.`;
-  });
+  protected readonly periodCaption = computed(
+    () =>
+      `Показаны полисы, срок которых истекает в ближайшие ${this.periodFilter()} дней — ${this.myFiltered().length} шт.`,
+  );
 
   protected readonly isMyLoading = computed(() => this.myResponse() === undefined);
 
