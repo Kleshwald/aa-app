@@ -2,8 +2,13 @@
   <!-- ──────────────────────────── FORM ──────────────────────────── -->
   @case ('form') {
     <section class="osago" [formGroup]="form">
+      @if (mode() === 'change') {
+        <app-back-link label="Вернуться к договору" (back)="backToContract()" />
+      }
       <header class="osago__title-row">
-        <h1 class="osago__title">ОСАГО</h1>
+        <h1 class="osago__title">
+          {{ mode() === 'change' ? 'Внесение изменений в договор' : 'ОСАГО' }}
+        </h1>
       </header>
 
       <!-- Insurer-type tabs -->
@@ -685,29 +690,43 @@
       </article>
 
       <footer class="osago__actions">
-        <button type="button" class="osago__assist" (click)="fillRandom()">
-          <svg
-            class="osago__assist-ico"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
+        @if (mode() === 'change') {
+          <span class="osago__draft-hint">Проверьте данные и подтвердите изменения</span>
+          <button
+            type="button"
+            class="osago__btn osago__btn--primary"
+            [disabled]="changeSubmitting()"
+            (click)="submitChange()"
           >
-            <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z" />
-            <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14Z" />
-          </svg>
-          Ассистент, заполни!
-        </button>
-        <span class="osago__draft-hint">Дата расчёта: {{ today | date: 'dd.MM.yyyy HH:mm' }}</span>
-        <button type="button" class="osago__btn osago__btn--secondary" (click)="saveDraft()">
-          Сохранить черновик
-        </button>
-        <button type="button" class="osago__btn osago__btn--primary" (click)="calculate()">
-          Рассчитать
-        </button>
+            {{ changeSubmitting() ? 'Отправляем…' : 'Внести изменения' }}
+          </button>
+        } @else {
+          <button type="button" class="osago__assist" (click)="fillRandom()">
+            <svg
+              class="osago__assist-ico"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z" />
+              <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14Z" />
+            </svg>
+            Ассистент, заполни!
+          </button>
+          <span class="osago__draft-hint"
+            >Дата расчёта: {{ today | date: 'dd.MM.yyyy HH:mm' }}</span
+          >
+          <button type="button" class="osago__btn osago__btn--secondary" (click)="saveDraft()">
+            Сохранить черновик
+          </button>
+          <button type="button" class="osago__btn osago__btn--primary" (click)="calculate()">
+            Рассчитать
+          </button>
+        }
       </footer>
     </section>
   }

@@ -17,12 +17,14 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import {
   type CreatePolicyPayload,
+  type PolicyDetail,
   ClientDetailService,
 } from '@core/services/client-detail.service';
+import { ProcessService } from '@core/services/process.service';
 import { AddonIconComponent } from '@shared/addon-icon/addon-icon.component';
 import { BackLinkComponent } from '@shared/back-link/back-link.component';
 import { CalcLoaderComponent, type CalcStep } from '@shared/calc-loader/calc-loader.component';
@@ -196,6 +198,12 @@ interface CoefRow {
   value: number;
 }
 
+/** «Фамилия Имя Отчество» → [Фамилия, Имя, Отчество] (для предзаполнения формы изменений). */
+function splitName(full: string): [string, string, string] {
+  const parts = (full ?? '').trim().split(/\s+/).filter(Boolean);
+  return [parts[0] ?? '', parts[1] ?? '', parts.slice(2).join(' ')];
+}
+
 @Component({
   selector: 'app-osago-page',
   imports: [
@@ -226,8 +234,22 @@ interface CoefRow {
 export class OsagoPage {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly policyService = inject(ClientDetailService);
+  private readonly processService = inject(ProcessService);
+
+  // Режим страницы: 'new' — обычный расчёт ОСАГО; 'change' — внесение изменений
+  // в существующий договор (форма предзаполняется, CTA «Внести изменения»,
+  // расчёт/оплата не используются). Флаг чисто аддитивный — новый флоу не трогает.
+  protected readonly mode = signal<'new' | 'change'>(
+    (this.route.snapshot.data as { mode?: string }).mode === 'change' ? 'change' : 'new',
+  );
+  private readonly changePolicyId = this.route.snapshot.paramMap.get('id') ?? '';
+  private readonly reasonCodes = (this.route.snapshot.queryParamMap.get('reasons') ?? '')
+    .split(',')
+    .filter(Boolean);
+  protected readonly changeSubmitting = signal(false);
 
   protected readonly purposes = VEHICLE_PURPOSES;
   protected readonly categories = VEHICLE_CATEGORIES;
@@ -455,6 +477,100 @@ export class OsagoPage {
       same ? ownerPerson.disable({ emitEvent: false }) : ownerPerson.enable({ emitEvent: false });
     syncOwner(ownerSame.value);
     ownerSame.valueChanges.pipe(takeUntilDestroyed()).subscribe(syncOwner);
+
+    // Режим «внесение изменений» — подтягиваем договор и предзаполняем форму.
+    if (this.mode() === 'change' && this.changePolicyId) {
+      this.loadPolicyForChange();
+    }
+  }
+
+  // ─── Режим «внесение изменений» ───
+
+  private loadPolicyForChange(): void {
+    this.policyService.get(this.changePolicyId).subscribe((res) => {
+      // Если договор не подгрузился — оставляем пустую редактируемую форму.
+      if (res.success && res.data) this.prefillFromPolicy(res.data);
+    });
+  }
+
+  /** Предзаполнить форму данными договора (частично — модель договора беднее формы). */
+  private prefillFromPolicy(p: PolicyDetail): void {
+    const [phLast, phFirst, phMiddle] = splitName(p.clientName);
+    // Произвольная марка/модель — иначе смена make чистит model (каталог ≠ фикстуры).
+    this.form.controls.vehicle.controls.customMakeModel.setValue(true);
+    this.form.patchValue({
+      base: {
+        startDate: p.startDate,
+        endDate: p.endDate,
+        clientPhone: p.clientPhone,
+        purpose: 'personal',
+      },
+      vehicle: {
+        licensePlate: p.vehicleLicensePlate,
+        make: p.vehicleBrand,
+        model: p.vehicleModel,
+        year: p.vehicleYear || null,
+        identifierType: 'vin',
+        identifierValue: p.vehicleVin,
+      },
+      policyholder: {
+        lastName: phLast,
+        firstName: phFirst,
+        middleName: phMiddle,
+        docType: 'passport-rf',
+      },
+      owner: { isSameAsPolicyholder: true },
+    });
+
+    // Водители из договора (строки ФИО). Первый, совпавший со страхователем, — источник «страхователь».
+    if (p.drivers.length > 0) {
+      this.setDriversMode('limited');
+      while (this.driversArray.length > 0) this.driversArray.removeAt(0);
+      for (const name of p.drivers) {
+        const [l, f, m] = splitName(name);
+        const group = this.makeDriverGroup();
+        group.patchValue({
+          source: name === p.clientName ? 'policyholder' : 'other',
+          lastName: l,
+          firstName: f,
+          middleName: m,
+        });
+        this.driversArray.push(group);
+      }
+    } else {
+      this.setDriversMode('unlimited');
+    }
+  }
+
+  /** Отправить заявку на внесение изменений (создаёт заявку, возвращает на договор). */
+  submitChange(): void {
+    if (this.form.invalid) {
+      this.submitted.set(true);
+      this.form.markAllAsTouched();
+      return;
+    }
+    if (this.changeSubmitting()) return;
+    this.changeSubmitting.set(true);
+    this.processService
+      .create(this.changePolicyId, {
+        kind: 'change',
+        reasons: this.reasonCodes,
+        formSnapshot: this.form.getRawValue(),
+      })
+      .subscribe({
+        next: () =>
+          void this.router.navigate(['/clients', this.changePolicyId], {
+            queryParams: { changed: '1' },
+          }),
+        error: () => {
+          this.changeSubmitting.set(false);
+          alert('Не удалось отправить заявку. Попробуйте ещё раз.');
+        },
+      });
+  }
+
+  backToContract(): void {
+    void this.router.navigate(['/clients', this.changePolicyId]);
   }
 
   /** Плейсхолдер поля идентификатора по выбранному типу (VIN / кузов / шасси). */

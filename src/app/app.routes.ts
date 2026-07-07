@@ -73,6 +73,13 @@ export const routes: Routes = [
         title: 'Информация о договоре — Agent Academy',
       },
       {
+        // Внесение изменений в договор — переиспользует форму ОСАГО в режиме 'change'.
+        path: 'clients/:id/change',
+        loadComponent: () => import('@features/osago/osago.page').then((m) => m.OsagoPage),
+        data: { mode: 'change' },
+        title: 'Внесение изменений — Agent Academy',
+      },
+      {
         path: 'prolongation',
         loadComponent: () =>
           import('@features/prolongation/prolongation.page').then((m) => m.ProlongationPage),

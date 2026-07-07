@@ -13,6 +13,12 @@ import {
   handleGetPolicy,
 } from '../../mock/handlers/policies.handler';
 import {
+  handleAddProcessComment,
+  handleCreateProcess,
+  handleListPolicyProcesses,
+  handleUploadProcessDoc,
+} from '../../mock/handlers/processes.handler';
+import {
   handleGetProlongationStats,
   handleGetProlongations,
   handleNsisSearch,
@@ -42,6 +48,11 @@ const routes: Route[] = [
   { method: 'GET', match: /\/agents\/me$/, handler: handleGetCurrentAgent },
   { method: 'GET', match: /\/agents\/team$/, handler: handleGetTeam },
   { method: 'POST', match: /\/policies$/, handler: handleCreatePolicy },
+  // Заявки по договору — до общего GET /policies/:id (3-сегментные пути).
+  { method: 'POST', match: /\/policies\/[^/]+\/processes$/, handler: handleCreateProcess },
+  { method: 'GET', match: /\/policies\/[^/]+\/processes$/, handler: handleListPolicyProcesses },
+  { method: 'POST', match: /\/processes\/[^/]+\/comments$/, handler: handleAddProcessComment },
+  { method: 'POST', match: /\/processes\/[^/]+\/documents$/, handler: handleUploadProcessDoc },
   { method: 'GET', match: /\/policies\/[^/]+$/, handler: handleGetPolicy },
   { method: 'GET', match: /\/policies(\?.*)?$/, handler: handleGetPolicies },
   { method: 'GET', match: /\/prolongations\/stats$/, handler: handleGetProlongationStats },

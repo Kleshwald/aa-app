@@ -41,6 +41,29 @@
       <h1 class="detail__title">Информация о договоре</h1>
     }
 
+    <!-- ─── Заявка на изменения отправлена ─── -->
+    @if (changed()) {
+      <div class="detail__success" role="status">
+        <span class="detail__success-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M5 12.5l4.5 4.5L19 7.5"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        <div class="detail__success-text">
+          <p class="detail__success-title">Заявка на внесение изменений отправлена</p>
+          <p class="detail__success-sub">
+            Поддержка обработает её — статус появится ниже, в блоке «Обслуживание договора».
+          </p>
+        </div>
+      </div>
+    }
+
     <div class="detail__layout">
       @if (justIssued()) {
         <!-- ─── Горячий сценарий ───
@@ -293,15 +316,154 @@
           </p>
         </header>
 
+        <!-- Счётчики процессов по договору -->
+        <div class="service__counters">
+          <span class="service__counter">
+            Изменения <b>{{ p.processCounters.changes }}</b>
+          </span>
+          <span class="service__counter">
+            Расторжения <b>{{ p.processCounters.cancellations }}</b>
+          </span>
+          <span class="service__counter">
+            Убытки <b>{{ p.processCounters.losses }}</b>
+          </span>
+        </div>
+
+        <!-- Плитки-старт процесса -->
         <div class="service__tiles">
-          @for (proc of processes; track proc.kind) {
-            <button type="button" class="service-tile" (click)="startProcess(proc.label)">
+          @for (proc of processTiles; track proc.kind) {
+            <button type="button" class="service-tile" (click)="startTile(proc.kind, proc.label)">
               <span class="service-tile__label">{{ proc.label }}</span>
               <span class="service-tile__benefit">{{ proc.benefit }}</span>
             </button>
           }
         </div>
+
+        <!-- Лента активных заявок -->
+        @if (processes().length > 0) {
+          <ul class="service__feed">
+            @for (proc of processes(); track proc.id) {
+              <li class="req">
+                <div class="req__top">
+                  <span class="req__kind">{{ processKindLabel[proc.kind] }}</span>
+                  <span class="req__num">№{{ proc.requestNumber }}</span>
+                  <span class="req__status" [attr.data-status]="proc.status">
+                    {{ processStatusLabel[proc.status] }}
+                  </span>
+                </div>
+                @if (proc.reasons.length > 0) {
+                  <p class="req__reasons">{{ reasonList(proc) }}</p>
+                }
+                @if (lastEvent(proc); as ev) {
+                  @if (ev.comment) {
+                    <p class="req__comment">{{ ev.comment }}</p>
+                  }
+                  @if (ev.docRequest) {
+                    <label class="req__upload">
+                      <input type="file" hidden (change)="uploadProcessDoc(proc, $event)" />
+                      <span>Загрузить документы</span>
+                    </label>
+                  }
+                }
+                <div class="req__actions">
+                  <button type="button" class="req__link" (click)="openHistory(proc)">
+                    Показать историю статусов
+                  </button>
+                  <button type="button" class="req__link" (click)="discussInChat(proc)">
+                    Обсудить в чате
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
       </article>
     </ng-template>
+
+    <!-- ════════ Мастер выбора причин изменения ════════ -->
+    @if (reasonDialogOpen()) {
+      <app-change-reason-dialog
+        (cancelled)="reasonDialogOpen.set(false)"
+        (next)="onReasonsNext($event)"
+      />
+    }
+
+    <!-- ════════ Модалка «История статусов» ════════ -->
+    @if (historyProcess(); as proc) {
+      <button
+        type="button"
+        class="hist-backdrop"
+        aria-label="Закрыть"
+        (click)="closeHistory()"
+      ></button>
+      <div class="hist" role="dialog" aria-modal="true" aria-labelledby="hist-title">
+        <header class="hist__head">
+          <h2 class="hist__title" id="hist-title">
+            История статусов · {{ processKindLabel[proc.kind] }} №{{ proc.requestNumber }}
+          </h2>
+          <button type="button" class="hist__close" (click)="closeHistory()" aria-label="Закрыть">
+            ×
+          </button>
+        </header>
+
+        <div class="hist__scroll">
+          <table class="hist__table">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Вид процесса</th>
+                <th>Заявка</th>
+                <th>Статус</th>
+                <th>Комментарий</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ev of proc.statusHistory; track $index) {
+                <tr>
+                  <td>{{ ev.at | date: 'dd.MM.yyyy HH:mm' }}</td>
+                  <td>{{ processKindLabel[proc.kind] }}</td>
+                  <td>№{{ ev.requestNumber }}</td>
+                  <td>{{ processStatusLabel[ev.status] }}</td>
+                  <td>{{ ev.comment }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          @if (proc.comments.length > 0) {
+            <div class="hist__comments">
+              <h3 class="hist__subtitle">Переписка по заявке</h3>
+              @for (c of proc.comments; track $index) {
+                <div class="cmt" [class.cmt--agent]="c.author === 'agent'">
+                  <div class="cmt__meta">
+                    <span class="cmt__author">{{ c.authorName }}</span>
+                    <span class="cmt__time">{{ c.at | date: 'dd.MM HH:mm' }}</span>
+                  </div>
+                  <p class="cmt__text">{{ c.text }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <footer class="hist__foot">
+          <textarea
+            class="hist__input"
+            rows="2"
+            placeholder="Оставить комментарий поддержке…"
+            [value]="commentDraft()"
+            (input)="commentDraft.set($any($event.target).value)"
+          ></textarea>
+          <button
+            type="button"
+            class="hist__send"
+            [disabled]="!commentDraft().trim()"
+            (click)="submitComment()"
+          >
+            Отправить
+          </button>
+        </footer>
+      </div>
+    }
   </section>
 }

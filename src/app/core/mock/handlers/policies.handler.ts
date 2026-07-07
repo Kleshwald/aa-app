@@ -6,6 +6,7 @@ import { type ApiResponse } from '@core/models';
 
 import { currentAgent } from '../fixtures/agents.fixture';
 import { type CreatePolicyInput, createPolicy, policies } from '../fixtures/policies.fixture';
+import { processes } from '../fixtures/processes.fixture';
 import { randomDelay } from '../helpers/delay';
 import { mockOk } from '../helpers/response';
 
@@ -78,11 +79,12 @@ export function handleGetPolicy(
   const drivers =
     policy.type === 'OSAGO' ? [policy.clientName, ...driverPool].slice(0, driverCount) : [];
 
-  // Process counters (история операций по полису).
+  // Process counters — из реальных заявок по договору (не случайные).
+  const own = processes.filter((x) => x.policyId === policy.id);
   const processCounters = {
-    changes: Math.random() < 0.15 ? 1 : 0,
-    cancellations: 0,
-    losses: Math.random() < 0.05 ? 1 : 0,
+    changes: own.filter((x) => x.kind === 'change').length,
+    cancellations: own.filter((x) => x.kind === 'cancel').length,
+    losses: own.filter((x) => x.kind === 'loss').length,
   };
 
   // Available downloadable documents. У продуктов «Здоровья» (НС/Антиклещ) —
