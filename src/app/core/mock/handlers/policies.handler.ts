@@ -9,8 +9,27 @@ import { type CreatePolicyInput, createPolicy, policies } from '../fixtures/poli
 import { processes } from '../fixtures/processes.fixture';
 import { randomDelay } from '../helpers/delay';
 import { mockOk } from '../helpers/response';
+import type { PolicyProcess, ProcessStatus } from '@core/services/process.service';
 
 // GET /policies — supports filter, search, sort, pagination per api-contract.yaml.
+
+// «Живые» статусы заявки: только они показываются маркером в строке. `done`/`rejected`
+// не показываем — закрытая заявка не «висит» на полисе и не требует агента.
+const ACTIVE_PROCESS: readonly ProcessStatus[] = [
+  'submitted',
+  'checking-docs',
+  'in-work',
+  'awaiting-docs',
+];
+
+/**
+ * Активная заявка по полису для маркера в строке. Если их несколько — «ваш ход»
+ * (awaiting-docs) важнее прочих; иначе берём свежайшую (processes — newest-first).
+ */
+function activeProcessFor(policyId: string): PolicyProcess | undefined {
+  const own = processes.filter((x) => x.policyId === policyId && ACTIVE_PROCESS.includes(x.status));
+  return own.find((x) => x.status === 'awaiting-docs') ?? own[0];
+}
 
 export function handleGetPolicies(
   req: HttpRequest<unknown>,
@@ -25,13 +44,20 @@ export function handleGetPolicies(
   const search = (params.get('search') ?? '').toLowerCase();
   const sortBy = params.get('sortBy') ?? 'createdAt';
   const sortOrder = params.get('sortOrder') ?? 'desc';
+  const awaitingOnly = params.get('awaitingOnly') === 'true';
 
   let result = policies.slice();
   if (status) result = result.filter((p) => p.status === status);
   if (type) result = result.filter((p) => p.type === type);
-  // Фильтр по дате оформления (createdAt — ISO datetime; сравниваем по дню).
-  if (dateFrom) result = result.filter((p) => p.createdAt.slice(0, 10) >= dateFrom);
-  if (dateTo) result = result.filter((p) => p.createdAt.slice(0, 10) <= dateTo);
+  if (awaitingOnly) {
+    // «Ждут ваших действий» — внимание кросс-периодное: заявка на прошлогоднем полисе
+    // обязана найтись, поэтому фильтр периода СОЗНАТЕЛЬНО игнорируется.
+    result = result.filter((p) => activeProcessFor(p.id)?.status === 'awaiting-docs');
+  } else {
+    // Фильтр по дате оформления (createdAt — ISO datetime; сравниваем по дню).
+    if (dateFrom) result = result.filter((p) => p.createdAt.slice(0, 10) >= dateFrom);
+    if (dateTo) result = result.filter((p) => p.createdAt.slice(0, 10) <= dateTo);
+  }
   if (search) {
     result = result.filter(
       (p) =>
@@ -50,11 +76,16 @@ export function handleGetPolicies(
 
   const total = result.length;
   const offset = (page - 1) * pageSize;
-  const slice = result.slice(offset, offset + pageSize).map((p) => ({
-    ...p,
-    ikp: currentAgent.ikp,
-    curatorName: currentAgent.curatorName,
-  }));
+  const slice = result.slice(offset, offset + pageSize).map((p) => {
+    const active = activeProcessFor(p.id);
+    return {
+      ...p,
+      ikp: currentAgent.ikp,
+      curatorName: currentAgent.curatorName,
+      processKind: active?.kind,
+      processStatus: active?.status,
+    };
+  });
 
   return mockOk(slice, { page, pageSize, total });
 }

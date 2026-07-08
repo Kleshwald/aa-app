@@ -5,7 +5,7 @@ import { switchMap, timer } from 'rxjs';
 import { ChatService } from './chat.service';
 import { ProcessService, type AwaitingProcess } from './process.service';
 
-// ─── Единый сигнал «Требуют вас» ───────────────────────────────────────────
+// ─── Единый сигнал «Ждут ваших действий» ───────────────────────────────────────────
 // Объединяем ОБНАРУЖЕНИЕ («где меня ждут») в один канал, но разводим ДЕЙСТВИЕ:
 // каждый пункт несёт свой адрес (заявка → страница договора; чат → «Сообщения»).
 // Агрегируем УКАЗАТЕЛИ (счётчики), не тексты — два бэкенда (1С/вендор) не сливаются,
@@ -14,7 +14,7 @@ import { ProcessService, type AwaitingProcess } from './process.service';
 /** Источник пункта — определяет, куда уводит клик. */
 export type AttentionSource = 'process' | 'chat';
 
-/** Пункт «Требуют вас»: указатель на дело + адрес действия. */
+/** Пункт «Ждут ваших действий»: указатель на дело + адрес действия. */
 export interface AttentionItem {
   id: string;
   source: AttentionSource;
@@ -44,7 +44,7 @@ export class AttentionService {
     return r?.success ? (r.data ?? []) : [];
   });
 
-  /** Пункты «Требуют вас»: заявки + непрочитанный чат (одним пунктом). */
+  /** Пункты «Ждут ваших действий»: заявки + непрочитанный чат (одним пунктом). */
   readonly items = computed<AttentionItem[]>(() => {
     const items: AttentionItem[] = this.awaiting().map(
       (a): AttentionItem => ({
@@ -77,4 +77,13 @@ export class AttentionService {
 
   /** Сколько дел ждут агента прямо сейчас (0 → индикатор скрыт). */
   readonly count = computed(() => this.items().length);
+
+  /**
+   * Полисы, по которым заявка ждёт агента — для чипа-фильтра «Ждут ваших действий» в
+   * «Мои клиенты». Считаем ПОЛИСЫ (строки таблицы), а не заявки: на одном полисе
+   * их может быть несколько, а строка — одна. Переиспользует тот же поллинг.
+   */
+  readonly awaitingPolicyCount = computed(
+    () => new Set(this.awaiting().map((a) => a.policyId)).size,
+  );
 }

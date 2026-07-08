@@ -9,6 +9,7 @@ import { TuiInputDate, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
 
 import { AttentionService } from '@core/services/attention.service';
 import { ClientService, type ClientRow, type ClientsQuery } from '@core/services/client.service';
+import { type ProcessKind } from '@core/services/process.service';
 import { AttentionListComponent } from '@shared/attention-list/attention-list.component';
 import { IsoDayTransformer } from '@shared/iso-day.transformer';
 
@@ -35,6 +36,23 @@ const STATUS_LABEL: Record<ClientRow['status'], string> = {
   processing: 'В обработке',
 };
 
+// Вид заявки — СЛОВОМ (коды ВИ/Р/УУ запрещены: их не расшифровывают).
+const PROCESS_KIND_SHORT: Record<ProcessKind, string> = {
+  change: 'Изменение',
+  cancel: 'Расторжение',
+  loss: 'Убыток',
+};
+
+/**
+ * Маркер заявки в строке — ВТОРАЯ ось статуса, отдельная от статуса полиса.
+ * `urgent` = «ваш ход» (заявка ждёт агента); иначе — пассивный трекинг «в работе».
+ */
+export interface RowProcessMarker {
+  urgent: boolean;
+  stateLabel: string;
+  kindLabel: string;
+}
+
 @Component({
   selector: 'app-clients-page',
   imports: [
@@ -58,7 +76,7 @@ export class ClientsPage {
   private readonly router = inject(Router);
   private readonly attention = inject(AttentionService);
 
-  // Зона «Требуют вас» над таблицей — тот же список, что и в сквозном индикаторе
+  // Зона «Ждут ваших действий» над таблицей — тот же список, что и в сквозном индикаторе
   // (момент входа: главная открывается после логина). Работает поверх фильтра периода.
   protected readonly attentionItems = this.attention.items;
 
@@ -119,6 +137,33 @@ export class ClientsPage {
   protected readonly type = signal<string>('');
   protected readonly insuranceCompany = signal<string>('');
 
+  /** Чип «Ждут ваших действий»: показать только полисы, где заявка ждёт агента. */
+  protected readonly awaitingOnly = signal(false);
+  /** Счётчик для чипа — из того же поллинга, что и сквозной индикатор (без 2-го запроса). */
+  protected readonly awaitingCount = this.attention.awaitingPolicyCount;
+
+  toggleAwaitingOnly(): void {
+    this.awaitingOnly.update((v) => !v);
+  }
+
+  /**
+   * Маркер заявки для строки. `null` — заявок нет либо все закрыты.
+   * НЕ смешивать со статусом полиса: это разные оси (полис «Оформлен» может
+   * одновременно иметь заявку, которая ждёт агента).
+   */
+  protected processMarker(row: ClientRow): RowProcessMarker | null {
+    if (!row.processStatus || !row.processKind) return null;
+    const urgent = row.processStatus === 'awaiting-docs';
+    return {
+      urgent,
+      // Говорим КОНКРЕТНО, что нужно (семья «Нужны документы» / «Нужен ответ»):
+      // без метафоры «ваш ход» и без повтора «ждут» из заголовка сигнала.
+      // Рядом стоит вид заявки, поэтому слово «Заявка» в пассивном состоянии не дублируем.
+      stateLabel: urgent ? 'Нужны документы' : 'В работе',
+      kindLabel: PROCESS_KIND_SHORT[row.processKind],
+    };
+  }
+
   // Произвольный период — два календаря (ISO-строки через IsoDayTransformer).
   protected readonly fromControl = new FormControl<string>('', { nonNullable: true });
   protected readonly toControl = new FormControl<string>('', { nonNullable: true });
@@ -151,11 +196,16 @@ export class ClientsPage {
 
   protected readonly query = computed<ClientsQuery>(() => {
     const range = this.dateRange();
+    // «Ждут ваших действий» — внимание кросс-периодное: заявка на прошлогоднем полисе обязана
+    // найтись, поэтому чип СНИМАЕТ фильтр периода (иначе `this-month` её спрячет).
+    const awaiting = this.awaitingOnly();
     return {
       page: 1,
       pageSize: 50,
-      dateFrom: range.from,
-      dateTo: range.to,
+      dateFrom: awaiting ? undefined : range.from,
+      dateTo: awaiting ? undefined : range.to,
+      // Только `true` уходит в query-параметры: `false` превратился бы в строку "false".
+      awaitingOnly: awaiting || undefined,
       status: this.status() || undefined,
       type: this.type() || undefined,
       insuranceCompanyId: this.insuranceCompany() || undefined,
@@ -200,6 +250,7 @@ export class ClientsPage {
     this.status.set('');
     this.type.set('');
     this.insuranceCompany.set('');
+    this.awaitingOnly.set(false);
     this.searchControl.setValue('');
     this.fromControl.setValue('');
     this.toControl.setValue('');

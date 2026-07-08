@@ -143,6 +143,100 @@
   }
 }
 
+// ─── Чип «Ждут ваших действий» ─────────────────────────────────────────────
+// Не поле, а переключатель — подписи сверху нет; садится по нижнему краю в ряд
+// с селектами (высота = --size-input, 48px ≥ 44px).
+.clients__chip {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--size-input);
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  font-weight: var(--weight-medium);
+  color: var(--warning-700);
+  background: #ffffff;
+  // -600, не -500: рамка интерактивного контрола обязана давать ≥3:1 (WCAG 1.4.11).
+  border: 2px solid var(--warning-600);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+
+  &:hover {
+    background: var(--warning-50);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--warning-100);
+  }
+}
+
+// Включён: заливка + галочка в глифе + semibold. Три носителя состояния, не только цвет.
+.clients__chip--on {
+  background: var(--warning-100);
+  border-color: var(--warning-700);
+  font-weight: var(--weight-semibold);
+}
+
+.clients__chip-box {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// Счётчик — та же пилюля, что у .att__count и .app-attention__count.
+.clients__chip-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  color: #ffffff;
+  background: var(--warning-700);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+// Пояснение к снятому периоду. Нейтрально-серое: янтаря на экране уже хватает,
+// и это не тревога, а факт («полисы не пропали»).
+.clients__chip-note {
+  flex: 1 0 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--gray-700);
+}
+
+.clients__chip-note-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--gray-500);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .clients__table-wrap {
   background: #ffffff;
   border: 1px solid var(--gray-200);
@@ -314,6 +408,82 @@
   stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+// ─── Заявка по полису — ВТОРАЯ ось статуса ─────────────────────────────────
+// Не путать с .clients__status (статус самого полиса). Живёт в ячейке «№ полиса»:
+// заявка подаётся ПО полису, ширина таблицы не растёт (на 1366px она уже уезжает
+// в скролл), строки без заявки выглядят как раньше — нет пустой 9-й колонки.
+// БЕЗ nowrap: номер «ХХХ 0123456789» исторически переносится по пробелу, и это
+// держит колонку узкой. Зафиксировать его в строку = распереть таблицу (на 1366px
+// она и так уезжает в скролл).
+.clients__policy-no {
+  display: block;
+}
+
+.clients__process {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 8px;
+}
+
+.clients__process-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  // 16px: это может быть единственная янтарная подсказка на экране,
+  // а аудитория 45+ не должна щуриться (DESIGN.md §5).
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-full);
+  // Тоже без nowrap: иначе min-content ячейки = вся фраза, и колонка распирает
+  // таблицу. Пусть в тесноте перенесётся по слову.
+  // Пассивный трекинг «идёт, от вас ничего не нужно» — нейтрально, не спорит
+  // со статусом полиса. Собственный фон: зебра и hover его не размывают.
+  color: var(--gray-700);
+  background: #ffffff;
+  border: 1px solid var(--gray-300);
+}
+
+.clients__process-icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// «Нужны документы» — тот же тёплый янтарь, что у сигнала в сайдбаре и зоны над
+// таблицей. Приоритет даём цветом, иконкой и весом, а НЕ размером: бейдж статуса
+// полиса остаётся главным в своей колонке.
+.clients__process--urgent .clients__process-state {
+  color: var(--warning-700);
+  background: var(--warning-50);
+  border-color: var(--warning-600);
+  font-weight: var(--weight-semibold);
+}
+
+// Вид заявки — обычным текстом, без плашки: не конкурирует с пиллом за внимание.
+.clients__process-kind {
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+// Янтарная засечка у левого края — глаз ловит строку в F-паттерне и ведёт к пиллу.
+// Полоса, а НЕ заливка строки (заливка = «полис сломан», запрещена). Тот же приём,
+// что inset-полоса у .app-attention и .att--active — одно семейство.
+// Правило фокуса выше по файлу специфичнее (0,3,3 против 0,1,1) и перебивает само.
+.clients__row--awaiting > td:first-child {
+  box-shadow: inset 3px 0 0 var(--warning-500);
 }
 
 .clients__row--skeleton td {

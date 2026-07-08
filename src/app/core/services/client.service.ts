@@ -3,6 +3,7 @@ import { type Observable } from 'rxjs';
 
 import { ApiClient } from '@core/api/api-client.service';
 import { type ApiResponse } from '@core/models';
+import { type ProcessKind, type ProcessStatus } from '@core/services/process.service';
 
 // Page renders a list of policies under the «Мои клиенты» heading.
 // The underlying entity is still a Policy (per api-contract.yaml).
@@ -22,6 +23,11 @@ export interface ClientRow {
   status: 'active' | 'expired' | 'cancelled' | 'pending' | 'processing';
   premium: number;
   insuranceCompanyName: string;
+
+  // Активная заявка по полису — ВТОРАЯ, ортогональная ось статуса (не путать с `status`,
+  // который про сам полис). Отсутствует, если заявок нет либо все закрыты.
+  processKind?: ProcessKind;
+  processStatus?: ProcessStatus;
 }
 
 export interface ClientsQuery {
@@ -35,6 +41,8 @@ export interface ClientsQuery {
   dateTo?: string; // yyyy-mm-dd включительно
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  /** Только полисы, где заявка ждёт действия агента. Игнорирует фильтр периода. */
+  awaitingOnly?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
