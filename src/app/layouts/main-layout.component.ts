@@ -67,7 +67,7 @@ export class MainLayoutComponent {
   // Unread support messages — badge on the «Сообщения» nav item.
   protected readonly messagesUnread = this.chat.unread;
 
-  // Сквозной сигнал «Требуют вас» — виден на всех экранах (заявки + чат).
+  // Сквозной сигнал «Ждут ваших действий» — виден на всех экранах (заявки + чат).
   // Клик уводит на «Мои клиенты», где полный список-зона. 0 → индикатор скрыт.
   protected readonly attentionCount = this.attention.count;
   protected readonly clientsRoute = '/clients';

@@ -47,9 +47,11 @@ export function handleListAwaitingProcesses(): Observable<HttpResponse<ApiRespon
     .map((p) => {
       const policy = policies.find((x) => x.id === p.policyId);
       const docRequest = [...p.statusHistory].reverse().find((e) => e.docRequest)?.docRequest;
+      // Пункт говорит КОНКРЕТНО, что нужно от агента: без «ждут» (не дублируем
+      // заголовок «Ждут ваших действий») и без метафоры «ваш ход» (аудитория 45+).
       const need = docRequest
-        ? `Ждут документы: ${docRequest.items.join(', ')}`
-        : 'Ждут ваш ход по заявке';
+        ? `Нужны документы: ${docRequest.items.join(', ')}`
+        : 'Нужен ваш ответ по заявке';
       return {
         processId: p.id,
         requestNumber: p.requestNumber,

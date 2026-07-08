@@ -160,7 +160,7 @@
         <a
           [routerLink]="clientsRoute"
           class="app-attention"
-          [attr.aria-label]="'Требуют вас: ' + attentionCount() + '. Открыть список'"
+          [attr.aria-label]="'Ждут ваших действий: ' + attentionCount() + '. Открыть список'"
         >
           <span class="app-attention__icon" aria-hidden="true">
             <svg
@@ -177,8 +177,9 @@
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
           </span>
-          <span class="app-attention__label">Требуют вас</span>
-          <span class="app-attention__count">{{ attentionCount() }}</span>
+          <span class="app-attention__label">Ждут ваших действий</span>
+          <!-- Число уже озвучено в aria-label родителя — не дублируем скринридеру. -->
+          <span class="app-attention__count" aria-hidden="true">{{ attentionCount() }}</span>
         </a>
       }
 
