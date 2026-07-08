@@ -16,8 +16,9 @@ import * as QRCode from 'qrcode';
 import { ClientDetailService, type PolicyDetail } from '@core/services/client-detail.service';
 import {
   PROCESS_KIND_LABEL,
-  PROCESS_STATUS_LABEL,
   ProcessService,
+  isCompletedProcess,
+  processStatusLabel,
   reasonLabel,
   type PolicyProcess,
   type ProcessActor,
@@ -78,7 +79,6 @@ export class ClientDetailPage {
 
   protected readonly statusLabel = STATUS_LABEL;
   protected readonly productLabel = PRODUCT_LABEL;
-  protected readonly processStatusLabel = PROCESS_STATUS_LABEL;
   protected readonly processKindLabel = PROCESS_KIND_LABEL;
 
   /** Пришли сюда сразу после оформления (горячий сценарий). */
@@ -124,6 +124,38 @@ export class ClientDetailPage {
     return r?.success ? (r.data ?? []) : [];
   });
 
+  /** Активные заявки — только они «висят» на договоре и ждут кого-то из сторон. */
+  protected readonly activeProcesses = computed(() =>
+    this.processes().filter((p) => !isCompletedProcess(p.status)),
+  );
+
+  /**
+   * Завершённые заявки — след операции. Маркера в строке «Мои клиенты» у них уже нет,
+   * но история обязана остаться здесь: иначе закрытая заявка выглядит как потерянная.
+   * Свежие сверху.
+   */
+  protected readonly completedProcesses = computed(() =>
+    this.processes()
+      .filter((p) => isCompletedProcess(p.status))
+      .sort((a, b) => this.closedAt(b).localeCompare(this.closedAt(a))),
+  );
+
+  protected readonly completedOpen = signal(false);
+
+  toggleCompleted(): void {
+    this.completedOpen.update((v) => !v);
+  }
+
+  /** Когда заявку закрыли (последнее событие истории) — для сортировки и подписи. */
+  private closedAt(proc: PolicyProcess): string {
+    return proc.statusHistory[proc.statusHistory.length - 1]?.at ?? proc.createdAt;
+  }
+
+  /** Статус заявки с учётом её вида: у убытка `done` — «Убыток урегулирован», не «Изменения внесены». */
+  protected reqStatusLabel(proc: PolicyProcess): string {
+    return processStatusLabel(proc.status, proc.kind);
+  }
+
   // Диалог выбора причин + модалка истории статусов + черновик комментария.
   protected readonly reasonDialogOpen = signal(false);
   protected readonly historyProcessId = signal<string | null>(null);
@@ -140,7 +172,7 @@ export class ClientDetailPage {
       at: ev.at,
       author: ev.author,
       authorLabel: ev.author === 'agent' ? 'Вы' : 'Поддержка',
-      statusLabel: PROCESS_STATUS_LABEL[ev.status],
+      statusLabel: processStatusLabel(ev.status, proc.kind),
       text: ev.comment,
     }));
     const fromComments: JournalEntry[] = proc.comments.map((c) => ({

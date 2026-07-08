@@ -838,9 +838,11 @@
     background: var(--success-50);
     color: var(--success-700);
   }
+  // Отклонение — не авария: полис цел, заявку можно подать заново. Тёплый янтарь,
+  // а не тревожный красный (лок «янтарь, не красный»); причина — текстом рядом.
   &[data-status='rejected'] {
-    background: var(--error-50);
-    color: var(--error-700);
+    background: var(--warning-50);
+    color: var(--warning-700);
   }
 }
 
@@ -854,6 +856,99 @@
   margin: 0;
   font-size: var(--text-base);
   color: var(--gray-900);
+}
+
+// ─── Завершённые заявки: архив, а не работа ───
+// Активных нет — говорим об этом словами, иначе закрытая заявка «потерялась».
+.service__none {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--gray-700);
+}
+
+.done-reqs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.done-reqs__toggle {
+  @extend %focus-ring;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 8px 4px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--gray-800);
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--brand-600);
+  }
+}
+
+.done-reqs__chev {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  transition: transform 120ms ease-out;
+
+  .done-reqs__toggle--open & {
+    transform: rotate(180deg);
+  }
+}
+
+.done-reqs__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: var(--text-sm);
+  line-height: 1;
+  color: var(--gray-700);
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+}
+
+.done-reqs__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.done-req {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+}
+
+// Итог — то, что агент прочитает клиенту вслух. Полным кеглем, не сноской.
+.done-req__outcome {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--gray-900);
+}
+
+.done-req__date {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
 }
 
 .req__upload {

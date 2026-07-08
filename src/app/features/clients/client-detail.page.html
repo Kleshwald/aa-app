@@ -340,15 +340,15 @@
         </div>
 
         <!-- Лента активных заявок -->
-        @if (processes().length > 0) {
+        @if (activeProcesses().length > 0) {
           <ul class="service__feed">
-            @for (proc of processes(); track proc.id) {
+            @for (proc of activeProcesses(); track proc.id) {
               <li class="req">
                 <div class="req__top">
                   <span class="req__kind">{{ processKindLabel[proc.kind] }}</span>
                   <span class="req__num">№{{ proc.requestNumber }}</span>
                   <span class="req__status" [attr.data-status]="proc.status">
-                    {{ processStatusLabel[proc.status] }}
+                    {{ reqStatusLabel(proc) }}
                   </span>
                 </div>
                 @if (proc.reasons.length > 0) {
@@ -389,6 +389,64 @@
               </li>
             }
           </ul>
+        } @else if (completedProcesses().length > 0) {
+          <!-- Молчать нельзя: закрытая заявка без слов читается как «потерялась». -->
+          <p class="service__none">
+            Активных заявок нет — все обращения по этому договору закрыты.
+          </p>
+        }
+
+        <!-- Завершённые заявки: след операции. Свёрнуты — это архив, а не работа. -->
+        @if (completedProcesses().length > 0) {
+          <div class="done-reqs">
+            <button
+              type="button"
+              class="done-reqs__toggle"
+              [class.done-reqs__toggle--open]="completedOpen()"
+              [attr.aria-expanded]="completedOpen()"
+              (click)="toggleCompleted()"
+            >
+              <svg
+                class="done-reqs__chev"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+              Завершённые заявки
+              <span class="done-reqs__count">{{ completedProcesses().length }}</span>
+            </button>
+
+            @if (completedOpen()) {
+              <ul class="done-reqs__list">
+                @for (proc of completedProcesses(); track proc.id) {
+                  <li class="done-req">
+                    <div class="req__top">
+                      <span class="req__kind">{{ processKindLabel[proc.kind] }}</span>
+                      <span class="req__num">№{{ proc.requestNumber }}</span>
+                      <span class="req__status" [attr.data-status]="proc.status">
+                        {{ reqStatusLabel(proc) }}
+                      </span>
+                    </div>
+                    @if (lastEvent(proc); as ev) {
+                      @if (ev.comment) {
+                        <p class="done-req__outcome">{{ ev.comment }}</p>
+                      }
+                      <p class="done-req__date">{{ ev.at | date: 'd MMMM y' }}</p>
+                    }
+                    <button type="button" class="req__link" (click)="openHistory(proc)">
+                      Ход заявки
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
         }
       </article>
     </ng-template>

@@ -71,7 +71,7 @@ export interface CreateProcessPayload {
 
 /**
  * Заявка, ждущая действия агента («ваш ход») — плоский указатель для единого
- * индикатора «Требуют вас». Не переписка, а ссылка: клиент+полис+что нужно+куда идти.
+ * индикатора «Ждут ваших действий». Не переписка, а ссылка: клиент+полис+что нужно+куда идти.
  * Обогащена именем клиента (джойн с полисом на моке) — в самой заявке его нет.
  */
 export interface AwaitingProcess {
@@ -81,7 +81,7 @@ export interface AwaitingProcess {
   policyNumber: string;
   clientName: string;
   kind: ProcessKind;
-  need: string; // что нужно от агента, человеческой строкой (напр. «Ждут документы: …»)
+  need: string; // что нужно от агента, человеческой строкой (напр. «Нужны документы: …»)
 }
 
 // ─── Каталог причин изменения (из 1С) — единый источник для диалога/ленты/истории ───
@@ -129,6 +129,24 @@ export const PROCESS_KIND_LABEL: Record<ProcessKind, string> = {
   loss: 'Урегулирование убытка',
 };
 
+// Итог завершённой заявки зависит от её ВИДА: сам по себе `done` не сообщает,
+// что произошло, а «Изменения внесены» — прямая ложь для расторжения и убытка.
+export const PROCESS_OUTCOME_LABEL: Record<ProcessKind, string> = {
+  change: 'Изменения внесены',
+  cancel: 'Договор расторгнут',
+  loss: 'Убыток урегулирован',
+};
+
+/** Лейбл статуса с учётом вида заявки: для `done` берём итог, иначе обычный статус. */
+export function processStatusLabel(status: ProcessStatus, kind: ProcessKind): string {
+  return status === 'done' ? PROCESS_OUTCOME_LABEL[kind] : PROCESS_STATUS_LABEL[status];
+}
+
+/** Заявка закрыта: маркера в строке «Мои клиенты» нет, но след на договоре остаётся. */
+export function isCompletedProcess(status: ProcessStatus): boolean {
+  return status === 'done' || status === 'rejected';
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProcessService {
   private readonly api = inject(ApiClient);
@@ -140,7 +158,7 @@ export class ProcessService {
 
   /**
    * Заявки, ждущие действия агента (статус «Ожидаем документы»), по ВСЕМ полисам —
-   * питает единый индикатор «Требуют вас». Игнорирует фильтр периода списка клиентов.
+   * питает единый индикатор «Ждут ваших действий». Игнорирует фильтр периода списка клиентов.
    */
   listAwaiting(): Observable<ApiResponse<AwaitingProcess[]>> {
     return this.api.get<AwaitingProcess[]>('/processes/awaiting');
