@@ -1,0 +1,45 @@
+name: Supabase keep-alive
+
+# Доска обратной связи (/feedback) живёт на бесплатном Supabase, а он ставит проект
+# на паузу после ~7 дней простоя — и доска падает целиком (чтение, отправка, лайки).
+# Тестировщики заходят редко, поэтому раз в 3 дня дёргаем REST-эндпоинт: любой запрос
+# сбрасывает счётчик простоя и проект не засыпает.
+#
+# anon-ключ публичный по дизайну Supabase (доступ ограничивают RLS-политики) — он и так
+# лежит в бандле, см. src/app/features/feedback/feedback.config.ts и docs/FEEDBACK.md.
+#
+# ⚠️ GitHub отключает cron-воркфлоу после 60 дней без активности в репозитории —
+# тогда его надо включить обратно на вкладке Actions (или пнуть workflow_dispatch).
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *' # каждые 3 дня, 06:17 UTC (не ровный час — меньше очередь у GitHub)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Пинг Supabase REST (таблица feedback)
+        env:
+          SUPABASE_URL: https://zyyvgpdxrmybxrdbutrg.supabase.co
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5eXZncGR4cm15YnhyZGJ1dHJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTI4MjgsImV4cCI6MjA5NzI2ODgyOH0.cqBPmeeZtJE-cDdklAbdBy2WXEtOWdz-0O78keizjVw
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_URL}/rest/v1/feedback?select=id&limit=1")
+
+          echo "Supabase ответил: HTTP ${code}"
+
+          if [ "${code}" = "200" ]; then
+            echo "✔ проект активен — счётчик простоя сброшен"
+            exit 0
+          fi
+
+          # 521/522/523 — проект на паузе или БД ещё не поднялась; 404 — прогрев кэша схемы
+          echo "::error::Supabase недоступен (HTTP ${code}). Проверьте проект в dashboard: возможно, он на паузе — нажмите Restore."
+          exit 1

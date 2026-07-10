@@ -257,7 +257,9 @@ export class FeedbackPage {
       this.message.set('');
       this.removeImage();
     } catch {
-      this.formError.set('Не удалось отправить. Проверьте интернет и попробуйте ещё раз.');
+      this.formError.set(
+        'Не удалось отправить — доска временно недоступна. Попробуйте через минуту.',
+      );
     } finally {
       this.submitting.set(false);
     }
@@ -293,7 +295,9 @@ export class FeedbackPage {
       this.replyText.set('');
       this.openReplyId.set(null);
     } catch {
-      this.formError.set('Не удалось отправить ответ.');
+      this.formError.set(
+        'Не удалось отправить ответ — доска временно недоступна. Попробуйте через минуту.',
+      );
     } finally {
       this.submitting.set(false);
     }
@@ -389,7 +393,7 @@ export class FeedbackPage {
         this.disableModeration();
       }
     } catch {
-      this.modError.set('Не удалось удалить. Проверьте интернет и попробуйте ещё раз.');
+      this.modError.set('Не удалось удалить — доска временно недоступна. Попробуйте через минуту.');
     }
   }
 
