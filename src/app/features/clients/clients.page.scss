@@ -143,15 +143,23 @@
   }
 }
 
-// ─── Чип «Ждут ваших действий» ─────────────────────────────────────────────
-// Не поле, а переключатель — подписи сверху нет; садится по нижнему краю в ряд
-// с селектами (высота = --size-input, 48px ≥ 44px).
+// ─── Быстрый фильтр «Ждут ваших действий» ──────────────────────────────────
+// Своя строка над таблицей, вне ряда выпадашек: это переключатель триажа
+// («только ждущие / все»), а не поле — поэтому нет подписи сверху и он не путается
+// с полями. Форма-пилюля (radius-full) читается как фильтр-ручка, а не как поле
+// ввода (у полей radius-base). Без глифа-чекбокса (он читался как чек-лист) и без
+// счётчика (число живёт в сайдбаре): состояние несут заливка + вес + aria-pressed.
+.clients__quickfilter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
 .clients__chip {
-  align-self: flex-end;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: var(--size-input);
+  height: var(--size-input); // 48px ≥ 44px — тач-цель (DESIGN §5)
   padding: 0 16px;
   font-family: inherit;
   font-size: var(--text-sm);
@@ -161,7 +169,7 @@
   background: #ffffff;
   // -600, не -500: рамка интерактивного контрола обязана давать ≥3:1 (WCAG 1.4.11).
   border: 2px solid var(--warning-600);
-  border-radius: var(--radius-base);
+  border-radius: var(--radius-full);
   cursor: pointer;
   white-space: nowrap;
   transition:
@@ -178,39 +186,20 @@
   }
 }
 
-// Включён: заливка + галочка в глифе + semibold. Три носителя состояния, не только цвет.
+// Включён: сплошная янтарная заливка + белый текст + semibold — однозначное
+// «активный фильтр» (та же амбра, что у счётчика в сайдбаре). Белый на -700 = 4.87:1
+// (на -100 текст -700 давал 4.37:1 — ниже порога §1.6). Состояние — не только цветом.
 .clients__chip--on {
-  background: var(--warning-100);
-  border-color: var(--warning-700);
-  font-weight: var(--weight-semibold);
-}
-
-.clients__chip-box {
-  flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-// Счётчик — та же пилюля, что у .att__count и .app-attention__count.
-.clients__chip-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 8px;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  line-height: 1;
-  color: #ffffff;
   background: var(--warning-700);
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
+  border-color: var(--warning-700);
+  color: #ffffff;
+  font-weight: var(--weight-semibold);
+
+  // Базовый :hover красит фон в -50 (светлый) — на нём белый текст пропал бы;
+  // держим заливку.
+  &:hover {
+    background: var(--warning-700);
+  }
 }
 
 // Пояснение к снятому периоду. Нейтрально-серое: янтаря на экране уже хватает,
@@ -411,42 +400,26 @@
 }
 
 // ─── Заявка по полису — ВТОРАЯ ось статуса ─────────────────────────────────
-// Не путать с .clients__status (статус самого полиса). Живёт в ячейке «№ полиса»:
+// Не путать с .clients__status (статус самого полиса). Живёт под № полиса:
 // заявка подаётся ПО полису, ширина таблицы не растёт (на 1366px она уже уезжает
 // в скролл), строки без заявки выглядят как раньше — нет пустой 9-й колонки.
-// БЕЗ nowrap: номер «ХХХ 0123456789» исторически переносится по пробелу, и это
-// держит колонку узкой. Зафиксировать его в строку = распереть таблицу (на 1366px
-// она и так уезжает в скролл).
+// В списке показываем ТОЛЬКО состояние, одним словом; вид заявки и дата не грузят
+// список — они на странице договора /clients/:id, туда ведёт клик по строке.
 .clients__policy-no {
   display: block;
 }
 
 .clients__process {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 8px;
-  margin-top: 8px;
-}
-
-.clients__process-state {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  margin-top: 4px;
   // 16px: это может быть единственная янтарная подсказка на экране,
   // а аудитория 45+ не должна щуриться (DESIGN.md §5).
   font-size: var(--text-sm);
   line-height: 1.25;
-  font-weight: var(--weight-medium);
-  border-radius: var(--radius-full);
-  // Тоже без nowrap: иначе min-content ячейки = вся фраза, и колонка распирает
-  // таблицу. Пусть в тесноте перенесётся по слову.
-  // Пассивный трекинг «идёт, от вас ничего не нужно» — нейтрально, не спорит
-  // со статусом полиса. Собственный фон: зебра и hover его не размывают.
-  color: var(--gray-700);
-  background: #ffffff;
-  border: 1px solid var(--gray-300);
+  // Пассив «В работе у страховой» — тихий серый, не спорит со статусом полиса.
+  color: var(--gray-600);
 }
 
 .clients__process-icon {
@@ -460,29 +433,15 @@
   stroke-linejoin: round;
 }
 
-// «Нужны документы» — тихий тёплый янтарь. Понижен (разбор 2026-07-13): без
-// колокола (он живёт только в сквозном индикаторе-сайдбаре), без жирного веса и
-// без жёсткой рамки — это единственный янтарный акцент на строке, не крик.
-.clients__process--urgent .clients__process-state {
+// «Нужны документы» — единственный тёплый янтарь строки: субтильный чип, чтобы
+// глаз находил его при беглом просмотре. Смысл несут слово+иконка (правило «не
+// только цветом» выполняется словом), цвет — третичен. Без жёсткой рамки: не крик.
+.clients__process--urgent {
+  padding: 4px 12px;
   color: var(--warning-700);
   background: var(--warning-50);
-  border-color: var(--warning-200);
-}
-
-// Вид заявки — обычным текстом, без плашки: не конкурирует с пиллом за внимание.
-.clients__process-kind {
-  font-size: var(--text-sm);
-  line-height: 1.25;
-  color: var(--gray-700);
-  white-space: nowrap;
-}
-
-// «с 3 июля» — вторично к состоянию, но читаемо (клиент по телефону спрашивает «с когда»).
-.clients__process-since {
-  font-size: var(--text-sm);
-  line-height: 1.25;
-  color: var(--gray-600);
-  white-space: nowrap;
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-medium);
 }
 
 .clients__row--skeleton td {

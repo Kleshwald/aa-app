@@ -22,28 +22,6 @@
     </div>
 
     <div class="clients__filters">
-      <!-- Скрыт при N=0: фильтр, который всегда даёт пустоту, обещать нельзя.
-           Условие с awaitingOnly() — чтобы чип не исчез из-под курсора, пока включён. -->
-      @if (awaitingCount() > 0 || awaitingOnly()) {
-        <button
-          type="button"
-          class="clients__chip"
-          [class.clients__chip--on]="awaitingOnly()"
-          [attr.aria-pressed]="awaitingOnly()"
-          (click)="toggleAwaitingOnly()"
-        >
-          <!-- Глиф-чекбокс: состояние читается формой, а не только цветом. -->
-          <svg class="clients__chip-box" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="4" />
-            @if (awaitingOnly()) {
-              <polyline points="7 12.5 10.5 16 17 8.5" />
-            }
-          </svg>
-          <span>Ждут ваших действий</span>
-          <span class="clients__chip-count" aria-hidden="true">{{ awaitingCount() }}</span>
-        </button>
-      }
-
       <div class="clients__field">
         <label class="clients__field-label" for="clients-period">Период</label>
         <select
@@ -139,21 +117,6 @@
       </div>
     </div>
 
-    @if (awaitingOnly()) {
-      <!-- Говорим прямо, а не намекаем: иначе агент увидит полис за прошлый год при
-           фильтре «Этот месяц» и решит, что таблица сломалась. Селект «Период» НЕ
-           дизейблим — disabled-фильтры уже отвергнуты в редизайне пролонгаций. -->
-      <p class="clients__chip-note">
-        <svg class="clients__chip-note-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" />
-          <line x1="12" y1="11" x2="12" y2="16" />
-          <line x1="12" y1="8" x2="12" y2="8.01" />
-        </svg>
-        Показаны все полисы, где заявка ждёт вас, — за всё время. Фильтр «Период» сейчас не
-        применяется.
-      </p>
-    }
-
     @if (searchOverridesPeriod()) {
       <!-- Поиск ищет за всё время (клиент звонит про полис, оформленный в другом месяце).
            Говорим прямо, иначе агент решит, что фильтр «Период» сломался. -->
@@ -167,6 +130,40 @@
       </p>
     }
   </div>
+
+  <!-- Быстрый фильтр над таблицей: переключатель «показать только ждущих / вернуть
+       все». Стоит своей строкой, вне ряда выпадашек — это ручка триажа, не поле.
+       Кросс-периодный: включённый, снимает фильтр «Период» (заявка на прошлогоднем
+       полисе обязана найтись). Скрыт при N=0; условие с awaitingOnly() — чтобы чип
+       не исчез из-под курсора, пока включён. -->
+  @if (awaitingCount() > 0 || awaitingOnly()) {
+    <div class="clients__quickfilter">
+      <button
+        type="button"
+        class="clients__chip"
+        [class.clients__chip--on]="awaitingOnly()"
+        [attr.aria-pressed]="awaitingOnly()"
+        (click)="toggleAwaitingOnly()"
+      >
+        Ждут ваших действий
+      </button>
+
+      @if (awaitingOnly()) {
+        <!-- Говорим прямо, а не намекаем: иначе агент увидит полис за прошлый год при
+             фильтре «Этот месяц» и решит, что таблица сломалась. Селект «Период» НЕ
+             дизейблим — disabled-фильтры уже отвергнуты в редизайне пролонгаций. -->
+        <p class="clients__chip-note">
+          <svg class="clients__chip-note-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <line x1="12" y1="11" x2="12" y2="16" />
+            <line x1="12" y1="8" x2="12" y2="8.01" />
+          </svg>
+          Показаны все полисы, где заявка ждёт вас, — за всё время. Фильтр «Период» сейчас не
+          применяется.
+        </p>
+      }
+    </div>
+  }
 
   <div class="clients__table-wrap">
     <table class="clients__table" aria-label="Список полисов">
@@ -274,31 +271,24 @@
 
                 @if (pm) {
                   <!-- ВТОРАЯ ось статуса: заявка ПО полису. Не путать с колонкой «Статус» —
-                       там статус самого полиса. Живёт здесь, а не в 9-й колонке: ширины у
-                       таблицы нет (на 1366px она уже уезжает в скролл, ФИО в 3 строки),
-                       а под номером вертикаль свободна. -->
+                       там статус самого полиса. Живёт под номером (в 9-ю колонку не выносим:
+                       на 1366px таблица уже уезжает в скролл, ФИО в 3 строки).
+                       В списке — ТОЛЬКО состояние, одним словом: вид заявки и дата не грузят
+                       список, они на странице договора /clients/:id, куда ведёт клик по строке. -->
                   <span class="clients__process" [class.clients__process--urgent]="pm.urgent">
-                    <span class="clients__process-state">
-                      <svg class="clients__process-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        @if (pm.urgent) {
-                          <!-- Документ — «нужны документы». Колокол НЕ используем:
-                               он живёт только в сквозном индикаторе (сайдбар). -->
-                          <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                          <path d="M14 3v5h5" />
-                        } @else {
-                          <!-- Круговая стрелка — «идёт, от вас ничего не нужно». -->
-                          <path d="M21 12a9 9 0 1 1-6.2-8.56" />
-                          <polyline points="21 3 21 9 15 9" />
-                        }
-                      </svg>
-                      {{ pm.stateLabel }}
-                    </span>
-                    <!-- Вид заявки — словом и всегда видим (в title прятать нельзя, DESIGN §4). -->
-                    <span class="clients__process-kind">{{ pm.kindLabel }}</span>
-                    @if (pm.since) {
-                      <!-- «с 3 июля» — чтобы было что сказать клиенту по телефону. -->
-                      <span class="clients__process-since">с {{ pm.since | date: 'd MMMM' }}</span>
-                    }
+                    <svg class="clients__process-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      @if (pm.urgent) {
+                        <!-- Документ — «нужны документы». Колокол НЕ используем:
+                             он живёт только в сквозном индикаторе (сайдбар). -->
+                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                        <path d="M14 3v5h5" />
+                      } @else {
+                        <!-- Круговая стрелка — «идёт, от вас ничего не нужно». -->
+                        <path d="M21 12a9 9 0 1 1-6.2-8.56" />
+                        <polyline points="21 3 21 9 15 9" />
+                      }
+                    </svg>
+                    {{ pm.stateLabel }}
                   </span>
                 }
               </td>
