@@ -67,9 +67,10 @@ export class MainLayoutComponent {
   // Unread support messages — badge on the «Сообщения» nav item.
   protected readonly messagesUnread = this.chat.unread;
 
-  // Сквозной сигнал «Ждут ваших действий» — виден на всех экранах (заявки + чат).
-  // Клик уводит на «Мои клиенты», где полный список-зона. 0 → индикатор скрыт.
-  protected readonly attentionCount = this.attention.count;
+  // Сквозной сигнал «Ждут ваших действий» — единственный амбиентный детектор,
+  // виден на всех экранах. Клик уводит на «Мои клиенты», где чип-фильтр включён и
+  // таблица уже отфильтрована. Число = полисы, где заявка ждёт агента (= число чипа).
+  protected readonly attentionCount = this.attention.awaitingPolicyCount;
   protected readonly clientsRoute = '/clients';
 
   protected readonly userMenuOpen = signal(false);

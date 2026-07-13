@@ -2,27 +2,16 @@ import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap, timer } from 'rxjs';
 
-import { ChatService } from './chat.service';
 import { ProcessService, type AwaitingProcess } from './process.service';
 
-// ─── Единый сигнал «Ждут ваших действий» ───────────────────────────────────────────
-// Объединяем ОБНАРУЖЕНИЕ («где меня ждут») в один канал, но разводим ДЕЙСТВИЕ:
-// каждый пункт несёт свой адрес (заявка → страница договора; чат → «Сообщения»).
-// Агрегируем УКАЗАТЕЛИ (счётчики), не тексты — два бэкенда (1С/вендор) не сливаются,
-// принцип «ответ приходит туда, где спросил» сохраняется.
-
-/** Источник пункта — определяет, куда уводит клик. */
-export type AttentionSource = 'process' | 'chat';
-
-/** Пункт «Ждут ваших действий»: указатель на дело + адрес действия. */
-export interface AttentionItem {
-  id: string;
-  source: AttentionSource;
-  title: string;
-  subtitle: string;
-  route: string;
-  actionLabel: string;
-}
+// ─── Сигнал «Ждут ваших действий» ───────────────────────────────────────────
+// Один УЗКИЙ сигнал: заявки по договорам, где мяч у агента (status awaiting-docs,
+// см. ProcessService.listAwaiting). Питает сквозной индикатор в сайдбаре и чип-
+// фильтр на «Мои клиенты» — оба показывают ОДНО число (полисы, где заявка ждёт).
+//
+// Чат сюда НЕ входит: у него свой канал — бейдж на «Сообщения». Это разные
+// контексты (администрирование договора vs переписка), и их склейка давала
+// ощущение «сигнал на всё» = перебор (разбор с Анваром/Беловым 2026-07-13).
 
 // Лёгкий поллинг: индикатор должен ловить авто-продвижение заявки в «Ожидаем
 // документы» без F5 — это несущее для теста «заметит ли посреди задачи».
@@ -31,7 +20,6 @@ const POLL_MS = 5000;
 @Injectable({ providedIn: 'root' })
 export class AttentionService {
   private readonly processService = inject(ProcessService);
-  private readonly chat = inject(ChatService);
 
   private readonly awaitingResponse = toSignal(
     timer(0, POLL_MS).pipe(switchMap(() => this.processService.listAwaiting())),
@@ -44,44 +32,10 @@ export class AttentionService {
     return r?.success ? (r.data ?? []) : [];
   });
 
-  /** Пункты «Ждут ваших действий»: заявки + непрочитанный чат (одним пунктом). */
-  readonly items = computed<AttentionItem[]>(() => {
-    const items: AttentionItem[] = this.awaiting().map(
-      (a): AttentionItem => ({
-        id: a.processId,
-        source: 'process',
-        title: a.clientName,
-        subtitle: a.need,
-        route: `/clients/${a.policyId}`,
-        actionLabel: 'Ответить по заявке',
-      }),
-    );
-
-    // Чат — одним пунктом; гранулярное число непрочитанных остаётся на бейдже
-    // «Сообщения» (числа согласованы, список чистый).
-    const unread = this.chat.messages().filter((m) => m.author === 'company' && !m.read);
-    if (unread.length > 0) {
-      const last = unread[unread.length - 1];
-      const who = last?.sender?.role === 'curator' ? 'Куратор' : 'Поддержка';
-      items.push({
-        id: 'chat',
-        source: 'chat',
-        title: `${who}: новое сообщение`,
-        subtitle: last?.sender?.name ?? 'Общий чат поддержки',
-        route: '/messages',
-        actionLabel: 'Открыть «Сообщения»',
-      });
-    }
-    return items;
-  });
-
-  /** Сколько дел ждут агента прямо сейчас (0 → индикатор скрыт). */
-  readonly count = computed(() => this.items().length);
-
   /**
-   * Полисы, по которым заявка ждёт агента — для чипа-фильтра «Ждут ваших действий» в
-   * «Мои клиенты». Считаем ПОЛИСЫ (строки таблицы), а не заявки: на одном полисе
-   * их может быть несколько, а строка — одна. Переиспользует тот же поллинг.
+   * Сколько ПОЛИСОВ (строк таблицы) ждут агента прямо сейчас: на одном полисе
+   * заявок может быть несколько, а строка — одна. 0 → индикатор скрыт.
+   * Одно число и для сквозного индикатора в сайдбаре, и для чипа на «Мои клиенты».
    */
   readonly awaitingPolicyCount = computed(
     () => new Set(this.awaiting().map((a) => a.policyId)).size,

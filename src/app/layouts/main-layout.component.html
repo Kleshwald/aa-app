@@ -159,6 +159,7 @@
       @if (attentionCount() > 0) {
         <a
           [routerLink]="clientsRoute"
+          [queryParams]="{ awaiting: 1 }"
           class="app-attention"
           [attr.aria-label]="'Ждут ваших действий: ' + attentionCount() + '. Открыть список'"
         >

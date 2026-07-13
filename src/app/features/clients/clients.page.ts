@@ -2,7 +2,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs';
 import { TuiTextfield, tuiTextfieldOptionsProvider } from '@taiga-ui/core';
 import { TuiInputDate, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
@@ -10,7 +10,6 @@ import { TuiInputDate, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
 import { AttentionService } from '@core/services/attention.service';
 import { ClientService, type ClientRow, type ClientsQuery } from '@core/services/client.service';
 import { type ProcessKind } from '@core/services/process.service';
-import { AttentionListComponent } from '@shared/attention-list/attention-list.component';
 import { IsoDayTransformer } from '@shared/iso-day.transformer';
 
 type PeriodKey = 'today' | 'this-month' | 'this-quarter' | 'this-year' | 'all' | 'custom';
@@ -51,18 +50,13 @@ export interface RowProcessMarker {
   urgent: boolean;
   stateLabel: string;
   kindLabel: string;
+  /** Дата последнего движения — «с 3 июля» (что сказать клиенту по телефону). */
+  since?: string;
 }
 
 @Component({
   selector: 'app-clients-page',
-  imports: [
-    DatePipe,
-    DecimalPipe,
-    ReactiveFormsModule,
-    TuiTextfield,
-    TuiInputDate,
-    AttentionListComponent,
-  ],
+  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TuiTextfield, TuiInputDate],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './clients.page.html',
   styleUrl: './clients.page.scss',
@@ -74,11 +68,17 @@ export interface RowProcessMarker {
 export class ClientsPage {
   private readonly service = inject(ClientService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly attention = inject(AttentionService);
 
-  // Зона «Ждут ваших действий» над таблицей — тот же список, что и в сквозном индикаторе
-  // (момент входа: главная открывается после логина). Работает поверх фильтра периода.
-  protected readonly attentionItems = this.attention.items;
+  constructor() {
+    // Клик по сквозному индикатору в сайдбаре ведёт сюда с ?awaiting=1 — сразу
+    // включаем чип-фильтр, чтобы таблица открылась уже как список «ждут вас»
+    // (зоны-дубля над таблицей больше нет — детектор один, в сайдбаре).
+    if (this.route.snapshot.queryParamMap.get('awaiting') === '1') {
+      this.awaitingOnly.set(true);
+    }
+  }
 
   openRow(row: ClientRow): void {
     void this.router.navigate(['/clients', row.id]);
@@ -146,6 +146,18 @@ export class ClientsPage {
     this.awaitingOnly.update((v) => !v);
   }
 
+  // Активен ли поиск и есть ли период, который он перебивает — для честной плашки.
+  private readonly searchValue = toSignal(this.searchControl.valueChanges, { initialValue: '' });
+  protected readonly searchActive = computed(() => this.searchValue().trim().length > 0);
+  protected readonly periodActive = computed(() => {
+    const r = this.dateRange();
+    return !!(r.from || r.to);
+  });
+  /** Поиск перебивает фильтр периода (см. мок) — говорим об этом прямо, не молча. */
+  protected readonly searchOverridesPeriod = computed(
+    () => this.searchActive() && this.periodActive() && !this.awaitingOnly(),
+  );
+
   /**
    * Маркер заявки для строки. `null` — заявок нет либо все закрыты.
    * НЕ смешивать со статусом полиса: это разные оси (полис «Оформлен» может
@@ -158,9 +170,12 @@ export class ClientsPage {
       urgent,
       // Говорим КОНКРЕТНО, что нужно (семья «Нужны документы» / «Нужен ответ»):
       // без метафоры «ваш ход» и без повтора «ждут» из заголовка сигнала.
+      // Пассив — «В работе у страховой»: это можно прочитать клиенту вслух («в работе»
+      // без «у кого» звучит как «а от меня что-то нужно?»).
       // Рядом стоит вид заявки, поэтому слово «Заявка» в пассивном состоянии не дублируем.
-      stateLabel: urgent ? 'Нужны документы' : 'В работе',
+      stateLabel: urgent ? 'Нужны документы' : 'В работе у страховой',
       kindLabel: PROCESS_KIND_SHORT[row.processKind],
+      since: row.processSince,
     };
   }
 
