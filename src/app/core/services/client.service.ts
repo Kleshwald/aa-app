@@ -28,6 +28,9 @@ export interface ClientRow {
   // который про сам полис). Отсутствует, если заявок нет либо все закрыты.
   processKind?: ProcessKind;
   processStatus?: ProcessStatus;
+  // Дата последнего движения по заявке — чтобы строку можно было прочитать клиенту
+  // вслух: «В работе у страховой с 3 июля» (когда звонит спросить статус).
+  processSince?: string;
 }
 
 export interface ClientsQuery {
@@ -43,6 +46,8 @@ export interface ClientsQuery {
   sortOrder?: 'asc' | 'desc';
   /** Только полисы, где заявка ждёт действия агента. Игнорирует фильтр периода. */
   awaitingOnly?: boolean;
+  /** Поднять полисы с активной заявкой наверх (ручной чип «Сначала с заявками»). */
+  processFirst?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
