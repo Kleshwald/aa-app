@@ -29,6 +29,16 @@ import {
   handleGetFinancePayouts,
   handleGetFinanceResults,
 } from '../../mock/handlers/finance.handler';
+import {
+  handleAcceptOffer,
+  handleAddDealMessage,
+  handleCreateDeal,
+  handleGetDeal,
+  handleGetDeals,
+  handleListAwaitingDeals,
+  handleReadDealMessages,
+  handleRequoteOffer,
+} from '../../mock/handlers/deals.handler';
 
 // Maps an incoming request to a mock handler. When useMocks is false
 // (staging/prod), the interceptor short-circuits and the request goes
@@ -63,6 +73,16 @@ const routes: Route[] = [
   { method: 'GET', match: /\/finance\/results$/, handler: handleGetFinanceResults },
   { method: 'GET', match: /\/finance\/payouts(\?.*)?$/, handler: handleGetFinancePayouts },
   { method: 'GET', match: /\/finance\/history(\?.*)?$/, handler: handleGetFinanceHistory },
+  // Сделки («Согласование») — заявка на оформление ДО появления полиса.
+  // /deals/awaiting — раньше общего /deals/:id, иначе «awaiting» съест id.
+  { method: 'GET', match: /\/deals\/awaiting$/, handler: handleListAwaitingDeals },
+  { method: 'POST', match: /\/deals\/[^/]+\/accept$/, handler: handleAcceptOffer },
+  { method: 'POST', match: /\/deals\/[^/]+\/requote$/, handler: handleRequoteOffer },
+  { method: 'POST', match: /\/deals\/[^/]+\/messages$/, handler: handleAddDealMessage },
+  { method: 'POST', match: /\/deals\/[^/]+\/read$/, handler: handleReadDealMessages },
+  { method: 'POST', match: /\/deals$/, handler: handleCreateDeal },
+  { method: 'GET', match: /\/deals\/[^/]+$/, handler: handleGetDeal },
+  { method: 'GET', match: /\/deals(\?.*)?$/, handler: handleGetDeals },
 ];
 
 export const mockInterceptor: HttpInterceptorFn = (req, next) => {

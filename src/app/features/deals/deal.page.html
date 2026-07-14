@@ -1,0 +1,245 @@
+@if (isLoading()) {
+  <section class="deal">
+    <app-breadcrumbs parentLabel="Мои клиенты" parentLink="/clients" />
+    <h1 class="deal__title">Согласование</h1>
+    <div class="deal__skeleton"></div>
+  </section>
+} @else if (hasError() || !deal()) {
+  <section class="deal">
+    <app-breadcrumbs parentLabel="Мои клиенты" parentLink="/clients" />
+    <h1 class="deal__title">Согласование</h1>
+    <p class="deal__error">Не удалось загрузить сделку. Попробуйте обновить страницу.</p>
+  </section>
+} @else if (deal(); as d) {
+  <section class="deal">
+    <app-breadcrumbs parentLabel="Мои клиенты" parentLink="/clients" />
+    <h1 class="deal__title">Согласование</h1>
+
+    <!-- ═════ ГЛАВНЫЙ БЛОК: чей ход · что дальше · когда ═════
+         Единственное, что агент должен прочитать клиенту вслух за 10 секунд.
+         Настоящее ограничение флоу — агент не видит, у кого мяч, и уходит
+         спрашивать куратора в WhatsApp. Этот блок и есть лекарство. -->
+    <div class="ball" [attr.data-ball]="d.ballHolder">
+      <div class="ball__main">
+        <span class="ball__who">{{ ballLabel[d.ballHolder] }}</span>
+        <span class="ball__what">{{ statusLabel[d.status] }}</span>
+      </div>
+      <div class="ball__meta">
+        @if (d.waitingSince && !closed()) {
+          <span class="ball__since">с {{ d.waitingSince | date: 'd MMMM' }}</span>
+        }
+        @if (d.waitHint) {
+          <!-- Норматив пишем ТОЛЬКО тот, что реально знаем (договор — «в течение дня»).
+               Срок ответа СК нам неизвестен → молчим, а не выдумываем. -->
+          <span class="ball__hint">{{ d.waitHint }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="deal__grid">
+      <!-- ─────────── ЛЕВАЯ КОЛОНКА: дело ─────────── -->
+      <div class="deal__col">
+        <!-- Тариф — АРТЕФАКТ, а не реплика в переписке. Это несущее: цену, согласованную
+             «словами в чате», однажды спишут другой — и это позор перед клиентом. -->
+        @if (offer(); as o) {
+          <section class="card offer" [class.offer--decide]="offerNeedsDecision()">
+            <header class="card__head">
+              <h2 class="card__title">Тариф от страховой</h2>
+              @if (o.version > 1) {
+                <span class="offer__version">Версия {{ o.version }}</span>
+              }
+            </header>
+
+            <div class="offer__price">
+              <span class="offer__sum">{{ o.premium | number: '1.0-0' }} ₽</span>
+              <span class="offer__insurer">{{ o.insurerName }}</span>
+            </div>
+
+            @if (o.conditions.length > 0) {
+              <ul class="offer__conditions">
+                @for (c of o.conditions; track c) {
+                  <li>{{ c }}</li>
+                }
+              </ul>
+            }
+
+            <p class="offer__valid">Предложение действует до {{ o.validUntil | date: 'd MMMM' }}</p>
+
+            @if (offerNeedsDecision()) {
+              <div class="offer__actions">
+                <button
+                  type="button"
+                  class="btn btn--primary"
+                  [disabled]="busy()"
+                  (click)="acceptOffer()"
+                >
+                  Согласовать — получить ссылку на оплату
+                </button>
+                <button type="button" class="btn btn--ghost" (click)="toggleRequote()">
+                  Попросить пересчёт
+                </button>
+              </div>
+
+              @if (requoteOpen()) {
+                <div class="requote">
+                  <label class="requote__label" for="requote-comment">
+                    Что не устроило? Передадим в страховую
+                  </label>
+                  <textarea
+                    id="requote-comment"
+                    class="requote__input"
+                    rows="2"
+                    [formControl]="requoteControl"
+                    placeholder="Например: дорого для клиента, просит с франшизой"
+                  ></textarea>
+                  <button
+                    type="button"
+                    class="btn btn--primary btn--sm"
+                    [disabled]="busy() || !requoteControl.value.trim()"
+                    (click)="sendRequote()"
+                  >
+                    Отправить запрос на пересчёт
+                  </button>
+                </div>
+              }
+            } @else if (o.acceptedAt) {
+              <p class="offer__accepted">
+                Согласован вами {{ o.acceptedAt | date: 'd MMMM, HH:mm' }}
+              </p>
+            }
+          </section>
+        }
+
+        <!-- Оплата. ЧЕСТНОСТЬ: эквайринг на стороне СК → статуса платежа мы НЕ ВИДИМ.
+             Не пишем «оплачено» — пишем правду. Доказательство оплаты = приход полиса. -->
+        @if (d.payment; as pay) {
+          <section class="card pay">
+            <h2 class="card__title">Ссылка на оплату для клиента</h2>
+            <div class="pay__link">
+              <code class="pay__url">{{ pay.url }}</code>
+              <button
+                type="button"
+                class="btn btn--ghost btn--sm"
+                (click)="copyPaymentLink(pay.url)"
+              >
+                {{ linkCopied() ? 'Скопировано' : 'Скопировать' }}
+              </button>
+            </div>
+            <p class="pay__note">
+              <svg class="pay__note-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <line x1="12" y1="11" x2="12" y2="16" />
+                <line x1="12" y1="8" x2="12" y2="8.01" />
+              </svg>
+              <span>
+                Клиент платит на сайте страховой компании —
+                <strong>статус оплаты нам не виден</strong>. Как только страховая выпустит полис, он
+                появится здесь, и мы загрузим договор (обычно в течение дня). Ссылка действует до
+                {{ pay.validUntil | date: 'd MMMM' }}.
+              </span>
+            </p>
+          </section>
+        }
+
+        <!-- Что просили посчитать -->
+        <section class="card">
+          <h2 class="card__title">Заявка № {{ d.requestNumber }}</h2>
+          <dl class="facts">
+            <div class="facts__row">
+              <dt>Клиент</dt>
+              <dd>
+                {{ d.clientName }}
+                <a class="facts__phone" [href]="telHref(d.clientPhone)">{{ d.clientPhone }}</a>
+              </dd>
+            </div>
+            <div class="facts__row">
+              <dt>Продукт</dt>
+              <dd>{{ d.productLabel }}</dd>
+            </div>
+            <div class="facts__row">
+              <dt>Объект</dt>
+              <dd>{{ d.objectLabel }}</dd>
+            </div>
+            <div class="facts__row">
+              <dt>Запрос</dt>
+              <dd>{{ d.request }}</dd>
+            </div>
+            @if (d.resultingPolicyNumber) {
+              <div class="facts__row">
+                <dt>Полис</dt>
+                <dd class="facts__policy">{{ d.resultingPolicyNumber }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <!-- История торга: предыдущие версии тарифа. Аудит «почему такая цена». -->
+        @if (previousOffers().length > 0) {
+          <section class="card">
+            <h2 class="card__title">Предыдущие тарифы</h2>
+            <ul class="history">
+              @for (o of previousOffers(); track o.id) {
+                <li class="history__item">
+                  <span class="history__sum">{{ o.premium | number: '1.0-0' }} ₽</span>
+                  <span class="history__meta">
+                    версия {{ o.version }} · {{ o.createdAt | date: 'd MMMM' }}
+                  </span>
+                  @if (o.requoteComment) {
+                    <span class="history__why">Пересчёт: {{ o.requoteComment }}</span>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+
+      <!-- ─────────── ПРАВАЯ КОЛОНКА: разговор ───────────
+           Переписка ПОЛНОРАЗМЕРНАЯ, а не модалка-справка. Раньше переписка внутри дела
+           выглядела второсортной против чата — и рука тянулась писать в «Сообщения».
+           Разговор по клиенту живёт здесь, в одном экземпляре, и никуда не зеркалится. -->
+      <div class="deal__col">
+        <section class="card chat">
+          <h2 class="card__title">Переписка по сделке</h2>
+          <p class="chat__scope">
+            Здесь — всё по этому клиенту. Общие вопросы и куратор — в разделе «Сообщения».
+          </p>
+
+          <ul class="chat__feed">
+            @for (m of d.messages; track m.id) {
+              <li class="msg" [class.msg--own]="m.actor === 'agent'">
+                <div class="msg__bubble">
+                  @if (m.actor !== 'agent') {
+                    <span class="msg__author">{{ m.authorName }}</span>
+                  }
+                  <span class="msg__text">{{ m.text }}</span>
+                  <span class="msg__time">{{ m.at | date: 'd MMM, HH:mm' }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+
+          @if (!closed()) {
+            <div class="chat__composer">
+              <textarea
+                class="chat__input"
+                rows="2"
+                [formControl]="messageControl"
+                placeholder="Написать поддержке по этой сделке"
+                aria-label="Сообщение по сделке"
+              ></textarea>
+              <button
+                type="button"
+                class="btn btn--primary btn--sm"
+                [disabled]="!messageControl.value.trim()"
+                (click)="sendMessage()"
+              >
+                Отправить
+              </button>
+            </div>
+          }
+        </section>
+      </div>
+    </div>
+  </section>
+}
