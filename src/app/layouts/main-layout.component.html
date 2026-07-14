@@ -156,7 +156,31 @@
 
   <div class="app-body">
     <aside class="app-sidebar" aria-label="Основное меню">
-      @if (attentionCount() > 0) {
+      @if (attentionFailed()) {
+        <!-- Отказ бэкенда НЕ показываем как ноль: молчание читалось бы как «вас никто
+             не ждёт». Говорим прямо, что не смогли проверить. -->
+        <div class="app-attention app-attention--failed" role="status">
+          <span class="app-attention__icon" aria-hidden="true">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <line x1="12" y1="8" x2="12" y2="13" />
+              <line x1="12" y1="16" x2="12" y2="16.01" />
+            </svg>
+          </span>
+          <span class="app-attention__label">
+            Не удалось проверить, ждут ли вас дела. Обновите страницу.
+          </span>
+        </div>
+      } @else if (attentionCount() > 0) {
         <a
           [routerLink]="clientsRoute"
           [queryParams]="{ awaiting: 1 }"

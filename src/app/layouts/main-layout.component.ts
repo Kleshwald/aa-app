@@ -71,6 +71,11 @@ export class MainLayoutComponent {
   // виден на всех экранах. Клик уводит на «Мои клиенты», где чип-фильтр включён и
   // таблица уже отфильтрована. Число = полисы, где заявка ждёт агента (= число чипа).
   protected readonly attentionCount = this.attention.awaitingPolicyCount;
+
+  // «Не знаю» ≠ «ноль». При отказе бэкенда молчать нельзя: тишина читается как
+  // «вас никто не ждёт» — это худший обман для аудитории, чей главный страх —
+  // «пропущу и опозорюсь». Показываем честное «не удалось проверить».
+  protected readonly attentionFailed = this.attention.failed;
   protected readonly clientsRoute = '/clients';
 
   protected readonly userMenuOpen = signal(false);

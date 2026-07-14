@@ -264,6 +264,22 @@
   }
 }
 
+// Отказ бэкенда: «не знаю» ≠ «ноль». Нейтрально-серый, НЕ янтарь и НЕ красный —
+// это не «вас ждут» и не авария, это «мы не смогли проверить». Не ссылка (кликать
+// некуда — клик в отфильтрованный список сейчас соврал бы), поэтому без hover.
+.app-attention--failed {
+  background: var(--gray-50);
+  color: var(--gray-700);
+  border-color: var(--gray-200);
+  box-shadow: inset 3px 0 0 var(--gray-400);
+  cursor: default;
+
+  .app-attention__label {
+    font-weight: var(--weight-medium);
+    font-size: var(--text-sm);
+  }
+}
+
 .app-attention__icon {
   display: inline-flex;
   align-items: center;
