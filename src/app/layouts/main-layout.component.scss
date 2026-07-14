@@ -230,49 +230,68 @@
   overflow-y: auto;
 }
 
-// ─── Сквозной сигнал «Ждут ваших действий» (над навигацией) ───
+// ─── Сквозной сигнал «Ждут ваших действий» (в ШАПКЕ, слева за логотипом) ───
 // Тёплый янтарь = «внимание», НЕ красный (красный = «сломалось» — ложная тревога
-// для аудитории 45+). Виден на всех экранах; клик → зона-список на «Мои клиенты».
+// для аудитории 45+). Виден на всех экранах; клик → отфильтрованный список.
+//
+// КРИТИЧНО про цвет: янтарь ПО navy давать нельзя — warning-500 на --header-bg даёт
+// 3.88:1, а тёмная пилюля счётчика — 1.47:1 (грязное пятно). Поэтому в шапке живёт
+// та же СВЕТЛАЯ плашка, что была в сайдбаре: она контрастирует с navy как «поднятый»
+// элемент и сохраняет контраст текста ≥4.5:1 внутри себя.
+.app-header__attention {
+  display: flex;
+  align-items: center;
+  margin-left: 24px;
+  // Слот может быть пустым (ноль дел / ещё не спросили) — но между ним и блоком
+  // пользователя стоит распорка, поэтому шапка не «прыгает» при появлении сигнала.
+  min-height: 44px;
+}
+
 .app-attention {
   display: flex;
   align-items: center;
-  // gap/padding = как у .app-sidebar__item — иконка и подпись «Ждут ваших действий»
-  // встают на ту же вертикальную ось, что и пункты меню ниже (DESIGN.md §7.7).
-  gap: 14px;
-  // min-height (не height): подпись «Ждут ваших действий» не влезает в 264px-сайдбар
-  // одной строкой и переносится на две — блок растёт, а не режет текст.
-  min-height: 56px;
-  padding: 10px 16px;
-  margin-bottom: 10px;
+  gap: 10px;
+  // Горизонтальная плашка: в шапке 68px — 44px это тач-цель и воздух сверху/снизу.
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--warning-100);
   border-radius: var(--radius-md);
   text-decoration: none;
   background: var(--warning-50);
   color: var(--warning-700);
-  border: 1px solid var(--warning-100);
-  box-shadow: inset 3px 0 0 var(--warning-500);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
   transition: background 120ms ease-out;
 
   &:hover {
     background: var(--warning-100);
   }
 
+  // Фокус на navy — белым, как у кнопки пользователя рядом (одно семейство).
   &:focus-visible {
-    outline: none;
-    box-shadow:
-      inset 3px 0 0 var(--warning-500),
-      0 0 0 3px var(--warning-100);
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
   }
 }
 
 // Отказ бэкенда: «не знаю» ≠ «ноль». Нейтрально-серый, НЕ янтарь и НЕ красный —
-// это не «вас ждут» и не авария, это «мы не смогли проверить». Не ссылка (кликать
-// некуда — клик в отфильтрованный список сейчас соврал бы), поэтому без hover.
+// это не «вас ждут» и не авария, это «мы не смогли проверить».
+// Это КНОПКА повтора: раньше здесь было «Обновите страницу» — то есть требование
+// бросить недозаполненную форму. Связь чиним мы, а не агент.
 .app-attention--failed {
   background: var(--gray-50);
   color: var(--gray-700);
   border-color: var(--gray-200);
-  box-shadow: inset 3px 0 0 var(--gray-400);
-  cursor: default;
+
+  &:hover {
+    background: var(--gray-100);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.85;
+  }
 
   .app-attention__label {
     font-weight: var(--weight-medium);
@@ -280,21 +299,29 @@
   }
 }
 
+// «Проверить ещё раз» — подпись действия внутри плашки: агент должен видеть, что
+// это можно нажать, а не читать как приговор.
+.app-attention__retry {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--brand-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .app-attention__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
 }
 
 .app-attention__label {
-  flex: 1;
   font-size: var(--text-base);
-  line-height: 1.25; // плотнее — две строки подписи держатся компактно
+  line-height: 1.2;
   font-weight: var(--weight-semibold);
-  min-width: 0;
 }
 
 .app-attention__count {
@@ -481,8 +508,7 @@
 
   .app-sidebar__label,
   .app-sidebar__social-title,
-  .app-sidebar__social-label,
-  .app-attention__label {
+  .app-sidebar__social-label {
     display: none;
   }
 
@@ -492,11 +518,15 @@
     padding: 0;
   }
 
-  // Свёрнутый сайдбар: только иконка + счётчик пунктом внимания.
-  .app-attention {
-    justify-content: center;
-    gap: 6px;
-    padding: 0 4px;
+  // Узкая шапка: у сигнала остаются иконка и счётчик, подпись прячется.
+  // Осознанная деградация (мобилка вторична), а не десктопное решение.
+  .app-header__attention {
+    margin-left: 12px;
+  }
+
+  .app-attention__label,
+  .app-attention__retry {
+    display: none;
   }
 
   .app-content {

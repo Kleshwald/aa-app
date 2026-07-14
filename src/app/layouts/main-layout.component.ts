@@ -76,7 +76,13 @@ export class MainLayoutComponent {
   // «вас никто не ждёт» — это худший обман для аудитории, чей главный страх —
   // «пропущу и опозорюсь». Показываем честное «не удалось проверить».
   protected readonly attentionFailed = this.attention.failed;
+  protected readonly attentionRetrying = this.attention.retrying;
   protected readonly clientsRoute = '/clients';
+
+  /** Отказ — не тупик: спрашиваем ещё раз сами, не гоняя агента на F5. */
+  retryAttention(): void {
+    this.attention.retry();
+  }
 
   protected readonly userMenuOpen = signal(false);
 

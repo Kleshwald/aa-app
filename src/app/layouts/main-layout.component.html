@@ -4,6 +4,86 @@
       <img src="images/logo.png" alt="" class="app-header__logo" />
     </a>
 
+    <!-- ═══ Сквозной сигнал «Ждут ваших действий» ═══
+         Живёт в ШАПКЕ, а не в сайдбаре (владелец, 2026-07-14). Причина не в тесноте:
+         сайдбар отвечает на «куда пойти сделать новое» (продукты), а это — СОСТОЯНИЕ
+         агента, сквозное для всех экранов. Стоя в ряду с продуктами (их станет ~13),
+         сигнал читался бы как ещё один пункт меню — и при скролле сайдбара уезжал бы
+         за верхний край, то есть переставал быть амбиентным детектором.
+         Место одно: в сайдбаре его больше нет. Дубль = шум.
+
+         Слева, сразу за логотипом: якорь неподвижен. В правом кластере плашка «ездила»
+         бы от длины ФИО агента — мышечная память ломается. -->
+    <div class="app-header__attention" role="status">
+      @if (attentionFailed()) {
+        <!-- «Не знаю» ≠ «ноль»: молчание читалось бы как «вас никто не ждёт» — худший
+             обман для аудитории, чей главный страх «пропущу и опозорюсь».
+             Серый, НЕ янтарь: это не «вас ждут», а «мы не смогли проверить».
+             И это КНОПКА: чинить связь — наша работа, а не повод гнать агента на F5
+             посреди недозаполненной формы. -->
+        <button
+          type="button"
+          class="app-attention app-attention--failed"
+          (click)="retryAttention()"
+          [disabled]="attentionRetrying()"
+          [attr.aria-label]="
+            attentionRetrying()
+              ? 'Проверяем, ждут ли вас дела'
+              : 'Не удалось проверить, ждут ли вас дела. Проверить ещё раз'
+          "
+        >
+          <span class="app-attention__icon" aria-hidden="true">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <line x1="12" y1="8" x2="12" y2="13" />
+              <line x1="12" y1="16" x2="12" y2="16.01" />
+            </svg>
+          </span>
+          <span class="app-attention__label">
+            {{ attentionRetrying() ? 'Проверяем…' : 'Не смогли проверить дела' }}
+          </span>
+          @if (!attentionRetrying()) {
+            <span class="app-attention__retry" aria-hidden="true">Проверить ещё раз</span>
+          }
+        </button>
+      } @else if (attentionCount() > 0) {
+        <a
+          [routerLink]="clientsRoute"
+          [queryParams]="{ awaiting: 1 }"
+          class="app-attention"
+          [attr.aria-label]="'Ждут ваших действий: ' + attentionCount() + '. Открыть список'"
+        >
+          <span class="app-attention__icon" aria-hidden="true">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </span>
+          <span class="app-attention__label">Ждут ваших действий</span>
+          <!-- Число уже озвучено в aria-label родителя — не дублируем скринридеру. -->
+          <span class="app-attention__count" aria-hidden="true">{{ attentionCount() }}</span>
+        </a>
+      }
+    </div>
+
     <div class="app-header__spacer"></div>
 
     <div class="app-header__actions">
@@ -156,58 +236,9 @@
 
   <div class="app-body">
     <aside class="app-sidebar" aria-label="Основное меню">
-      @if (attentionFailed()) {
-        <!-- Отказ бэкенда НЕ показываем как ноль: молчание читалось бы как «вас никто
-             не ждёт». Говорим прямо, что не смогли проверить. -->
-        <div class="app-attention app-attention--failed" role="status">
-          <span class="app-attention__icon" aria-hidden="true">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <line x1="12" y1="8" x2="12" y2="13" />
-              <line x1="12" y1="16" x2="12" y2="16.01" />
-            </svg>
-          </span>
-          <span class="app-attention__label">
-            Не удалось проверить, ждут ли вас дела. Обновите страницу.
-          </span>
-        </div>
-      } @else if (attentionCount() > 0) {
-        <a
-          [routerLink]="clientsRoute"
-          [queryParams]="{ awaiting: 1 }"
-          class="app-attention"
-          [attr.aria-label]="'Ждут ваших действий: ' + attentionCount() + '. Открыть список'"
-        >
-          <span class="app-attention__icon" aria-hidden="true">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-          </span>
-          <span class="app-attention__label">Ждут ваших действий</span>
-          <!-- Число уже озвучено в aria-label родителя — не дублируем скринридеру. -->
-          <span class="app-attention__count" aria-hidden="true">{{ attentionCount() }}</span>
-        </a>
-      }
-
+      <!-- Сигнала «Ждут ваших действий» здесь БОЛЬШЕ НЕТ — он переехал в шапку.
+           Бейдж «Сообщения» ниже остаётся: это не дубль сигнала, а счётчик, приклеенный
+           к своему пункту назначения (другой канал, свой контекст). -->
       <nav class="app-sidebar__nav">
         @for (item of nav; track item.route) {
           <a

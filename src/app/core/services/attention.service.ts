@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, filter, switchMap, timer } from 'rxjs';
+import { Subject, combineLatest, filter, merge, switchMap, tap, timer } from 'rxjs';
 
 import type { AwaitingDeal } from './deal.model';
 import { DealService } from './deal.service';
@@ -36,8 +36,26 @@ export class AttentionService {
   /** Вкладка на переднем плане? Скрытую не опрашиваем. */
   private readonly visible = signal(!document.hidden);
 
+  /** Ручной повтор из UI: отказ должен быть тупиком не для агента, а для нас. */
+  private readonly retry$ = new Subject<void>();
+
+  /** Идёт повторная проверка (после нажатия «Проверить ещё раз»). */
+  readonly retrying = signal(false);
+
   constructor() {
     document.addEventListener('visibilitychange', () => this.visible.set(!document.hidden));
+  }
+
+  /**
+   * Спросить ещё раз, не дожидаясь следующего тика поллинга.
+   *
+   * Без этого честный текст «не удалось проверить» превращался в «обновите страницу» —
+   * то есть в требование к агенту бросить недозаполненную форму ОСАГО и потерять ввод.
+   * Чинить связь — наша работа, а не её.
+   */
+  retry(): void {
+    this.retrying.set(true);
+    this.retry$.next();
   }
 
   // ДВА источника мяча у агента, ОДИН сигнал:
@@ -48,10 +66,14 @@ export class AttentionService {
   // Это и есть та синхронизация, о которой спрашивал владелец: наружу «всплывает»
   // не текст переписки, а ФАКТ «вас ждут».
   private readonly response = toSignal(
-    timer(0, POLL_MS).pipe(
-      filter(() => this.visible()),
+    merge(
+      timer(0, POLL_MS).pipe(filter(() => this.visible())),
+      this.retry$, // ручной повтор идёт вне расписания — агент не должен ждать тик
+    ).pipe(
       switchMap(() =>
-        combineLatest([this.processService.listAwaiting(), this.dealService.listAwaiting()]),
+        combineLatest([this.processService.listAwaiting(), this.dealService.listAwaiting()]).pipe(
+          tap(() => this.retrying.set(false)),
+        ),
       ),
     ),
     { initialValue: undefined },
