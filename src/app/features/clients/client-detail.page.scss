@@ -807,10 +807,17 @@
   color: var(--gray-900);
 }
 
+// «№» — обычным шрифтом: в моношрифте глиф ломается (рендерится надстрочным).
+// Моно — только на цифрах ID; неразрывный пробел держит «№» и номер вместе.
 .req__num {
-  font-family: var(--font-mono);
   font-size: var(--text-sm);
   color: var(--gray-500);
+  white-space: nowrap;
+}
+
+.req__num-val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .req__status {

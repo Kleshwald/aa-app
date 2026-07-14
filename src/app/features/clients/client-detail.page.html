@@ -346,7 +346,9 @@
               <li class="req">
                 <div class="req__top">
                   <span class="req__kind">{{ processKindLabel[proc.kind] }}</span>
-                  <span class="req__num">№{{ proc.requestNumber }}</span>
+                  <span class="req__num"
+                    >№&nbsp;<span class="req__num-val">{{ proc.requestNumber }}</span></span
+                  >
                   <span class="req__status" [attr.data-status]="proc.status">
                     {{ reqStatusLabel(proc) }}
                   </span>
@@ -428,7 +430,9 @@
                   <li class="done-req">
                     <div class="req__top">
                       <span class="req__kind">{{ processKindLabel[proc.kind] }}</span>
-                      <span class="req__num">№{{ proc.requestNumber }}</span>
+                      <span class="req__num"
+                        >№&nbsp;<span class="req__num-val">{{ proc.requestNumber }}</span></span
+                      >
                       <span class="req__status" [attr.data-status]="proc.status">
                         {{ reqStatusLabel(proc) }}
                       </span>
@@ -471,7 +475,7 @@
         <header class="hist__head">
           <div>
             <h2 class="hist__title" id="hist-title">
-              Ход заявки · {{ processKindLabel[proc.kind] }} №{{ proc.requestNumber }}
+              Ход заявки · {{ processKindLabel[proc.kind] }} №&nbsp;{{ proc.requestNumber }}
             </h2>
             @if (proc.reasons.length > 0) {
               <p class="hist__reasons">{{ reasonList(proc) }}</p>
@@ -504,7 +508,7 @@
 
         <footer class="hist__foot">
           <label class="hist__label" for="reqReply"
-            >Уточнение по заявке №{{ proc.requestNumber }}</label
+            >Уточнение по заявке №&nbsp;{{ proc.requestNumber }}</label
           >
           <div class="hist__composer">
             <textarea
