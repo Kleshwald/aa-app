@@ -24,10 +24,29 @@ import { randomDelay } from '../helpers/delay';
 // Сделки («Согласование») — критичный путь демо, отвечаем гарантированным успехом
 // (в обход random-fail из mockOk), как и заявки по договору.
 
+/**
+ * Отдаём КОПИЮ, а не живую ссылку на объект из фикстуры.
+ *
+ * Это не «оптимизация», а воспроизведение границы HTTP: настоящий бэкенд сериализует
+ * ответ, и клиент КАЖДЫЙ раз получает новый объект. Мок, отдающий живую ссылку, врёт:
+ * фикстура мутируется на месте → ссылка та же → Angular-сигналы (сравнение по ссылке)
+ * считают, что ничего не изменилось, и computed НЕ пересчитываются. Экран замирает
+ * навсегда, хотя данные «поменялись».
+ *
+ * Именно на этом сгорел акцепт тарифа: хендлер честно проставлял acceptedAt, а UI не
+ * обновлялся. Класс ошибок «мок ≠ контракт»: мок скрывал баг, которого на реальном
+ * бэкенде не будет — и наоборот, создавал баг, которого там тоже нет.
+ */
 function ok<T>(data: T, status = 200): Observable<HttpResponse<ApiResponse<T>>> {
+  const copy = data === null || data === undefined ? data : (structuredClone(data) as T);
   return timer(randomDelay()).pipe(
     mergeMap(() =>
-      of(new HttpResponse({ status, body: { success: true, data, error: null, meta: null } })),
+      of(
+        new HttpResponse({
+          status,
+          body: { success: true, data: copy, error: null, meta: null },
+        }),
+      ),
     ),
   );
 }
