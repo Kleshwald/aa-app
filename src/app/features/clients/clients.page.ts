@@ -3,12 +3,14 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, startWith, switchMap, timer } from 'rxjs';
 import { TuiTextfield, tuiTextfieldOptionsProvider } from '@taiga-ui/core';
 import { TuiInputDate, tuiInputDateOptionsProvider } from '@taiga-ui/kit';
 
 import { AttentionService } from '@core/services/attention.service';
 import { ClientService, type ClientRow, type ClientsQuery } from '@core/services/client.service';
+import { isClosedDeal, type DealRow } from '@core/services/deal.model';
+import { DealService } from '@core/services/deal.service';
 import { type ProcessKind } from '@core/services/process.service';
 import { IsoDayTransformer } from '@shared/iso-day.transformer';
 
@@ -67,6 +69,7 @@ export interface RowProcessMarker {
 })
 export class ClientsPage {
   private readonly service = inject(ClientService);
+  private readonly dealService = inject(DealService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly attention = inject(AttentionService);
@@ -249,6 +252,30 @@ export class ClientsPage {
   );
 
   protected readonly rows = computed<ClientRow[]>(() => this.response()?.data ?? []);
+
+  // ─── Сделки («Согласование») — незавершённые продажи ───
+  // «Мои клиенты» — картотека СДЕЛОК, а не реестр выданных полисов (в 1С так и есть:
+  // там и черновики, и «оформляется»; прототип это нечаянно потерял). Сделка появляется
+  // строкой с первой секунды и НЕ переезжает: после оплаты у неё просто появляется
+  // № полиса. Агент ищет ИВАНОВА, а не «заявку», — и всегда находит в одном месте.
+  private readonly dealsResponse = toSignal(
+    timer(0, 4000).pipe(switchMap(() => this.dealService.list())),
+    { initialValue: undefined },
+  );
+
+  /** Активные сделки — сверху списка: это дела, которые ещё не доведены до полиса. */
+  protected readonly dealRows = computed<DealRow[]>(() => {
+    const r = this.dealsResponse();
+    const all = r?.success ? (r.data ?? []) : [];
+    const open = all.filter((d) => !isClosedDeal(d.status));
+    // Чип «Ждут ваших действий» сужает и сделки — до тех, где мяч у агента.
+    return this.awaitingOnly() ? open.filter((d) => !!d.actionRequired) : open;
+  });
+
+  openDeal(row: DealRow): void {
+    void this.router.navigate(['/deals', row.id]);
+  }
+
   protected readonly isLoading = computed(() => this.response() === undefined);
   protected readonly hasError = computed(() => {
     const r = this.response();

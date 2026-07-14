@@ -202,6 +202,66 @@
         </tr>
       </thead>
       <tbody>
+        <!-- СДЕЛКИ («Согласование») — незавершённые продажи, сверху списка.
+             «Мои клиенты» = картотека сделок, а не реестр выданных полисов. Строка
+             появляется с первой секунды и НЕ переезжает: после оплаты у неё просто
+             появится № полиса и цена. Ложится в те же 8 колонок — новых нет. -->
+        @for (d of dealRows(); track d.id) {
+          <tr
+            class="clients__row clients__row--clickable clients__row--deal"
+            (click)="openDeal(d)"
+            (keydown.enter)="openDeal(d)"
+            tabindex="0"
+            [attr.aria-label]="
+              'Открыть сделку ' + d.requestNumber + ', ' + d.clientName + '. ' + d.statusLabel
+            "
+          >
+            <td>{{ d.createdAt | date: 'dd.MM.yyyy' }}</td>
+            <td>{{ d.clientName }}</td>
+            <td>{{ d.objectLabel }}</td>
+            <td>
+              <span class="clients__policy-no">Заявка {{ d.requestNumber }}</span>
+              @if (d.actionRequired) {
+                <!-- Тот же тихий янтарь, что у маркера заявки: один язык на весь список. -->
+                <span class="clients__process clients__process--urgent">
+                  <span class="clients__process-state">
+                    <svg class="clients__process-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                      <path d="M14 3v5h5" />
+                    </svg>
+                    {{ d.actionRequired.label }}
+                  </span>
+                </span>
+              }
+            </td>
+            <td>{{ d.productLabel }}</td>
+            <td class="clients__cell--num">
+              <!-- Цены ещё нет — честное «—», а не ноль. -->
+              @if (d.premium) {
+                {{ d.premium | number: '1.0-0' }}
+              } @else {
+                <span class="clients__empty-cell">—</span>
+              }
+            </td>
+            <td>
+              <span class="clients__status" data-status="processing">
+                <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="8" />
+                  <polyline points="12 8 12 12 15 14" />
+                </svg>
+                <span class="clients__status-label">{{ d.statusLabel }}</span>
+              </span>
+            </td>
+            <td>
+              @if (d.insurerName) {
+                {{ d.insurerName }}
+              } @else {
+                <span class="clients__empty-cell">Подбираем</span>
+              }
+            </td>
+          </tr>
+        }
+
         @if (isLoading()) {
           @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
             <tr class="clients__row clients__row--skeleton">
@@ -273,13 +333,22 @@
                   <!-- ВТОРАЯ ось статуса: заявка ПО полису. Не путать с колонкой «Статус» —
                        там статус самого полиса. Живёт под номером (в 9-ю колонку не выносим:
                        на 1366px таблица уже уезжает в скролл, ФИО в 3 строки).
-                       В списке — ТОЛЬКО состояние, одним словом: вид заявки и дата не грузят
-                       список, они на странице договора /clients/:id, куда ведёт клик по строке. -->
+
+                       ВИД заявки — СЛОВОМ и рядом с состоянием: «Расторжение · В работе
+                       у страховой». Это ровно то, что агент произносит клиенту в трубку.
+                       Раньше вид уходил только в aria-label: скринридер его «видел», а
+                       зрячий агент — нет.
+                       Кодов ВИ/Р/УУ в списке НЕТ сознательно: одинокая «Р» стоит в паре
+                       сантиметров от колонки «Статус: Оформлен» и читается как «расторгнут» —
+                       это ровно тот испуг, от которого мы весь продукт защищаем. Код живёт
+                       на странице договора («Внесение изменений (ВИ)»), где есть время читать.
+                       ДАТЫ здесь нет: перегружала строку (владелец, 2026-07-09) — она на
+                       странице договора, куда ведёт клик. -->
                   <span class="clients__process" [class.clients__process--urgent]="pm.urgent">
                     <svg class="clients__process-icon" viewBox="0 0 24 24" aria-hidden="true">
                       @if (pm.urgent) {
                         <!-- Документ — «нужны документы». Колокол НЕ используем:
-                             он живёт только в сквозном индикаторе (сайдбар). -->
+                             он живёт только в сквозном индикаторе (шапка). -->
                         <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
                         <path d="M14 3v5h5" />
                       } @else {
@@ -288,6 +357,8 @@
                         <polyline points="21 3 21 9 15 9" />
                       }
                     </svg>
+                    <span class="clients__process-kind">{{ pm.kindLabel }}</span>
+                    <span class="clients__process-sep" aria-hidden="true">·</span>
                     {{ pm.stateLabel }}
                   </span>
                 }
