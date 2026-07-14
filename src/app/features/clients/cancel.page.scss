@@ -1,0 +1,236 @@
+:host {
+  display: block;
+}
+
+// Одна колонка, длинная страница из секций-карточек (залок: НЕ stepper).
+.cxl {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.cxl__header {
+  display: flex;
+  justify-content: center;
+}
+
+.cxl__title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--brand-700);
+}
+
+// «Это заявка, а не мгновенное расторжение» — спокойный синий, НЕ янтарь и не красный:
+// это не тревога и не «ваш ход», а снятие страха.
+.cxl__assure {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 16px;
+  font-size: var(--text-base);
+  line-height: var(--leading-sm);
+  color: var(--brand-700);
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+  border-radius: var(--radius-md);
+}
+
+.cxl__assure-ico {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cxl__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cxl__card {
+  padding: 20px 24px;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.cxl__card-title {
+  margin: 0 0 16px;
+  font-size: var(--text-lg);
+  line-height: 1.3;
+  font-weight: var(--weight-semibold);
+  color: var(--brand-700);
+}
+
+// ─── Что расторгаем (read-only) ───
+.cxl__summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  --ins-logo-size: 56px;
+}
+
+.cxl__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 24px;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.cxl__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  dt {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+  }
+
+  dd {
+    margin: 0;
+    font-size: var(--text-base);
+    color: var(--gray-900);
+  }
+}
+
+.cxl__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+// Пояснение по домену (кому вернут деньги, какой документ нужен).
+.cxl__note {
+  margin: 8px 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--gray-700);
+}
+
+// ─── Деньги — главный вопрос клиента «сколько вернут?» ───
+.cxl__card--money {
+  border-color: var(--brand-100);
+  background: var(--brand-50);
+}
+
+.cxl__amount {
+  margin: 0 0 16px;
+  font-size: var(--text-3xl);
+  line-height: 1.1;
+  font-weight: var(--weight-semibold);
+  color: var(--brand-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.cxl__amount-cur {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+}
+
+// Прозрачность расчёта: агент должен объяснить цифру клиенту, а не просто назвать.
+.cxl__calc {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    font-size: var(--text-base);
+    color: var(--gray-800);
+    border-bottom: 1px dashed var(--brand-100);
+    padding-bottom: 6px;
+  }
+
+  b {
+    font-weight: var(--weight-semibold);
+    color: var(--gray-900);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// Оговорка «предварительно» — обязательна: агент не должен обещать эту сумму.
+.cxl__disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--warning-700);
+  background: var(--warning-50);
+  border: 1px solid var(--warning-100);
+  border-radius: var(--radius-md);
+}
+
+// ─── Отправка ───
+.cxl__foot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cxl__submit {
+  min-height: var(--size-input);
+  padding: 0 32px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: #ffffff;
+  background: var(--brand-500);
+  border: 1.5px solid var(--brand-500);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition: background 120ms ease-out;
+
+  &:hover:not(:disabled) {
+    background: var(--brand-600);
+    border-color: var(--brand-600);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    background: var(--gray-300);
+    border-color: var(--gray-300);
+    cursor: not-allowed;
+  }
+}
+
+.cxl__state {
+  margin: 0;
+  padding: 16px;
+  font-size: var(--text-base);
+  color: var(--gray-700);
+  text-align: center;
+}
+
+.cxl__state--error {
+  color: var(--error-600);
+  background: var(--error-50);
+  border: 1px solid var(--error-100);
+  border-radius: var(--radius-md);
+}

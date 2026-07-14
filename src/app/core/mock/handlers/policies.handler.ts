@@ -45,6 +45,7 @@ export function handleGetPolicies(
   const sortBy = params.get('sortBy') ?? 'createdAt';
   const sortOrder = params.get('sortOrder') ?? 'desc';
   const awaitingOnly = params.get('awaitingOnly') === 'true';
+  const processFirst = params.get('processFirst') === 'true';
 
   let result = policies.slice();
   if (status) result = result.filter((p) => p.status === status);
@@ -53,8 +54,10 @@ export function handleGetPolicies(
     // «Ждут ваших действий» — внимание кросс-периодное: заявка на прошлогоднем полисе
     // обязана найтись, поэтому фильтр периода СОЗНАТЕЛЬНО игнорируется.
     result = result.filter((p) => activeProcessFor(p.id)?.status === 'awaiting-docs');
-  } else {
-    // Фильтр по дате оформления (createdAt — ISO datetime; сравниваем по дню).
+  } else if (!search) {
+    // Поиск (по фамилии/номеру) тоже игнорирует период: клиент звонит спросить статус,
+    // а его полис оформлен в мае — при дефолтном «Этот месяц» он бы не нашёлся.
+    // Дату применяем ТОЛЬКО когда агент листает список, а не ищет конкретного клиента.
     if (dateFrom) result = result.filter((p) => p.createdAt.slice(0, 10) >= dateFrom);
     if (dateTo) result = result.filter((p) => p.createdAt.slice(0, 10) <= dateTo);
   }
@@ -73,6 +76,13 @@ export function handleGetPolicies(
     if (av === bv) return 0;
     return av < bv ? -direction : direction;
   });
+  if (processFirst) {
+    // Стабильное разбиение: полисы с активной заявкой наверх, порядок внутри — прежний
+    // (сортировка выше сохраняется). Это ручной чип, не смена сортировки по умолчанию.
+    const withProc = result.filter((p) => activeProcessFor(p.id));
+    const rest = result.filter((p) => !activeProcessFor(p.id));
+    result = [...withProc, ...rest];
+  }
 
   const total = result.length;
   const offset = (page - 1) * pageSize;
@@ -84,6 +94,8 @@ export function handleGetPolicies(
       curatorName: currentAgent.curatorName,
       processKind: active?.kind,
       processStatus: active?.status,
+      // Дата последнего события заявки — для строки «В работе у страховой с 3 июля».
+      processSince: active?.statusHistory[active.statusHistory.length - 1]?.at,
     };
   });
 

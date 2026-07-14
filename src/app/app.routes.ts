@@ -73,11 +73,29 @@ export const routes: Routes = [
         title: 'Информация о договоре — Agent Academy',
       },
       {
+        // Сделка «Согласование» — дело, у которого ещё НЕТ договора (полис только будет),
+        // поэтому она не может жить под /clients/:id. Дом сделки — строка в «Мои клиенты».
+        //
+        // Входа «с нуля» у сделки нет и не будет: запрос тарифа рождается ВНУТРИ продукта
+        // (ОСАГО ЮЛ, Автопомощник и далее), а не отдельной кнопкой «напишите в поддержку».
+        // Сюда агент попадает по строке в «Мои клиенты» или из сигнала «Ждут ваших действий».
+        path: 'deals/:id',
+        loadComponent: () => import('@features/deals/deal.page').then((m) => m.DealPage),
+        title: 'Согласование — Agent Academy',
+      },
+      {
         // Внесение изменений в договор — переиспользует форму ОСАГО в режиме 'change'.
         path: 'clients/:id/change',
         loadComponent: () => import('@features/osago/osago.page').then((m) => m.OsagoPage),
         data: { mode: 'change' },
         title: 'Внесение изменений — Agent Academy',
+      },
+      {
+        // Заявка на расторжение — своя короткая форма (НЕ форма ОСАГО: другой предмет,
+        // деньги и дата прекращения, а не поля полиса).
+        path: 'clients/:id/cancel',
+        loadComponent: () => import('@features/clients/cancel.page').then((m) => m.CancelPage),
+        title: 'Расторжение договора — Agent Academy',
       },
       {
         path: 'prolongation',

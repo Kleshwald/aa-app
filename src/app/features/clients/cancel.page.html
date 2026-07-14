@@ -1,0 +1,193 @@
+<section class="cxl">
+  <app-back-link label="Вернуться к договору" (back)="backToContract()" />
+
+  <header class="cxl__header">
+    <h1 class="cxl__title">Заявка на расторжение</h1>
+  </header>
+
+  <!-- Владелец оставил на плитке глагол «Расторгнуть» — он читается как мгновенное
+       действие. Снимаем страх прямо здесь: договор продолжает действовать. -->
+  <p class="cxl__assure">
+    <svg class="cxl__assure-ico" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <line x1="12" y1="11" x2="12" y2="16" />
+      <line x1="12" y1="8" x2="12" y2="8.01" />
+    </svg>
+    Это <b>заявка</b>: договор продолжает действовать, пока страховая компания её не подтвердит.
+    Ничего не расторгнется в момент отправки.
+  </p>
+
+  @if (isLoading()) {
+    <p class="cxl__state">Загружаем договор…</p>
+  } @else if (!policy()) {
+    <p class="cxl__state cxl__state--error">Договор не найден.</p>
+  } @else if (policy(); as p) {
+    <form class="cxl__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- 1. Что расторгаем — только чтение. Снимает страх «не тот договор». -->
+      <section class="cxl__card">
+        <h2 class="cxl__card-title">Что расторгаем</h2>
+        <div class="cxl__summary">
+          <app-insurer-logo [id]="p.insuranceCompanyId" [name]="p.insuranceCompanyName" />
+          <dl class="cxl__facts">
+            <div class="cxl__fact">
+              <dt>Продукт</dt>
+              <dd>{{ p.productName || productLabel[p.type] }}</dd>
+            </div>
+            <div class="cxl__fact">
+              <dt>№ полиса</dt>
+              <dd>{{ p.number }}</dd>
+            </div>
+            <div class="cxl__fact">
+              <dt>Страхователь</dt>
+              <dd>{{ p.clientName }}</dd>
+            </div>
+            <div class="cxl__fact">
+              <dt>Срок действия</dt>
+              <dd>{{ p.startDate | date: 'dd.MM.yyyy' }} — {{ p.endDate | date: 'dd.MM.yyyy' }}</dd>
+            </div>
+            <div class="cxl__fact">
+              <dt>Премия</dt>
+              <dd>{{ p.premium | number: '1.0-0' }} ₽</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- 2. Заявитель + причина [Р-ФТ-1] -->
+      <section class="cxl__card">
+        <h2 class="cxl__card-title">Кто подаёт и почему</h2>
+        <div class="cxl__row">
+          <app-field label="Кто заявитель" width="grow">
+            <tui-textfield [stringify]="stringifyApplicant">
+              <select tuiSelect formControlName="applicant" [items]="applicantItems"></select>
+            </tui-textfield>
+          </app-field>
+        </div>
+
+        @if (applicantIsNotPolicyholder()) {
+          <!-- Частый конфликт: машину продал собственник, а деньги вернут страхователю. -->
+          <p class="cxl__note">
+            Деньги вернут <b>страхователю по полису</b> — {{ p.clientName }}, — даже если заявление
+            подаёт другой человек.
+          </p>
+        }
+
+        <div class="cxl__row">
+          <app-field
+            label="Причина расторжения"
+            width="wide"
+            [error]="
+              form.controls.reason.touched && !form.controls.reason.value ? 'Выберите причину' : ''
+            "
+          >
+            <tui-textfield [stringify]="stringifyReason">
+              <select tuiSelect formControlName="reason" [items]="reasonItems"></select>
+            </tui-textfield>
+          </app-field>
+
+          @if (needsEventDate()) {
+            <!-- По гибели ТС и смерти договор прекращается ДАТОЙ СОБЫТИЯ, не подачей. -->
+            <app-field
+              label="Дата события"
+              width="narrow"
+              hint="Дата гибели ТС или смерти"
+              [error]="
+                form.controls.eventDate.touched && !form.controls.eventDate.value
+                  ? 'Укажите дату'
+                  : ''
+              "
+            >
+              <tui-textfield>
+                <input tuiInputDate formControlName="eventDate" placeholder="дд.мм.гггг" />
+                <tui-calendar *tuiDropdown />
+              </tui-textfield>
+            </app-field>
+          }
+        </div>
+
+        @if (selectedReason(); as r) {
+          <p class="cxl__note">
+            Документ-основание: <b>{{ r.document }}</b
+            >. Приложить можно позже — поддержка запросит, если он понадобится.
+            @if (r.dateBasis === 'application') {
+              Договор прекратится <b>со дня подачи заявления</b>, поэтому каждый день ожидания
+              уменьшает возврат.
+            }
+          </p>
+        }
+      </section>
+
+      <!-- 3. Расчёт возврата [Р-ФТ-4] — сердце экрана: главный вопрос клиента. -->
+      @if (refund(); as r) {
+        <section class="cxl__card cxl__card--money">
+          <h2 class="cxl__card-title">Сколько вернут клиенту</h2>
+
+          @if (nothingToRefund()) {
+            <p class="cxl__note">
+              Срок полиса уже истёк — возвращать нечего. Заявку подать можно, но возврата премии не
+              будет.
+            </p>
+          } @else {
+            <p class="cxl__amount">
+              ≈ {{ r.amount | number: '1.0-0' }} <span class="cxl__amount-cur">₽</span>
+            </p>
+
+            <!-- Прозрачность расчёта: агент должен уметь объяснить цифру клиенту вслух. -->
+            <ul class="cxl__calc">
+              <li>
+                <span>Премия по договору</span><b>{{ r.premium | number: '1.0-0' }} ₽</b>
+              </li>
+              <li>
+                <span>Удержание страховщика ({{ withholdPercent }}%)</span
+                ><b>−{{ r.withheld | number: '1.0-0' }} ₽</b>
+              </li>
+              <li>
+                <span>Осталось дней из {{ r.termDays }}</span
+                ><b>{{ r.remainingDays }}</b>
+              </li>
+              <li>
+                <span>Дата прекращения</span><b>{{ terminationDate() | date: 'dd.MM.yyyy' }}</b>
+              </li>
+            </ul>
+
+            <p class="cxl__disclaimer">
+              <svg class="cxl__assure-ico" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <line x1="12" y1="11" x2="12" y2="16" />
+                <line x1="12" y1="8" x2="12" y2="8.01" />
+              </svg>
+              Расчёт <b>предварительный</b>. Точную сумму определит страховая компания — она может
+              считать дни и удержания немного иначе. Не обещайте клиенту эту сумму как
+              окончательную.
+            </p>
+          }
+        </section>
+      }
+
+      <!-- 4. Комментарий + документы. Документы — опционально: на 3G их грузить больно,
+           а у нас есть статус «Ожидаем документы» и догрузка. -->
+      <section class="cxl__card">
+        <h2 class="cxl__card-title">Комментарий и документы</h2>
+        <app-field label="Комментарий для поддержки" hint="Необязательно" width="wide">
+          <tui-textfield>
+            <input tuiInput formControlName="comment" placeholder="Если есть что уточнить" />
+          </tui-textfield>
+        </app-field>
+        <p class="cxl__note">
+          Сканы прикладывать сейчас не нужно. Если документ понадобится, заявка перейдёт в статус
+          «Ожидаем документы», и вы догрузите его на странице договора.
+        </p>
+      </section>
+
+      @if (submitError()) {
+        <p class="cxl__state cxl__state--error" role="alert">{{ submitError() }}</p>
+      }
+
+      <footer class="cxl__foot">
+        <button type="submit" class="cxl__submit" [disabled]="!canSubmit()">
+          {{ submitting() ? 'Отправляем…' : 'Отправить заявку на расторжение' }}
+        </button>
+      </footer>
+    </form>
+  }
+</section>

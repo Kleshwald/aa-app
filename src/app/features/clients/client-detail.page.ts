@@ -293,10 +293,17 @@ export class ClientDetailPage {
 
   // ─── Процессы по договору ───
 
-  /** Клик по плитке: изменения → мастер причин; расторжение/убыток — заглушка (та же инфра позже). */
+  /**
+   * Клик по плитке процесса. У изменений причин 12 (мультивыбор из 1С) — их выбирают в
+   * мастере; у расторжения причина одна и живёт первым полем формы, поэтому лишней
+   * модалки нет. Убыток — пока заглушка (интейк следующим шагом).
+   */
   startTile(kind: 'change' | 'cancel' | 'loss', label: string): void {
+    const id = this.policy()?.id;
     if (kind === 'change') {
       this.reasonDialogOpen.set(true);
+    } else if (kind === 'cancel' && id) {
+      void this.router.navigate(['/clients', id, 'cancel']);
     } else {
       alert(`Проведём по шагам: ${label}`);
     }

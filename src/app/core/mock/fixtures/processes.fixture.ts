@@ -79,14 +79,16 @@ function advance(id: string, status: ProcessStatus, extra?: Partial<ProcessStatu
 /**
  * Имитация обработки заявки поддержкой: «Проверка документов» → «В работе» →
  * «Ожидаем документы». Как только агент дозагрузит документ — заявка вернётся в работу.
+ * Документы запрашиваем ПО ВИДУ заявки: по расторжению просить «предыдущее ВУ» — бред.
  */
-function scheduleSupportProgress(id: string): void {
+function scheduleSupportProgress(id: string, kind: ProcessKind): void {
+  const items = DOC_ITEMS[kind];
   setTimeout(() => advance(id, 'in-work', { comment: 'Ваша заявка принята в работу' }), 4500);
   setTimeout(
     () =>
       advance(id, 'awaiting-docs', {
-        comment: 'Приложите документы: Предыдущее водительское удостоверение',
-        docRequest: DOC_REQUEST,
+        comment: `Приложите документы: ${items.join(', ')}`,
+        docRequest: { title: 'Приложите документы', items },
       }),
     9000,
   );
@@ -119,7 +121,7 @@ export function createProcess(input: CreateProcessInput): PolicyProcess {
     createdAt: nowIso(),
   };
   processes.unshift(process);
-  scheduleSupportProgress(process.id);
+  scheduleSupportProgress(process.id, process.kind);
   return process;
 }
 
