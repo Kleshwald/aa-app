@@ -1,7 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, switchMap, timer } from 'rxjs';
+import { combineLatest, filter, switchMap, timer } from 'rxjs';
 
+import type { AwaitingDeal } from './deal.model';
+import { DealService } from './deal.service';
 import { ProcessService, type AwaitingProcess } from './process.service';
 
 // ─── Сигнал «Ждут ваших действий» ───────────────────────────────────────────
@@ -29,6 +31,7 @@ const POLL_MS = 5000;
 @Injectable({ providedIn: 'root' })
 export class AttentionService {
   private readonly processService = inject(ProcessService);
+  private readonly dealService = inject(DealService);
 
   /** Вкладка на переднем плане? Скрытую не опрашиваем. */
   private readonly visible = signal(!document.hidden);
@@ -37,10 +40,19 @@ export class AttentionService {
     document.addEventListener('visibilitychange', () => this.visible.set(!document.hidden));
   }
 
+  // ДВА источника мяча у агента, ОДИН сигнал:
+  //   • заявки по договору (изменение/расторжение/убыток) — status `awaiting-docs`;
+  //   • сделки «Согласование» — по флагу `actionRequired` (тариф пришёл / СК просит
+  //     документы / нужно отдать клиенту ссылку на оплату).
+  // Оба — из НАШЕГО контура (1С). Чат по-прежнему НЕ здесь: у него свой бейдж.
+  // Это и есть та синхронизация, о которой спрашивал владелец: наружу «всплывает»
+  // не текст переписки, а ФАКТ «вас ждут».
   private readonly response = toSignal(
     timer(0, POLL_MS).pipe(
       filter(() => this.visible()),
-      switchMap(() => this.processService.listAwaiting()),
+      switchMap(() =>
+        combineLatest([this.processService.listAwaiting(), this.dealService.listAwaiting()]),
+      ),
     ),
     { initialValue: undefined },
   );
@@ -49,18 +61,27 @@ export class AttentionService {
   readonly state = computed<AttentionState>(() => {
     const r = this.response();
     if (r === undefined) return 'loading';
-    return r.success ? 'ok' : 'error';
+    const [processes, deals] = r;
+    return processes.success && deals.success ? 'ok' : 'error';
   });
 
-  /** Заявки, ждущие действия агента, по всем полисам (вне фильтра периода). */
+  /** Заявки по договорам, ждущие действия агента (вне фильтра периода). */
   private readonly awaiting = computed<AwaitingProcess[]>(() => {
     const r = this.response();
-    return r?.success ? (r.data ?? []) : [];
+    return r?.[0]?.success ? (r[0].data ?? []) : [];
+  });
+
+  /** Сделки «Согласование», где мяч у агента. */
+  private readonly awaitingDeals = computed<AwaitingDeal[]>(() => {
+    const r = this.response();
+    return r?.[1]?.success ? (r[1].data ?? []) : [];
   });
 
   /**
-   * Сколько ПОЛИСОВ (строк таблицы) ждут агента: на одном полисе заявок может быть
-   * несколько, а строка — одна. Одно число и для индикатора в сайдбаре, и для чипа.
+   * Сколько СТРОК «Мои клиенты» ждут агента. Считаем строки, а не заявки: на одном
+   * полисе заявок может быть несколько, а строка — одна. Сделки — тоже строки того же
+   * списка (картотека сделок), поэтому просто складываются.
+   * Одно число и для индикатора в сайдбаре, и для чипа-фильтра.
    *
    * ВАЖНО: 0 здесь значит «знаем, что ноль» ТОЛЬКО при `state() === 'ok'`.
    * При 'loading'/'error' тоже вернётся 0 — поэтому UI обязан сначала смотреть на
@@ -68,8 +89,13 @@ export class AttentionService {
    * (отказ бэкенда, показанный как «вас никто не ждёт»).
    */
   readonly awaitingPolicyCount = computed(
-    () => new Set(this.awaiting().map((a) => a.policyId)).size,
+    () =>
+      new Set(this.awaiting().map((a) => a.policyId)).size +
+      new Set(this.awaitingDeals().map((d) => d.dealId)).size,
   );
+
+  /** Id сделок, ждущих агента — для маркера в строке «Мои клиенты». */
+  readonly awaitingDealIds = computed(() => new Set(this.awaitingDeals().map((d) => d.dealId)));
 
   /** Не смогли узнать (отказ бэкенда). UI: «не удалось проверить», НЕ ноль. */
   readonly failed = computed(() => this.state() === 'error');
