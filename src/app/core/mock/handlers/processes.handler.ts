@@ -12,10 +12,20 @@ import { randomDelay } from '../helpers/delay';
 // Заявки по договору — критичный путь демо (процессы = отличие платформы),
 // поэтому отвечаем гарантированным успехом (в обход random-fail из mockOk).
 
+/**
+ * Отдаём КОПИЮ, а не живую ссылку на объект из фикстуры — как настоящий бэкенд,
+ * который сериализует ответ. Мок, отдающий живую ссылку, врёт: фикстура мутируется
+ * на месте (поддержка «отвечает» через setTimeout) → ссылка та же → Angular-сигналы
+ * (сравнение по ссылке) считают, что ничего не изменилось, и ход заявки замирает,
+ * пока окно открыто. Тот же класс ошибки чинили в сделках (deals.handler `8db8d9d`).
+ */
 function ok<T>(data: T, status = 200): Observable<HttpResponse<ApiResponse<T>>> {
+  const copy = data === null || data === undefined ? data : (structuredClone(data) as T);
   return timer(randomDelay()).pipe(
     mergeMap(() =>
-      of(new HttpResponse({ status, body: { success: true, data, error: null, meta: null } })),
+      of(
+        new HttpResponse({ status, body: { success: true, data: copy, error: null, meta: null } }),
+      ),
     ),
   );
 }

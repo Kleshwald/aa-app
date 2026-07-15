@@ -1227,3 +1227,23 @@
   font-size: var(--text-sm);
   color: var(--gray-600);
 }
+
+// Отказ отправки: слово + иконка + цвет (не только цветом — DESIGN.md §4).
+// Красный здесь уместен, в отличие от сигнала внимания: это НЕ «вас ждут», это
+// «действие не выполнено» — ровно тот случай, для которого красный и существует.
+.hist__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--error-700);
+}
+
+.hist__error-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}

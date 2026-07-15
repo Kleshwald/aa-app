@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -156,13 +157,27 @@ export class ClientDetailPage {
     return processStatusLabel(proc.status, proc.kind);
   }
 
-  // Диалог выбора причин + модалка истории статусов + черновик комментария.
+  // Диалог выбора причин + окно заявки + черновик ответа.
   protected readonly reasonDialogOpen = signal(false);
   protected readonly historyProcessId = signal<string | null>(null);
-  protected readonly historyProcess = computed<PolicyProcess | null>(
-    () => this.processes().find((p) => p.id === this.historyProcessId()) ?? null,
-  );
+
+  /**
+   * Открытая заявка — СНИМОК, а не производная от опрашиваемого списка.
+   *
+   * Раньше здесь стоял computed над `processes()`, а `processes()` при неудачном ответе
+   * отдаёт []. Поллинг раз в 5 сек → ОДИН провалившийся запрос на 3G закрывал открытое
+   * окно заявки прямо под руками агента. Фон обновляет ДАННЫЕ, но не имеет права
+   * разрушать ПОВЕРХНОСТЬ, в которой человек работает.
+   * Снимок обновляется только при успехе (см. effect ниже); при сбое просто живёт дальше.
+   */
+  private readonly historySnapshot = signal<PolicyProcess | null>(null);
+  protected readonly historyProcess = this.historySnapshot.asReadonly();
+
   protected readonly commentDraft = signal('');
+  /** Идёт отправка ответа — блокирует кнопку (защита от двойного тапа на 3G). */
+  protected readonly sending = signal(false);
+  /** Ответ не ушёл. Черновик при этом ЦЕЛ — см. submitComment(). */
+  protected readonly sendFailed = signal(false);
 
   /** «Ход заявки» — события статуса + реплики в одной хронологии (по времени). */
   protected readonly journal = computed<JournalEntry[]>(() => {
@@ -186,8 +201,22 @@ export class ClientDetailPage {
 
   constructor() {
     // Model A: лёгкий поллинг, чтобы «поддержка» продвинула статус/ответила без F5.
-    const poll = setInterval(() => this.refresh$.next(), 5000);
+    // НО: пока агент набирает ответ, фон молчит — перерисовка списка не должна дёргать
+    // каретку в поле ввода. Пишущий человек важнее свежести на 5 секунд.
+    const poll = setInterval(() => {
+      if (this.historyProcessId() && this.commentDraft().trim()) return;
+      this.refresh$.next();
+    }, 5000);
     this.destroyRef.onDestroy(() => clearInterval(poll));
+
+    // Снимок открытой заявки обновляем ТОЛЬКО когда пришли годные данные.
+    // Пришёл сбой (processes() === []) — снимок остаётся прежним, окно не схлопывается.
+    effect(() => {
+      const id = this.historyProcessId();
+      if (!id) return;
+      const fresh = this.processes().find((p) => p.id === id);
+      if (fresh) this.historySnapshot.set(fresh);
+    });
   }
 
   protected readonly response = toSignal<ApiResponse<PolicyDetail | null> | undefined>(
@@ -336,19 +365,51 @@ export class ClientDetailPage {
 
   openHistory(proc: PolicyProcess): void {
     this.historyProcessId.set(proc.id);
+    this.historySnapshot.set(proc);
     this.commentDraft.set('');
+    this.sendFailed.set(false);
   }
 
   closeHistory(): void {
     this.historyProcessId.set(null);
+    this.historySnapshot.set(null);
+    this.sendFailed.set(false);
   }
 
+  /**
+   * Ответ по заявке.
+   *
+   * БЫЛО: `commentDraft.set('')` ДО ответа сервера и `subscribe(() => …)` без обработки
+   * ошибки. На нестабильном 3G это значило: отправка упала → черновик УЖЕ стёрт →
+   * ошибки нет → агент уверена, что написала страховой. Молчаливая потеря ответа —
+   * самый дорогой из возможных отказов: один раз потеряв ответ по убытку, агент
+   * навсегда возвращается в почту и звонок куратору. И не жалуется — просто перестаёт.
+   *
+   * СТАЛО: черновик чистим ТОЛЬКО после успеха; отказ показываем словами; кнопка
+   * заблокирована на время отправки — это же и защита от двойного тапа (дубль реплики).
+   */
   submitComment(): void {
     const proc = this.historyProcess();
     const text = this.commentDraft().trim();
-    if (!proc || !text) return;
-    this.commentDraft.set('');
-    this.processService.addComment(proc.id, text).subscribe(() => this.refreshProcesses());
+    if (!proc || !text || this.sending()) return;
+
+    this.sending.set(true);
+    this.sendFailed.set(false);
+    this.processService.addComment(proc.id, text).subscribe({
+      next: (res) => {
+        this.sending.set(false);
+        if (res.success) {
+          this.commentDraft.set(''); // ← только здесь, и никогда раньше
+          this.refreshProcesses();
+        } else {
+          this.sendFailed.set(true);
+        }
+      },
+      error: () => {
+        this.sending.set(false);
+        this.sendFailed.set(true);
+      },
+    });
   }
 
   /** Приложить документ к заявке (заглушка: берём имя выбранного файла). */

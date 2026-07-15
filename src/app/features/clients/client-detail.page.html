@@ -384,8 +384,12 @@
                   }
                 }
                 <div class="req__actions">
+                  <!-- Вход в переписку назван ДЕЙСТВИЕМ, а не вывеской. «Ход заявки и
+                       переписка» — это ярлык шкафа: чтобы понять, что тут можно ответить,
+                       надо сначала догадаться нажать. Отсюда и была жалоба «непонятно,
+                       куда писать». Глагол снимает вопрос без единой подсказки. -->
                   <button type="button" class="req__link" (click)="openHistory(proc)">
-                    Ход заявки и переписка
+                    Ответить по заявке
                   </button>
                 </div>
               </li>
@@ -516,17 +520,40 @@
               class="hist__input"
               rows="2"
               [value]="commentDraft()"
+              [attr.aria-invalid]="sendFailed() ? 'true' : null"
               (input)="commentDraft.set($any($event.target).value)"
             ></textarea>
             <button
               type="button"
               class="hist__send"
-              [disabled]="!commentDraft().trim()"
+              [disabled]="!commentDraft().trim() || sending()"
               (click)="submitComment()"
             >
-              Ответить по заявке
+              {{ sending() ? 'Отправляем…' : sendFailed() ? 'Отправить ещё раз' : 'Отправить' }}
             </button>
           </div>
+
+          <!-- Отказ ГОВОРИМ, а не глотаем. Текст агента при этом ЦЕЛ и остался в поле:
+               молчаливая потеря ответа — самый дорогой отказ («я же написала»). -->
+          @if (sendFailed()) {
+            <p class="hist__error" role="alert">
+              <svg
+                class="hist__error-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v4M12 16h.01" />
+              </svg>
+              Ответ не отправился — связь прервалась. Ваш текст сохранён, нажмите «Отправить ещё
+              раз».
+            </p>
+          }
+
           <p class="hist__border">
             Пишете по этой заявке — её видит специалист, который её ведёт; ответ появится здесь же.
             Общие вопросы и куратор — в разделе «Сообщения».
