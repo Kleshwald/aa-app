@@ -15,130 +15,126 @@
           id="clients-search"
           type="search"
           [formControl]="searchControl"
-          placeholder="например, Иванова, ХХХ0123456789 или А123ВС777"
+          placeholder="Имя, № полиса или госномер"
           class="clients__search-input"
         />
       </div>
     </div>
 
-    <div class="clients__filters">
-      <div class="clients__field">
-        <label class="clients__field-label" for="clients-period">Период</label>
-        <select
-          id="clients-period"
-          class="clients__filter-select"
-          [value]="period()"
-          (change)="setPeriod($any($event.target).value)"
-        >
-          <option value="today">Сегодня</option>
-          <option value="this-month">Этот месяц</option>
-          <option value="this-quarter">Этот квартал</option>
-          <option value="this-year">Этот год</option>
-          <option value="all">Всё время</option>
-          <option value="custom">Произвольный период</option>
-        </select>
+    <!-- Поиск, фильтры и переключатель — ПРЯМЫЕ дети тулбара (без обёртки): один
+         flex-ряд, единая базовая линия, равномерный перенос. Тумблер отжат вправо
+         (margin-left:auto у `.clients__quick`). -->
+    <div class="clients__field">
+      <label class="clients__field-label" for="clients-period">Период</label>
+      <select
+        id="clients-period"
+        class="clients__filter-select"
+        [value]="period()"
+        (change)="setPeriod($any($event.target).value)"
+      >
+        <option value="today">Сегодня</option>
+        <option value="this-month">Этот месяц</option>
+        <option value="this-quarter">Этот квартал</option>
+        <option value="this-year">Этот год</option>
+        <option value="all">Всё время</option>
+        <option value="custom">Произвольный период</option>
+      </select>
+    </div>
+
+    @if (period() === 'custom') {
+      <div class="clients__field clients__field--date">
+        <label class="clients__field-label" for="clients-from">Начало</label>
+        <tui-textfield>
+          <input
+            id="clients-from"
+            tuiInputDate
+            [formControl]="fromControl"
+            placeholder="дд.мм.гггг"
+          />
+          <tui-calendar *tuiDropdown />
+        </tui-textfield>
       </div>
-
-      @if (period() === 'custom') {
-        <div class="clients__field clients__field--date">
-          <label class="clients__field-label" for="clients-from">Начало</label>
-          <tui-textfield>
-            <input
-              id="clients-from"
-              tuiInputDate
-              [formControl]="fromControl"
-              placeholder="дд.мм.гггг"
-            />
-            <tui-calendar *tuiDropdown />
-          </tui-textfield>
-        </div>
-        <div class="clients__field clients__field--date">
-          <label class="clients__field-label" for="clients-to">Конец</label>
-          <tui-textfield>
-            <input
-              id="clients-to"
-              tuiInputDate
-              [formControl]="toControl"
-              placeholder="дд.мм.гггг"
-            />
-            <tui-calendar *tuiDropdown />
-          </tui-textfield>
-        </div>
-      }
-
-      <div class="clients__field">
-        <label class="clients__field-label" for="clients-status">Статус</label>
-        <select
-          id="clients-status"
-          class="clients__filter-select"
-          [value]="status()"
-          (change)="status.set($any($event.target).value)"
-        >
-          <option value="">Все статусы</option>
-          <option value="active">Оформлен</option>
-          <option value="pending">Черновик</option>
-        </select>
+      <div class="clients__field clients__field--date">
+        <label class="clients__field-label" for="clients-to">Конец</label>
+        <tui-textfield>
+          <input id="clients-to" tuiInputDate [formControl]="toControl" placeholder="дд.мм.гггг" />
+          <tui-calendar *tuiDropdown />
+        </tui-textfield>
       </div>
+    }
 
-      <div class="clients__field">
-        <label class="clients__field-label" for="clients-type">Продукт</label>
-        <select
-          id="clients-type"
-          class="clients__filter-select"
-          [value]="type()"
-          (change)="type.set($any($event.target).value)"
-        >
-          <option value="">Все продукты</option>
-          <option value="OSAGO">ОСАГО</option>
-          <option value="NS">НС при ДТП</option>
-          <option value="TICK">Антиклещ</option>
-          <option value="MORTGAGE">Ипотека</option>
-        </select>
-      </div>
+    <div class="clients__field">
+      <label class="clients__field-label" for="clients-status">Статус</label>
+      <select
+        id="clients-status"
+        class="clients__filter-select"
+        [value]="status()"
+        (change)="status.set($any($event.target).value)"
+      >
+        <option value="">Все статусы</option>
+        <option value="active">Оформлен</option>
+        <option value="pending">Черновик</option>
+      </select>
+    </div>
 
-      <div class="clients__field">
-        <label class="clients__field-label" for="clients-company">Страховая компания</label>
-        <select
-          id="clients-company"
-          class="clients__filter-select"
-          [value]="insuranceCompany()"
-          (change)="insuranceCompany.set($any($event.target).value)"
-        >
-          <option value="">Все СК</option>
-          <option value="renessans">Ренессанс</option>
-          <option value="ugoria">Югория</option>
-          <option value="soglasie">Согласие</option>
-          <option value="zetta">Зетта</option>
-          <option value="rosgosstrah">Росгосстрах</option>
-          <option value="sogaz">СОГАЗ</option>
-          <option value="euroins">Евроинс</option>
-          <option value="energogarant">Энергогарант</option>
-        </select>
-      </div>
+    <div class="clients__field">
+      <label class="clients__field-label" for="clients-type">Продукт</label>
+      <select
+        id="clients-type"
+        class="clients__filter-select"
+        [value]="type()"
+        (change)="type.set($any($event.target).value)"
+      >
+        <option value="">Все продукты</option>
+        <option value="OSAGO">ОСАГО</option>
+        <option value="NS">НС при ДТП</option>
+        <option value="TICK">Антиклещ</option>
+        <option value="MORTGAGE">Ипотека</option>
+      </select>
+    </div>
 
-      <!-- Быстрый фильтр триажа — ПЕРЕКЛЮЧАТЕЛЬ (владелец 2026-07-15) в правом краю ряда
+    <div class="clients__field">
+      <label class="clients__field-label" for="clients-company">Страховая компания</label>
+      <select
+        id="clients-company"
+        class="clients__filter-select"
+        [value]="insuranceCompany()"
+        (change)="insuranceCompany.set($any($event.target).value)"
+      >
+        <option value="">Все СК</option>
+        <option value="renessans">Ренессанс</option>
+        <option value="ugoria">Югория</option>
+        <option value="soglasie">Согласие</option>
+        <option value="zetta">Зетта</option>
+        <option value="rosgosstrah">Росгосстрах</option>
+        <option value="sogaz">СОГАЗ</option>
+        <option value="euroins">Евроинс</option>
+        <option value="energogarant">Энергогарант</option>
+      </select>
+    </div>
+
+    <!-- Быстрый фильтр триажа — ПЕРЕКЛЮЧАТЕЛЬ (владелец 2026-07-15) в правом краю ряда
            фильтров: «фильтры слева — переключатель справа». Тумблер честнее кнопки-чипа:
            у него два явных положения (вкл/выкл), а не «нажата/не нажата». Кросс-периодный:
            включённый снимает «Период»; пояснение — под тулбаром. Скрыт при N=0; условие
            с awaitingOnly() — чтобы не исчез из-под курсора включённым. -->
-      @if (awaitingCount() > 0 || awaitingOnly()) {
-        <div class="clients__quick">
-          <button
-            type="button"
-            role="switch"
-            class="clients__toggle"
-            [class.clients__toggle--on]="awaitingOnly()"
-            [attr.aria-checked]="awaitingOnly()"
-            (click)="toggleAwaitingOnly()"
-          >
-            <span class="clients__toggle-track" aria-hidden="true">
-              <span class="clients__toggle-thumb"></span>
-            </span>
-            <span class="clients__toggle-label">Только ждущие меня</span>
-          </button>
-        </div>
-      }
-    </div>
+    @if (awaitingCount() > 0 || awaitingOnly()) {
+      <div class="clients__quick">
+        <button
+          type="button"
+          role="switch"
+          class="clients__toggle"
+          [class.clients__toggle--on]="awaitingOnly()"
+          [attr.aria-checked]="awaitingOnly()"
+          (click)="toggleAwaitingOnly()"
+        >
+          <span class="clients__toggle-track" aria-hidden="true">
+            <span class="clients__toggle-thumb"></span>
+          </span>
+          <span class="clients__toggle-label">Только ждущие меня</span>
+        </button>
+      </div>
+    }
 
     @if (searchOverridesPeriod()) {
       <!-- Поиск ищет за всё время (клиент звонит про полис, оформленный в другом месяце).
@@ -328,23 +324,19 @@
               </td>
               <td>
                 <span class="clients__policy-no">{{ row.number }}</span>
-              </td>
-              <td>{{ productLabel[row.type] }}</td>
-              <td class="clients__cell--num">{{ row.premium | number: '1.0-0' }}</td>
 
-              <!-- Статус (владелец 2026-07-15): при активной заявке — её РАСШИРЕННЫЙ статус
-                   («Ожидаем документы» / «В работе у страховой»), а не «Оформлен»: агенту
-                   важно живое состояние дела. ВИД процесса — значком ПЕРЕД текстом в той же
-                   ячейке (изменение/расторжение/убыток): и тип, и состояние, без 9-й колонки.
-                   Янтарный — мяч у агента; серый — у страховой. Без заявки — статус полиса. -->
-              <td>
+                <!-- Заявка по полису — под номером (владелец 2026-07-15: «было лучше»,
+                     вернули из колонки «Статус»). ВИД словом (изменение/расторжение/убыток)
+                     + состояние: «Расторжение · Ожидаем документы». Значок типа + тёплая
+                     точка ургентности; серый — мяч у страховой. Клик по строке уводит в
+                     заявку (статусы + переписка). -->
                 @if (pm) {
                   <span
-                    class="clients__status clients__status--proc"
-                    [class.clients__status--urgent]="pm.urgent"
-                    [title]="pm.kindLabel"
+                    class="clients__process"
+                    [class.clients__process--urgent]="pm.urgent"
+                    [title]="pm.kindLabel + ' · ' + pm.stateLabel"
                   >
-                    <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="clients__process-icon" viewBox="0 0 24 24" aria-hidden="true">
                       @switch (pm.kind) {
                         @case ('change') {
                           <!-- Карандаш — внесение изменений. -->
@@ -367,38 +359,44 @@
                         }
                       }
                     </svg>
-                    <span class="clients__status-label">{{ pm.stateLabel }}</span>
-                    <span class="clients__sr-only">— {{ pm.kindLabel }}</span>
-                  </span>
-                } @else {
-                  <span class="clients__status" [attr.data-status]="row.status">
-                    <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
-                      @switch (row.status) {
-                        @case ('active') {
-                          <polyline points="5 12 10 17 19 7" />
-                        }
-                        @case ('cancelled') {
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                        }
-                        @case ('expired') {
-                          <circle cx="12" cy="12" r="8" />
-                          <polyline points="12 8 12 12 15 14" />
-                        }
-                        @case ('processing') {
-                          <circle cx="12" cy="12" r="8" />
-                          <line x1="12" y1="8" x2="12" y2="12" />
-                          <line x1="12" y1="16" x2="12" y2="16.01" />
-                        }
-                        @default {
-                          <path d="M5 19 19 5" />
-                          <path d="M14 5h5v5" />
-                        }
-                      }
-                    </svg>
-                    <span class="clients__status-label">{{ statusLabel[row.status] }}</span>
+                    <span class="clients__process-kind">{{ pm.kindLabel }}</span>
+                    <span class="clients__process-sep" aria-hidden="true">·</span>
+                    {{ pm.stateLabel }}
                   </span>
                 }
+              </td>
+              <td>{{ productLabel[row.type] }}</td>
+              <td class="clients__cell--num">{{ row.premium | number: '1.0-0' }}</td>
+
+              <!-- Статус — снова статус самого ПОЛИСА (владелец: заявку вернули под № полиса). -->
+              <td>
+                <span class="clients__status" [attr.data-status]="row.status">
+                  <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    @switch (row.status) {
+                      @case ('active') {
+                        <polyline points="5 12 10 17 19 7" />
+                      }
+                      @case ('cancelled') {
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                      }
+                      @case ('expired') {
+                        <circle cx="12" cy="12" r="8" />
+                        <polyline points="12 8 12 12 15 14" />
+                      }
+                      @case ('processing') {
+                        <circle cx="12" cy="12" r="8" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12" y2="16.01" />
+                      }
+                      @default {
+                        <path d="M5 19 19 5" />
+                        <path d="M14 5h5v5" />
+                      }
+                    }
+                  </svg>
+                  <span class="clients__status-label">{{ statusLabel[row.status] }}</span>
+                </span>
               </td>
               <td>{{ row.insuranceCompanyName }}</td>
             </tr>

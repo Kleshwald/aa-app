@@ -26,7 +26,7 @@
 .clients__toolbar {
   display: flex;
   align-items: flex-end;
-  gap: 16px;
+  gap: 14px;
   padding: 16px;
   background: #ffffff;
   border: 1px solid var(--gray-200);
@@ -42,8 +42,10 @@
 }
 
 .clients__field--search {
-  flex: 1 1 280px;
-  min-width: 240px;
+  // Не растягиваем на всю строку (владелец 2026-07-15: «зачем поиск такой длинный»):
+  // компактная ширина — поиск и фильтры встают в ОДИН ряд.
+  flex: 0 1 240px;
+  min-width: 180px;
 }
 
 .clients__field--date {
@@ -55,16 +57,6 @@
   line-height: var(--leading-sm);
   font-weight: var(--weight-medium);
   color: var(--gray-700);
-}
-
-.clients__filters {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  flex-wrap: wrap;
-  // Своя строка на всю ширину тулбара: тогда `.clients__quick` (margin-left:auto)
-  // отжимает быстрый фильтр к правому краю — «фильтры слева, переключатель справа».
-  flex: 1 1 100%;
 }
 
 .clients__search {
@@ -118,7 +110,7 @@
 
 .clients__filter-select {
   height: var(--size-input);
-  min-width: 168px;
+  min-width: 140px;
   padding: 0 36px 0 12px;
   font-size: var(--text-base);
   font-family: inherit;
@@ -316,19 +308,6 @@
   white-space: nowrap;
 }
 
-// Подпись только для скринридера (вид заявки словом рядом со значком-типом).
-.clients__sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 // ─── Сортировка по столбцам ───
 .clients__sort {
   display: inline-flex;
@@ -431,19 +410,6 @@
   stroke-linejoin: round;
 }
 
-// Статус ЗАЯВКИ в колонке «Статус» (когда по полису идёт процесс). Тот же бейдж-пилюля,
-// что у статусов полиса, — консистентность колонки. Точка вместо галочки; серый — мяч
-// у страховой, янтарь — мяч у агента (вид процесса стоит значком в колонке «Заявка»).
-.clients__status--proc {
-  background: var(--gray-100);
-  color: var(--gray-700);
-}
-
-.clients__status--urgent {
-  background: var(--warning-50);
-  color: var(--warning-700);
-}
-
 // ─── Заявка по полису — ВТОРАЯ ось статуса ─────────────────────────────────
 // Не путать с .clients__status (статус самого полиса). Живёт под № полиса:
 // заявка подаётся ПО полису, ширина таблицы не растёт (на 1366px она уже уезжает
@@ -469,8 +435,21 @@
   color: var(--gray-600);
 }
 
-// Точка-маркер. По умолчанию серая (пассив «идёт у страховой»); тёплая — только
-// когда мяч у агента (`--urgent`). 8px — видна, но не «пятно».
+// Значок вида заявки (изменение=карандаш/расторжение=лист/убыток=треугольник).
+// По умолчанию серый (мяч у страховой); тёплый — когда мяч у агента (`--urgent`).
+.clients__process-icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--gray-500);
+}
+
+// Точка-маркер (у строк-сделок «Согласование»). Серая; тёплая при мяче агента.
 .clients__process-dot {
   flex: 0 0 auto;
   width: 8px;
@@ -489,11 +468,14 @@
   color: var(--gray-400);
 }
 
-// «Ваш ход» — единственное тёплое пятно строки: тёплая точка + чуть темнее текст.
-// Без заливки, без рамки, без иконки: спокойно на весь список.
+// «Ваш ход» — тёплый значок + чуть темнее текст. Без заливки/рамки: спокойно на список.
 .clients__process--urgent {
   color: var(--gray-700);
   font-weight: var(--weight-medium);
+
+  .clients__process-icon {
+    color: var(--warning-600);
+  }
 
   .clients__process-dot {
     background: var(--warning-500);
