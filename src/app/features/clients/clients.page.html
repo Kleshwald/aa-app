@@ -116,21 +116,25 @@
         </select>
       </div>
 
-      <!-- Быстрый фильтр триажа встроен в ПРАВЫЙ край ряда фильтров (margin-left:auto):
-           «фильтры слева — быстрый переключатель справа». Раньше висел одиноким овалом
-           отдельной строкой ниже — несбалансированно. Кросс-периодный: включённый снимает
-           «Период» (заявка на прошлогоднем полисе обязана найтись); пояснение — под тулбаром.
-           Скрыт при N=0; условие с awaitingOnly() — чтобы не исчез из-под курсора включённым. -->
+      <!-- Быстрый фильтр триажа — ПЕРЕКЛЮЧАТЕЛЬ (владелец 2026-07-15) в правом краю ряда
+           фильтров: «фильтры слева — переключатель справа». Тумблер честнее кнопки-чипа:
+           у него два явных положения (вкл/выкл), а не «нажата/не нажата». Кросс-периодный:
+           включённый снимает «Период»; пояснение — под тулбаром. Скрыт при N=0; условие
+           с awaitingOnly() — чтобы не исчез из-под курсора включённым. -->
       @if (awaitingCount() > 0 || awaitingOnly()) {
         <div class="clients__quick">
           <button
             type="button"
-            class="clients__chip"
-            [class.clients__chip--on]="awaitingOnly()"
-            [attr.aria-pressed]="awaitingOnly()"
+            role="switch"
+            class="clients__toggle"
+            [class.clients__toggle--on]="awaitingOnly()"
+            [attr.aria-checked]="awaitingOnly()"
             (click)="toggleAwaitingOnly()"
           >
-            Ждут ваших действий
+            <span class="clients__toggle-track" aria-hidden="true">
+              <span class="clients__toggle-thumb"></span>
+            </span>
+            <span class="clients__toggle-label">Только ждущие меня</span>
           </button>
         </div>
       }
@@ -324,65 +328,77 @@
               </td>
               <td>
                 <span class="clients__policy-no">{{ row.number }}</span>
-
-                @if (pm) {
-                  <!-- ВТОРАЯ ось статуса: заявка ПО полису. Не путать с колонкой «Статус» —
-                       там статус самого полиса. Живёт под номером (в 9-ю колонку не выносим:
-                       на 1366px таблица уже уезжает в скролл, ФИО в 3 строки).
-
-                       ВИД заявки — СЛОВОМ и рядом с состоянием: «Расторжение · В работе
-                       у страховой». Это ровно то, что агент произносит клиенту в трубку.
-                       Раньше вид уходил только в aria-label: скринридер его «видел», а
-                       зрячий агент — нет.
-                       Кодов ВИ/Р/УУ в списке НЕТ сознательно: одинокая «Р» стоит в паре
-                       сантиметров от колонки «Статус: Оформлен» и читается как «расторгнут» —
-                       это ровно тот испуг, от которого мы весь продукт защищаем.
-                       И на странице договора кода тоже нет: владелец подтвердил, что агенты
-                       говорят «изменения»/«расторжение», а не «ВИ»/«Р» — код был выдумкой из 1С.
-                       ДАТЫ здесь нет: перегружала строку (владелец, 2026-07-09) — она на
-                       странице договора, куда ведёт клик. -->
-                  <span class="clients__process" [class.clients__process--urgent]="pm.urgent">
-                    <!-- Тихая метка вместо янтарной пилюли: точка ведёт глаз, слово несёт
-                         смысл (цвет — не единственный носитель). Тёплая точка = «ваш ход»,
-                         серая = «идёт у страховой». Заметный сигнал «вас ждут» остаётся один
-                         — в шапке; строки не должны кричать все разом. -->
-                    <span class="clients__process-dot" aria-hidden="true"></span>
-                    <span class="clients__process-kind">{{ pm.kindLabel }}</span>
-                    <span class="clients__process-sep" aria-hidden="true">·</span>
-                    {{ pm.stateLabel }}
-                  </span>
-                }
               </td>
               <td>{{ productLabel[row.type] }}</td>
               <td class="clients__cell--num">{{ row.premium | number: '1.0-0' }}</td>
+
+              <!-- Статус (владелец 2026-07-15): при активной заявке — её РАСШИРЕННЫЙ статус
+                   («Ожидаем документы» / «В работе у страховой»), а не «Оформлен»: агенту
+                   важно живое состояние дела. ВИД процесса — значком ПЕРЕД текстом в той же
+                   ячейке (изменение/расторжение/убыток): и тип, и состояние, без 9-й колонки.
+                   Янтарный — мяч у агента; серый — у страховой. Без заявки — статус полиса. -->
               <td>
-                <span class="clients__status" [attr.data-status]="row.status">
-                  <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    @switch (row.status) {
-                      @case ('active') {
-                        <polyline points="5 12 10 17 19 7" />
+                @if (pm) {
+                  <span
+                    class="clients__status clients__status--proc"
+                    [class.clients__status--urgent]="pm.urgent"
+                    [title]="pm.kindLabel"
+                  >
+                    <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      @switch (pm.kind) {
+                        @case ('change') {
+                          <!-- Карандаш — внесение изменений. -->
+                          <path d="M12 20h9" />
+                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+                        }
+                        @case ('cancel') {
+                          <!-- Лист с минусом — расторжение договора. -->
+                          <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                          <path d="M14 3v5h5" />
+                          <line x1="9" y1="15" x2="15" y2="15" />
+                        }
+                        @case ('loss') {
+                          <!-- Треугольник-внимание — урегулирование убытка. -->
+                          <path
+                            d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"
+                          />
+                          <line x1="12" y1="9" x2="12" y2="13" />
+                          <line x1="12" y1="17" x2="12" y2="17.01" />
+                        }
                       }
-                      @case ('cancelled') {
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                        <line x1="18" y1="6" x2="6" y2="18" />
+                    </svg>
+                    <span class="clients__status-label">{{ pm.stateLabel }}</span>
+                    <span class="clients__sr-only">— {{ pm.kindLabel }}</span>
+                  </span>
+                } @else {
+                  <span class="clients__status" [attr.data-status]="row.status">
+                    <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      @switch (row.status) {
+                        @case ('active') {
+                          <polyline points="5 12 10 17 19 7" />
+                        }
+                        @case ('cancelled') {
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                        }
+                        @case ('expired') {
+                          <circle cx="12" cy="12" r="8" />
+                          <polyline points="12 8 12 12 15 14" />
+                        }
+                        @case ('processing') {
+                          <circle cx="12" cy="12" r="8" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12" y2="16.01" />
+                        }
+                        @default {
+                          <path d="M5 19 19 5" />
+                          <path d="M14 5h5v5" />
+                        }
                       }
-                      @case ('expired') {
-                        <circle cx="12" cy="12" r="8" />
-                        <polyline points="12 8 12 12 15 14" />
-                      }
-                      @case ('processing') {
-                        <circle cx="12" cy="12" r="8" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12" y2="16.01" />
-                      }
-                      @default {
-                        <path d="M5 19 19 5" />
-                        <path d="M14 5h5v5" />
-                      }
-                    }
-                  </svg>
-                  <span class="clients__status-label">{{ statusLabel[row.status] }}</span>
-                </span>
+                    </svg>
+                    <span class="clients__status-label">{{ statusLabel[row.status] }}</span>
+                  </span>
+                }
               </td>
               <td>{{ row.insuranceCompanyName }}</td>
             </tr>

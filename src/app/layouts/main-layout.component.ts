@@ -77,6 +77,9 @@ export class MainLayoutComponent {
   // «пропущу и опозорюсь». Показываем честное «не удалось проверить».
   protected readonly attentionFailed = this.attention.failed;
   protected readonly attentionRetrying = this.attention.retrying;
+  // 'loading' | 'ok' | 'error' — чтобы «Всё сделано» показывать ТОЛЬКО когда точно
+  // знаем, что ноль (state==='ok'), а не пока грузимся (тогда 0 — это «не знаю»).
+  protected readonly attentionState = this.attention.state;
   protected readonly clientsRoute = '/clients';
 
   /** Отказ — не тупик: спрашиваем ещё раз сами, не гоняя агента на F5. */

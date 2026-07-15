@@ -146,65 +146,78 @@
   }
 }
 
-// ─── Быстрый фильтр «Ждут ваших действий» ──────────────────────────────────
-// Это переключатель триажа («только ждущие / все») — КОНТРОЛ, не тревога.
-// Форма (вариант 3-A, владелец 2026-07-15): прямоугольник `radius-base`, как у полей
-// фильтра — прежняя пилюля-овал выбивалась формой из ряда контролов. Цвет НЕЙТРАЛЬНЫЙ:
-// янтарь убран (он теперь только у «вас ждут» — в шапке и точках строк, а не у фильтра);
-// включённый = бренд-navy заливка (это выбранный фильтр, а не сигнал).
-//
-// МЕСТО (2026-07-15): встроен в ПРАВЫЙ край ряда фильтров (`margin-left:auto`) — «фильтры
-// слева, быстрый переключатель справа». Раньше висел одиноким овалом отдельной строкой —
-// несбалансированно. Стоит в `.clients__filters` (align-items:flex-end), поэтому его
-// 48px-контрол встаёт на ту же базовую линию, что и селекты с подписями сверху.
+// ─── Быстрый фильтр «Ждут ваших действий» — ПЕРЕКЛЮЧАТЕЛЬ ────────────────────
+// Тумблер (владелец 2026-07-15): честнее кнопки — два явных положения вкл/выкл.
+// Стоит в правом краю ряда фильтров (margin-left:auto): «фильтры слева, переключатель
+// справа». В `.clients__filters` (align-items:flex-end) встаёт на базовую линию селектов.
 .clients__quick {
   margin-left: auto;
   display: flex;
   align-items: flex-end;
 }
 
-.clients__chip {
+.clients__toggle {
   display: inline-flex;
   align-items: center;
-  height: var(--size-input); // 48px ≥ 44px — тач-цель (DESIGN §5)
-  padding: 0 16px;
+  gap: 10px;
+  height: var(--size-input); // 48px — общая базовая линия с полями фильтра
+  padding: 0 6px 0 4px;
+  background: none;
+  border: none;
   font-family: inherit;
   font-size: var(--text-sm);
-  line-height: 1.25;
   font-weight: var(--weight-medium);
   color: var(--gray-700);
-  background: #ffffff;
-  border: 2px solid var(--gray-300);
-  border-radius: var(--radius-base); // как у полей фильтра — один ряд контролов
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    background 120ms ease-out,
-    border-color 120ms ease-out;
-
-  &:hover {
-    border-color: var(--gray-400);
-    background: var(--gray-50);
-  }
 
   &:focus-visible {
     outline: none;
-    border-color: var(--brand-500);
-    box-shadow: 0 0 0 4px var(--brand-100);
+    .clients__toggle-track {
+      box-shadow: 0 0 0 4px var(--brand-100);
+    }
   }
 }
 
-// Включён: бренд-navy заливка + белый текст + semibold — «выбранный фильтр».
-// Белый на brand-500 (#0c3363) = 13.5:1. Состояние — не только цветом (вес + aria-pressed).
-.clients__chip--on {
-  background: var(--brand-500);
-  border-color: var(--brand-500);
-  color: #ffffff;
+// Дорожка + бегунок. Выкл — серый; вкл — бренд-navy (это выбранный фильтр, не тревога).
+.clients__toggle-track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: var(--gray-300);
+  transition:
+    background 140ms ease-out,
+    box-shadow 120ms ease-out;
+}
+
+.clients__toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(12, 51, 99, 0.3);
+  transition: transform 140ms ease-out;
+}
+
+.clients__toggle-label {
+  line-height: 1.2;
+}
+
+.clients__toggle--on {
+  color: var(--brand-700);
   font-weight: var(--weight-semibold);
 
-  &:hover {
-    background: var(--brand-600);
-    border-color: var(--brand-600);
+  .clients__toggle-track {
+    background: var(--brand-500);
+  }
+
+  .clients__toggle-thumb {
+    transform: translateX(18px);
   }
 }
 
@@ -301,6 +314,19 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+// Подпись только для скринридера (вид заявки словом рядом со значком-типом).
+.clients__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 // ─── Сортировка по столбцам ───
@@ -403,6 +429,19 @@
   stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+// Статус ЗАЯВКИ в колонке «Статус» (когда по полису идёт процесс). Тот же бейдж-пилюля,
+// что у статусов полиса, — консистентность колонки. Точка вместо галочки; серый — мяч
+// у страховой, янтарь — мяч у агента (вид процесса стоит значком в колонке «Заявка»).
+.clients__status--proc {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.clients__status--urgent {
+  background: var(--warning-50);
+  color: var(--warning-700);
 }
 
 // ─── Заявка по полису — ВТОРАЯ ось статуса ─────────────────────────────────

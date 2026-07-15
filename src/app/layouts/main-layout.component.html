@@ -81,10 +81,34 @@
             <!-- Число уже озвучено в aria-label родителя — не дублируем скринридеру. -->
             <span class="app-attention__count" aria-hidden="true">{{ attentionCount() }}</span>
           </a>
+        } @else if (attentionState() === 'ok') {
+          <!-- НУЛЕВОЕ состояние НЕ исчезает (владелец 2026-07-15: пропадающий блок «стрёмно»
+               — шапка дёргается, и «пусто» неотличимо от «ещё не загрузилось»). Спокойная
+               серая плашка «Всё сделано» — не янтарь (нечего ждать), место стабильно.
+               Показываем ТОЛЬКО при state==='ok': пока грузимся, «ноль» = «не знаю». -->
+          <span class="app-attention app-attention--clear" role="status">
+            <span class="app-attention__icon" aria-hidden="true">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="5 12 10 17 19 7" />
+              </svg>
+            </span>
+            <span class="app-attention__label">Всё сделано</span>
+          </span>
         }
       </div>
 
-      @if (attentionFailed() || attentionCount() > 0) {
+      <!-- Разделитель прячем только на короткий миг первичной загрузки (пустой слот),
+           чтобы не висел одиноко; в состояниях ok/error слот всегда заполнен. -->
+      @if (attentionState() !== 'loading') {
         <span class="app-header__attn-divider" aria-hidden="true"></span>
       }
 

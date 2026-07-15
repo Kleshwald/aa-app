@@ -11,7 +11,7 @@ import { AttentionService } from '@core/services/attention.service';
 import { ClientService, type ClientRow, type ClientsQuery } from '@core/services/client.service';
 import { isClosedDeal, type DealRow } from '@core/services/deal.model';
 import { DealService } from '@core/services/deal.service';
-import { type ProcessKind } from '@core/services/process.service';
+import { type ProcessKind, type ProcessStatus } from '@core/services/process.service';
 import { IsoDayTransformer } from '@shared/iso-day.transformer';
 
 type PeriodKey = 'today' | 'this-month' | 'this-quarter' | 'this-year' | 'all' | 'custom';
@@ -44,12 +44,25 @@ const PROCESS_KIND_SHORT: Record<ProcessKind, string> = {
   loss: 'Убыток',
 };
 
+// Расширенный статус заявки — в КОЛОНКУ «Статус» (владелец 2026-07-15): раньше он ютился
+// в ячейке «№ полиса», теперь стоит там, где статусу и место. Формулировки — что агент
+// прочитает клиенту вслух («что с моим заявлением?»), а не служебные коды 1С.
+const PROCESS_STATE_LABEL: Record<ProcessStatus, string> = {
+  submitted: 'Заявка принята',
+  'checking-docs': 'Проверка документов',
+  'in-work': 'В работе у страховой',
+  'awaiting-docs': 'Ожидаем документы',
+  done: 'Заявка завершена',
+  rejected: 'Заявка отклонена',
+};
+
 /**
  * Маркер заявки в строке — ВТОРАЯ ось статуса, отдельная от статуса полиса.
  * `urgent` = «ваш ход» (заявка ждёт агента); иначе — пассивный трекинг «в работе».
  */
 export interface RowProcessMarker {
   urgent: boolean;
+  kind: ProcessKind;
   stateLabel: string;
   kindLabel: string;
   /** Дата последнего движения — «с 3 июля» (что сказать клиенту по телефону). */
@@ -113,6 +126,9 @@ export class ClientsPage {
     { label: '№ полиса' },
     { label: 'Продукт' },
     { label: 'Цена', key: 'premium', num: true },
+    // ВИД заявки (значок) НЕ отдельной колонкой, а внутри «Статуса»: замер показал, что
+    // 9-я колонка + расширенный статус переполняют таблицу на 1366px и РЕЖУТ сам статус.
+    // Значок типа стоит перед текстом состояния в той же ячейке — и тип, и состояние.
     { label: 'Статус' },
     { label: 'Страховая компания' },
   ];
@@ -171,12 +187,9 @@ export class ClientsPage {
     const urgent = row.processStatus === 'awaiting-docs';
     return {
       urgent,
-      // Говорим КОНКРЕТНО, что нужно (семья «Нужны документы» / «Нужен ответ»):
-      // без метафоры «ваш ход» и без повтора «ждут» из заголовка сигнала.
-      // Пассив — «В работе у страховой»: это можно прочитать клиенту вслух («в работе»
-      // без «у кого» звучит как «а от меня что-то нужно?»).
-      // Рядом стоит вид заявки, поэтому слово «Заявка» в пассивном состоянии не дублируем.
-      stateLabel: urgent ? 'Нужны документы' : 'В работе у страховой',
+      kind: row.processKind,
+      // Расширенный статус в колонку «Статус» — что агент прочитает клиенту вслух.
+      stateLabel: PROCESS_STATE_LABEL[row.processStatus],
       kindLabel: PROCESS_KIND_SHORT[row.processKind],
       since: row.processSince,
     };
