@@ -144,11 +144,11 @@
 }
 
 // ─── Быстрый фильтр «Ждут ваших действий» ──────────────────────────────────
-// Своя строка над таблицей, вне ряда выпадашек: это переключатель триажа
-// («только ждущие / все»), а не поле — поэтому нет подписи сверху и он не путается
-// с полями. Форма-пилюля (radius-full) читается как фильтр-ручка, а не как поле
-// ввода (у полей radius-base). Без глифа-чекбокса (он читался как чек-лист) и без
-// счётчика (число живёт в сайдбаре): состояние несут заливка + вес + aria-pressed.
+// Это переключатель триажа («только ждущие / все») — КОНТРОЛ, не тревога.
+// Форма (вариант 3-A, владелец 2026-07-15): прямоугольник `radius-base`, как у полей
+// фильтра — прежняя пилюля-овал выбивалась формой из ряда контролов. Цвет НЕЙТРАЛЬНЫЙ:
+// янтарь убран (он теперь только у «вас ждут» — в шапке и точках строк, а не у фильтра);
+// включённый = бренд-navy заливка (это выбранный фильтр, а не сигнал).
 .clients__quickfilter {
   display: flex;
   flex-wrap: wrap;
@@ -165,11 +165,10 @@
   font-size: var(--text-sm);
   line-height: 1.25;
   font-weight: var(--weight-medium);
-  color: var(--warning-700);
+  color: var(--gray-700);
   background: #ffffff;
-  // -600, не -500: рамка интерактивного контрола обязана давать ≥3:1 (WCAG 1.4.11).
-  border: 2px solid var(--warning-600);
-  border-radius: var(--radius-full);
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-base); // как у полей фильтра — один ряд контролов
   cursor: pointer;
   white-space: nowrap;
   transition:
@@ -177,28 +176,28 @@
     border-color 120ms ease-out;
 
   &:hover {
-    background: var(--warning-50);
+    border-color: var(--gray-400);
+    background: var(--gray-50);
   }
 
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 4px var(--warning-100);
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 4px var(--brand-100);
   }
 }
 
-// Включён: сплошная янтарная заливка + белый текст + semibold — однозначное
-// «активный фильтр» (та же амбра, что у счётчика в сайдбаре). Белый на -700 = 4.87:1
-// (на -100 текст -700 давал 4.37:1 — ниже порога §1.6). Состояние — не только цветом.
+// Включён: бренд-navy заливка + белый текст + semibold — «выбранный фильтр».
+// Белый на brand-500 (#0c3363) = 13.5:1. Состояние — не только цветом (вес + aria-pressed).
 .clients__chip--on {
-  background: var(--warning-700);
-  border-color: var(--warning-700);
+  background: var(--brand-500);
+  border-color: var(--brand-500);
   color: #ffffff;
   font-weight: var(--weight-semibold);
 
-  // Базовый :hover красит фон в -50 (светлый) — на нём белый текст пропал бы;
-  // держим заливку.
   &:hover {
-    background: var(--warning-700);
+    background: var(--brand-600);
+    border-color: var(--brand-600);
   }
 }
 
@@ -409,28 +408,29 @@
   display: block;
 }
 
+// Маркер заявки — ТИХАЯ метка (вариант 4, владелец 2026-07-15): точка + слово, без
+// заливки. Прежняя янтарная пилюля на каждой ждущей строке давала 3-4 крика на экран.
+// Теперь тёплым горит только маленькая точка «ваш ход»; смысл несёт слово (правило
+// «не только цветом» — словом). Заметный сигнал «вас ждут» остаётся один — в шапке.
 .clients__process {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   margin-top: 4px;
-  // 16px: это может быть единственная янтарная подсказка на экране,
-  // а аудитория 45+ не должна щуриться (DESIGN.md §5).
   font-size: var(--text-sm);
   line-height: 1.25;
   // Пассив «В работе у страховой» — тихий серый, не спорит со статусом полиса.
   color: var(--gray-600);
 }
 
-.clients__process-icon {
+// Точка-маркер. По умолчанию серая (пассив «идёт у страховой»); тёплая — только
+// когда мяч у агента (`--urgent`). 8px — видна, но не «пятно».
+.clients__process-dot {
   flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--gray-400);
 }
 
 // Вид заявки — чуть плотнее состояния: это существительное, которое агент
@@ -443,15 +443,15 @@
   color: var(--gray-400);
 }
 
-// «Нужны документы» — единственный тёплый янтарь строки: субтильный чип, чтобы
-// глаз находил его при беглом просмотре. Смысл несут слово+иконка (правило «не
-// только цветом» выполняется словом), цвет — третичен. Без жёсткой рамки: не крик.
+// «Ваш ход» — единственное тёплое пятно строки: тёплая точка + чуть темнее текст.
+// Без заливки, без рамки, без иконки: спокойно на весь список.
 .clients__process--urgent {
-  padding: 4px 12px;
-  color: var(--warning-700);
-  background: var(--warning-50);
-  border-radius: var(--radius-full);
+  color: var(--gray-700);
   font-weight: var(--weight-medium);
+
+  .clients__process-dot {
+    background: var(--warning-500);
+  }
 }
 
 .clients__row--skeleton td {

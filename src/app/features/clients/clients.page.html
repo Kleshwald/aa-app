@@ -222,15 +222,11 @@
             <td>
               <span class="clients__policy-no">Заявка {{ d.requestNumber }}</span>
               @if (d.actionRequired) {
-                <!-- Тот же тихий янтарь, что у маркера заявки: один язык на весь список. -->
+                <!-- Тихая метка: тёплая точка + слово, без заливки. Один язык на весь
+                     список (тот же маркер, что у заявок по договору). -->
                 <span class="clients__process clients__process--urgent">
-                  <span class="clients__process-state">
-                    <svg class="clients__process-icon" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                      <path d="M14 3v5h5" />
-                    </svg>
-                    {{ d.actionRequired.label }}
-                  </span>
+                  <span class="clients__process-dot" aria-hidden="true"></span>
+                  {{ d.actionRequired.label }}
                 </span>
               }
             </td>
@@ -346,18 +342,11 @@
                        ДАТЫ здесь нет: перегружала строку (владелец, 2026-07-09) — она на
                        странице договора, куда ведёт клик. -->
                   <span class="clients__process" [class.clients__process--urgent]="pm.urgent">
-                    <svg class="clients__process-icon" viewBox="0 0 24 24" aria-hidden="true">
-                      @if (pm.urgent) {
-                        <!-- Документ — «нужны документы». Колокол НЕ используем:
-                             он живёт только в сквозном индикаторе (шапка). -->
-                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                        <path d="M14 3v5h5" />
-                      } @else {
-                        <!-- Круговая стрелка — «идёт, от вас ничего не нужно». -->
-                        <path d="M21 12a9 9 0 1 1-6.2-8.56" />
-                        <polyline points="21 3 21 9 15 9" />
-                      }
-                    </svg>
+                    <!-- Тихая метка вместо янтарной пилюли: точка ведёт глаз, слово несёт
+                         смысл (цвет — не единственный носитель). Тёплая точка = «ваш ход»,
+                         серая = «идёт у страховой». Заметный сигнал «вас ждут» остаётся один
+                         — в шапке; строки не должны кричать все разом. -->
+                    <span class="clients__process-dot" aria-hidden="true"></span>
                     <span class="clients__process-kind">{{ pm.kindLabel }}</span>
                     <span class="clients__process-sep" aria-hidden="true">·</span>
                     {{ pm.stateLabel }}
