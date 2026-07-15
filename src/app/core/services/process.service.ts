@@ -84,6 +84,24 @@ export interface AwaitingProcess {
   need: string; // что нужно от агента, человеческой строкой (напр. «Нужны документы: …»)
 }
 
+/**
+ * Активная заявка для ИНБОКСА «Сообщения → Процессы» (владелец 2026-07-15, вариант B).
+ * Это УКАЗАТЕЛЬ, не переписка: клик ведёт на страницу договора, где живёт единственный
+ * дом переписки заявки (второй вход туда же, не копия — лок process_visibility).
+ * `awaiting` = мяч у агента (питает срочный сигнал в шапке и общий счётчик).
+ */
+export interface ActiveProcess {
+  processId: string;
+  requestNumber: string;
+  policyId: string;
+  policyNumber: string;
+  clientName: string;
+  kind: ProcessKind;
+  status: ProcessStatus;
+  awaiting: boolean;
+  since: string; // дата последнего движения
+}
+
 // ─── Каталог причин изменения (из 1С) — единый источник для диалога/ленты/истории ───
 export interface ChangeReason {
   code: string;
@@ -166,6 +184,15 @@ export class ProcessService {
    */
   listAwaiting(): Observable<ApiResponse<AwaitingProcess[]>> {
     return this.api.get<AwaitingProcess[]>('/processes/awaiting');
+  }
+
+  /**
+   * Все НЕзакрытые заявки по всем полисам — для инбокса «Сообщения → Процессы».
+   * И «ваш ход», и «в работе у страховой»: агент хочет видеть все дела в работе,
+   * а не только те, где мяч у него (для тех есть срочный сигнал).
+   */
+  listActive(): Observable<ApiResponse<ActiveProcess[]>> {
+    return this.api.get<ActiveProcess[]>('/processes/active');
   }
 
   /** Создать заявку (внесение изменений). Возвращает id и номер заявки. */

@@ -57,10 +57,12 @@
           </button>
         } @else if (attentionCount() > 0) {
           <a
-            [routerLink]="clientsRoute"
-            [queryParams]="{ awaiting: 1 }"
+            [routerLink]="messagesRoute"
+            [queryParams]="{ tab: 'processes' }"
             class="app-attention"
-            [attr.aria-label]="'Ждут ваших действий: ' + attentionCount() + '. Открыть список'"
+            [attr.aria-label]="
+              'Ждут ваших действий: ' + attentionCount() + '. Открыть список процессов'
+            "
           >
             <span class="app-attention__icon" aria-hidden="true">
               <svg

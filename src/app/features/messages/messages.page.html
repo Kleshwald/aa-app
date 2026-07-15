@@ -1,190 +1,42 @@
-<section class="chat">
-  <!-- Иконка обобщённой службы поддержки (одна на все места: шапка, лента, «печатает»). -->
-  <ng-template #supportGlyph>
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
+<section class="msg">
+  <!-- Хаб «Сообщения» = Диалоги + Процессы (владелец 2026-07-15, вариант B). Две ДВЕРИ,
+       один смысл «что на мне»: диалоги (чат-вендор, свой контур) и процессы (список-
+       указатель → страница договора в НАШЕМ контуре). Контуры разные — вкладки честно
+       разделяют их, чтобы переписка по убытку никогда не ушла «не в тот» тред (152-ФЗ). -->
+  <div class="msg__tabs" role="tablist" aria-label="Сообщения">
+    <button
+      type="button"
+      role="tab"
+      class="msg__tab"
+      [class.msg__tab--on]="tab() === 'dialogs'"
+      [attr.aria-selected]="tab() === 'dialogs'"
+      (click)="setTab('dialogs')"
     >
-      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-      <path
-        d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
-      />
-    </svg>
-  </ng-template>
-
-  <header class="chat__head">
-    <span class="chat__head-avatars" aria-hidden="true">
-      <span class="chat__head-av" data-role="support">
-        <ng-container [ngTemplateOutlet]="supportGlyph" />
-      </span>
-      <span class="chat__head-av" data-role="curator">{{ initials(curator.name) }}</span>
-    </span>
-    <div class="chat__head-info">
-      <span class="chat__head-title">Поддержка и ваш куратор {{ givenName(curator.name) }}</span>
-      <span class="chat__head-status">
-        <span class="chat__status-dot" aria-hidden="true"></span>
-        На связи · обычно отвечаем за несколько минут
-      </span>
-    </div>
-  </header>
-
-  <div class="chat__body" #scroller>
-    @if (!groups().length && !supportTyping()) {
-      <div class="chat__empty">
-        <span class="chat__empty-icon" aria-hidden="true">
-          <svg
-            width="64"
-            height="64"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.6"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-            />
-          </svg>
-        </span>
-        <p class="chat__empty-title">Здесь появятся ваши сообщения</p>
-        <p class="chat__empty-text">
-          Напишите в поддержку или куратору — ответим за несколько минут.
-        </p>
-      </div>
-    }
-
-    @for (group of groups(); track group.label) {
-      <div class="chat__day">
-        <span>{{ group.label }}</span>
-      </div>
-
-      @for (m of group.messages; track m.id) {
-        <div class="chat__row" [class.chat__row--out]="m.author === 'agent'">
-          @if (m.author === 'company') {
-            <span class="chat__avatar" [attr.data-role]="m.sender?.role" aria-hidden="true">
-              @if (m.sender?.role === 'support') {
-                <ng-container [ngTemplateOutlet]="supportGlyph" />
-              } @else {
-                {{ initials(m.sender?.name) }}
-              }
-            </span>
-          }
-          <div class="chat__bubble">
-            @if (m.author === 'company' && m.sender) {
-              <span class="chat__sender" [attr.data-role]="m.sender.role">
-                @if (m.sender.role === 'curator') {
-                  {{ m.sender.name }} · {{ roleLabel(m.sender.role) }}
-                } @else {
-                  {{ m.sender.name }}
-                }
-              </span>
-            }
-            @if (m.text) {
-              <p class="chat__text">{{ m.text }}</p>
-            }
-            @for (a of m.attachments; track a.name) {
-              <span class="chat__attach">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
-                  />
-                </svg>
-                {{ a.name }}
-              </span>
-            }
-            <span class="chat__meta">
-              {{ m.createdAt | date: 'HH:mm' }}
-              @if (m.author === 'agent') {
-                <svg
-                  class="chat__tick"
-                  [class.chat__tick--sending]="m.status === 'sending'"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.4"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              }
-            </span>
-          </div>
-        </div>
+      Диалоги
+      @if (dialogsUnread() > 0) {
+        <span class="msg__tab-count">{{ dialogsUnread() }}</span>
       }
-    }
-
-    @if (supportTyping()) {
-      <div class="chat__row">
-        <span class="chat__avatar" data-role="support" aria-hidden="true">
-          <ng-container [ngTemplateOutlet]="supportGlyph" />
-        </span>
-        <div class="chat__bubble chat__bubble--typing" aria-label="Поддержка печатает">
-          <span class="chat__dot"></span>
-          <span class="chat__dot"></span>
-          <span class="chat__dot"></span>
-        </div>
-      </div>
-    }
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="msg__tab"
+      [class.msg__tab--on]="tab() === 'processes'"
+      [attr.aria-selected]="tab() === 'processes'"
+      (click)="setTab('processes')"
+    >
+      Процессы
+      @if (awaitingCount() > 0) {
+        <span class="msg__tab-count msg__tab-count--urgent">{{ awaitingCount() }}</span>
+      }
+    </button>
   </div>
 
-  <div class="chat__composer">
-    @if (showQuickReplies()) {
-      <div class="chat__suggest">
-        @for (q of quickReplies; track q) {
-          <button type="button" class="chat__chip" (click)="quickFill(q)">{{ q }}</button>
-        }
-      </div>
-    }
-
-    @if (pendingFiles().length) {
-      <div class="chat__files">
-        @for (f of pendingFiles(); track f.name) {
-          <span class="chat__file">
-            <span class="chat__file-name">{{ f.name }}</span>
-            <button
-              type="button"
-              class="chat__file-remove"
-              (click)="removeFile(f.name)"
-              aria-label="Убрать файл"
-            >
-              ×
-            </button>
-          </span>
-        }
-      </div>
-    }
-
-    <div class="chat__composer-row">
-      <button
-        type="button"
-        class="chat__icon-btn"
-        (click)="fileInput.click()"
-        aria-label="Прикрепить файл"
-        title="Прикрепить файл"
-      >
+  @if (tab() === 'dialogs') {
+    <div class="chat">
+      <!-- Иконка обобщённой службы поддержки (одна на все места: шапка, лента, «печатает»). -->
+      <ng-template #supportGlyph>
         <svg
-          width="22"
-          height="22"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -193,49 +45,300 @@
           stroke-linejoin="round"
           aria-hidden="true"
         >
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
           <path
-            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+            d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
           />
         </svg>
-      </button>
-      <input #fileInput type="file" multiple hidden (change)="onFiles($event)" />
+      </ng-template>
 
-      <textarea
-        #input
-        class="chat__input"
-        placeholder="Напишите сообщение…"
-        [value]="draft()"
-        (input)="draft.set($any($event.target).value); autoGrow($any($event.target))"
-        (keydown)="onKeydown($event)"
-        rows="1"
-        aria-label="Сообщение"
-      ></textarea>
+      <header class="chat__head">
+        <span class="chat__head-avatars" aria-hidden="true">
+          <span class="chat__head-av" data-role="support">
+            <ng-container [ngTemplateOutlet]="supportGlyph" />
+          </span>
+          <span class="chat__head-av" data-role="curator">{{ initials(curator.name) }}</span>
+        </span>
+        <div class="chat__head-info">
+          <span class="chat__head-title"
+            >Поддержка и ваш куратор {{ givenName(curator.name) }}</span
+          >
+          <span class="chat__head-status">
+            <span class="chat__status-dot" aria-hidden="true"></span>
+            На связи · обычно отвечаем за несколько минут
+          </span>
+        </div>
+      </header>
 
-      <button
-        type="button"
-        class="chat__send"
-        [disabled]="!canSend()"
-        (click)="send()"
-        aria-label="Отправить"
-      >
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M22 2L11 13" />
-          <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-        </svg>
-        <span class="chat__send-label">Отправить</span>
-      </button>
+      <div class="chat__body" #scroller>
+        @if (!groups().length && !supportTyping()) {
+          <div class="chat__empty">
+            <span class="chat__empty-icon" aria-hidden="true">
+              <svg
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                />
+              </svg>
+            </span>
+            <p class="chat__empty-title">Здесь появятся ваши сообщения</p>
+            <p class="chat__empty-text">
+              Напишите в поддержку или куратору — ответим за несколько минут.
+            </p>
+          </div>
+        }
+
+        @for (group of groups(); track group.label) {
+          <div class="chat__day">
+            <span>{{ group.label }}</span>
+          </div>
+
+          @for (m of group.messages; track m.id) {
+            <div class="chat__row" [class.chat__row--out]="m.author === 'agent'">
+              @if (m.author === 'company') {
+                <span class="chat__avatar" [attr.data-role]="m.sender?.role" aria-hidden="true">
+                  @if (m.sender?.role === 'support') {
+                    <ng-container [ngTemplateOutlet]="supportGlyph" />
+                  } @else {
+                    {{ initials(m.sender?.name) }}
+                  }
+                </span>
+              }
+              <div class="chat__bubble">
+                @if (m.author === 'company' && m.sender) {
+                  <span class="chat__sender" [attr.data-role]="m.sender.role">
+                    @if (m.sender.role === 'curator') {
+                      {{ m.sender.name }} · {{ roleLabel(m.sender.role) }}
+                    } @else {
+                      {{ m.sender.name }}
+                    }
+                  </span>
+                }
+                @if (m.text) {
+                  <p class="chat__text">{{ m.text }}</p>
+                }
+                @for (a of m.attachments; track a.name) {
+                  <span class="chat__attach">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                      />
+                    </svg>
+                    {{ a.name }}
+                  </span>
+                }
+                <span class="chat__meta">
+                  {{ m.createdAt | date: 'HH:mm' }}
+                  @if (m.author === 'agent') {
+                    <svg
+                      class="chat__tick"
+                      [class.chat__tick--sending]="m.status === 'sending'"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  }
+                </span>
+              </div>
+            </div>
+          }
+        }
+
+        @if (supportTyping()) {
+          <div class="chat__row">
+            <span class="chat__avatar" data-role="support" aria-hidden="true">
+              <ng-container [ngTemplateOutlet]="supportGlyph" />
+            </span>
+            <div class="chat__bubble chat__bubble--typing" aria-label="Поддержка печатает">
+              <span class="chat__dot"></span>
+              <span class="chat__dot"></span>
+              <span class="chat__dot"></span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="chat__composer">
+        @if (showQuickReplies()) {
+          <div class="chat__suggest">
+            @for (q of quickReplies; track q) {
+              <button type="button" class="chat__chip" (click)="quickFill(q)">{{ q }}</button>
+            }
+          </div>
+        }
+
+        @if (pendingFiles().length) {
+          <div class="chat__files">
+            @for (f of pendingFiles(); track f.name) {
+              <span class="chat__file">
+                <span class="chat__file-name">{{ f.name }}</span>
+                <button
+                  type="button"
+                  class="chat__file-remove"
+                  (click)="removeFile(f.name)"
+                  aria-label="Убрать файл"
+                >
+                  ×
+                </button>
+              </span>
+            }
+          </div>
+        }
+
+        <div class="chat__composer-row">
+          <button
+            type="button"
+            class="chat__icon-btn"
+            (click)="fileInput.click()"
+            aria-label="Прикрепить файл"
+            title="Прикрепить файл"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+              />
+            </svg>
+          </button>
+          <input #fileInput type="file" multiple hidden (change)="onFiles($event)" />
+
+          <textarea
+            #input
+            class="chat__input"
+            placeholder="Напишите сообщение…"
+            [value]="draft()"
+            (input)="draft.set($any($event.target).value); autoGrow($any($event.target))"
+            (keydown)="onKeydown($event)"
+            rows="1"
+            aria-label="Сообщение"
+          ></textarea>
+
+          <button
+            type="button"
+            class="chat__send"
+            [disabled]="!canSend()"
+            (click)="send()"
+            aria-label="Отправить"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M22 2L11 13" />
+              <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+            <span class="chat__send-label">Отправить</span>
+          </button>
+        </div>
+
+        <p class="chat__hint">Enter — отправить, Shift+Enter — новая строка</p>
+      </div>
     </div>
-
-    <p class="chat__hint">Enter — отправить, Shift+Enter — новая строка</p>
-  </div>
+  } @else {
+    <!-- ИНБОКС «Процессы»: список-указатель. Клик → страница договора, где статусы и
+         переписка заявки (единственный дом, наш контур). Это НЕ второе хранилище. -->
+    <div class="pinbox">
+      @if (activeProcesses().length === 0) {
+        <div class="pinbox__empty">
+          <p class="pinbox__empty-title">Активных заявок нет</p>
+          <p class="pinbox__empty-text">
+            Изменения, расторжения и урегулирования по вашим договорам появятся здесь — вместе с их
+            статусом и перепиской.
+          </p>
+        </div>
+      } @else {
+        <ul class="pinbox__list">
+          @for (p of activeProcesses(); track p.processId) {
+            <li>
+              <a class="pinbox__item" [routerLink]="['/clients', p.policyId]">
+                <span
+                  class="pinbox__icon"
+                  [class.pinbox__icon--urgent]="p.awaiting"
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 24 24">
+                    @switch (p.kind) {
+                      @case ('change') {
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+                      }
+                      @case ('cancel') {
+                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                        <path d="M14 3v5h5" />
+                        <line x1="9" y1="15" x2="15" y2="15" />
+                      }
+                      @case ('loss') {
+                        <path
+                          d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"
+                        />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12" y2="17.01" />
+                      }
+                    }
+                  </svg>
+                </span>
+                <span class="pinbox__body">
+                  <span class="pinbox__client">{{ p.clientName }}</span>
+                  <span class="pinbox__sub">
+                    {{ kindLabel(p.kind) }} · полис {{ p.policyNumber }}
+                  </span>
+                </span>
+                <span class="pinbox__status" [class.pinbox__status--urgent]="p.awaiting">
+                  {{ stateLabel(p.status) }}
+                </span>
+                <svg class="pinbox__chev" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
+              </a>
+            </li>
+          }
+        </ul>
+        <p class="pinbox__note">
+          Заявка открывается на странице договора — там её статус, документы и переписка.
+        </p>
+      }
+    </div>
+  }
 </section>

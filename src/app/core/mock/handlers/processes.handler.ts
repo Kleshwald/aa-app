@@ -3,7 +3,12 @@ import { type Observable, of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { type ApiResponse } from '@core/models';
-import type { AwaitingProcess, CreateProcessPayload } from '@core/services/process.service';
+import {
+  isCompletedProcess,
+  type ActiveProcess,
+  type AwaitingProcess,
+  type CreateProcessPayload,
+} from '@core/services/process.service';
 
 import { policies } from '../fixtures/policies.fixture';
 import { addAttachment, addComment, createProcess, processes } from '../fixtures/processes.fixture';
@@ -73,6 +78,32 @@ export function handleListAwaitingProcesses(): Observable<HttpResponse<ApiRespon
       };
     });
   return ok(awaiting);
+}
+
+/**
+ * GET /processes/active — ВСЕ незакрытые заявки по всем полисам (инбокс «Процессы»).
+ * И «ваш ход», и «в работе»: свежие сверху. Джойн имени клиента с полисом.
+ */
+export function handleListActiveProcesses(): Observable<HttpResponse<ApiResponse<unknown>>> {
+  const items: ActiveProcess[] = processes
+    .filter((p) => !isCompletedProcess(p.status))
+    .map((p) => {
+      const policy = policies.find((x) => x.id === p.policyId);
+      const last = p.statusHistory[p.statusHistory.length - 1];
+      return {
+        processId: p.id,
+        requestNumber: p.requestNumber,
+        policyId: p.policyId,
+        policyNumber: p.policyNumber,
+        clientName: policy?.clientName ?? `Полис ${p.policyNumber}`,
+        kind: p.kind,
+        status: p.status,
+        awaiting: p.status === 'awaiting-docs',
+        since: last?.at ?? p.createdAt,
+      };
+    })
+    .sort((a, b) => b.since.localeCompare(a.since));
+  return ok(items);
 }
 
 /** POST /policies/:id/processes — создать заявку (внесение изменений). */

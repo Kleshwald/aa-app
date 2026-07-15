@@ -2,15 +2,225 @@
   display: block;
 }
 
-.chat {
+// ─── Хаб «Сообщения»: вкладки + активная поверхность ───
+.msg {
   display: flex;
   flex-direction: column;
   // Fill the work area: viewport minus header (64) and content padding (48).
   height: calc(100vh - 112px);
+  gap: 12px;
+}
+
+.msg__tabs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--gray-100);
+  border-radius: var(--radius-base);
+  align-self: flex-start;
+}
+
+.msg__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 18px;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--gray-600);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out;
+
+  &:hover {
+    color: var(--gray-900);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 1px;
+  }
+}
+
+// Активная вкладка — белая «карточка» на сером желобе (сегмент-контрол).
+.msg__tab--on {
+  color: var(--brand-700);
+  font-weight: var(--weight-semibold);
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(12, 51, 99, 0.12);
+}
+
+.msg__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  color: #ffffff;
+  background: var(--gray-500);
+  border-radius: var(--radius-full);
+}
+
+// Срочный счётчик (мяч у агента) — тёплый янтарь, как язык внимания везде.
+.msg__tab-count--urgent {
+  color: #3a1d00;
+  background: var(--warning-500);
+}
+
+.chat {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+// ─── Инбокс «Процессы» — список-указатель ───
+.pinbox {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.pinbox__empty {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.pinbox__empty-title {
+  margin: 0 0 6px;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-800);
+}
+
+.pinbox__empty-text {
+  margin: 0 auto;
+  max-width: 42ch;
+  color: var(--gray-600);
+}
+
+.pinbox__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pinbox__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-100);
+  text-decoration: none;
+  color: var(--gray-900);
+  cursor: pointer;
+  transition: background 120ms ease-out;
+
+  &:hover {
+    background: var(--gray-50);
+  }
+
+  &:focus-visible {
+    outline: none;
+    background: var(--brand-50);
+    box-shadow: inset 3px 0 0 var(--brand-500);
+  }
+}
+
+.pinbox__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  color: var(--gray-500);
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.pinbox__icon--urgent {
+  background: var(--warning-50);
+  color: var(--warning-600);
+}
+
+.pinbox__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pinbox__client {
+  font-weight: var(--weight-medium);
+}
+
+.pinbox__sub {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+}
+
+.pinbox__status {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+.pinbox__status--urgent {
+  background: var(--warning-50);
+  color: var(--warning-700);
+  font-weight: var(--weight-medium);
+}
+
+.pinbox__chev {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--gray-400);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pinbox__note {
+  margin: 0;
+  padding: 14px 20px;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
 }
 
 // ─── Header ───

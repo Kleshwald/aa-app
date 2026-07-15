@@ -15,6 +15,7 @@ import {
 import {
   handleAddProcessComment,
   handleCreateProcess,
+  handleListActiveProcesses,
   handleListAwaitingProcesses,
   handleListPolicyProcesses,
   handleUploadProcessDoc,
@@ -61,6 +62,7 @@ const routes: Route[] = [
   { method: 'POST', match: /\/policies$/, handler: handleCreatePolicy },
   // Заявки по договору — до общего GET /policies/:id (3-сегментные пути).
   { method: 'GET', match: /\/processes\/awaiting$/, handler: handleListAwaitingProcesses },
+  { method: 'GET', match: /\/processes\/active$/, handler: handleListActiveProcesses },
   { method: 'POST', match: /\/policies\/[^/]+\/processes$/, handler: handleCreateProcess },
   { method: 'GET', match: /\/policies\/[^/]+\/processes$/, handler: handleListPolicyProcesses },
   { method: 'POST', match: /\/processes\/[^/]+\/comments$/, handler: handleAddProcessComment },

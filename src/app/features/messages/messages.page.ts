@@ -11,6 +11,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { switchMap, timer } from 'rxjs';
 
 import {
   ChatService,
@@ -18,21 +21,33 @@ import {
   type ChatMessage,
   type ChatRole,
 } from '@core/services/chat.service';
+import {
+  PROCESS_KIND_LABEL,
+  PROCESS_STATUS_LABEL,
+  ProcessService,
+  type ActiveProcess,
+  type ProcessKind,
+  type ProcessStatus,
+} from '@core/services/process.service';
 
 interface DayGroup {
   label: string;
   messages: ChatMessage[];
 }
 
+type MsgTab = 'dialogs' | 'processes';
+
 @Component({
   selector: 'app-messages-page',
-  imports: [DatePipe, NgTemplateOutlet],
+  imports: [DatePipe, NgTemplateOutlet, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './messages.page.html',
   styleUrl: './messages.page.scss',
 })
 export class MessagesPage implements OnInit {
   private readonly chat = inject(ChatService);
+  private readonly processService = inject(ProcessService);
+  private readonly route = inject(ActivatedRoute);
   private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller');
   private readonly inputEl = viewChild<ElementRef<HTMLTextAreaElement>>('input');
 
@@ -40,6 +55,37 @@ export class MessagesPage implements OnInit {
   protected readonly supportTyping = this.chat.supportTyping;
   protected readonly support = this.chat.support;
   protected readonly curator = this.chat.curator;
+
+  // ─── Хаб «Сообщения» = Диалоги + Процессы (владелец 2026-07-15, вариант B) ───
+  // «Процессы» — СПИСОК-УКАЗАТЕЛЬ: клик ведёт на страницу договора, где живёт
+  // единственный дом переписки заявки (вторая дверь, не копия — лок process_visibility).
+  protected readonly tab = signal<MsgTab>('dialogs');
+  protected readonly dialogsUnread = this.chat.unread;
+
+  private readonly activeResponse = toSignal(
+    timer(0, 5000).pipe(switchMap(() => this.processService.listActive())),
+    { initialValue: undefined },
+  );
+  protected readonly activeProcesses = computed<ActiveProcess[]>(() => {
+    const r = this.activeResponse();
+    return r?.success ? (r.data ?? []) : [];
+  });
+  /** Заявки, где мяч у агента — тот же счётчик, что «Ждут ваших действий» в шапке. */
+  protected readonly awaitingCount = computed(
+    () => this.activeProcesses().filter((p) => p.awaiting).length,
+  );
+
+  protected setTab(t: MsgTab): void {
+    this.tab.set(t);
+  }
+
+  protected kindLabel(kind: ProcessKind): string {
+    return PROCESS_KIND_LABEL[kind];
+  }
+
+  protected stateLabel(status: ProcessStatus): string {
+    return PROCESS_STATUS_LABEL[status];
+  }
 
   protected readonly draft = signal('');
   protected readonly pendingFiles = signal<ChatAttachment[]>([]);
@@ -80,6 +126,10 @@ export class MessagesPage implements OnInit {
   }
 
   ngOnInit(): void {
+    // Сигнал в шапке ведёт сюда с ?tab=processes — открываем нужную вкладку сразу.
+    if (this.route.snapshot.queryParamMap.get('tab') === 'processes') {
+      this.tab.set('processes');
+    }
     this.chat.markRead();
   }
 

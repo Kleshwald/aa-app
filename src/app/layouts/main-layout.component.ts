@@ -64,8 +64,13 @@ export class MainLayoutComponent {
   private readonly attention = inject(AttentionService);
 
   protected readonly messagesRoute = MESSAGES_ROUTE;
-  // Unread support messages — badge on the «Сообщения» nav item.
-  protected readonly messagesUnread = this.chat.unread;
+  // Общий счётчик «Сообщения» = непрочитанный чат + заявки, где ваш ход (владелец
+  // 2026-07-15, вариант B). «Сообщения» — единый ящик (Диалоги + Процессы); внешний
+  // бейдж считает оба вида дел. Сигнал в шапке показывает ТОЛЬКО срочное подмножество
+  // (заявки) и ДРУГИМ словом — «3» честно вложено в «5», не читается как «что пропустила».
+  protected readonly messagesUnread = computed(
+    () => this.chat.unread() + this.attention.awaitingPolicyCount(),
+  );
 
   // Сквозной сигнал «Ждут ваших действий» — единственный амбиентный детектор,
   // виден на всех экранах. Клик уводит на «Мои клиенты», где чип-фильтр включён и
