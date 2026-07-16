@@ -687,6 +687,247 @@
   color: var(--gray-700);
 }
 
+// ─── V3 «Переписка в Сообщениях»: список бесед + тред заявки ───
+
+// Список бесед (чат поддержки + беседа на каждую активную заявку).
+.convos {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.convo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-bottom: 1px solid var(--gray-100);
+  background: none;
+  text-align: left;
+  font-family: inherit;
+  color: var(--gray-900);
+  cursor: pointer;
+  transition: background 120ms ease-out;
+
+  &:hover {
+    background: var(--gray-50);
+  }
+
+  &:focus-visible {
+    outline: none;
+    background: var(--brand-50);
+    box-shadow: inset 3px 0 0 var(--brand-500);
+  }
+}
+
+.convo__av {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--brand-500);
+  color: #ffffff;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+// Беседа-заявка: нейтральный кружок, значок вида заявки внутри.
+.convo__av--kind {
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
+
+// Ждёт агента — тёплый янтарь, как язык внимания везде.
+.convo__av--urgent {
+  background: var(--warning-50);
+  color: var(--warning-600);
+}
+
+.convo__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.convo__title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.convo__snippet {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.convo__dot {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--brand-500);
+}
+
+.convo__dot--urgent {
+  background: var(--warning-500);
+}
+
+.convos__sep {
+  padding: 14px 20px 6px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+.convos__empty {
+  margin: 0;
+  padding: 8px 20px 20px;
+  max-width: 52ch;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+}
+
+// Тред одной заявки — тот же чат-скин, что у поддержки (переиспользуем .chat__*).
+.thread {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+// Возврат к списку — над чатом поддержки (беседа support) отдельной строкой.
+.thread__nav {
+  flex-shrink: 0;
+}
+
+.thread__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--text-base);
+  color: var(--brand-600);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--brand-700);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+.thread__head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  background: var(--brand-50);
+  border-bottom: 1px solid var(--brand-100);
+
+  .thread__back {
+    min-height: 36px;
+  }
+}
+
+.thread__id {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.thread__client {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-900);
+}
+
+.thread__sub {
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+}
+
+.thread__status {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+.thread__status--urgent {
+  background: var(--warning-50);
+  color: var(--warning-700);
+  font-weight: var(--weight-medium);
+}
+
+.thread__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: var(--brand-50);
+}
+
+.thread__loading {
+  margin: auto;
+  color: var(--gray-600);
+}
+
+.thread__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: var(--text-sm);
+  color: var(--error-700);
+
+  svg {
+    flex: 0 0 auto;
+    margin-top: 2px;
+  }
+}
+
 @media (max-width: 1023px) {
   .chat {
     height: calc(100vh - 96px);

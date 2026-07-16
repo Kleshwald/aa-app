@@ -78,6 +78,14 @@
   color: var(--gray-900);
 }
 
+.hub-sec__lead {
+  margin: -4px 0 0;
+  max-width: 90ch;
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  color: var(--gray-600);
+}
+
 .hub-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

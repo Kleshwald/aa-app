@@ -57,12 +57,10 @@
           </button>
         } @else if (attentionCount() > 0) {
           <a
-            [routerLink]="messagesRoute"
-            [queryParams]="{ tab: 'processes' }"
+            [routerLink]="attentionLink().commands"
+            [queryParams]="attentionLink().query"
             class="app-attention"
-            [attr.aria-label]="
-              'Ждут ваших действий: ' + attentionCount() + '. Открыть список процессов'
-            "
+            [attr.aria-label]="'Ждут ваших действий: ' + attentionCount() + '. Открыть'"
           >
             <span class="app-attention__icon" aria-hidden="true">
               <svg
@@ -452,4 +450,18 @@
       <router-outlet />
     </main>
   </div>
+
+  <!-- Dev-метка UX-варианта: видна ТОЛЬКО когда вариант выбран явно (пришли по ссылке
+       с «панели проекта»). Обычному входу агента не мешает. Клик — обратно на /hub,
+       сравнить с другим вариантом. Это не часть продукта — служебный оверлей. -->
+  @if (uxChosen()) {
+    <a
+      class="app-uxflag"
+      routerLink="/hub"
+      title="Вернуться к панели проекта — выбрать другой вариант"
+    >
+      <span class="app-uxflag__n">Вариант {{ uxMeta().n }}</span>
+      <span class="app-uxflag__name">{{ uxMeta().name }}</span>
+    </a>
+  }
 </div>

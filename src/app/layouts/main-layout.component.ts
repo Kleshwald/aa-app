@@ -12,6 +12,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AttentionService } from '@core/services/attention.service';
 import { AuthService } from '@core/services/auth.service';
 import { ChatService } from '@core/services/chat.service';
+import { UxVariantService } from '@core/services/ux-variant.service';
 
 interface NavItem {
   label: string;
@@ -62,20 +63,29 @@ export class MainLayoutComponent {
 
   private readonly chat = inject(ChatService);
   private readonly attention = inject(AttentionService);
+  private readonly ux = inject(UxVariantService);
 
   protected readonly messagesRoute = MESSAGES_ROUTE;
-  // Общий счётчик «Сообщения» = непрочитанный чат + заявки, где ваш ход (владелец
-  // 2026-07-15, вариант B). «Сообщения» — единый ящик (Диалоги + Процессы); внешний
-  // бейдж считает оба вида дел. Сигнал в шапке показывает ТОЛЬКО срочное подмножество
-  // (заявки) и ДРУГИМ словом — «3» честно вложено в «5», не читается как «что пропустила».
+  // Счётчик «Сообщения» = непрочитанный чат (+ заявки, где ваш ход — ТОЛЬКО когда
+  // процессы живут в Сообщениях: v1 «Процессы в Сообщениях», v3 «Переписка в
+  // Сообщениях»). В v2 «Уведомления вверху» процессов в Сообщениях нет — их считает
+  // ТОЛЬКО сигнал в шапке, иначе бейдж обещал бы то, чего в Сообщениях не открыть.
   protected readonly messagesUnread = computed(
-    () => this.chat.unread() + this.attention.awaitingPolicyCount(),
+    () =>
+      this.chat.unread() +
+      (this.ux.messagesCountsProcesses() ? this.attention.awaitingPolicyCount() : 0),
   );
 
   // Сквозной сигнал «Ждут ваших действий» — единственный амбиентный детектор,
-  // виден на всех экранах. Клик уводит на «Мои клиенты», где чип-фильтр включён и
-  // таблица уже отфильтрована. Число = полисы, где заявка ждёт агента (= число чипа).
+  // виден на всех экранах. Куда ведёт клик — зависит от UX-варианта (см. UxVariantService):
+  // v1 → Сообщения/Процессы, v2 → «Мои клиенты» с чипом, v3 → беседа заявки в Сообщениях.
   protected readonly attentionCount = this.attention.awaitingPolicyCount;
+  protected readonly attentionLink = this.ux.signalLink;
+
+  // Метка активного UX-варианта — только когда он выбран ЯВНО (через ссылку с /hub).
+  // Обычный вход агента метки не видит; тестировщик-сравниватель — видит, куда попал.
+  protected readonly uxChosen = this.ux.chosen;
+  protected readonly uxMeta = this.ux.meta;
 
   // «Не знаю» ≠ «ноль». При отказе бэкенда молчать нельзя: тишина читается как
   // «вас никто не ждёт» — это худший обман для аудитории, чей главный страх —
