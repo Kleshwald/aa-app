@@ -20,7 +20,7 @@ export interface ClientRow {
   vehicleModel: string;
   vehicleLicensePlate: string;
   type: 'OSAGO' | 'NS' | 'TICK' | 'MORTGAGE';
-  status: 'active' | 'expired' | 'cancelled' | 'pending' | 'processing';
+  status: 'active' | 'expired' | 'cancelled' | 'pending' | 'processing' | 'awaiting-payment';
   premium: number;
   insuranceCompanyName: string;
 

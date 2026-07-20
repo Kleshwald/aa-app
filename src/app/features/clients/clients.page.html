@@ -67,13 +67,18 @@
       <label class="clients__field-label" for="clients-status">Статус</label>
       <select
         id="clients-status"
-        class="clients__filter-select"
+        class="clients__filter-select clients__filter-select--status"
         [value]="status()"
         (change)="status.set($any($event.target).value)"
       >
         <option value="">Все статусы</option>
-        <option value="active">Оформлен</option>
         <option value="pending">Черновик</option>
+        <option value="awaiting-payment">Ожидает оплаты</option>
+        <option value="active">Оформлен</option>
+        <option value="processing">Оформляется</option>
+        <option value="proc-change">Изменения в договоре</option>
+        <option value="proc-cancel">Расторжение договора</option>
+        <option value="proc-loss">Урегулирование убытка</option>
       </select>
     </div>
 
@@ -81,7 +86,7 @@
       <label class="clients__field-label" for="clients-type">Продукт</label>
       <select
         id="clients-type"
-        class="clients__filter-select"
+        class="clients__filter-select clients__filter-select--product"
         [value]="type()"
         (change)="type.set($any($event.target).value)"
       >
@@ -97,7 +102,7 @@
       <label class="clients__field-label" for="clients-company">Страховая компания</label>
       <select
         id="clients-company"
-        class="clients__filter-select"
+        class="clients__filter-select clients__filter-select--company"
         [value]="insuranceCompany()"
         (change)="insuranceCompany.set($any($event.target).value)"
       >
@@ -325,18 +330,17 @@
               <td>
                 <span class="clients__policy-no">{{ row.number }}</span>
 
-                <!-- Заявка по полису — под номером (владелец 2026-07-15: «было лучше»,
-                     вернули из колонки «Статус»). ВИД словом (изменение/расторжение/убыток)
-                     + состояние: «Расторжение · Ожидаем документы». Значок типа + тёплая
-                     точка ургентности; серый — мяч у страховой. Клик по строке уводит в
-                     заявку (статусы + переписка). -->
+                <!-- Заявка по полису — БЕЙДЖ под номером (владелец 2026-07-16: «только бейдж
+                     — изменение, расторжение, урегулирование»). Только ВИД заявки словом;
+                     состояние ушло в столбец «Статус». Янтарь = ваш ход, серый = у страховой.
+                     Клик по строке уводит в заявку (статусы + переписка на договоре). -->
                 @if (pm) {
                   <span
-                    class="clients__process"
-                    [class.clients__process--urgent]="pm.urgent"
+                    class="clients__proc-badge"
+                    [class.clients__proc-badge--urgent]="pm.urgent"
                     [title]="pm.kindLabel + ' · ' + pm.stateLabel"
                   >
-                    <svg class="clients__process-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="clients__proc-badge-icon" viewBox="0 0 24 24" aria-hidden="true">
                       @switch (pm.kind) {
                         @case ('change') {
                           <!-- Карандаш — внесение изменений. -->
@@ -359,20 +363,22 @@
                         }
                       }
                     </svg>
-                    <span class="clients__process-kind">{{ pm.kindLabel }}</span>
-                    <span class="clients__process-sep" aria-hidden="true">·</span>
-                    {{ pm.stateLabel }}
+                    {{ pm.kindLabel }}
                   </span>
                 }
               </td>
               <td>{{ productLabel[row.type] }}</td>
               <td class="clients__cell--num">{{ row.premium | number: '1.0-0' }}</td>
 
-              <!-- Статус — снова статус самого ПОЛИСА (владелец: заявку вернули под № полиса). -->
+              <!-- Статус СТРОКИ (владелец 2026-07-16): активная заявка вытесняет статус
+                   полиса — «Изменения в договоре / Расторжение договора / Урегулирование
+                   убытка» (как в 1С), иначе — статус самого полиса. Тон: заявка ждёт вас →
+                   янтарь, в работе → синий; статусы полиса — свои цвета. -->
+              @let tone = rowStatusTone(row);
               <td>
-                <span class="clients__status" [attr.data-status]="row.status">
+                <span class="clients__status" [attr.data-status]="tone">
                   <svg class="clients__status-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    @switch (row.status) {
+                    @switch (tone) {
                       @case ('active') {
                         <polyline points="5 12 10 17 19 7" />
                       }
@@ -389,13 +395,28 @@
                         <line x1="12" y1="8" x2="12" y2="12" />
                         <line x1="12" y1="16" x2="12" y2="16.01" />
                       }
+                      @case ('awaiting-payment') {
+                        <circle cx="12" cy="12" r="8" />
+                        <polyline points="12 8 12 12 15 14" />
+                      }
+                      @case ('proc-urgent') {
+                        <path
+                          d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"
+                        />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12" y2="17.01" />
+                      }
+                      @case ('proc') {
+                        <path d="M21 12a9 9 0 1 1-2.6-6.4" />
+                        <polyline points="21 3 21 9 15 9" />
+                      }
                       @default {
                         <path d="M5 19 19 5" />
                         <path d="M14 5h5v5" />
                       }
                     }
                   </svg>
-                  <span class="clients__status-label">{{ statusLabel[row.status] }}</span>
+                  <span class="clients__status-label">{{ rowStatusLabel(row) }}</span>
                 </span>
               </td>
               <td>{{ row.insuranceCompanyName }}</td>

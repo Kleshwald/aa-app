@@ -4,7 +4,13 @@ import { insuranceCompanies } from './insurance-companies.fixture';
 import { osagoPolicyNumber } from './policy-number';
 
 type PolicyType = 'OSAGO' | 'NS' | 'TICK' | 'MORTGAGE';
-type PolicyStatus = 'active' | 'expired' | 'cancelled' | 'pending' | 'processing';
+type PolicyStatus =
+  | 'active'
+  | 'expired'
+  | 'cancelled'
+  | 'pending'
+  | 'processing'
+  | 'awaiting-payment';
 
 const CAR_BRANDS = [
   ['ВАЗ', ['2107', '2110', '2114', 'Granta', 'Vesta', 'Niva']],
@@ -50,10 +56,14 @@ function makePolicy(agentId: string): PolicyFixture {
     { value: 'TICK', weight: 8 },
     { value: 'MORTGAGE', weight: 7 },
   ]);
-  // Пока используем только два статуса: «Оформлен» (active) и «Черновик» (pending).
+  // Четыре статуса полиса (как в 1С): «Оформлен» (active), «Черновик» (pending),
+  // «Оформляется» (processing) и «Ожидает оплаты» (awaiting-payment) — чтобы у фильтра
+  // «Статус» была живая выборка по каждому пункту, а не мёртвые опции.
   const status: PolicyStatus = faker.helpers.weightedArrayElement([
-    { value: 'active', weight: 80 },
-    { value: 'pending', weight: 20 },
+    { value: 'active', weight: 70 },
+    { value: 'pending', weight: 14 },
+    { value: 'processing', weight: 9 },
+    { value: 'awaiting-payment', weight: 7 },
   ]);
   const created = faker.date.past({ years: 1 });
   const start = faker.date.between({ from: created, to: new Date() });

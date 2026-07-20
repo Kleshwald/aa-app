@@ -47,13 +47,21 @@ export function handleGetPolicies(
   const awaitingOnly = params.get('awaitingOnly') === 'true';
   const processFirst = params.get('processFirst') === 'true';
 
+  // Фильтр «Статус» несёт ДВЕ оси: статус полиса (active/pending/…) ИЛИ вид активной
+  // заявки (proc-change/proc-cancel/proc-loss — «Изменения/Расторжение/Урегулирование»).
+  const procKind = status && status.startsWith('proc-') ? status.slice(5) : null;
+
   let result = policies.slice();
-  if (status) result = result.filter((p) => p.status === status);
+  if (status && !procKind) result = result.filter((p) => p.status === status);
   if (type) result = result.filter((p) => p.type === type);
   if (awaitingOnly) {
     // «Ждут ваших действий» — внимание кросс-периодное: заявка на прошлогоднем полисе
     // обязана найтись, поэтому фильтр периода СОЗНАТЕЛЬНО игнорируется.
     result = result.filter((p) => activeProcessFor(p.id)?.status === 'awaiting-docs');
+  } else if (procKind) {
+    // Фильтр по виду заявки — тоже кросс-периодный: расторжение может висеть на старом
+    // полисе, а под дефолтным «Этот месяц» его бы не нашли.
+    result = result.filter((p) => activeProcessFor(p.id)?.kind === procKind);
   } else if (!search) {
     // Поиск (по фамилии/номеру) тоже игнорирует период: клиент звонит спросить статус,
     // а его полис оформлен в мае — при дефолтном «Этот месяц» он бы не нашёлся.

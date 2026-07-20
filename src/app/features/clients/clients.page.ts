@@ -29,19 +29,31 @@ const PRODUCT_LABEL: Record<ClientRow['type'], string> = {
   MORTGAGE: 'Ипотека',
 };
 
+// Статусы полиса — как в 1С (Черновик / Ожидает оплаты / Оформлен / Оформляется),
+// но СЛОВАМИ. Коды в скобках из 1С не переносим: агенты между собой говорят словами.
 const STATUS_LABEL: Record<ClientRow['status'], string> = {
   active: 'Оформлен',
   expired: 'Истёк',
   cancelled: 'Расторгнут',
   pending: 'Черновик',
-  processing: 'В обработке',
+  processing: 'Оформляется',
+  'awaiting-payment': 'Ожидает оплаты',
 };
 
-// Вид заявки — СЛОВОМ (коды ВИ/Р/УУ запрещены: их не расшифровывают).
+// Вид заявки — СЛОВОМ (коды ВИ/Р/УУ запрещены: их не расшифровывают). Короткая форма —
+// для бейджа в столбце «№ полиса».
 const PROCESS_KIND_SHORT: Record<ProcessKind, string> = {
   change: 'Изменение',
   cancel: 'Расторжение',
-  loss: 'Убыток',
+  loss: 'Урегулирование',
+};
+
+// Вид заявки как СТАТУС строки — для столбца «Статус» (владелец 2026-07-16: активная
+// заявка становится статусом строки, как в 1С). Полная форма, без кода.
+const PROCESS_STATUS_AS_STATUS: Record<ProcessKind, string> = {
+  change: 'Изменения в договоре',
+  cancel: 'Расторжение договора',
+  loss: 'Урегулирование убытка',
 };
 
 // Расширенный статус заявки — в КОЛОНКУ «Статус» (владелец 2026-07-15): раньше он ютился
@@ -188,11 +200,24 @@ export class ClientsPage {
     return {
       urgent,
       kind: row.processKind,
-      // Расширенный статус в колонку «Статус» — что агент прочитает клиенту вслух.
+      // Расширенный статус — для подсказки/aria (что агент прочитает клиенту вслух).
       stateLabel: PROCESS_STATE_LABEL[row.processStatus],
       kindLabel: PROCESS_KIND_SHORT[row.processKind],
       since: row.processSince,
     };
+  }
+
+  // Статус СТРОКИ для столбца «Статус» (владелец 2026-07-16): активная заявка вытесняет
+  // статус полиса — как в 1С («Изменения в договоре» вместо «Оформлен»). Вид заявки при
+  // этом дублируется бейджем в «№ полиса» (быстрый скан у номера + формальный статус в столбце).
+  protected rowStatusLabel(row: ClientRow): string {
+    return row.processKind ? PROCESS_STATUS_AS_STATUS[row.processKind] : STATUS_LABEL[row.status];
+  }
+
+  /** Тон бейджа статуса: заявка → янтарь (ваш ход) или синий (в работе); иначе — статус полиса. */
+  protected rowStatusTone(row: ClientRow): string {
+    if (row.processKind) return row.processStatus === 'awaiting-docs' ? 'proc-urgent' : 'proc';
+    return row.status;
   }
 
   // Произвольный период — два календаря (ISO-строки через IsoDayTransformer).
