@@ -1,0 +1,522 @@
+<div class="sup">
+  <!-- Шапка кокпита. Namely не агентская: другой пользователь, другая работа —
+       поэтому своя полоса, а не MainLayout с сайдбаром продуктов. -->
+  <header class="sup__bar">
+    <div class="sup__brand">
+      <span class="sup__logo">AA</span>
+      <div>
+        <h1 class="sup__title">Рабочее место поддержки</h1>
+        <p class="sup__subtitle">Заявки из 1С и вопросы из чата — одна очередь</p>
+      </div>
+    </div>
+
+    <div class="sup__metrics">
+      <span class="sup__metric" [class.sup__metric--alarm]="overdueCount() > 0">
+        Просрочено: <b>{{ overdueCount() }}</b>
+      </span>
+      <span class="sup__metric"
+        >Без ответственного: <b>{{ unassignedCount() }}</b></span
+      >
+    </div>
+
+    <div class="sup__who">
+      <label class="sup__who-label" for="sup-operator">Оператор</label>
+      <select
+        id="sup-operator"
+        class="sup__select"
+        [ngModel]="operator()"
+        (ngModelChange)="operator.set($event)"
+      >
+        @for (name of operators; track name) {
+          <option [value]="name">{{ name }}</option>
+        }
+      </select>
+      <button type="button" class="sup__ghost" (click)="reloadQueue()">Обновить</button>
+      <a class="sup__ghost" routerLink="/hub">Панель проекта</a>
+    </div>
+  </header>
+
+  <div class="sup__body">
+    <!-- ─── ОЧЕРЕДЬ ─────────────────────────────────────────────────────────── -->
+    <aside class="sup__queue" aria-label="Очередь поддержки">
+      <div class="sup__tabs" role="tablist">
+        @for (t of tabs; track t) {
+          <button
+            type="button"
+            role="tab"
+            class="sup__tab"
+            [class.sup__tab--on]="tab() === t"
+            [attr.aria-selected]="tab() === t"
+            (click)="tab.set(t)"
+          >
+            {{ tabLabel[t] }}
+            <span class="sup__tab-count">{{ counts()[t] }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="sup__search">
+        <input
+          type="search"
+          class="sup__input"
+          placeholder="Агент, ИКП, № заявки, полис"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+          aria-label="Поиск по очереди"
+        />
+      </div>
+
+      <ol class="sup__list">
+        @for (item of filtered(); track trackById($index, item)) {
+          <li>
+            <button
+              type="button"
+              class="qi"
+              [class.qi--on]="isSelected(item)"
+              [class.qi--overdue]="sla(item) === 'overdue'"
+              [class.qi--soon]="sla(item) === 'soon'"
+              (click)="select(item)"
+            >
+              <span class="qi__top">
+                <span class="qi__source qi__source--{{ item.source }}">
+                  {{ sourceLabel[item.source] }}
+                </span>
+                <span class="qi__topic">{{ item.topic }}</span>
+                @if (item.live) {
+                  <span class="qi__live" title="Живое дело демо-агента">демо</span>
+                }
+              </span>
+
+              <span class="qi__detail">{{ item.detail }}</span>
+
+              <span class="qi__meta">
+                <span class="qi__agent">{{ item.agentName }}</span>
+                <span class="qi__dot">·</span>
+                <span>{{ item.region }}</span>
+                @if (item.insurer) {
+                  <span class="qi__dot">·</span>
+                  <span>{{ item.insurer }}</span>
+                }
+              </span>
+
+              <span class="qi__bottom">
+                <span class="qi__status qi__status--{{ item.tone }}">{{ item.statusLabel }}</span>
+                <span class="qi__ball qi__ball--{{ item.ball }}">{{ ballLabel[item.ball] }}</span>
+                <span class="qi__age" [class.qi__age--alarm]="sla(item) === 'overdue'">
+                  {{ humanAge(item.sinceIso) }}
+                </span>
+              </span>
+
+              <span class="qi__assignee">
+                @if (item.assignee) {
+                  Ведёт: {{ item.assignee }}
+                } @else {
+                  <span class="qi__free">Никто не ведёт</span>
+                }
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="sup__empty">
+            @if (loadingQueue()) {
+              Загружаем очередь…
+            } @else {
+              В этой вкладке пусто. Переключитесь на «Все» — возможно, дела ведут коллеги.
+            }
+          </li>
+        }
+      </ol>
+    </aside>
+
+    <!-- ─── ДЕЛО ────────────────────────────────────────────────────────────── -->
+    <section class="sup__card" aria-live="polite">
+      @if (error(); as message) {
+        <p class="sup__error" role="alert">{{ message }}</p>
+      }
+
+      @if (loadingCard()) {
+        <p class="sup__hint">Открываем дело…</p>
+      }
+
+      <!-- ЗАЯВКА (1С) -->
+      @if (request(); as req) {
+        <header class="card__head">
+          <div>
+            <p class="card__eyebrow">
+              {{ kindLabel[req.kind] }} · № {{ req.requestNumber }}
+              @if (req.live) {
+                <span class="card__live">живое дело демо-агента</span>
+              }
+            </p>
+            <h2 class="card__title">{{ req.policyholder }}</h2>
+            <p class="card__sub">{{ req.policyNumber }} · {{ req.insurer }} · {{ req.vehicle }}</p>
+          </div>
+          <div class="card__head-right">
+            <span class="card__assignee">
+              @if (req.assignee) {
+                Ведёт: {{ req.assignee }}
+              } @else {
+                Никто не ведёт
+              }
+            </span>
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="busy()"
+              (click)="takeRequest()"
+            >
+              @if (req.assignee === operator()) {
+                Снять с себя
+              } @else {
+                Взять на себя
+              }
+            </button>
+          </div>
+        </header>
+
+        <!-- Кто спрашивает. У поддержки нет «своих» клиентов: агент, ИКП и телефон
+             нужны в первой же секунде разговора. -->
+        <div class="card__grid">
+          <section class="pane">
+            <h3 class="pane__title">Агент</h3>
+            <dl class="kv">
+              <dt>ФИО</dt>
+              <dd>{{ req.agentName }}</dd>
+              <dt>ИКП</dt>
+              <dd class="kv__mono">{{ req.agentIkp }}</dd>
+              <dt>Телефон</dt>
+              <dd>
+                <a href="tel:{{ req.agentPhone }}">{{ req.agentPhone }}</a>
+              </dd>
+              <dt>Территория</dt>
+              <dd>{{ req.region }}</dd>
+              <dt>Куратор</dt>
+              <dd>{{ req.curatorName }}</dd>
+            </dl>
+          </section>
+
+          <section class="pane">
+            <h3 class="pane__title">Договор</h3>
+            <dl class="kv">
+              <dt>Полис</dt>
+              <dd class="kv__mono">{{ req.policyNumber }}</dd>
+              <dt>Компания</dt>
+              <dd>{{ req.insurer }}</dd>
+              <dt>Страхователь</dt>
+              <dd>{{ req.policyholder }}</dd>
+              <dt>Объект</dt>
+              <dd>{{ req.vehicle }}</dd>
+              <dt>Премия</dt>
+              <dd>{{ req.premium | number: '1.0-0' }} ₽</dd>
+              <dt>Срок</dt>
+              <dd>
+                {{ req.startDate | date: 'dd.MM.yyyy' }} — {{ req.endDate | date: 'dd.MM.yyyy' }}
+              </dd>
+              @if (req.reasons.length) {
+                <dt>Причины</dt>
+                <dd>
+                  @for (r of req.reasons; track r) {
+                    <span class="chip">{{ reasonLabel(r) }}</span>
+                  }
+                </dd>
+              }
+              @if (req.refundAmount !== undefined) {
+                <dt>К возврату</dt>
+                <dd>{{ req.refundAmount | number: '1.0-0' }} ₽</dd>
+              }
+              @if (req.lossNumber) {
+                <dt>Номер убытка</dt>
+                <dd class="kv__mono">{{ req.lossNumber }}</dd>
+              }
+              @if (req.payoutAmount) {
+                <dt>Выплата</dt>
+                <dd>{{ req.payoutAmount | number: '1.0-0' }} ₽</dd>
+              }
+            </dl>
+          </section>
+        </div>
+
+        <!-- Действия. Ровно то, чем поддержка двигает дело: попросить документы,
+             взять в работу, отдать в СК (агенту не видно), закрыть. -->
+        <section class="pane pane--actions">
+          <h3 class="pane__title">Действие</h3>
+          <div class="actions">
+            <button
+              type="button"
+              class="btn"
+              [disabled]="busy()"
+              (click)="docFormOpen.set(!docFormOpen())"
+            >
+              Запросить документы
+            </button>
+            <button type="button" class="btn" [disabled]="busy()" (click)="setStatus('in-work')">
+              В работе у нас
+            </button>
+            <button
+              type="button"
+              class="btn"
+              [disabled]="busy()"
+              (click)="
+                setStatus('in-work', {
+                  atInsurer: true,
+                  comment: 'Запрос направлен в страховую компанию',
+                })
+              "
+            >
+              Передать в страховую
+            </button>
+            <button
+              type="button"
+              class="btn btn--done"
+              [disabled]="busy()"
+              (click)="setStatus('done')"
+            >
+              {{ finishLabel() }}
+            </button>
+            <button
+              type="button"
+              class="btn btn--reject"
+              [disabled]="busy()"
+              (click)="setStatus('rejected', { comment: 'Заявка отклонена' })"
+            >
+              Отклонить
+            </button>
+          </div>
+
+          @if (req.atInsurer) {
+            <p class="actions__note">
+              Работа во внешнем контуре: у страховой. Агент видит «В работе у страховой», переписку
+              с СК — нет.
+            </p>
+          }
+
+          @if (docFormOpen()) {
+            <div class="docs">
+              <p class="docs__title">Что запросить у агента</p>
+              @for (preset of docPresets(); track preset) {
+                <label class="docs__item">
+                  <input
+                    type="checkbox"
+                    [checked]="docPicks().includes(preset)"
+                    (change)="toggleDoc(preset)"
+                  />
+                  <span>{{ preset }}</span>
+                </label>
+              }
+              <div class="docs__foot">
+                <button
+                  type="button"
+                  class="btn btn--primary"
+                  [disabled]="busy() || docPicks().length === 0"
+                  (click)="requestDocs()"
+                >
+                  Отправить запрос агенту
+                </button>
+                <span class="docs__hint">
+                  У агента зажжётся «Ждут ваших действий» со списком документов.
+                </span>
+              </div>
+            </div>
+          }
+        </section>
+
+        <div class="card__grid">
+          <!-- Переписка с агентом — ВИДНА агенту. -->
+          <section class="pane">
+            <h3 class="pane__title">
+              Переписка с агентом <span class="pane__tag pane__tag--public">видит агент</span>
+            </h3>
+            <ol class="feed">
+              @for (c of req.comments; track c.at) {
+                <li class="feed__item feed__item--{{ c.author }}">
+                  <p class="feed__who">{{ c.authorName }} · {{ c.at | date: 'dd.MM HH:mm' }}</p>
+                  <p class="feed__text">{{ c.text }}</p>
+                </li>
+              } @empty {
+                <li class="feed__empty">Переписки пока нет.</li>
+              }
+            </ol>
+            <div class="composer">
+              <textarea
+                class="composer__input"
+                rows="3"
+                placeholder="Ответ агенту — он увидит это в кабинете"
+                [ngModel]="replyDraft()"
+                (ngModelChange)="replyDraft.set($event)"
+              ></textarea>
+              <button
+                type="button"
+                class="btn btn--primary"
+                [disabled]="busy() || !replyDraft().trim()"
+                (click)="sendReply()"
+              >
+                Ответить агенту
+              </button>
+            </div>
+          </section>
+
+          <!-- Внутренние заметки — агенту НЕ видны. Разные адресаты не должны
+               делить одно поле ввода: цена ошибки — чужие данные в кабинете агента. -->
+          <section class="pane pane--internal">
+            <h3 class="pane__title">
+              Заметки для своих <span class="pane__tag pane__tag--internal">агент не видит</span>
+            </h3>
+            <ol class="feed">
+              @for (n of req.notes; track n.at) {
+                <li class="feed__item feed__item--note">
+                  <p class="feed__who">{{ n.author }} · {{ n.at | date: 'dd.MM HH:mm' }}</p>
+                  <p class="feed__text">{{ n.text }}</p>
+                </li>
+              } @empty {
+                <li class="feed__empty">Заметок нет.</li>
+              }
+            </ol>
+            <div class="composer">
+              <textarea
+                class="composer__input"
+                rows="3"
+                placeholder="Например: отправила пакет в РГС, жду номер убытка"
+                [ngModel]="noteDraft()"
+                (ngModelChange)="noteDraft.set($event)"
+              ></textarea>
+              <button
+                type="button"
+                class="btn"
+                [disabled]="busy() || !noteDraft().trim()"
+                (click)="sendNote()"
+              >
+                Сохранить заметку
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Трек. «Статус всегда в платформе» проверяется именно здесь. -->
+        <section class="pane">
+          <h3 class="pane__title">Ход дела</h3>
+          <ol class="track">
+            @for (e of req.statusHistory; track e.at) {
+              <li class="track__item">
+                <span class="track__at">{{ e.at | date: 'dd.MM HH:mm' }}</span>
+                <span class="track__who">{{ e.author === 'agent' ? 'Агент' : 'Поддержка' }}</span>
+                <span class="track__what">
+                  {{ e.comment || e.status }}
+                  @if (e.docRequest) {
+                    <span class="track__docs">
+                      @for (d of e.docRequest.items; track d) {
+                        <span class="chip">{{ d }}</span>
+                      }
+                    </span>
+                  }
+                </span>
+              </li>
+            }
+          </ol>
+        </section>
+      }
+
+      <!-- ВОПРОС (чат) -->
+      @if (thread(); as t) {
+        <header class="card__head">
+          <div>
+            <p class="card__eyebrow">Вопрос в чате</p>
+            <h2 class="card__title">{{ t.topic }}</h2>
+            <p class="card__sub">
+              {{ t.agentName }} · ИКП {{ t.agentIkp }} · {{ t.region }} ·
+              <a href="tel:{{ t.agentPhone }}">{{ t.agentPhone }}</a>
+            </p>
+          </div>
+          <div class="card__head-right">
+            <span class="card__assignee">
+              @if (t.assignee) {
+                Ведёт: {{ t.assignee }}
+              } @else {
+                Никто не ведёт
+              }
+            </span>
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="busy()"
+              (click)="takeThread()"
+            >
+              @if (t.assignee === operator()) {
+                Снять с себя
+              } @else {
+                Взять на себя
+              }
+            </button>
+          </div>
+        </header>
+
+        <section class="pane">
+          <h3 class="pane__title">
+            Диалог <span class="pane__tag pane__tag--public">видит агент</span>
+          </h3>
+          <ol class="feed">
+            @for (m of t.messages; track m.id) {
+              <li class="feed__item feed__item--{{ m.author }}">
+                <p class="feed__who">{{ m.authorName }} · {{ m.at | date: 'dd.MM HH:mm' }}</p>
+                <p class="feed__text">{{ m.text }}</p>
+              </li>
+            }
+          </ol>
+          <div class="composer">
+            <textarea
+              class="composer__input"
+              rows="3"
+              placeholder="Ответ агенту"
+              [ngModel]="replyDraft()"
+              (ngModelChange)="replyDraft.set($event)"
+            ></textarea>
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="busy() || !replyDraft().trim()"
+              (click)="sendThreadReply()"
+            >
+              Ответить
+            </button>
+          </div>
+        </section>
+
+        <!-- Эскалация внутрь — ПО ТЕМЕ, не «наверх». Куратора здесь нет специально:
+             он параллельный канал отношений, а не ступень эскалации (SUPPORT.md §2). -->
+        <section class="pane">
+          <h3 class="pane__title">Передать во вторую линию</h3>
+          @if (t.escalatedTo) {
+            <p class="pane__note">
+              Уже передано: <b>{{ t.escalatedTo }}</b
+              >. Ответ вернётся в этот же диалог.
+            </p>
+          }
+          <div class="escalate">
+            <select
+              class="sup__select"
+              [ngModel]="escalateTopic()"
+              (ngModelChange)="escalateTopic.set($event)"
+              aria-label="Тема второй линии"
+            >
+              <option value="">Выберите тему</option>
+              @for (topic of secondLineTopics; track topic) {
+                <option [value]="topic">{{ topic }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              class="btn"
+              [disabled]="busy() || !escalateTopic()"
+              (click)="escalate()"
+            >
+              Передать
+            </button>
+          </div>
+        </section>
+      }
+
+      @if (!request() && !thread() && !loadingCard()) {
+        <p class="sup__hint">Выберите дело слева.</p>
+      }
+    </section>
+  </div>
+</div>

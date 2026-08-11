@@ -40,6 +40,18 @@ import {
   handleReadDealMessages,
   handleRequoteOffer,
 } from '../../mock/handlers/deals.handler';
+import {
+  handleSupportAssign,
+  handleSupportEscalate,
+  handleSupportNote,
+  handleSupportQueue,
+  handleSupportReply,
+  handleSupportRequest,
+  handleSupportStatus,
+  handleSupportThread,
+  handleSupportThreadAssign,
+  handleSupportThreadReply,
+} from '../../mock/handlers/support.handler';
 
 // Maps an incoming request to a mock handler. When useMocks is false
 // (staging/prod), the interceptor short-circuits and the request goes
@@ -85,6 +97,21 @@ const routes: Route[] = [
   { method: 'POST', match: /\/deals$/, handler: handleCreateDeal },
   { method: 'GET', match: /\/deals\/[^/]+$/, handler: handleGetDeal },
   { method: 'GET', match: /\/deals(\?.*)?$/, handler: handleGetDeals },
+  // Кокпит поддержки. Действия — раньше общих GET /:id, иначе id съест хвост.
+  { method: 'GET', match: /\/support\/queue(\?.*)?$/, handler: handleSupportQueue },
+  { method: 'POST', match: /\/support\/requests\/[^/]+\/assign$/, handler: handleSupportAssign },
+  { method: 'POST', match: /\/support\/requests\/[^/]+\/reply$/, handler: handleSupportReply },
+  { method: 'POST', match: /\/support\/requests\/[^/]+\/note$/, handler: handleSupportNote },
+  { method: 'POST', match: /\/support\/requests\/[^/]+\/status$/, handler: handleSupportStatus },
+  { method: 'GET', match: /\/support\/requests\/[^/]+$/, handler: handleSupportRequest },
+  { method: 'POST', match: /\/support\/threads\/[^/]+\/reply$/, handler: handleSupportThreadReply },
+  { method: 'POST', match: /\/support\/threads\/[^/]+\/escalate$/, handler: handleSupportEscalate },
+  {
+    method: 'POST',
+    match: /\/support\/threads\/[^/]+\/assign$/,
+    handler: handleSupportThreadAssign,
+  },
+  { method: 'GET', match: /\/support\/threads\/[^/]+$/, handler: handleSupportThread },
 ];
 
 export const mockInterceptor: HttpInterceptorFn = (req, next) => {

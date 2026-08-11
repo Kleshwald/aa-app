@@ -30,6 +30,14 @@ export const routes: Routes = [
     canActivate: [hubGuard],
     title: 'Документация — Agent Academy',
   },
+  // Рабочее место поддержки — отдельная роль, вне агентской оболочки.
+  // За тем же гейтом, что и панель проекта: показываем владельцу и команде, агенту не нужно.
+  {
+    path: 'support',
+    loadComponent: () => import('@features/support/support.page').then((m) => m.SupportPage),
+    canActivate: [hubGuard],
+    title: 'Поддержка — рабочее место',
+  },
   {
     path: 'register',
     loadComponent: () => import('@pages/register.page').then((m) => m.RegisterPage),
