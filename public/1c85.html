@@ -197,7 +197,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .of input,.of select{ height:38px; padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:calc(14px*var(--scale)); }
 .of input:focus,.of select:focus{ outline:2px solid var(--navy); outline-offset:1px; }
 .of--narrow{ width:132px } .of--small{ width:190px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
-.ocheck{ display:inline-flex; align-items:center; gap:6px; font-size:calc(12.5px*var(--scale)); color:var(--ink); padding-bottom:9px; }
+.ocheck{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-size:calc(12.5px*var(--scale)); color:var(--ink); padding-bottom:9px; }
 /* Составной контрол: сегменты + поле в один ряд под подписью (Идентификатор VIN/№кузова/№шасси). */
 .octl{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 /* Ссылка «Дополнительные сведения ТС» — голубой (наш цвет ссылок), как в брендбуке 8.5. */
@@ -513,6 +513,132 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .osticky__prog{ display:inline-flex; align-items:center; gap:7px; color:var(--ok); font-size:calc(13px*var(--scale)); font-weight:600; }
 .osticky__prog svg{ width:17px; height:17px; }
 .btn--lg{ height:44px; padding:0 22px; font-size:calc(14.5px*var(--scale)); }
+
+/* ===== Рабочее место поддержки ===== */
+/* Кокпит оператора: одна очередь (заявки 1С + вопросы чата), ось «чей мяч», SLA только когда мяч у нас. */
+.sup-lead{ display:flex; align-items:flex-start; gap:8px; margin:0 20px 4px; padding:10px 13px; border-radius:8px;
+  background:var(--sel); border:1px solid var(--sel-line); color:var(--muted); font-size:calc(12.5px*var(--scale)); line-height:1.5; }
+.sup-lead svg{ color:var(--navy); flex:none; margin-top:1px; } .win[data-1ctheme='dark'] .sup-lead svg{ color:var(--blue); }
+.sup-src{ display:inline-block; padding:1px 6px; border-radius:4px; font-size:calc(9.5px*var(--scale)); font-weight:700; letter-spacing:.02em; }
+.sup-src--1c{ background:color-mix(in srgb,var(--navy) 13%,transparent); color:var(--navy); } .win[data-1ctheme='dark'] .sup-src--1c{ color:var(--blue); }
+.sup-src--chat{ background:color-mix(in srgb,var(--blue) 16%,transparent); color:var(--blue); }
+.sup-num{ display:inline-flex; align-items:center; gap:6px; font-variant-numeric:tabular-nums; }
+.sup-agent{ display:block; margin-top:2px; color:var(--muted); font-size:calc(11px*var(--scale)); font-weight:400; }
+.sup-sla-wrap{ display:block; margin-top:4px; } .sup-sla-wrap .sup-sla{ margin-left:0; }
+/* фильтр-бар «Мои заявки» — как в боевой 1С (преемственность) */
+.sup-frow2{ display:flex; align-items:center; gap:20px; padding:0 20px 12px; flex-wrap:wrap; }
+.sup-flink{ color:var(--blue); font-size:calc(12.5px*var(--scale)); cursor:pointer; } .sup-flink:hover{ text-decoration:underline; }
+.sup-multichip{ display:inline-flex; align-items:center; gap:7px; height:40px; padding:0 6px 0 12px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); font-size:calc(13px*var(--scale)); font-weight:600; }
+.sup-multichip__x{ border:none; background:var(--line); color:var(--muted); width:19px; height:19px; border-radius:50%; cursor:pointer; font-size:13px; line-height:1; }
+/* надстройка Agent Academy — пунктирная тинт-зона, чтобы «наше сверх ихнего» читалось */
+.sup-mine-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 20px 12px; padding:8px 14px; border:1px dashed var(--sel-line); border-radius:9px; background:var(--sel); }
+.sup-mine-cap{ font-size:calc(12px*var(--scale)); font-weight:600; color:var(--navy); } .win[data-1ctheme='dark'] .sup-mine-cap{ color:var(--blue); }
+.sup-tabs{ border-bottom:none !important; padding:0 !important; }
+.sup-tabs .chattab{ padding:8px 14px; }
+.sup-select--sm{ height:34px; }
+/* сигнал строки: точка «нужен разбор» + жирный № + чип-событие «агент ответил» — БЕЗ заливки */
+.sup-flag{ display:inline-block; width:8px; height:8px; border-radius:50%; flex:none; }
+.sup-flag--new{ background:var(--navy); } .win[data-1ctheme='dark'] .sup-flag--new{ background:var(--blue); }
+.sup-flag--back{ background:var(--warn); }
+.sup-flag--none{ background:transparent; }
+.sup-list tbody tr.sup-unread .sup-num{ font-weight:700; }
+.sup-ev{ display:inline-flex; align-items:center; gap:4px; margin-left:8px; padding:1px 7px; border-radius:5px; font-size:calc(10.5px*var(--scale)); font-weight:700; white-space:nowrap; }
+.sup-ev--back{ background:color-mix(in srgb,var(--warn) 15%,transparent); color:var(--warn); }
+/* тема обращения (общий вопрос) — чип с #, это НЕ «объект страхования» */
+.sup-topic{ display:inline-flex; align-items:center; padding:2px 8px; border-radius:6px; background:color-mix(in srgb,var(--navy) 9%,transparent); color:var(--navy); font-size:calc(12px*var(--scale)); font-weight:600; }
+.win[data-1ctheme='dark'] .sup-topic{ color:var(--blue); background:color-mix(in srgb,var(--blue) 16%,transparent); }
+.sup-obj-sub{ display:block; margin-top:3px; color:var(--muted); font-size:calc(11.5px*var(--scale)); }
+/* статус заявки = badge: pale-фон + тёмный текст + цветная точка (цвет — подкрепление, контраст держит текст) */
+.sup-stbadge{ display:inline-flex; align-items:center; gap:6px; padding:2px 9px; border-radius:6px; background:var(--bg); color:var(--ink); font-size:calc(12px*var(--scale)); font-weight:600; white-space:nowrap; }
+.sup-stbadge::before{ content:''; width:7px; height:7px; border-radius:50%; background:var(--muted); flex:none; }
+.sup-stbadge--ok::before{ background:var(--ok); }
+.sup-stbadge--pay::before{ background:var(--warn); }
+.sup-stbadge--proc::before{ background:var(--wait); }
+.sup-stbadge--wait::before{ background:var(--wait); }
+.sup-stbadge--draft::before{ background:var(--muted); }
+.sup-sigpills .pill{ padding:6px 11px; }
+/* вариант B — один бледный тон ТОЛЬКО у «нужен разбор» (не радуга) */
+.sup-list.sig-b tbody tr.sup-unread td{ background:color-mix(in srgb,var(--warn) 6%,transparent); }
+/* вариант «Заливка» — как боевая 1С: фон всей строки по состоянию (демонстрация «радуги к вечеру») */
+.sup-list.sig-fill tbody tr.sup-row-new td{ background:color-mix(in srgb,var(--wait) 10%,transparent); }
+.sup-list.sig-fill tbody tr.sup-row-back td{ background:color-mix(in srgb,var(--warn) 13%,transparent); }
+.sup-list.sig-fill tbody tr.sup-row-sla td{ background:color-mix(in srgb,var(--err) 10%,transparent); }
+.sup-list.sig-fill tbody tr.sup-row-done td{ background:color-mix(in srgb,var(--ok) 9%,transparent); }
+/* вложение в чат-пузыре */
+.svm-file{ display:inline-flex; align-items:center; gap:6px; margin-top:7px; padding:5px 9px; border-radius:7px; background:var(--card); border:1px solid var(--line); color:var(--navy); font-size:calc(11.5px*var(--scale)); font-weight:600; cursor:pointer; text-decoration:none; }
+.svm-file svg{ flex:none; } .svm-file span{ color:var(--muted); font-weight:400; }
+.win[data-1ctheme='dark'] .svm-file{ color:var(--blue); }
+.supchat__hint{ margin-top:8px; color:var(--muted); font-size:calc(11.5px*var(--scale)); line-height:1.45; }
+/* счётчик очереди */
+.sup-count{ padding:2px 20px 8px; color:var(--muted); font-size:calc(12.5px*var(--scale)); } .sup-count b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+/* сортируемый заголовок — стрелка вниз/вверх */
+.sorth--desc svg{ transform:rotate(180deg); }
+/* компактная таблица поддержки — мельче шрифт и отступы, чтобы 10-11 колонок влезали без гориз. скролла */
+.sup-list{ font-size:calc(11px*var(--scale)); }
+.sup-list thead th{ padding:7px 8px; font-size:calc(10.5px*var(--scale)); }
+.sup-list tbody td{ padding:6px 8px; }
+.sup-list .sup-num{ gap:5px; }
+.sup-list .sup-topic{ padding:1px 6px; font-size:calc(10.5px*var(--scale)); }
+.sup-list .sup-stbadge{ padding:2px 7px; font-size:calc(10.5px*var(--scale)); gap:5px; }
+.sup-list .sup-stbadge::before{ width:6px; height:6px; }
+.sup-list .sup-ev{ font-size:calc(9px*var(--scale)); padding:1px 5px; margin-left:6px; }
+.sup-list .sup-sla{ font-size:calc(9.5px*var(--scale)); padding:1px 6px; }
+.sup-list .sup-src{ font-size:calc(8.5px*var(--scale)); padding:1px 5px; }
+.sup-list .sup-flag{ width:7px; height:7px; }
+/* компактная шапка/фильтры экрана поддержки — чтобы всё влезало по вертикали */
+.sup-screen .ptitle{ padding-top:10px; padding-bottom:2px; }
+.sup-screen .sup-lead{ padding:7px 12px; }
+.sup-screen .tbar{ padding:6px 20px 8px; gap:7px 12px; }
+.sup-screen .tselect,.sup-screen .tsearch,.sup-screen .sup-multichip{ height:34px; }
+.sup-screen .sup-mine-bar{ padding:6px 12px; margin-bottom:8px; }
+.sup-screen .sup-count{ padding:0 20px 6px; }
+/* SLA-бейдж — считаем только когда мяч у нас; янтарь на «скоро», красный на просрочке */
+.sup-sla{ display:inline-block; margin-left:8px; padding:1px 7px; border-radius:5px; font-size:calc(10.5px*var(--scale)); font-weight:700; font-variant-numeric:tabular-nums; }
+.sup-sla--ok{ background:color-mix(in srgb,var(--ok) 13%,transparent); color:var(--ok); }
+.sup-sla--warn{ background:color-mix(in srgb,var(--warn) 16%,transparent); color:var(--warn); }
+.sup-sla--err{ background:color-mix(in srgb,var(--err) 14%,transparent); color:var(--err); }
+/* карточка заявки — две колонки как в боевой 1С: слева поля+ответ, справа статус+действия */
+.supback{ padding:12px 20px 0; }
+.supback button{ display:inline-flex; align-items:center; gap:7px; background:none; border:none; font:inherit; font-size:calc(13px*var(--scale)); color:var(--navy); font-weight:600; cursor:pointer; padding:0; }
+.win[data-1ctheme='dark'] .supback button{ color:var(--blue); }
+.supcard{ display:grid; grid-template-columns:1fr 296px; gap:18px; padding:12px 20px 6px; align-items:start; }
+@media (max-width:1080px){ .supcard{ grid-template-columns:1fr; } }
+.suphd{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:6px 20px 0; }
+.suphd__t{ font-size:calc(16px*var(--scale)); font-weight:600; color:var(--navy); } .win[data-1ctheme='dark'] .suphd__t{ color:var(--ink); }
+.suphd__sub{ color:var(--muted); font-size:calc(13px*var(--scale)); margin-top:3px; }
+.suphd__task{ text-align:right; flex:none; } .suphd__task b{ font-variant-numeric:tabular-nums; font-size:calc(13px*var(--scale)); }
+.sup-timer{ display:inline-block; margin-top:5px; padding:3px 10px; border-radius:6px; font-size:calc(15px*var(--scale)); font-weight:700; font-variant-numeric:tabular-nums; }
+.sup-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; margin-bottom:12px; }
+.sup-fld{ display:flex; flex-direction:column; gap:4px; } .sup-fld--full{ grid-column:1/-1; }
+.sup-fld label{ font-size:calc(12px*var(--scale)); color:var(--muted); font-weight:600; }
+.sup-fld__v{ min-height:38px; padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:var(--bg); color:var(--ink); font-size:calc(14px*var(--scale)); white-space:pre-wrap; }
+.sup-reply{ margin-top:12px; padding:12px 13px; border-radius:9px; border:1px solid var(--line); }
+.sup-reply--agent{ border-left:3px solid var(--blue); background:color-mix(in srgb,var(--blue) 5%,transparent); }
+.sup-reply--note{ border-left:3px solid var(--warn); background:color-mix(in srgb,var(--warn) 6%,transparent); }
+.sup-reply__h{ display:flex; align-items:center; gap:8px; font-size:calc(12.5px*var(--scale)); font-weight:600; color:var(--ink); margin-bottom:7px; }
+.sup-reply__tag{ font-size:calc(10px*var(--scale)); font-weight:700; padding:1px 6px; border-radius:4px; }
+.sup-reply--agent .sup-reply__tag{ background:color-mix(in srgb,var(--blue) 16%,transparent); color:var(--blue); }
+.sup-reply--note .sup-reply__tag{ background:color-mix(in srgb,var(--warn) 16%,transparent); color:var(--warn); }
+.sup-ta{ width:100%; min-height:60px; padding:9px 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:calc(13.5px*var(--scale)); resize:vertical; }
+.sup-ta:focus{ outline:2px solid var(--navy); outline-offset:1px; }
+.sup-reply__row{ display:flex; justify-content:flex-end; margin-top:8px; }
+.sup-side{ display:flex; flex-direction:column; gap:10px; }
+.sup-side__box{ border:1px solid var(--line); border-radius:9px; padding:13px; }
+.sup-side__h{ font-size:calc(12px*var(--scale)); color:var(--muted); font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:.03em; }
+.sup-actions{ display:flex; flex-direction:column; gap:7px; }
+.sup-actions .btn{ justify-content:flex-start; width:100%; }
+.sup-esc__row{ display:flex; gap:7px; margin-top:8px; }
+.sup-esc__row select{ flex:1; }
+.sup-esc-chip{ display:inline-flex; align-items:center; gap:6px; margin-bottom:8px; padding:3px 9px; border-radius:6px;
+  background:color-mix(in srgb,var(--warn) 13%,transparent); color:var(--warn); font-size:calc(11.5px*var(--scale)); font-weight:600; }
+.sup-links{ display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:2px; }
+.sup-links a{ color:var(--blue); font-size:calc(12.5px*var(--scale)); cursor:pointer; } .sup-links a:hover{ text-decoration:underline; }
+.suptl{ margin:6px 20px 18px; } .suptl h3{ font-size:calc(14px*var(--scale)); color:var(--ink); margin:0 0 8px; padding:0 0 0 0; }
+.supfoot{ display:flex; justify-content:flex-end; gap:10px; padding:4px 20px 24px; }
+/* чат-вопрос: пузыри как в СВ */
+.supchat{ display:flex; flex-direction:column; gap:10px; margin:0 0 12px; padding:13px; border:1px solid var(--line); border-radius:9px; background:var(--bg); max-height:320px; overflow-y:auto; }
+.supchat .svm{ max-width:82%; }
+.supchat__composer{ display:flex; gap:8px; } .supchat__composer input{ flex:1; height:40px; padding:0 12px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); font:inherit; font-size:calc(13.5px*var(--scale)); }
 </style>
 
 <div class="win" id="win" data-1ctheme="light" data-scale="standard">
@@ -540,6 +666,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
       <div class="sec" data-view="finance" onclick="go('finance')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 7a2 2 0 0 1 2-2h11a1 1 0 0 1 1 1v2"/><path d="M4 7v11a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-3"/><path d="M21 10h-4a2 2 0 0 0 0 4h4z"/></svg><span>Мои финансы</span></div>
       <div class="sec" data-view="learning" onclick="go('learning')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 5 2 9.5l10 4.5 10-4.5z"/><path d="M6 11.5V16c0 1.4 2.7 2.4 6 2.4s6-1 6-2.4v-4.5"/><path d="M22 9.8V15"/></svg><span>Обучение</span></div>
       <div class="sec" data-view="messages" onclick="go('messages')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M20.5 11.5a8 8 0 0 1-11.6 7.1L4 20l1.4-4.8A8 8 0 1 1 20.5 11.5z"/></svg><span>Чаты</span><span class="sec__badge">3</span></div>
+      <div class="sec" data-view="support" onclick="supOpen=null;go('support')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 13a7 7 0 0 1 14 0"/><path d="M5 13v2.5a2 2 0 0 0 2 2h.5v-6H7a2 2 0 0 0-2 2z"/><path d="M19 13v2.5a2 2 0 0 1-2 2h-.5v-6h.5a2 2 0 0 1 2 2z"/><path d="M17.5 17.5a3.2 3.2 0 0 1-3.2 3h-2"/></svg><span>Поддержка</span><span class="sec__badge" id="supBadge"></span></div>
       <div class="sections__spacer"></div>
       <div class="sec sec--collapse"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M13 6l-6 6 6 6"/><path d="M18 6v12"/></svg><span>Свернуть</span></div>
     </nav>
@@ -658,29 +785,30 @@ function badge(done){ return done
   : '<span class="badge">Не заполнено</span>'; }
 function otab(el){ var p=el.parentNode; var t=p.querySelectorAll('.otab'); for(var i=0;i<t.length;i++) t[i].classList.remove('otab--active'); el.classList.add('otab--active'); }
 function pill(el){ var t=el.parentNode.querySelectorAll('.pill'); for(var i=0;i<t.length;i++) t[i].classList.remove('pill--active'); el.classList.add('pill--active'); }
+function toggleCustomMM(cb){ var mk=document.getElementById('mmMake'), md=document.getElementById('mmModel'); if(!mk||!md) return;
+  if(cb.checked){ mk.innerHTML='<label>Марка</label><input placeholder="Марка ТС"/>'; md.innerHTML='<label>Модель</label><input placeholder="Модель ТС"/>'; }
+  else{ mk.innerHTML='<label>Марка</label><select><option>Toyota</option><option>Kia</option></select>'; md.innerHTML='<label>Модель</label><select><option>Camry</option><option>Corolla</option></select>'; } }
 function screenOsago(){ return '<div class="screen active" id="osagoScreen">'+osagoForm()+'</div>'; }
 function osagoForm(){
   return '<div class="ptitle">ОСАГО</div>'
-    +'<div class="otabs"><button class="otab otab--active" onclick="otab(this)">Физическое лицо</button><button class="otab" onclick="otab(this);toast(\'Для ЮЛ: ИНН, КПП, ОГРН, оплата по счёту\')">Юридическое лицо</button></div>'
+    +'<div class="otabs"><button class="otab otab--active" onclick="otab(this)">Физическое лицо</button><button class="otab" onclick="otab(this);toast(\'ИП: как физлицо + ОГРНИП и расчётный счёт\')">Физическое лицо ИП</button><button class="otab" onclick="otab(this);toast(\'Для ЮЛ: ИНН, КПП, ОГРН, оплата по счёту\')">Юридическое лицо</button></div>'
     /* Транспортное средство */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Транспортное средство '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox"/> С прицепом</label></div>'
       +'<div class="osearch"><span class="osearch__lbl">Поиск по</span>'
       +'<div class="pills"><button class="pill pill--active">Гос.номер</button><button class="pill">VIN</button><button class="pill">Кузов</button></div>'
       +'<input value="Т432ЕК124" /><button class="btn btn--sm" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
-      +'<label class="ocheck" style="margin-left:auto"><input type="checkbox"/> Произвольная марка/модель</label></div>'
+      +'<label class="sw" style="margin-left:auto"><input type="checkbox" onchange="toggleCustomMM(this)"/><span class="sw__t"><span class="sw__k"></span></span>Произвольная марка/модель</label></div>'
       +'<div class="orow">'
         +'<div class="of of--narrow"><label>Гос.знак</label><input value="Т432ЕК124"/></div>'
         +'<label class="ocheck"><input type="checkbox"/> Без номера</label>'
         +'<div class="of of--small"><label>Категория</label><select><option>B — легковые</option><option>C — грузовые</option><option>D — автобусы</option></select></div>'
-        +'<div class="of of--small"><label>Марка</label><select><option>Toyota</option><option>Kia</option></select></div>'
-        +'<div class="of of--small"><label>Модель</label><select><option>Camry</option><option>Corolla</option></select></div>'
+        +'<div class="of of--small" id="mmMake"><label>Марка</label><select><option>Toyota</option><option>Kia</option></select></div>'
+        +'<div class="of of--small" id="mmModel"><label>Модель</label><select><option>Camry</option><option>Corolla</option></select></div>'
         +'<div class="of of--narrow"><label>Год выпуска</label><input value="2021"/></div>'
         +'<div class="of of--narrow"><label>Мощность (л.с.)</label><input value="181"/></div>'
       +'</div>'
       +'<div class="orow" style="margin-top:12px">'
-        +'<div class="of of--grow"><label>Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input style="flex:1;min-width:220px" value="XW7BK4FK90S123456"/></div></div>'
-      +'</div>'
-      +'<div class="orow" style="margin-top:12px">'
+        +'<div class="of"><label>Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input style="width:200px" value="XW7BK4FK90S123456"/></div></div>'
         +'<div class="of"><label>Документ ТС</label><div class="pills"><button class="pill pill--active" onclick="pill(this)">СТС</button><button class="pill" onclick="pill(this)">ПТС</button><button class="pill" onclick="pill(this)">ЭПТС</button></div></div>'
         +'<div class="of of--small"><label>Серия и номер</label><input value="99 23 456789"/></div>'
         +'<div class="of of--narrow"><label>Дата выдачи</label><input value="15.05.2022"/></div>'
@@ -1044,8 +1172,352 @@ function screenProfile(){
 function ptab(el,idx){ var t=el.parentNode.children; for(var i=0;i<t.length;i++) t[i].classList.remove('ptab--active'); el.classList.add('ptab--active'); document.querySelectorAll('.ptab-body').forEach(function(b,i){ b.classList.toggle('active',i===idx); }); }
 function screenStub(title,desc){ return '<div class="screen active"><div class="ptitle">'+title+'</div><div class="stub"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg><b>'+title+'</b><span>'+desc+'</span><button class="btn" onclick="go(\'clients\')">К клиентам</button></div></div>'; }
 
+/* ===== Рабочее место поддержки — очередь заявок 1С + вопросы чата ===== */
+/* Один экран оператора. Ось «чей мяч» (У нас / У агента / У страховой), SLA капает ТОЛЬКО пока мяч у нас.
+   Заявки 1С и вопросы из чата — одна очередь. Логика взята из боевой 1С: «Мои заявки» + карточка заявки + ход дела.
+   Два раздельных поля ответа: агенту (видит) и заметка для своих (не видит). Эскалация во 2-ю линию — по теме, скрытая кухня. */
+var SUP_BALL={us:'У нас',agent:'У агента',insurer:'У страховой',done:'Завершено'};
+var SUP_TOPICS=['Расчёт тарифа','Скоринг / андеррайтинг','Пул / Автопомощник','Технический сбой'];
+var SUP=[
+  /* --- мяч у нас: наш ход, SLA идёт --- */
+  {id:'000015168',src:'1c',ball:'us',vid:'Урегулирование убытка',st:'Новая',sla:38,fresh:true,
+    num:'ТТТ 7097162132',holder:'ООО «Губернский Хлеб»',obj:'ВАЗ (LADA) Granta · У432ХК124',region:'Красноярский',agent:'Романова Евгения Павловна',sk:'Ренессанс',type:'Простая',
+    what:'Заявлен убыток по ОСАГО — столкновение на парковке. Нужна проверка покрытия и запрос справки о ДТП.',ac:'Клиент приложил фото повреждений и извещение о ДТП.',
+    steps:[{d:'21.08 09:40',s:'Новая',c:'Заявка поступила из кабинета агента.'}]},
+  {id:'000015153',src:'1c',ball:'us',vid:'Внесение изменений',st:'В работе',sla:95,back:true,
+    num:'ХХХ 0615772845',holder:'Цыбизов Александр Олегович',obj:'ВАЗ (LADA) 2112 · М224ЕЕ138',region:'Иркутская',agent:'Тетерина Галина Александровна',sk:'Зетта',type:'Сложная',
+    what:'Смена собственника ТС. Приложить новый полис и ссылку на доплату.',ac:'Агент приложил новый ПТС и паспорт собственника — можно продолжать оформление.',
+    steps:[{d:'21.08 08:52',s:'Новая',c:'Смена собственника ТС.'},{d:'21.08 08:52',s:'В работе',c:'Ваша заявка принята в работу.'},{d:'21.08 08:53',s:'В работе',c:'Средний срок обработки заявки — 1 рабочий день.'},{d:'21.08 11:04',s:'В работе',c:'Агент ответил: приложил новый ПТС и паспорт собственника.'}]},
+  {id:'000015147',src:'1c',ball:'us',vid:'Урегулирование убытка',st:'На расчёте',sla:-25,
+    num:'ХХХ 0645884590',holder:'Клеттер Сергей Карлович',obj:'ВАЗ 212140 · В858ТК124',region:'Новосибирская',agent:'Попова Ирина Валерьевна',sk:'Согласие',type:'Сложная',
+    what:'Расчёт суммы выплаты по повреждениям. Ждёт заключение оценщика.',ac:'Оценщик выехал 20.08, заключение обещали к утру 21.08.',
+    steps:[{d:'20.08 14:10',s:'Новая',c:'Убыток заявлен.'},{d:'20.08 15:30',s:'На расчёте',c:'Передано оценщику.'}]},
+  {id:'chat-1',src:'chat',ball:'us',vid:'Вопрос в чате',st:'Новый вопрос',sla:12,fresh:true,topic:'Расчёт',objref:'Toyota Camry · Т432ЕК124',
+    num:'—',holder:'Филь Виктория Викторовна',obj:'ОСАГО · Toyota Camry Т432ЕК124',region:'Красноярский',agent:'Филь Виктория Викторовна',sk:'—',
+    chat:[{i:1,t:'Здравствуйте! Не проходит расчёт ОСАГО по Toyota Camry, госномер Т432ЕК124 — пишет «ошибка КБМ». Помогите, пожалуйста.',w:'Агент · 11:02'}]},
+  /* --- мяч у агента --- */
+  {id:'000015119',src:'1c',ball:'agent',vid:'Внесение изменений',st:'Ждём оплату',sla:0,
+    num:'ХХХ 0686405828',holder:'Гашникова Елена Леонидовна',obj:'Mitsubishi Lancer · К574ОК124',region:'Челябинская',agent:'Быкова Ирина Владимировна',sk:'Ингосстрах',type:'Простая',
+    what:'Добавление второго водителя. Выставлена доплата 789,77 ₽.',ac:'Ссылка на оплату отправлена агенту 21.08 10:08.',
+    steps:[{d:'20.08 12:00',s:'Новая',c:'Добавление водителя.'},{d:'21.08 10:08',s:'Ждём оплату',c:'Оплатите 789,77 ₽ — ссылка направлена.'}]},
+  {id:'000015104',src:'1c',ball:'agent',vid:'Урегулирование убытка',st:'Ждём документы',sla:0,
+    num:'ХХХ 0558622744',holder:'Побежимов Дмитрий Валерьевич',obj:'Toyota Corolla · Т735ХС38',region:'Иркутская',agent:'Охремчук Татьяна Ивановна',sk:'Росгосстрах',type:'Сложная',
+    what:'Урегулирование убытка. Запрошены недостающие документы у агента.',ac:'Запрошены: банковские реквизиты и постановление ГИБДД.',
+    steps:[{d:'19.08 10:00',s:'Новая',c:'Убыток заявлен.'},{d:'20.08 16:20',s:'Ждём документы',c:'Запрошены реквизиты и постановление ГИБДД.'}]},
+  {id:'chat-2',src:'chat',ball:'agent',vid:'Вопрос в чате',st:'Ждём ответ агента',sla:0,topic:'Пролонгация',objref:'НС «Спорт»',
+    num:'РРР-40571908',holder:'Зверева Наталья Сергеевна (агент)',obj:'Пролонгация НС «Спорт»',region:'Приморский',agent:'Зверева Наталья Сергеевна',sk:'Югория',
+    chat:[{i:1,t:'Подскажите, продлевается ли НС «Спорт» по прошлогодним условиям?',w:'Агент · вчера'},{o:1,t:'Да, условия сохраняются. Пришлите, пожалуйста, паспортные данные застрахованного для пролонгации.',w:'Поддержка · вчера'}]},
+  /* --- мяч у страховой --- */
+  {id:'000015010',src:'1c',ball:'insurer',vid:'Оформление ОСАГО ЮЛ',st:'Передана в СК',sla:0,
+    num:'—',holder:'ООО «Запад»',obj:'Toyota Land Cruiser 200 · О777ОО154',region:'Тыва',agent:'Романова Евгения Павловна',sk:'СОГАЗ',type:'Сложная',
+    what:'Оформление ОСАГО на юрлицо, автопарк. Заявка передана андеррайтеру СК.',ac:'Ждём согласование тарифа от андеррайтера СОГАЗ.',
+    steps:[{d:'19.08 09:00',s:'Новая',c:'Оформление ОСАГО ЮЛ.'},{d:'19.08 11:30',s:'Передана в СК',c:'Направлено андеррайтеру СОГАЗ.'}]},
+  {id:'000014974',src:'1c',ball:'insurer',vid:'Расторжение договора',st:'В СК на расчёте',sla:0,
+    num:'09/26-П04(7-2)А',holder:'Никулин Руслан Анатольевич',obj:'Toyota Corolla · Р231СЕ154',region:'Новосибирская',agent:'Тупицына Ольга Игоревна',sk:'Югория',type:'Сложная',
+    what:'Расторжение договора с расчётом возврата части премии.',ac:'СК рассчитывает сумму возврата.',
+    steps:[{d:'18.08 13:00',s:'Новая',c:'Заявление на расторжение.'},{d:'18.08 14:20',s:'В СК на расчёте',c:'Передано в СК для расчёта возврата.'}]},
+  /* --- завершено --- */
+  {id:'000015036',src:'1c',ball:'done',vid:'Урегулирование убытка',st:'Убыток урегулирован',sla:0,
+    num:'ХХХ 0579205802',holder:'Безруких Анастасия Андреевна',obj:'Skoda Yeti · А268ТУ124',region:'Красноярский',agent:'Полушина Наталья Викторовна',sk:'Ренессанс',type:'Сложная',
+    what:'Убыток урегулирован, выплата перечислена.',ac:'Выплата 62 400 ₽ перечислена 20.08.',
+    steps:[{d:'15.08 10:00',s:'Новая',c:'Убыток заявлен.'},{d:'20.08 12:00',s:'Убыток урегулирован',c:'Выплата 62 400 ₽ перечислена.'}]},
+  {id:'000014891',src:'1c',ball:'done',vid:'Оформление ОСАГО ЮЛ',st:'Полис оформлен',sla:0,
+    num:'ХХХ 0699120043',holder:'ООО «Комета»',obj:'Isuzu Elf · Р308МУ154',region:'Новосибирская',agent:'Ковалёв Виктор Сергеевич',sk:'Евроинс',type:'Сложная',
+    what:'ОСАГО ЮЛ оформлен, полис выпущен.',ac:'Полис направлен агенту.',
+    steps:[{d:'17.08 09:00',s:'Новая',c:'Оформление ОСАГО ЮЛ.'},{d:'17.08 16:00',s:'Полис оформлен',c:'Полис выпущен и направлен агенту.'}]},
+  {id:'chat-3',src:'chat',ball:'done',vid:'Вопрос в чате',st:'Отвечено',sla:0,topic:'КБМ',
+    num:'—',holder:'Богданов Геннадий Иванович (агент)',obj:'Вопрос по КБМ',region:'Красноярский',agent:'Богданов Геннадий Иванович',sk:'—',
+    chat:[{i:1,t:'Где посмотреть КБМ клиента перед расчётом?',w:'Агент · 2 дн'},{o:1,t:'КБМ подтягивается автоматически из НСИС при расчёте ОСАГО — отдельно проверять не нужно. Если значение спорное, напишите нам, запросим сверку.',w:'Поддержка · 2 дн'}]},
+  /* ===== доп. примеры (чтобы очередь была плотной как в боевой) ===== */
+  /* --- ещё у нас --- */
+  {id:'000015181',src:'1c',ball:'us',vid:'Оформление ОСАГО ФЛ',st:'Новая',sla:55,fresh:true,
+    num:'—',holder:'Пименова Ольга Сергеевна',obj:'Kia Rio · Н321ОР124',region:'Красноярский',agent:'Гимальтдинова Алия Ринатовна',sk:'Тинькофф Страхование',type:'Простая',
+    what:'Новый расчёт ОСАГО ФЛ, клиент выбрал СК — выпустить полис и выставить счёт.',ac:'Клиент подтвердил данные, ждёт ссылку на оплату.',
+    steps:[{d:'21.08 10:30',s:'Новая',c:'Заявка на оформление ОСАГО ФЛ.'}]},
+  {id:'000015176',src:'1c',ball:'us',vid:'Внесение изменений',st:'В работе',sla:20,back:true,
+    num:'ХХХ 0662140077',holder:'Сафонов Игорь Петрович',obj:'Hyundai Solaris · Т905ВК124',region:'Красноярский',agent:'Гусарова Елена Сергеевна',sk:'Ренессанс',type:'Сложная',
+    what:'Изменение адреса собственника.',ac:'Агент приложил скан прописки — можно вносить изменение.',
+    steps:[{d:'21.08 09:10',s:'Новая',c:'Изменение адреса собственника.'},{d:'21.08 11:15',s:'В работе',c:'Агент ответил: приложил скан прописки.'}]},
+  {id:'000015159',src:'1c',ball:'us',vid:'Урегулирование убытка',st:'На расчёте',sla:150,
+    num:'ХХХ 0641239855',holder:'Мельникова Дарья Олеговна',obj:'Renault Duster · О412ХН124',region:'Иркутская',agent:'Тетерина Галина Александровна',sk:'Согласие',type:'Сложная',
+    what:'Расчёт выплаты по факту ДТП.',ac:'Ждём заключение оценщика.',
+    steps:[{d:'21.08 08:00',s:'Новая',c:'Убыток заявлен.'},{d:'21.08 09:20',s:'На расчёте',c:'Передано в расчёт.'}]},
+  {id:'chat-4',src:'chat',ball:'us',vid:'Вопрос в чате',st:'Новый вопрос',sla:8,fresh:true,topic:'Оплата и КВ',
+    num:'—',holder:'Гусарова Елена Сергеевна (агент)',obj:'—',region:'Иркутская',agent:'Гусарова Елена Сергеевна',sk:'—',
+    chat:[{i:1,t:'Здравствуйте! Когда придёт комиссия за август? В прошлом месяце было 5-го.',w:'Агент · 11:40'}]},
+  /* --- ещё у агента --- */
+  {id:'000015130',src:'1c',ball:'agent',vid:'Оформление ОСАГО ЮЛ',st:'Ждём оплату',sla:0,
+    num:'—',holder:'ООО «СтройГарант»',obj:'MAN TGS · Н556ОР138',region:'Иркутская',agent:'Зайцева Наталья Петровна',sk:'СОГАЗ',type:'Сложная',
+    what:'ОСАГО ЮЛ на грузовик, выставлен счёт.',ac:'Счёт направлен агенту, ждём оплату.',
+    steps:[{d:'20.08 15:00',s:'Новая',c:'Оформление ОСАГО ЮЛ.'},{d:'21.08 09:00',s:'Ждём оплату',c:'Счёт направлен агенту.'}]},
+  {id:'chat-5',src:'chat',ball:'agent',vid:'Вопрос в чате',st:'Ждём ответ агента',sla:0,topic:'Оформление',objref:'LADA Vesta',
+    num:'—',holder:'Зайцева Наталья Петровна (агент)',obj:'—',region:'Иркутская',agent:'Зайцева Наталья Петровна',sk:'—',
+    chat:[{i:1,t:'Клиент оплатил, но полиса нет в кабинете. Прикладываю чек.',att:'Чек_оплаты.pdf',atype:'PDF · 180 КБ',w:'Агент · вчера'},{o:1,t:'Проверяю оплату. Пришлите, пожалуйста, номер расчёта.',w:'Поддержка · вчера'}]},
+  {id:'000015098',src:'1c',ball:'agent',vid:'Расторжение договора',st:'Ждём документы',sla:0,
+    num:'ХХХ 0599871234',holder:'Кузьмин Артём Владимирович',obj:'Toyota RAV4 · К221ЕВ124',region:'Красноярский',agent:'Полушина Наталья Викторовна',sk:'Ренессанс',type:'Сложная',
+    what:'Расторжение с возвратом части премии.',ac:'Запрошено заявление и банковские реквизиты.',
+    steps:[{d:'19.08 11:00',s:'Новая',c:'Заявление на расторжение.'},{d:'20.08 10:00',s:'Ждём документы',c:'Запрошены реквизиты.'}]},
+  /* --- ещё у страховой --- */
+  {id:'000015061',src:'1c',ball:'insurer',vid:'Оформление ОСАГО ЮЛ',st:'Передана в СК',sla:0,
+    num:'—',holder:'ООО «АгроТранс»',obj:'КАМАЗ 5490 · Т784ХК138',region:'Иркутская',agent:'Зайцева Наталья Петровна',sk:'Ингосстрах',type:'Сложная',
+    what:'ОСАГО ЮЛ автопарк — у андеррайтера СК.',ac:'Ждём тариф от Ингосстраха.',
+    steps:[{d:'20.08 09:00',s:'Новая',c:'Оформление.'},{d:'20.08 12:00',s:'Передана в СК',c:'Направлено андеррайтеру.'}]},
+  {id:'000014990',src:'1c',ball:'insurer',vid:'Урегулирование убытка',st:'В СК на расчёте',sla:0,
+    num:'ХХХ 0587234109',holder:'Богданова Ирина Сергеевна',obj:'Nissan X-Trail · О908ТМ124',region:'Красноярский',agent:'Гусарова Елена Сергеевна',sk:'Югория',type:'Сложная',
+    what:'Расчёт выплаты в СК.',ac:'СК проводит экспертизу повреждений.',
+    steps:[{d:'18.08 10:00',s:'Новая',c:'Убыток заявлен.'},{d:'18.08 16:00',s:'В СК на расчёте',c:'Экспертиза в СК.'}]},
+  /* --- ещё завершено --- */
+  {id:'000015020',src:'1c',ball:'done',vid:'Внесение изменений',st:'Изменения внесены',sla:0,
+    num:'ХХХ 0571239088',holder:'Лаптев Сергей Иванович',obj:'Skoda Octavia · Р334ХМ124',region:'Новосибирская',agent:'Попова Ирина Валерьевна',sk:'Зетта',type:'Простая',
+    what:'Добавление второго водителя.',ac:'Изменения внесены, полис обновлён.',
+    steps:[{d:'16.08 10:00',s:'Новая',c:'Добавление водителя.'},{d:'17.08 12:00',s:'Изменения внесены',c:'Полис обновлён.'}]},
+  {id:'chat-6',src:'chat',ball:'done',vid:'Вопрос в чате',st:'Отвечено',sla:0,topic:'Технический',
+    num:'—',holder:'Овчинникова Тамара Ивановна (агент)',obj:'—',region:'Иркутская',agent:'Овчинникова Тамара Ивановна',sk:'—',
+    chat:[{i:1,t:'Не грузится кабинет — белый экран после входа.',w:'Агент · 2 дн'},{o:1,t:'Очистите кэш браузера (Ctrl+Shift+Del) и войдите через Edge. Если повторится — пришлите скриншот, передадим в техподдержку.',w:'Поддержка · 2 дн'}]},
+  {id:'000014950',src:'1c',ball:'done',vid:'Оформление ОСАГО ФЛ',st:'Полис оформлен',sla:0,
+    num:'ХХХ 0566120783',holder:'Тимофеев Роман Андреевич',obj:'Volkswagen Polo · Н778ОК124',region:'Красноярский',agent:'Гимальтдинова Алия Ринатовна',sk:'Тинькофф Страхование',type:'Простая',
+    what:'ОСАГО ФЛ оформлен, полис выпущен.',ac:'Полис направлен агенту.',
+    steps:[{d:'15.08 10:00',s:'Новая',c:'Оформление ОСАГО ФЛ.'},{d:'15.08 14:00',s:'Полис оформлен',c:'Направлен агенту.'}]}
+];
+/* Дата + Ответственный (оператор поддержки) — колонки боевой «Мои заявки». Кладём метой, чтобы не трогать массив. */
+var SUP_META={
+  '000015168':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
+  '000015153':{date:'21.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015147':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
+  'chat-1':{date:'21.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015119':{date:'20.08.2026',resp:'Денисова Анна Викторовна'},
+  '000015104':{date:'19.08.2026',resp:'Рязанцева Елена Павловна'},
+  'chat-2':{date:'20.08.2026',resp:'Денисова Анна Викторовна'},
+  '000015010':{date:'19.08.2026',resp:'Уланова Татьяна Борисовна'},
+  '000014974':{date:'18.08.2026',resp:'Уланова Татьяна Борисовна'},
+  '000015036':{date:'15.08.2026',resp:'Рязанцева Елена Павловна'},
+  '000014891':{date:'17.08.2026',resp:'Уланова Татьяна Борисовна'},
+  'chat-3':{date:'19.08.2026',resp:'Денисова Анна Викторовна'},
+  '000015181':{date:'21.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015176':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
+  '000015159':{date:'21.08.2026',resp:'Денисова Анна Викторовна'},
+  'chat-4':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
+  '000015130':{date:'20.08.2026',resp:'Уланова Татьяна Борисовна'},
+  'chat-5':{date:'20.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015098':{date:'19.08.2026',resp:'Рязанцева Елена Павловна'},
+  '000015061':{date:'20.08.2026',resp:'Уланова Татьяна Борисовна'},
+  '000014990':{date:'18.08.2026',resp:'Рязанцева Елена Павловна'},
+  '000015020':{date:'17.08.2026',resp:'Кулагина Мария Сергеевна'},
+  'chat-6':{date:'19.08.2026',resp:'Денисова Анна Викторовна'},
+  '000014950':{date:'15.08.2026',resp:'Мартынова Ольга Ивановна'}
+};
+SUP.forEach(function(it){ var m=SUP_META[it.id]; if(m){ it.date=m.date; it.resp=m.resp; } });
+var supOpen=null, supTab='us', supSrc='all', supSK='all', supVid='all', supRowSig='a';
+var supSort={key:'date',dir:'desc'};
+function supFind(id){ for(var i=0;i<SUP.length;i++){ if(SUP[i].id===id) return SUP[i]; } return null; }
+/* Сигнал строки: точка «нужен разбор» (new/back), состояние строки для тона/заливки в вариантах B/«Заливка». */
+function supDot(it){ return it.back?'back':(it.fresh?'new':'none'); }
+function supRowState(it){ if(it.ball==='us'&&it.sla<0) return 'sla'; if(it.back) return 'back'; if(it.fresh) return 'new'; if(it.ball==='done') return 'done'; return ''; }
+/* Сортировка динамического списка 1С — клик по заголовку колонки (Дата / Номер заявки). */
+function supDateNum(d){ if(!d) return 0; var p=d.split('.'); return p.length===3? parseInt(p[2]+p[1]+p[0],10):0; }
+function supSetSort(k){ if(supSort.key===k){ supSort.dir = supSort.dir==='asc'?'desc':'asc'; } else { supSort.key=k; supSort.dir = k==='date'?'desc':'asc'; } supRerender(); }
+function supSortItems(items){ items.sort(function(a,b){ var av,bv;
+  if(supSort.key==='date'){ av=supDateNum(a.date); bv=supDateNum(b.date); } else { av=a.id; bv=b.id; }
+  var r = av<bv?-1:(av>bv?1:0); return supSort.dir==='desc'?-r:r; }); return items; }
+function supSortTh(key,label){ var active=supSort.key===key; var dir=active&&supSort.dir==='desc'?' sorth--desc':'';
+  return '<th><button class="sorth'+(active?' sorth--active':'')+dir+'" onclick="supSetSort(\''+key+'\')">'+label+' <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7.5 6 4l3 3.5"/></svg></button></th>'; }
+/* Прикрепить документ в чат-переписку — оператор отправляет файл агенту. */
+function supChatAttach(id){ var it=supFind(id); var inp=document.getElementById('supChatInput');
+  var txt = inp&&inp.value.trim() ? inp.value.trim() : 'Направляю документ по вашему вопросу.';
+  (it.chat=it.chat||[]).push({o:1,t:txt,att:'Памятка — '+(it.topic||'поддержка')+'.pdf',atype:'PDF · 240 КБ',w:'Поддержка · сейчас'});
+  if(inp) inp.value=''; toast('Документ прикреплён и отправлен агенту'); supRerender(); }
+function supPill(it){ if(it.ball==='done') return {cls:'ok',label:it.st}; if(it.ball==='us') return {cls:'pay',label:it.st}; if(it.ball==='insurer') return {cls:'proc',label:it.st}; return {cls:'draft',label:it.st}; }
+function supFmt(m){ var h=Math.floor(m/60), mm=m%60; return (h?h+' ч ':'')+mm+' мин'; }
+function supSla(it,big){ if(it.ball!=='us') return ''; var m=it.sla, cls, txt; if(m<0){ cls='err'; txt='Просрочено на '+supFmt(-m); } else if(m<=30){ cls='warn'; txt='SLA '+supFmt(m); } else { cls='ok'; txt='SLA '+supFmt(m); }
+  return '<span class="sup-sla sup-sla--'+cls+'"'+(big?' style="font-size:calc(15px*var(--scale));padding:3px 11px;margin:0"':'')+'>'+txt+'</span>'; }
+function supSrcChip(it){ return it.src==='chat' ? '<span class="sup-src sup-src--chat">Чат</span>' : '<span class="sup-src sup-src--1c">1С</span>'; }
+function supPass(it){ return (supSrc==='all'||it.src===supSrc) && (supSK==='all'||it.sk===supSK); }
+function supCount(ball){ return SUP.filter(function(it){ return it.ball===ball && supPass(it); }).length; }
+function supEmpty(){ if(supTab==='us') return 'Мяч сейчас не у нас — новых задач по фильтру нет.'; if(supTab==='agent') return 'Нет заявок, где мяч у агента.'; if(supTab==='insurer') return 'Нет заявок на стороне страховой.'; return 'Завершённых по фильтру нет.'; }
+function supWarnIco(){ return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.51"/></svg>'; }
+function screenSupport(){ return '<div class="screen active sup-screen">'+(supOpen?supDetail(supOpen):supQueue())+'</div>'; }
+function supRerender(){ var w=document.getElementById('workscreen'); if(w) w.innerHTML=screenSupport(); }
+/* Статус заявки — цвет по ФАЗЕ (их модель статусов), не по мячу: синий=в работе, янтарь=ждём оплату/док, зелёный=готово. */
+function supStTone(it){ if(it.ball==='done') return 'ok'; var s=it.st;
+  if(s==='Ожидаем оплату'||s==='Ждём оплату'||s==='Ждём документы') return 'pay';
+  if(s==='Отложена') return 'draft';
+  if(s.indexOf('Новы')===0) return 'wait';
+  return 'proc'; }
+function supQueue(){
+  var tabs=[['us','У нас'],['agent','У агента'],['insurer','У страховой'],['done','Завершено']];
+  var tbar=tabs.map(function(t){ var n=supCount(t[0]); return '<button class="chattab'+(supTab===t[0]?' chattab--active':'')+'" onclick="supSetTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="svtab__b">'+n+'</span>':'')+'</button>'; }).join('');
+  var items=supSortItems(SUP.filter(function(it){ return it.ball===supTab && supPass(it) && (supVid==='all'||it.vid===supVid); }));
+  var total=items.length;
+  var showSla = supTab==='us';
+  var rows=items.map(function(it){
+    var isChat=it.src==='chat';
+    /* Вопрос: ТЕМА-чип (не «объект»); заявка: вид как есть */
+    var vidCell = isChat ? 'Вопрос'+(it.topic?' · <span class="sup-topic">#'+it.topic+'</span>':'') : it.vid;
+    /* Объект: у заявки — объект; у вопроса — упомянутый объект ИЛИ честное «—» (у общего вопроса объекта нет) */
+    var objCell = isChat ? (it.objref? it.objref : '<span class="empty-cell">—</span>') : it.obj;
+    /* Страхователь: у вопроса клиента нет (агент — в своей колонке) */
+    var holderCell = isChat ? '<span class="empty-cell">—</span>' : '<b>'+it.holder+'</b>';
+    var ev = it.back ? '<span class="sup-ev sup-ev--back">↩ ответ агента</span>' : '';
+    var trcls='click'+((it.fresh||it.back)?' sup-unread':'')+(supRowState(it)?' sup-row-'+supRowState(it):'');
+    return '<tr class="'+trcls+'" onclick="supSelect(\''+it.id+'\')">'
+      +'<td><span class="sup-num"><span class="sup-flag sup-flag--'+supDot(it)+'"></span>'+supSrcChip(it)+it.id+'</span>'+ev+'</td>'
+      +'<td>'+(it.date||'—')+'</td>'
+      +'<td>'+vidCell+'</td>'
+      +'<td>'+(it.num==='—'?'<span class="empty-cell">—</span>':'<span class="polnum">'+it.num+'</span>')+'</td>'
+      +'<td>'+holderCell+'</td>'
+      +'<td>'+objCell+'</td>'
+      +'<td>'+(it.region||'—')+'</td>'
+      +'<td>'+it.agent+'</td>'
+      +'<td>'+(it.resp||'<span class="empty-cell">—</span>')+'</td>'
+      +'<td class="sup-stcell"><span class="sup-stbadge sup-stbadge--'+supStTone(it)+'">'+it.st+'</span>'+supSla(it)+'</td>'
+      +'</tr>';
+  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:26px">'+supEmpty()+'</td></tr>';
+  var sks={}, vids={}, resps={}, regions={};
+  SUP.forEach(function(it){ if(it.sk&&it.sk!=='—') sks[it.sk]=1; vids[it.vid]=1; if(it.resp) resps[it.resp]=1; if(it.region) regions[it.region]=1; });
+  var skOpts='<option value="all">Все СК</option>'+Object.keys(sks).map(function(s){ return '<option'+(supSK===s?' selected':'')+'>'+s+'</option>'; }).join('');
+  var vidOpts='<option value="all">Все виды заявок</option>'+Object.keys(vids).map(function(s){ return '<option'+(supVid===s?' selected':'')+'>'+s+'</option>'; }).join('');
+  var respOpts='<option>Все ответственные</option>'+Object.keys(resps).map(function(s){ return '<option>'+s+'</option>'; }).join('');
+  var regOpts='<option>Все регионы</option>'+Object.keys(regions).map(function(s){ return '<option>'+s+'</option>'; }).join('');
+  var searchIco='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+  return '<div class="ptitle">Поддержка — Мои заявки</div>'
+    +'<div class="sup-lead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8.01"/></svg><span>Та же таблица заявок и фильтры, что в 1С «Мои заявки» — привычно для оператора. <b>Добавлено сверху</b> (пунктирная зона): разбор «чей мяч» вкладками, SLA (когда мяч у нас) и вопросы из чата в общей очереди (чип «Чат»).</span></div>'
+    /* --- фильтр-бар как в боевой «Мои заявки» (преемственность) --- */
+    +'<div class="tbar">'
+      +'<div class="tfield tfield--search"><label>Поиск</label><div class="tsearch">'+searchIco+'<input placeholder="Ctrl+F — № заявки, договор, страхователь"/></div></div>'
+      +'<div class="tfield"><label>&nbsp;</label><button class="btn btn--primary" onclick="toast(\'Поиск по заявкам\')">Поиск</button></div>'
+      +'<div class="tfield"><label>Период</label><select class="tselect"><option>Этот месяц</option><option>Сегодня</option><option>Этот квартал</option><option>Этот год</option><option>Всё время</option></select></div>'
+      +'<div class="tfield"><label>Вид заявки</label><select class="tselect" onchange="supVid=this.value;supRerender()">'+vidOpts+'</select></div>'
+      +'<div class="tfield"><label>Задачи</label><select class="tselect"><option>Все задачи</option><option>Простые</option><option>Сложные</option></select></div>'
+      +'<div class="tfield"><label>Статусы</label><span class="sup-multichip">+20<button class="sup-multichip__x" title="Сбросить" onclick="toast(\'Фильтр по статусам (мультивыбор)\')">×</button></span></div>'
+      +'<div class="tfield"><label>Ответственные</label><select class="tselect">'+respOpts+'</select></div>'
+      +'<div class="tfield"><label>Страховая компания</label><select class="tselect" onchange="supSK=this.value;supRerender()">'+skOpts+'</select></div>'
+      +'<div class="tfield"><label>Регион</label><select class="tselect">'+regOpts+'</select></div>'
+    +'</div>'
+    +'<div class="sup-frow2"><a class="sup-flink" onclick="toast(\'Аналитика по заявкам поддержки\')">Посмотреть аналитику</a>'
+      +'<label class="tcheck" style="margin:0"><input type="checkbox"/> API</label>'
+      +'<label class="tcheck" style="margin:0"><input type="checkbox"/> Скрыть готовые</label></div>'
+    /* --- надстройка Agent Academy: чей мяч + источник + SLA --- */
+    +'<div class="sup-mine-bar"><span class="sup-mine-cap">Разбор — чей мяч:</span><div class="chattabs sup-tabs">'+tbar+'</div>'
+      +'<span class="sup-mine-cap" style="margin-left:6px">Источник:</span><select class="tselect sup-select--sm" onchange="supSrc=this.value;supRerender();supUpdateBadge()"><option value="all"'+(supSrc==='all'?' selected':'')+'>Все</option><option value="1c"'+(supSrc==='1c'?' selected':'')+'>Заявки 1С</option><option value="chat"'+(supSrc==='chat'?' selected':'')+'>Вопросы чата</option></select>'
+      +'<span class="sup-mine-cap" style="margin-left:6px" title="Как показывать состояние строки (неразобрана / вернулась обратная связь). Сравнение: маркеры vs заливка как в боевой 1С.">Сигнал строки:</span>'
+      +'<div class="pills sup-sigpills">'
+        +'<button class="pill'+(supRowSig==='a'?' pill--active':'')+'" onclick="supRowSig=\'a\';supRerender()">Маркеры</button>'
+        +'<button class="pill'+(supRowSig==='b'?' pill--active':'')+'" onclick="supRowSig=\'b\';supRerender()">+ тон</button>'
+        +'<button class="pill'+(supRowSig==='fill'?' pill--active':'')+'" onclick="supRowSig=\'fill\';supRerender()">Заливка (1С)</button>'
+      +'</div></div>'
+    +'<div class="sup-count">В очереди: <b>'+total+'</b> '+supPlural(total)+' · вкладка «'+SUP_BALL[supTab]+'»</div>'
+    +'<div class="list-wrap sup-listwrap" style="margin-top:0"><div class="list-scroll"><table class="list sup-list sig-'+supRowSig+'">'
+    +'<thead><tr>'+supSortTh('id','Номер заявки')+supSortTh('date','Дата')+'<th>Вид заявки</th><th>Номер договора</th><th>Страхователь</th><th>Объект страхования</th><th>Регион</th><th>Агент</th><th>Ответственный</th><th>Статус заявки · SLA</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div></div>';
+}
+/* «заявка/заявки/заявок» по числу */
+function supPlural(n){ var n10=n%10, n100=n%100; if(n10===1&&n100!==11) return 'заявка'; if(n10>=2&&n10<=4&&(n100<10||n100>=20)) return 'заявки'; return 'заявок'; }
+function supKind(it){ return (it.objref||it.num!=='—') ? 'Вопрос по объекту' : 'Общий вопрос'; }
+function supSubLine(it){
+  if(it.src==='chat'){
+    var parts=[];
+    if(it.topic) parts.push('<span class="sup-topic">#'+it.topic+'</span>');
+    if(it.objref) parts.push(it.objref);
+    if(it.num!=='—') parts.push(it.num);
+    if(!it.objref && it.num==='—') parts.push('общий вопрос, без договора');
+    return supSrcChip(it)+' '+parts.join(' · ');
+  }
+  return supSrcChip(it)+' '+(it.num!=='—'?it.num+' · ':'')+it.obj;
+}
+function supDetail(id){
+  var it=supFind(id); if(!it) return supQueue();
+  var body = it.src==='chat' ? supChatBody(it) : supRequestBody(it);
+  var right = it.ball==='us'
+    ? '<div>'+supSla(it,true)+'</div>'
+    : '<div style="margin-top:5px"><span class="st st--'+supPill(it).cls+'">Мяч: '+SUP_BALL[it.ball]+'</span></div>';
+  var title = it.src==='chat' ? (supKind(it)+' · '+it.agent) : (it.vid+' · '+it.holder);
+  return '<div class="supback"><button onclick="supBack()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>Все заявки поддержки</button></div>'
+    +'<div class="suphd"><div><div class="suphd__t">'+title+'</div>'
+      +'<div class="suphd__sub">'+supSubLine(it)+'</div></div>'
+      +'<div class="suphd__task"><div>Задача <b>№'+it.id+'</b></div>'+right+'</div></div>'
+    +body;
+}
+function supRequestBody(it){
+  var esc = it.escalation ? '<div class="sup-esc-chip">'+supWarnIco()+'Во 2-й линии: '+it.escalation.topic+'</div>' : '';
+  var escBlock = it.escalation
+    ? esc+'<div class="sup-esc__row"><input class="sup-ta" id="supEscAns" style="min-height:44px" placeholder="Ответ 2-й линии…"/></div><div class="sup-reply__row"><button class="btn btn--primary btn--sm" onclick="supEscAnswer(\''+it.id+'\')">Внести ответ</button></div>'
+    : '<div class="sup-esc__row"><select class="tselect" id="supEscTopic">'+SUP_TOPICS.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select></div><div class="sup-reply__row"><button class="btn btn--sm" onclick="supEscalate(\''+it.id+'\')">Передать во 2-ю линию</button></div>';
+  var side='<div class="sup-side">'
+    +'<div class="sup-side__box"><div class="sup-side__h">Статус</div>'
+      +'<select class="tselect" style="width:100%" onchange="supSetStatus(\''+it.id+'\',this.value)"><option>'+it.st+'</option><option>В работе</option><option>Ждём оплату</option><option>Ждём документы</option><option>Передана в СК</option><option>Завершена</option></select></div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">Действия оператора</div><div class="sup-actions">'
+      +'<button class="btn btn--sm" onclick="toast(\'Приложен новый полис (демо)\')">Приложить новый полис</button>'
+      +'<button class="btn btn--sm" onclick="toast(\'Ссылка на оплату отправлена агенту\')">Ссылка на оплату</button>'
+      +'<button class="btn btn--sm" onclick="toast(\'Документы прикреплены (демо)\')">Прикрепить документы</button>'
+      +'<button class="btn btn--sm" onclick="toast(\'Ответственный изменён (демо)\')">Сменить ответственного</button>'
+      +'<button class="btn btn--sm" onclick="toast(\'Открыт полис — '+it.num+'\')">Посмотреть полис</button>'
+    +'</div></div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">Вторая линия</div>'+escBlock+'</div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">Связанное</div><div class="sup-links"><a onclick="toast(\'Файлы заявки (демо)\')">Файлы (4)</a><a onclick="toast(\'Таблица изменений (демо)\')">Таблица изменений</a><a onclick="toast(\'Текущие обращения: 2\')">Текущие обращения 2</a><a onclick="toast(\'Архив: 25\')">Архив 25</a></div></div>'
+  +'</div>';
+  var main='<div>'
+    +'<div class="sup-grid">'
+      +'<div class="sup-fld"><label>№ полиса</label><div class="sup-fld__v">'+it.num+'</div></div>'
+      +'<div class="sup-fld"><label>Страховая компания</label><div class="sup-fld__v">'+it.sk+'</div></div>'
+      +'<div class="sup-fld"><label>Страхователь</label><div class="sup-fld__v">'+it.holder+'</div></div>'
+      +'<div class="sup-fld"><label>Тип заявки</label><div class="sup-fld__v">'+(it.type||'—')+'</div></div>'
+      +'<div class="sup-fld sup-fld--full"><label>Что нужно сделать</label><div class="sup-fld__v">'+it.what+'</div></div>'
+      +'<div class="sup-fld sup-fld--full"><label>Комментарий и действия агента</label><div class="sup-fld__v">'+it.ac+'</div></div>'
+    +'</div>'
+    +'<div class="sup-reply sup-reply--agent"><div class="sup-reply__h">Ответить агенту <span class="sup-reply__tag">агент видит</span></div>'
+      +'<textarea class="sup-ta" id="supReplyA" placeholder="Текст ответа — появится в кабинете агента и в чате…"></textarea>'
+      +'<div class="sup-reply__row"><button class="btn btn--primary btn--sm" onclick="supReplyAgent(\''+it.id+'\')">Отправить агенту</button></div></div>'
+    +'<div class="sup-reply sup-reply--note"><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div>'
+      +'<textarea class="sup-ta" id="supNoteA" placeholder="Внутренняя заметка поддержки…"></textarea>'
+      +'<div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
+  +'</div>';
+  return '<div class="supcard">'+main+side+'</div>'+supTimeline(it)+supFoot(it);
+}
+function supFileChip(m){ return '<a class="svm-file" onclick="toast(\'Открыть документ: '+m.att+'\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+m.att+(m.atype?' · <span>'+m.atype+'</span>':'')+'</a>'; }
+function supChatMsg(m){ return '<div class="svm '+(m.o?'svm--out':'svm--in')+'">'+(m.t||'')+(m.att?supFileChip(m):'')+'<small>'+m.w+'</small></div>'; }
+function supChatBody(it){
+  var msgs=(it.chat||[]).map(supChatMsg).join('');
+  var main='<div>'
+    +'<div class="supchat" id="supChatBody">'+msgs+'</div>'
+    +'<div class="supchat__composer"><input id="supChatInput" placeholder="Ответ агенту…" onkeydown="if(event.key===\'Enter\')supChatSend(\''+it.id+'\')"/>'
+      +'<button class="btn btn--sm" onclick="supChatAttach(\''+it.id+'\')" title="Прикрепить документ агенту"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.2-9.2a3.33 3.33 0 0 1 4.71 4.71l-9.2 9.2a1.67 1.67 0 0 1-2.36-2.36l8.49-8.49"/></svg>Документ</button>'
+      +'<button class="btn btn--primary btn--sm" onclick="supChatSend(\''+it.id+'\')">Отправить</button></div>'
+    +'<div class="supchat__hint">Прикреплённый документ уходит агенту в переписку. Файлы и вложения хранятся при обращении, а не в теле сообщения.</div>'
+    +'<div class="sup-reply sup-reply--note" style="margin-top:12px"><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div><textarea class="sup-ta" id="supNoteA" placeholder="Внутренняя заметка…"></textarea><div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
+  +'</div>';
+  var side='<div class="sup-side">'
+    +'<div class="sup-side__box"><div class="sup-side__h">Обращение</div>'
+      +'<div class="kv"><span>Тип</span><b>'+supKind(it)+'</b></div>'
+      +'<div class="kv"><span>Агент</span><b>'+it.agent+'</b></div>'
+      +(it.topic?'<div class="kv"><span>Тема</span><span class="sup-topic">#'+it.topic+'</span></div>':'')
+      +(it.objref?'<div class="kv"><span>Упомянут объект</span><b>'+it.objref+'</b></div>':'')
+      +(it.num!=='—'?'<div class="kv"><span>Договор</span><span class="polnum">'+it.num+'</span></div>':'<div class="kv"><span>Договор</span><b style="color:var(--muted);font-weight:400">не привязан</b></div>')
+      +'<div style="margin-top:8px"><button class="btn btn--sm" onclick="toast(\'Привязать договор к вопросу\')">Привязать договор</button></div></div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">Передать специалисту</div><div class="sup-esc__row"><select class="tselect" id="supEscTopic">'+SUP_TOPICS.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select></div><div class="sup-reply__row"><button class="btn btn--sm" onclick="supEscalateChat(\''+it.id+'\')">Передать</button></div></div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">Действия</div><div class="sup-actions"><button class="btn btn--sm" onclick="toast(\'Создана заявка в 1С из вопроса\')">Создать заявку 1С</button><button class="btn btn--sm" onclick="toast(\'Вопрос закрыт\')">Закрыть вопрос</button></div></div>'
+  +'</div>';
+  return '<div class="supcard">'+main+side+'</div>';
+}
+function supTimeline(it){
+  var rows=(it.steps||[]).map(function(s){ var pill=s.internal?'pay':'proc'; var col=s.internal?' style="color:var(--warn)"':''; return '<tr><td>'+s.d+'</td><td><span class="st st--'+pill+'">'+s.s+'</span></td><td'+col+'>'+s.c+'</td></tr>'; }).join('');
+  return '<div class="suptl"><h3>Ход дела</h3><div class="list-wrap" style="margin:0"><div class="list-scroll"><table class="list"><thead><tr><th>Дата</th><th>Статус</th><th>Комментарий</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+}
+function supFoot(it){ return '<div class="supfoot"><button class="btn btn--sm" onclick="supBack()">Закрыть</button><button class="btn btn--primary btn--sm" onclick="supSave(\''+it.id+'\')">Сохранить</button></div>'; }
+function supSelect(id){ supOpen=id; supRerender(); }
+function supBack(){ supOpen=null; supRerender(); }
+function supSetTab(t){ supTab=t; supRerender(); }
+function supReplyAgent(id){ var it=supFind(id); var ta=document.getElementById('supReplyA'); if(!ta||!ta.value.trim())return; it.steps.push({d:'сейчас',s:it.st,c:'Ответ агенту: '+ta.value.trim()}); ta.value=''; toast('Ответ отправлен агенту — виден в кабинете'); supRerender(); }
+function supNote(id){ var it=supFind(id); var ta=document.getElementById('supNoteA'); if(!ta||!ta.value.trim())return; (it.steps=it.steps||[]).push({d:'сейчас',s:'Заметка',c:ta.value.trim(),internal:true}); ta.value=''; toast('Заметка сохранена — агент её не видит'); supRerender(); }
+function supEscalate(id){ var it=supFind(id); var sel=document.getElementById('supEscTopic'); var topic=sel?sel.value:SUP_TOPICS[0]; it.escalation={topic:topic}; it.steps.push({d:'сейчас',s:'2-я линия',c:'Передано во 2-ю линию: '+topic,internal:true}); toast('Передано во 2-ю линию: '+topic); supRerender(); }
+function supEscAnswer(id){ var it=supFind(id); var ta=document.getElementById('supEscAns'); if(!ta||!ta.value.trim())return; it.steps.push({d:'сейчас',s:'2-я линия',c:'2-я линия ответила: '+ta.value.trim(),internal:true}); it.escalation=null; toast('Ответ 2-й линии внесён — блок снят'); supRerender(); }
+function supEscalateChat(id){ var it=supFind(id); var sel=document.getElementById('supEscTopic'); var topic=sel?sel.value:SUP_TOPICS[0]; (it.chat=it.chat||[]).push({o:1,t:'Передаю ваш вопрос профильному специалисту ('+topic+') — вернёмся с ответом.',w:'Поддержка · сейчас'}); toast('Вопрос передан специалисту'); supRerender(); }
+function supChatSend(id){ var it=supFind(id); var inp=document.getElementById('supChatInput'); if(!inp||!inp.value.trim())return; (it.chat=it.chat||[]).push({o:1,t:inp.value.trim(),w:'Поддержка · сейчас'}); inp.value=''; toast('Ответ отправлен агенту'); supRerender(); }
+function supSetStatus(id,v){ var it=supFind(id); it.st=v; if(v==='Завершена'){ it.ball='done'; } toast('Статус: '+v); supRerender(); supUpdateBadge(); }
+function supSave(id){ toast('Заявка сохранена'); supBack(); }
+function supUpdateBadge(){ var sp=document.getElementById('supBadge'); if(sp){ var c=supCount('us'); sp.textContent=c; sp.style.display=c?'grid':'none'; } }
+
 /* ===== роутер ===== */
-var TITLES={clients:'Мои клиенты',prolongation:'Пролонгация',osago:'ОСАГО',health:'Здоровье',mortgage:'Ипотека',finance:'Мои финансы',learning:'Обучение',messages:'Чаты',profile:'Профиль'};
+var TITLES={clients:'Мои клиенты',prolongation:'Пролонгация',osago:'ОСАГО',health:'Здоровье',mortgage:'Ипотека',finance:'Мои финансы',learning:'Обучение',messages:'Чаты',support:'Поддержка',profile:'Профиль'};
 function render(view,arg){
   var w=document.getElementById('workscreen');
   if(view==='clients') w.innerHTML=screenClients();
@@ -1054,6 +1526,7 @@ function render(view,arg){
   else if(view==='health') w.innerHTML=screenHealth();
   else if(view==='prolongation') w.innerHTML=screenProlongation();
   else if(view==='messages') w.innerHTML=screenMessages();
+  else if(view==='support') w.innerHTML=screenSupport();
   else if(view==='profile') w.innerHTML=screenProfile();
   else if(view==='mortgage') w.innerHTML=screenStub('Ипотека','Раздел в разработке — страхование залоговой недвижимости');
   else if(view==='finance') w.innerHTML=screenStub('Мои финансы','Комиссии, выплаты и сверки');
@@ -1183,6 +1656,7 @@ function closeSV(){ document.getElementById('sv').classList.remove('open'); }
 document.getElementById('svBtn').addEventListener('click', toggleSV);
 
 updateBell();
+supUpdateBadge();
 go('clients');
 </script>
 </body></html>
