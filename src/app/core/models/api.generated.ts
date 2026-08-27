@@ -260,6 +260,81 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список заявок (процессов) — очередь агента / поддержки */
+        get: operations["getCases"];
+        put?: never;
+        /** Создать заявку (ВИ / расторжение / убыток / ошибка) по договору */
+        post: operations["createCase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Детали заявки (со статусной историей и оверлеями по виду) */
+        get: operations["getCase"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Приложить документ к заявке */
+        post: operations["uploadCaseDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{id}/transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Перевести заявку в новый статус (смена состояния автомата)
+         * @description Идемпотентный переход (Idempotency-Key — защита от двойного тапа на нестабильном 3G).
+         *     При targetStatus=rejected/claim_rejected обязателен rejectReason (свободный текст).
+         *     Перевыпуск ссылки на доплату (kind=change): targetStatus=awaiting_payment +
+         *     reissuePaymentLink=true (сбрасывает paymentLinkStale, увеличивает reissueCount).
+         */
+        post: operations["transitionCase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -497,6 +572,227 @@ export interface components {
             /** @description Срок жизни access token в секундах */
             expiresIn?: number;
             agent?: components["schemas"]["Agent"];
+        };
+        /**
+         * @description Вид заявки (bounded context). error — сервисный тикет, пока не реализуется.
+         * @enum {string}
+         */
+        CaseKind: "change" | "cancel" | "loss" | "error";
+        /**
+         * @description Каноничный (машинный) статус — единый источник правды. Русские лейблы для агента и
+         *     поддержки вычисляются из справочника по паре (status, роль) → agentStatusLabel /
+         *     supportStatusLabel (напр. new = агенту "Проверка документов", поддержке "Новая").
+         *     Оверлеи по виду: awaiting_payment/paid — только kind=change;
+         *     under_review/signing/signed/settled и claim_* — только kind=loss.
+         * @enum {string}
+         */
+        CaseStatus: "new" | "in_work" | "awaiting_docs" | "docs_uploaded" | "awaiting_payment" | "paid" | "under_review" | "signing" | "signed" | "settled" | "done" | "rejected" | "claim_filed" | "claim_review" | "claim_awaiting_docs" | "claim_docs_uploaded" | "claim_signing" | "claim_signed" | "claim_settled" | "claim_rejected";
+        /**
+         * @description Обобщённая фаза — для UI-логики вместо switch по статусу.
+         * @enum {string}
+         */
+        CasePhase: "intake" | "in_progress" | "action_required" | "with_insurer" | "closed";
+        /**
+         * @description Чей сейчас ход. Приходит флагом с бэкенда, фронт его не вычисляет.
+         * @enum {string}
+         */
+        CaseBallHolder: "agent" | "support" | "insurer" | "client" | "none";
+        /**
+         * @description Автор события/комментария. system — авто-переход/авто-текст.
+         * @enum {string}
+         */
+        CaseActor: "agent" | "support" | "insurer" | "curator" | "system";
+        CaseStatusEvent: {
+            status: components["schemas"]["CaseStatus"];
+            /** Format: date-time */
+            at: string;
+            actor: components["schemas"]["CaseActor"];
+            /** @description Комментарий/сервисное сообщение к переходу. */
+            comment?: string | null;
+        };
+        /** @description Заполнено ⇔ мяч у агента ⇔ заявка попадает в "Ждут ваших действий". */
+        CaseActionRequired: {
+            /** @example Загрузите: СТС, водительское удостоверение */
+            label: string;
+            /**
+             * @description К кому обращено действие (агент лично / клиент через агента).
+             * @enum {string}
+             */
+            addressee: "agent" | "client";
+        };
+        /**
+         * @description Оверлей доплаты (только kind=change, статусы awaiting_payment/paid).
+         *     Срок жизни ссылки НЕ храним и НЕ показываем (решение владельца 2026-08-27):
+         *     только флаг paymentLinkStale + дисклеймер + подпроцесс перевыпуска ссылки.
+         */
+        CasePaymentDetails: {
+            /**
+             * Format: float
+             * @description Сумма доплаты за изменение (₽).
+             */
+            surchargeAmount?: number;
+            /**
+             * Format: uri
+             * @description Ссылка на доплату, которую агент передаёт клиенту.
+             */
+            paymentLink?: string | null;
+            /**
+             * @description true — ссылка помечена недействительной, нужен перевыпуск.
+             * @default false
+             */
+            paymentLinkStale: boolean;
+            /**
+             * @description Сколько раз ссылку перевыпускали.
+             * @default 0
+             */
+            reissueCount: number;
+            /**
+             * @description Агент приложил подтверждение оплаты (→ статус paid).
+             * @default false
+             */
+            paymentConfirmed: boolean;
+        };
+        /** @description Оверлей убытка (только kind=loss). Поля с доски (карточка УУ). */
+        CaseLossDetails: {
+            /** @description Номер убытка (вместо "крупный убыток"). */
+            claimNumber?: string | null;
+            /**
+             * @description Тип убытка (Первичный / Вторичный / Претензия).
+             * @enum {string|null}
+             */
+            claimType?: "primary" | "secondary" | "complaint" | null;
+            /**
+             * @description Признак убытка (ПВУ / Классика; РС и ГО).
+             * @enum {string|null}
+             */
+            claimSign?: "pvu" | "classic" | null;
+            /**
+             * @description Тип осмотра (Осмотр агентом / АО-НЭ клиента / Выездной осмотр).
+             * @enum {string|null}
+             */
+            inspectionType?: "by_agent" | "client_independent" | "field" | null;
+            /**
+             * @description Кто заявляет убыток (Собственник / Представитель по доверенности).
+             * @enum {string|null}
+             */
+            applicant?: "owner" | "representative" | null;
+            /**
+             * Format: date
+             * @description Дата заявления.
+             */
+            claimDate?: string | null;
+            /**
+             * Format: date
+             * @description Дата соглашения от СК.
+             */
+            insurerAgreementDate?: string | null;
+            /**
+             * Format: date
+             * @description Дата соглашения от агента.
+             */
+            agentAgreementDate?: string | null;
+            /**
+             * Format: date
+             * @description Дата оплаты от СК.
+             */
+            paymentDate?: string | null;
+            /**
+             * Format: float
+             * @description Сумма выплаты.
+             */
+            payoutAmount?: number | null;
+            /**
+             * @description Открыта ветка претензии (статусы claim_*).
+             * @default false
+             */
+            hasComplaint: boolean;
+        };
+        /** @description Оверлей расторжения (только kind=cancel). */
+        CaseCancelDetails: {
+            /**
+             * Format: float
+             * @description Сумма к возврату (может быть скорректирована СК).
+             */
+            refundAmount?: number | null;
+            /**
+             * Format: date
+             * @description Ориентир выплаты (до 14 календарных дней).
+             */
+            refundDueDate?: string | null;
+        };
+        CaseDocument: {
+            id: string;
+            name: string;
+            /** Format: date-time */
+            uploadedAt: string;
+            actor: components["schemas"]["CaseActor"];
+        };
+        Case: {
+            id: string;
+            /**
+             * @description Сквозной номер заявки, как в 1С.
+             * @example 000012934
+             */
+            requestNumber: string;
+            kind: components["schemas"]["CaseKind"];
+            /**
+             * @description Оверлей ЮЛ (нужны подписанные с печатями документы для СК).
+             * @default false
+             */
+            legalEntity: boolean;
+            status: components["schemas"]["CaseStatus"];
+            /**
+             * @description Вычисляемый лейбл статуса для агента (внешний словарь).
+             * @example Проверка документов
+             */
+            agentStatusLabel?: string;
+            /**
+             * @description Вычисляемый лейбл статуса для поддержки (внутренний словарь).
+             * @example Новая
+             */
+            supportStatusLabel?: string;
+            phase: components["schemas"]["CasePhase"];
+            ballHolder: components["schemas"]["CaseBallHolder"];
+            /** @description Заполнено только когда мяч у агента. */
+            actionRequired?: components["schemas"]["CaseActionRequired"] | null;
+            policyId: string;
+            policyNumber?: string | null;
+            /**
+             * @description Страхователь (полное ФИО).
+             * @example Иванов Иван Иванович
+             */
+            holderName?: string;
+            /** @description Объект страхования (авто+госномер / «Здоровье» / «Недвижимость»). */
+            object?: string;
+            /** @description Регион страхователя (для очереди поддержки). */
+            region?: string | null;
+            insurerName?: string | null;
+            /** @description ФИО ответственного сотрудника поддержки. */
+            responsibleName?: string | null;
+            /**
+             * @description Заявка пришла/обрабатывается через API СК (напр. Ренессанс).
+             * @default false
+             */
+            viaApi: boolean;
+            /** @description Коды причин изменения (для kind=change). */
+            reasons?: string[];
+            /** @description Причина отказа — СВОБОДНЫЙ ТЕКСТ (решение владельца 2026-08-27, без справочника). */
+            rejectReason?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Дата последнего движения (для сортировки и сигнала «Ждут действий»).
+             */
+            lastActionAt?: string;
+            statusHistory?: components["schemas"]["CaseStatusEvent"][];
+            documents?: components["schemas"]["CaseDocument"][];
+            /** @description Оверлей доплаты (kind=change). */
+            payment?: components["schemas"]["CasePaymentDetails"] | null;
+            /** @description Оверлей убытка (kind=loss). */
+            loss?: components["schemas"]["CaseLossDetails"] | null;
+            /** @description Оверлей расторжения (kind=cancel). */
+            cancel?: components["schemas"]["CaseCancelDetails"] | null;
         };
     };
     responses: never;
@@ -936,6 +1232,182 @@ export interface operations {
         responses: {
             /** @description OK */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiResponse"];
+                };
+            };
+        };
+    };
+    getCases: {
+        parameters: {
+            query?: {
+                page?: number;
+                pageSize?: number;
+                kind?: components["schemas"]["CaseKind"];
+                status?: components["schemas"]["CaseStatus"];
+                /** @description Фильтр «чей мяч» (напр. agent — ждут действий агента). */
+                ballHolder?: components["schemas"]["CaseBallHolder"];
+                policyId?: string;
+                responsibleName?: string;
+                insurerName?: string;
+                region?: string;
+                /** @description Показывать заявки, пришедшие через API СК. */
+                viaApi?: boolean;
+                /** @description Поиск по ФИО страхователя, ИКП, номеру полиса или номеру заявки. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiResponse"] & {
+                        data?: components["schemas"]["Case"][];
+                    };
+                };
+            };
+        };
+    };
+    createCase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    kind: components["schemas"]["CaseKind"];
+                    policyId: string;
+                    reasons?: string[];
+                    comment?: string;
+                    /** @description Снимок формы (для последующей передачи в СК). */
+                    formSnapshot?: Record<string, never>;
+                };
+            };
+        };
+        responses: {
+            /** @description Заявка создана */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiResponse"] & {
+                        data?: components["schemas"]["Case"];
+                    };
+                };
+            };
+        };
+    };
+    getCase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiResponse"] & {
+                        data?: components["schemas"]["Case"];
+                    };
+                };
+            };
+        };
+    };
+    uploadCaseDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Документ приложен, заявка обновлена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiResponse"] & {
+                        data?: components["schemas"]["Case"];
+                    };
+                };
+            };
+        };
+    };
+    transitionCase: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Ключ идемпотентности write-операции. */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    targetStatus: components["schemas"]["CaseStatus"];
+                    comment?: string;
+                    /** @description Обязателен при targetStatus=rejected/claim_rejected. Свободный текст. */
+                    rejectReason?: string;
+                    /**
+                     * Format: uri
+                     * @description Новая ссылка при выдаче/перевыпуске доплаты.
+                     */
+                    paymentLink?: string;
+                    /** @description true — перевыпуск ссылки на доплату. */
+                    reissuePaymentLink?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Статус изменён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiResponse"] & {
+                        data?: components["schemas"]["Case"];
+                    };
+                };
+            };
+            /** @description Недопустимый переход из текущего статуса */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

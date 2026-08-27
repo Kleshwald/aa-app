@@ -37,7 +37,7 @@ components:
 
   schemas:
     # ─── Общие схемы ───
-    
+
     ApiResponse:
       type: object
       required: [success]
@@ -383,11 +383,315 @@ components:
         agent:
           $ref: '#/components/schemas/Agent'
 
+    # ─── Case (единый автомат процессов: ВИ / расторжение / убыток / ошибка) ───
+    # Источник: docs/knowledge/10a-status-model-processes.md (доска ПРОЦЕССЫ-АА, ревизия 2026-08-27).
+    # Ядро (Белов): UI смотрит на phase + ballHolder + actionRequired, а НЕ на switch(status).
+    # Сводит три модели репо (PolicyProcess, Deal, cancel.model) в один Case с оверлеями по kind.
+    # Разведение словарей статусов агент/поддержка — P0-находка (см. §2 документа 10a).
+
+    CaseKind:
+      type: string
+      description: Вид заявки (bounded context). error — сервисный тикет, пока не реализуется.
+      enum: [change, cancel, loss, error]
+
+    CaseStatus:
+      type: string
+      description: |
+        Каноничный (машинный) статус — единый источник правды. Русские лейблы для агента и
+        поддержки вычисляются из справочника по паре (status, роль) → agentStatusLabel /
+        supportStatusLabel (напр. new = агенту "Проверка документов", поддержке "Новая").
+        Оверлеи по виду: awaiting_payment/paid — только kind=change;
+        under_review/signing/signed/settled и claim_* — только kind=loss.
+      enum:
+        - new              # агент: Проверка документов / поддержка: Новая
+        - in_work          # В работе (показываем агенту — решение владельца 2026-08-27)
+        - awaiting_docs    # Ожидаем документы (мяч у агента)
+        - docs_uploaded    # Документы загружены (системный)
+        - awaiting_payment # Ожидаем оплаты (только change)
+        - paid             # Оплачен (только change, системный)
+        - under_review     # На рассмотрении у СК (только loss)
+        - signing          # Подписание соглашения (только loss)
+        - signed           # Соглашение подписано (только loss)
+        - settled          # Урегулирован (loss, терминал-успех)
+        - done             # Готово (change/cancel, терминал-успех)
+        - rejected         # Отказ (терминал-отказ; rejectReason — свободный текст)
+        # --- оверлей претензии (только loss) ---
+        - claim_filed          # Направлена претензия
+        - claim_review         # Претензия на рассмотрении
+        - claim_awaiting_docs  # Ожидаем документы по претензии
+        - claim_docs_uploaded  # Документы загружены (претензия)
+        - claim_signing        # Подписание соглашения по претензии
+        - claim_signed         # Соглашение подписано (претензия)
+        - claim_settled        # Претензия урегулирована (терминал-успех)
+        - claim_rejected       # Отказ по претензии (терминал-отказ)
+
+    CasePhase:
+      type: string
+      description: Обобщённая фаза — для UI-логики вместо switch по статусу.
+      enum: [intake, in_progress, action_required, with_insurer, closed]
+
+    CaseBallHolder:
+      type: string
+      description: Чей сейчас ход. Приходит флагом с бэкенда, фронт его не вычисляет.
+      enum: [agent, support, insurer, client, none]
+
+    CaseActor:
+      type: string
+      description: Автор события/комментария. system — авто-переход/авто-текст.
+      enum: [agent, support, insurer, curator, system]
+
+    CaseStatusEvent:
+      type: object
+      required: [status, at, actor]
+      properties:
+        status:
+          $ref: '#/components/schemas/CaseStatus'
+        at:
+          type: string
+          format: date-time
+        actor:
+          $ref: '#/components/schemas/CaseActor'
+        comment:
+          type: string
+          nullable: true
+          description: Комментарий/сервисное сообщение к переходу.
+
+    CaseActionRequired:
+      type: object
+      description: Заполнено ⇔ мяч у агента ⇔ заявка попадает в "Ждут ваших действий".
+      required: [label, addressee]
+      properties:
+        label:
+          type: string
+          example: "Загрузите: СТС, водительское удостоверение"
+        addressee:
+          type: string
+          description: К кому обращено действие (агент лично / клиент через агента).
+          enum: [agent, client]
+
+    CasePaymentDetails:
+      type: object
+      description: |
+        Оверлей доплаты (только kind=change, статусы awaiting_payment/paid).
+        Срок жизни ссылки НЕ храним и НЕ показываем (решение владельца 2026-08-27):
+        только флаг paymentLinkStale + дисклеймер + подпроцесс перевыпуска ссылки.
+      properties:
+        surchargeAmount:
+          type: number
+          format: float
+          description: Сумма доплаты за изменение (₽).
+        paymentLink:
+          type: string
+          format: uri
+          nullable: true
+          description: Ссылка на доплату, которую агент передаёт клиенту.
+        paymentLinkStale:
+          type: boolean
+          default: false
+          description: true — ссылка помечена недействительной, нужен перевыпуск.
+        reissueCount:
+          type: integer
+          default: 0
+          description: Сколько раз ссылку перевыпускали.
+        paymentConfirmed:
+          type: boolean
+          default: false
+          description: Агент приложил подтверждение оплаты (→ статус paid).
+
+    CaseLossDetails:
+      type: object
+      description: Оверлей убытка (только kind=loss). Поля с доски (карточка УУ).
+      properties:
+        claimNumber:
+          type: string
+          nullable: true
+          description: Номер убытка (вместо "крупный убыток").
+        claimType:
+          type: string
+          nullable: true
+          description: Тип убытка (Первичный / Вторичный / Претензия).
+          enum: [primary, secondary, complaint]
+        claimSign:
+          type: string
+          nullable: true
+          description: Признак убытка (ПВУ / Классика; РС и ГО).
+          enum: [pvu, classic]
+        inspectionType:
+          type: string
+          nullable: true
+          description: Тип осмотра (Осмотр агентом / АО-НЭ клиента / Выездной осмотр).
+          enum: [by_agent, client_independent, field]
+        applicant:
+          type: string
+          nullable: true
+          description: Кто заявляет убыток (Собственник / Представитель по доверенности).
+          enum: [owner, representative]
+        claimDate:
+          type: string
+          format: date
+          nullable: true
+          description: Дата заявления.
+        insurerAgreementDate:
+          type: string
+          format: date
+          nullable: true
+          description: Дата соглашения от СК.
+        agentAgreementDate:
+          type: string
+          format: date
+          nullable: true
+          description: Дата соглашения от агента.
+        paymentDate:
+          type: string
+          format: date
+          nullable: true
+          description: Дата оплаты от СК.
+        payoutAmount:
+          type: number
+          format: float
+          nullable: true
+          description: Сумма выплаты.
+        hasComplaint:
+          type: boolean
+          default: false
+          description: Открыта ветка претензии (статусы claim_*).
+
+    CaseCancelDetails:
+      type: object
+      description: Оверлей расторжения (только kind=cancel).
+      properties:
+        refundAmount:
+          type: number
+          format: float
+          nullable: true
+          description: Сумма к возврату (может быть скорректирована СК).
+        refundDueDate:
+          type: string
+          format: date
+          nullable: true
+          description: Ориентир выплаты (до 14 календарных дней).
+
+    CaseDocument:
+      type: object
+      required: [id, name, uploadedAt, actor]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        uploadedAt:
+          type: string
+          format: date-time
+        actor:
+          $ref: '#/components/schemas/CaseActor'
+
+    Case:
+      type: object
+      required: [id, requestNumber, kind, status, phase, ballHolder, policyId, createdAt]
+      properties:
+        id:
+          type: string
+        requestNumber:
+          type: string
+          description: Сквозной номер заявки, как в 1С.
+          example: "000012934"
+        kind:
+          $ref: '#/components/schemas/CaseKind'
+        legalEntity:
+          type: boolean
+          default: false
+          description: Оверлей ЮЛ (нужны подписанные с печатями документы для СК).
+        status:
+          $ref: '#/components/schemas/CaseStatus'
+        agentStatusLabel:
+          type: string
+          description: Вычисляемый лейбл статуса для агента (внешний словарь).
+          example: "Проверка документов"
+        supportStatusLabel:
+          type: string
+          description: Вычисляемый лейбл статуса для поддержки (внутренний словарь).
+          example: "Новая"
+        phase:
+          $ref: '#/components/schemas/CasePhase'
+        ballHolder:
+          $ref: '#/components/schemas/CaseBallHolder'
+        actionRequired:
+          allOf:
+            - $ref: '#/components/schemas/CaseActionRequired'
+          nullable: true
+          description: Заполнено только когда мяч у агента.
+        policyId:
+          type: string
+        policyNumber:
+          type: string
+          nullable: true
+        holderName:
+          type: string
+          description: Страхователь (полное ФИО).
+          example: "Иванов Иван Иванович"
+        object:
+          type: string
+          description: Объект страхования (авто+госномер / «Здоровье» / «Недвижимость»).
+        region:
+          type: string
+          nullable: true
+          description: Регион страхователя (для очереди поддержки).
+        insurerName:
+          type: string
+          nullable: true
+        responsibleName:
+          type: string
+          nullable: true
+          description: ФИО ответственного сотрудника поддержки.
+        viaApi:
+          type: boolean
+          default: false
+          description: Заявка пришла/обрабатывается через API СК (напр. Ренессанс).
+        reasons:
+          type: array
+          items:
+            type: string
+          description: Коды причин изменения (для kind=change).
+        rejectReason:
+          type: string
+          nullable: true
+          description: Причина отказа — СВОБОДНЫЙ ТЕКСТ (решение владельца 2026-08-27, без справочника).
+        createdAt:
+          type: string
+          format: date-time
+        lastActionAt:
+          type: string
+          format: date-time
+          description: Дата последнего движения (для сортировки и сигнала «Ждут действий»).
+        statusHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseStatusEvent'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseDocument'
+        payment:
+          allOf:
+            - $ref: '#/components/schemas/CasePaymentDetails'
+          nullable: true
+          description: Оверлей доплаты (kind=change).
+        loss:
+          allOf:
+            - $ref: '#/components/schemas/CaseLossDetails'
+          nullable: true
+          description: Оверлей убытка (kind=loss).
+        cancel:
+          allOf:
+            - $ref: '#/components/schemas/CaseCancelDetails'
+          nullable: true
+          description: Оверлей расторжения (kind=cancel).
+
 # ───── PATHS ─────
 
 paths:
   # ─── Auth ───
-  
+
   /auth/login:
     post:
       tags: [Auth]
@@ -463,7 +767,7 @@ paths:
                             type: integer
 
   # ─── Agent ───
-  
+
   /agents/me:
     get:
       tags: [Agent]
@@ -512,7 +816,7 @@ paths:
                         $ref: '#/components/schemas/Agent'
 
   # ─── Dashboard ───
-  
+
   /dashboard:
     get:
       tags: [Dashboard]
@@ -545,7 +849,7 @@ paths:
                             maxItems: 10
 
   # ─── Policies ───
-  
+
   /policies:
     get:
       tags: [Policies]
@@ -701,7 +1005,7 @@ paths:
                             type: string
 
   # ─── Calculations (OSAGO) ───
-  
+
   /calculations/osago:
     post:
       tags: [Calculations]
@@ -810,7 +1114,7 @@ paths:
                         $ref: '#/components/schemas/Policy'
 
   # ─── Insurance Companies ───
-  
+
   /insurance-companies:
     get:
       tags: [InsuranceCompanies]
@@ -832,7 +1136,7 @@ paths:
                           $ref: '#/components/schemas/InsuranceCompany'
 
   # ─── Vehicles (справочник) ───
-  
+
   /vehicles/brands:
     get:
       tags: [Vehicles]
@@ -872,6 +1176,238 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  # ─── Cases (процессы по договору: ВИ / расторжение / убыток / ошибка) ───
+  # Единый автомат заявок. См. docs/knowledge/10a-status-model-processes.md.
+
+  /cases:
+    get:
+      tags: [Cases]
+      summary: Список заявок (процессов) — очередь агента / поддержки
+      operationId: getCases
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: kind
+          in: query
+          schema:
+            $ref: '#/components/schemas/CaseKind'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/CaseStatus'
+        - name: ballHolder
+          in: query
+          description: Фильтр «чей мяч» (напр. agent — ждут действий агента).
+          schema:
+            $ref: '#/components/schemas/CaseBallHolder'
+        - name: policyId
+          in: query
+          schema:
+            type: string
+        - name: responsibleName
+          in: query
+          schema:
+            type: string
+        - name: insurerName
+          in: query
+          schema:
+            type: string
+        - name: region
+          in: query
+          schema:
+            type: string
+        - name: viaApi
+          in: query
+          description: Показывать заявки, пришедшие через API СК.
+          schema:
+            type: boolean
+        - name: search
+          in: query
+          description: Поиск по ФИО страхователя, ИКП, номеру полиса или номеру заявки.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Case'
+
+    post:
+      tags: [Cases]
+      summary: Создать заявку (ВИ / расторжение / убыток / ошибка) по договору
+      operationId: createCase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind, policyId]
+              properties:
+                kind:
+                  $ref: '#/components/schemas/CaseKind'
+                policyId:
+                  type: string
+                reasons:
+                  type: array
+                  items:
+                    type: string
+                comment:
+                  type: string
+                formSnapshot:
+                  type: object
+                  description: Снимок формы (для последующей передачи в СК).
+      responses:
+        '200':
+          description: Заявка создана
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Case'
+
+  /cases/{id}:
+    get:
+      tags: [Cases]
+      summary: Детали заявки (со статусной историей и оверлеями по виду)
+      operationId: getCase
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Case'
+
+  /cases/{id}/documents:
+    post:
+      tags: [Cases]
+      summary: Приложить документ к заявке
+      operationId: uploadCaseDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Документ приложен, заявка обновлена
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Case'
+
+  /cases/{id}/transition:
+    post:
+      tags: [Cases]
+      summary: Перевести заявку в новый статус (смена состояния автомата)
+      description: |
+        Идемпотентный переход (Idempotency-Key — защита от двойного тапа на нестабильном 3G).
+        При targetStatus=rejected/claim_rejected обязателен rejectReason (свободный текст).
+        Перевыпуск ссылки на доплату (kind=change): targetStatus=awaiting_payment +
+        reissuePaymentLink=true (сбрасывает paymentLinkStale, увеличивает reissueCount).
+      operationId: transitionCase
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Ключ идемпотентности write-операции.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetStatus]
+              properties:
+                targetStatus:
+                  $ref: '#/components/schemas/CaseStatus'
+                comment:
+                  type: string
+                rejectReason:
+                  type: string
+                  description: Обязателен при targetStatus=rejected/claim_rejected. Свободный текст.
+                paymentLink:
+                  type: string
+                  format: uri
+                  description: Новая ссылка при выдаче/перевыпуске доплаты.
+                reissuePaymentLink:
+                  type: boolean
+                  description: true — перевыпуск ссылки на доплату.
+      responses:
+        '200':
+          description: Статус изменён
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Case'
+        '409':
+          description: Недопустимый переход из текущего статуса
           content:
             application/json:
               schema:
