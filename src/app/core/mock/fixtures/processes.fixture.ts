@@ -500,7 +500,7 @@ function seedPayment(
   });
 }
 
-const payPolicy = osagoList.find(
-  (p) => p.id !== osagoList[0]?.id && p.id !== olderPolicy?.id && p.id !== inWorkPolicy?.id,
-);
-seedPayment(payPolicy, 1350, 3);
+// Кладём доплату на ПЕРВЫЙ OSAGO-полис (там уже есть заявка seedProcess(0)): один
+// договор может иметь несколько активных обращений, и так блок доплаты гарантированно
+// виден на странице договора (полис свежий, попадает в дефолтный период списка).
+seedPayment(osagoList[0], 1350, 3);
