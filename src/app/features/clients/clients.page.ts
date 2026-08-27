@@ -64,6 +64,8 @@ const PROCESS_STATE_LABEL: Record<ProcessStatus, string> = {
   'checking-docs': 'Проверка документов',
   'in-work': 'В работе у страховой',
   'awaiting-docs': 'Ожидаем документы',
+  'awaiting-payment': 'Ожидаем оплаты',
+  paid: 'Оплата получена',
   done: 'Заявка завершена',
   rejected: 'Заявка отклонена',
 };

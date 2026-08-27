@@ -421,6 +421,16 @@ export class ClientDetailPage {
     this.processService.uploadDoc(proc.id, file.name).subscribe(() => this.refreshProcesses());
   }
 
+  /** Перевыпустить ссылку на оплату (доплата ВИ): поддержка выдаёт новую по запросу. */
+  reissuePaymentLink(proc: PolicyProcess): void {
+    this.processService.reissuePaymentLink(proc.id).subscribe(() => this.refreshProcesses());
+  }
+
+  /** Сумма доплаты человеческой строкой (₽ добавляет шаблон). */
+  payAmount(proc: PolicyProcess): string {
+    return (proc.paymentAmount ?? 0).toLocaleString('ru-RU');
+  }
+
   /** Добавить кросс-продукт клиенту. Заглушка — реальный флоу появится позже. */
   addCrossSell(name: string): void {
     alert(`Добавим клиенту: ${name}`);

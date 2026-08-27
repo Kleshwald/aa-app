@@ -16,6 +16,8 @@ export type ProcessStatus =
   | 'checking-docs'
   | 'in-work'
   | 'awaiting-docs'
+  | 'awaiting-payment'
+  | 'paid'
   | 'done'
   | 'rejected';
 
@@ -60,6 +62,13 @@ export interface PolicyProcess {
   comments: ProcessComment[];
   attachments: ProcessAttachment[];
   responsibleName?: string;
+  /**
+   * Доплата за изменение (ВИ). Владелец 2026-08-27: срок жизни ссылки НЕ знаем и НЕ
+   * показываем — вместо таймера дисклеймер + перевыпуск. `paymentLinkStale` = ссылка
+   * помечена недействительной (оплата не прошла / перерасчёт), поддержка выдаёт новую.
+   */
+  paymentAmount?: number;
+  paymentLinkStale?: boolean;
   createdAt: string;
 }
 
@@ -137,6 +146,8 @@ export const PROCESS_STATUS_LABEL: Record<ProcessStatus, string> = {
   'checking-docs': 'Проверка документов',
   'in-work': 'В работе',
   'awaiting-docs': 'Ожидаем документы',
+  'awaiting-payment': 'Ожидаем оплаты',
+  paid: 'Оплачен',
   done: 'Изменения внесены',
   rejected: 'Отклонено',
 };
@@ -214,5 +225,13 @@ export class ProcessService {
   /** Приложить документ к заявке (заглушка загрузки). */
   uploadDoc(processId: string, name: string): Observable<ApiResponse<PolicyProcess | null>> {
     return this.api.post<PolicyProcess | null>(`/processes/${processId}/documents`, { name });
+  }
+
+  /**
+   * Перевыпустить ссылку на оплату (доплата ВИ). Срок жизни ссылки не показываем —
+   * поддержка выдаёт новую по запросу агента (решение владельца 2026-08-27, §3.3).
+   */
+  reissuePaymentLink(processId: string): Observable<ApiResponse<PolicyProcess | null>> {
+    return this.api.post<PolicyProcess | null>(`/processes/${processId}/payment-link/reissue`, {});
   }
 }

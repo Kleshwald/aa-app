@@ -192,6 +192,21 @@ export function addAttachment(id: string, name: string): PolicyProcess | undefin
   return proc;
 }
 
+/** Перевыпуск ссылки на оплату: снимаем «недействительна» + отмечаем в истории. */
+export function reissuePaymentLink(id: string): PolicyProcess | undefined {
+  const proc = find(id);
+  if (!proc) return undefined;
+  proc.paymentLinkStale = false;
+  proc.statusHistory.push({
+    at: nowIso(),
+    status: 'awaiting-payment',
+    author: 'support',
+    requestNumber: proc.requestNumber,
+    comment: 'Отправили клиенту новую ссылку на оплату.',
+  });
+  return proc;
+}
+
 // ─── Сид: 1–2 существующие заявки на первых OSAGO-полисах, чтобы холодный вход
 //     на странице договора не был пустым и счётчики что-то показывали. ───
 function seedProcess(policyIndex: number, minutesAgo: number): void {
@@ -431,3 +446,61 @@ seedActive(inWorkPolicy, 'cancel', 'in-work', 2);
 // «Ждут ваших действий» на СТАРОМ полисе: под дефолтным «Этот месяц» строки не видно,
 // и найти её можно только чипом. Это и есть кросс-периодность внимания.
 seedActive(olderPolicy, 'loss', 'awaiting-docs', 20);
+
+// ─── Сид: доплата по изменению (ВИ) со «протухшей» ссылкой ───────────────────
+// Ветка доплаты (Billing) была потеряна в плоской модели. Владелец 2026-08-27:
+// срок жизни ссылки НЕ показываем → дисклеймер + перевыпуск (§3.3). Ссылка сразу
+// помечена недействительной, чтобы на договоре был виден путь «Запросить новую».
+function seedPayment(
+  policy: PolicyFixture | undefined,
+  amount: number,
+  openedDaysAgo: number,
+): void {
+  if (!policy) return;
+  const requestNumber = nextRequestNumber();
+  const openedAt = agoDaysIso(openedDaysAgo);
+  processes.push({
+    id: faker.string.uuid(),
+    requestNumber,
+    policyId: policy.id,
+    policyNumber: policy.number,
+    kind: 'change',
+    reasons: ['add-driver'],
+    status: 'awaiting-payment',
+    statusHistory: [
+      { at: openedAt, status: 'submitted', author: 'agent', requestNumber },
+      {
+        at: agoDaysIso(openedDaysAgo * 0.8),
+        status: 'checking-docs',
+        author: 'support',
+        requestNumber,
+        comment: 'Добавление нового водителя',
+      },
+      {
+        at: agoDaysIso(openedDaysAgo * 0.5),
+        status: 'in-work',
+        author: 'support',
+        requestNumber,
+        comment: 'Ваша заявка принята в работу',
+      },
+      {
+        at: agoDaysIso(openedDaysAgo * 0.2),
+        status: 'awaiting-payment',
+        author: 'support',
+        requestNumber,
+        comment: `Добавление водителя увеличивает премию. К доплате ${amount.toLocaleString('ru-RU')} ₽ — ссылка отправлена клиенту.`,
+      },
+    ],
+    comments: [],
+    attachments: [],
+    responsibleName: 'Статьева Елена Владимировна',
+    paymentAmount: amount,
+    paymentLinkStale: true,
+    createdAt: openedAt,
+  });
+}
+
+const payPolicy = osagoList.find(
+  (p) => p.id !== osagoList[0]?.id && p.id !== olderPolicy?.id && p.id !== inWorkPolicy?.id,
+);
+seedPayment(payPolicy, 1350, 3);

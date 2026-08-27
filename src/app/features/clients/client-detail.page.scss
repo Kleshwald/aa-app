@@ -1010,6 +1010,55 @@
   color: var(--gray-800);
 }
 
+// Доплата по изменению (ВИ): штатный шаг, нейтральный тон (не тревожный янтарь).
+.req__pay {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+}
+
+.req__pay-amount {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--brand-700);
+}
+
+.req__pay-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  line-height: 1.45;
+}
+
+.req__pay-btn {
+  @extend %focus-ring;
+  align-self: flex-start;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--brand-600);
+  border-radius: var(--radius-md);
+  background: var(--brand-600);
+  color: #fff;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--brand-700);
+    border-color: var(--brand-700);
+  }
+}
+
+.req__pay-sent {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--success-700);
+}
+
 .req__actions {
   display: flex;
   flex-wrap: wrap;

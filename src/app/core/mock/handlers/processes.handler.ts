@@ -11,7 +11,13 @@ import {
 } from '@core/services/process.service';
 
 import { policies } from '../fixtures/policies.fixture';
-import { addAttachment, addComment, createProcess, processes } from '../fixtures/processes.fixture';
+import {
+  addAttachment,
+  addComment,
+  createProcess,
+  processes,
+  reissuePaymentLink,
+} from '../fixtures/processes.fixture';
 import { randomDelay } from '../helpers/delay';
 
 // Заявки по договору — критичный путь демо (процессы = отличие платформы),
@@ -140,5 +146,14 @@ export function handleUploadProcessDoc(
   const id = processIdFromUrl(req.url);
   const name = ((req.body ?? {}) as { name?: string }).name ?? 'Документ';
   const process = addAttachment(id, name) ?? null;
+  return ok(process);
+}
+
+/** POST /processes/:id/payment-link/reissue — перевыпустить ссылку на оплату (доплата ВИ). */
+export function handleReissuePaymentLink(
+  req: HttpRequest<unknown>,
+): Observable<HttpResponse<ApiResponse<unknown>>> {
+  const id = processIdFromUrl(req.url);
+  const process = reissuePaymentLink(id) ?? null;
   return ok(process);
 }

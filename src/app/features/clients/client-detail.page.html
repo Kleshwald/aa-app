@@ -383,6 +383,22 @@
                     <p class="req__comment">{{ ev.comment }}</p>
                   }
                 }
+                @if (proc.status === 'awaiting-payment') {
+                  <div class="req__pay">
+                    <span class="req__pay-amount">К доплате {{ payAmount(proc) }} ₽</span>
+                    <p class="req__pay-note">
+                      Ссылка на оплату отправлена клиенту. Срок её действия мы не указываем — ссылка
+                      может стать недействительной; если оплата не проходит, запросите новую.
+                    </p>
+                    @if (proc.paymentLinkStale) {
+                      <button type="button" class="req__pay-btn" (click)="reissuePaymentLink(proc)">
+                        Запросить новую ссылку
+                      </button>
+                    } @else {
+                      <span class="req__pay-sent">Новая ссылка отправлена клиенту ✓</span>
+                    }
+                  </div>
+                }
                 <div class="req__actions">
                   <!-- Вход в переписку назван ДЕЙСТВИЕМ, а не вывеской. «Ход заявки и
                        переписка» — это ярлык шкафа: чтобы понять, что тут можно ответить,
