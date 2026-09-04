@@ -814,8 +814,19 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .sup-ta{ width:100%; min-height:60px; padding:9px 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:calc(13.5px*var(--scale)); resize:vertical; }
 .sup-ta:focus{ outline:2px solid var(--navy); outline-offset:1px; }
 .sup-reply__row{ display:flex; justify-content:flex-end; margin-top:8px; }
-.sup-replylinks{ display:flex; gap:18px; margin:14px 0 2px; }
+.sup-replylinks{ display:flex; gap:18px; margin:14px 0 2px; flex-wrap:wrap; }
 [hidden]{ display:none !important; }
+/* Канал обращения (система / мессенджер МАХ) + список всех обращений агента */
+.sup-chan{ display:inline-block; padding:1px 7px; border-radius:5px; background:var(--sel); border:1px solid var(--sel-line); color:var(--navy); font-size:calc(10px*var(--scale)); font-weight:700; vertical-align:middle; }
+.sup-chan--max{ background:color-mix(in srgb,#6D28D9 12%,transparent); border-color:transparent; color:#5B21B6; }
+.sup-aglist{ margin-top:8px; border-top:1px solid var(--line); }
+.sup-agrow{ padding:8px 2px; border-bottom:1px solid var(--line); cursor:pointer; }
+.sup-agrow:hover{ background:var(--hover); }
+.sup-agrow__t{ font-size:calc(12px*var(--scale)); font-weight:600; color:var(--ink); }
+.sup-agrow__m{ font-size:calc(11px*var(--scale)); color:var(--muted); margin-top:2px; }
+.sup-thread{ margin-top:10px; border:1px solid var(--line); border-radius:9px; padding:10px 12px; }
+.sup-thread__h{ font-size:calc(11.5px*var(--scale)); color:var(--muted); margin-bottom:8px; }
+.sup-thread .supchat{ overflow-y:auto; border:none; padding:0; }
 .sup-side{ display:flex; flex-direction:column; gap:10px; }
 .sup-side__box{ border:1px solid var(--line); border-radius:9px; padding:13px; }
 .sup-side__h{ font-size:calc(12px*var(--scale)); color:var(--muted); font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:.03em; }
@@ -1902,7 +1913,7 @@ var SUP=[
     num:'—',holder:'Пименова Ольга Сергеевна',obj:'Kia Rio · Н321ОР124',region:'Красноярский',agent:'Гимальтдинова Алия Ринатовна',sk:'Тинькофф Страхование',type:'Простая',
     what:'Новый расчёт ОСАГО ФЛ, клиент выбрал СК — выпустить полис и выставить счёт.',ac:'Клиент подтвердил данные, ждёт ссылку на оплату.',
     steps:[{d:'21.08 10:30',s:'Новая',c:'Заявка на оформление ОСАГО ФЛ.'}]},
-  {id:'000015176',src:'1c',ball:'us',vid:'Внесение изменений',st:'В работе',sla:20,back:true,
+  {id:'000015162',src:'1c',ball:'us',vid:'Внесение изменений',st:'В работе',sla:20,back:true,
     num:'ХХХ 0662140077',holder:'Сафонов Игорь Петрович',obj:'Hyundai Solaris · Т905ВК124',region:'Красноярский',agent:'Гусарова Елена Сергеевна',sk:'Ренессанс',type:'Сложная',
     what:'Изменение адреса собственника.',ac:'Агент приложил скан прописки — можно вносить изменение.',
     steps:[{d:'21.08 09:10',s:'Новая',c:'Изменение адреса собственника.'},{d:'21.08 11:15',s:'В работе',c:'Агент ответил: приложил скан прописки.'}]},
@@ -2029,7 +2040,8 @@ var SUP_META={
   '000014950':{date:'15.08.2026',resp:'Мартынова Ольга Ивановна'},
   '000015179':{date:'06.08.2026',resp:'Кулагина Мария Сергеевна'},
   '000015180':{date:'15.08.2026',resp:'Мартынова Ольга Ивановна'},
-  '000015182':{date:'02.07.2026',resp:'Денисова Анна Викторовна'}
+  '000015182':{date:'02.07.2026',resp:'Денисова Анна Викторовна'},
+  '000015162':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'}
 };
 SUP.forEach(function(it){ var m=SUP_META[it.id]; if(m){ it.date=m.date; it.resp=m.resp; if(m.days!=null) it.days=m.days; } });
 var supOpen=null, supTab='us', supSrc='all', supSK='all', supVid='all', supStuck=false;
@@ -2178,7 +2190,36 @@ function supDetail(id){
       +'<div class="suphd__task"><div>Задача <b>№'+it.id+'</b></div>'+right+'</div></div>'
     +body;
 }
+/* ── Агент целиком: канал обращения + все его обращения (система · чат · МАХ) + переписка ── */
+function supChanLabel(it){ return it.channel==='max' ? 'Мессенджер МАХ' : (it.src==='chat' ? 'Чат кабинета' : 'Кабинет (1С)'); }
+function supAgentItems(it){ return SUP.filter(function(x){ return x.agent===it.agent && x.id!==it.id; }); }
+function supAgentBox(it){
+  var items=supAgentItems(it);
+  var rows=items.map(function(x){
+    var stl=x.cstatus?procSupLabel(x):(x.st||'');
+    var num=(x.id.indexOf('chat')===0||x.channel==='max')?'':('№ '+x.id+' · ');
+    return '<div class="sup-agrow" onclick="supSelect(\''+x.id+'\')"><div class="sup-agrow__t">'+(x.vid||'Обращение')+(x.channel==='max'?' <span class="sup-chan sup-chan--max">МАХ</span>':'')+'</div><div class="sup-agrow__m">'+num+stl+'</div></div>';
+  }).join('');
+  return '<div class="sup-side__box"><div class="sup-side__h">Агент</div>'
+    +'<div class="kv"><span>ФИО</span><b>'+it.agent+'</b></div>'
+    +'<div class="kv"><span>Канал обращения</span><b>'+supChanLabel(it)+'</b></div>'
+    +'<button class="req__reply" style="margin-top:6px" onclick="supToggle(\'supAgentList\')">Все обращения агента ('+items.length+')</button>'
+    +'<div id="supAgentList" class="sup-aglist" hidden>'+(rows||'<span class="empty-cell">Других обращений нет</span>')+'</div>'
+  +'</div>';
+}
+/* Переписка с агентом по заявке: чат обращения или связанный диалог кабинета (SV по caseId). */
+function supThreadHTML(it){
+  if(it.chat&&it.chat.length) return it.chat.map(supChatMsg).join('');
+  if(typeof SV==='undefined') return '';
+  var row=null; SV.forEach(function(c){ if(c.caseId===it.id) row=c; });
+  if(!row) return '';
+  return (SV_THREADS[row.id]||[]).map(function(m){
+    if(m.sys) return '<div class="svm svm--in" style="opacity:.75">'+m.t+'<small>система</small></div>';
+    return '<div class="svm '+(m.o?'svm--in':'svm--out')+'">'+(m.t||'')+'<small>'+(m.o?'Агент':(m.w||'Поддержка'))+'</small></div>';
+  }).join('');
+}
 function supRequestBody(it){
+  var thread=supThreadHTML(it);
   /* Канон-заявка: статус read-only (меняется только действиями «Хода заявки»); легаси-строки — старый селект. */
   var statusBox=it.cstatus
     ? '<div class="sup-side__box"><div class="sup-side__h">Статус</div><div style="margin-bottom:6px"><span class="sup-stbadge sup-stbadge--'+((PROC_STATUS[it.cstatus]||{}).tone||'proc')+'">'+procSupLabel(it)+'</span></div><div class="proc-wait" style="margin:0">Меняется действиями по заявке.</div></div>'
@@ -2186,6 +2227,7 @@ function supRequestBody(it){
       +'<select class="tselect" style="width:100%" onchange="supSetStatus(\''+it.id+'\',this.value)"><option>'+it.st+'</option><option>В работе</option><option>Ждём оплату</option><option>Ждём документы</option><option>Передана в СК</option><option>Завершена</option></select></div>';
   var side='<div class="sup-side">'
     +statusBox
+    +supAgentBox(it)
     +'<div class="sup-side__box"><div class="sup-side__h">Сервис</div><div class="sup-actions">'
       +(it.cstatus?'':'<button class="btn btn--sm" onclick="toast(\'Приложен новый полис (демо)\')">Приложить новый полис</button>'
       +'<button class="btn btn--sm" onclick="supSendPayLink(\''+it.id+'\')">Ссылка на оплату</button>')
@@ -2210,7 +2252,9 @@ function supRequestBody(it){
     +'<div class="sup-replylinks">'
       +'<button class="req__reply" onclick="supToggle(\'supReplyBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Ответить агенту</button>'
       +'<button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Заметка для своих</button>'
+      +(thread?'<button class="req__reply" onclick="supToggle(\'supThreadBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v13H4z" fill="none"/><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка с агентом</button>':'')
     +'</div>'
+    +(thread?'<div id="supThreadBox" class="sup-thread" hidden><div class="sup-thread__h">Переписка с агентом · '+supChanLabel(it)+' — видна агенту в его диалоге</div><div class="supchat" style="max-height:280px">'+thread+'</div></div>':'')
     +'<div id="supReplyBox" class="sup-reply sup-reply--agent" hidden><div class="sup-reply__h">Ответить агенту <span class="sup-reply__tag">агент видит</span></div>'
       +'<textarea class="sup-ta" id="supReplyA" placeholder="Текст ответа — попадёт в историю заявки и в кабинет агента…"></textarea>'
       +'<div class="sup-reply__row"><button class="btn btn--primary btn--sm" onclick="supReplyAgent(\''+it.id+'\')">Отправить агенту</button></div></div>'
@@ -2235,11 +2279,13 @@ function supChatBody(it){
   var side='<div class="sup-side">'
     +'<div class="sup-side__box"><div class="sup-side__h">Обращение</div>'
       +'<div class="kv"><span>Тип</span><b>'+supKind(it)+'</b></div>'
+      +'<div class="kv"><span>Канал</span><b>'+supChanLabel(it)+(it.channel==='max'?' <span class="sup-chan sup-chan--max">МАХ</span>':'')+'</b></div>'
       +'<div class="kv"><span>Агент</span><b>'+it.agent+'</b></div>'
       +(it.topic?'<div class="kv"><span>Тема</span><span class="sup-topic">#'+it.topic+'</span></div>':'')
       +(it.objref?'<div class="kv"><span>Упомянут объект</span><b>'+it.objref+'</b></div>':'')
       +(it.num!=='—'?'<div class="kv"><span>Договор</span><span class="polnum">'+it.num+'</span></div>':'<div class="kv"><span>Договор</span><b style="color:var(--muted);font-weight:400">не привязан</b></div>')
       +'<div style="margin-top:8px"><button class="btn btn--sm" onclick="toast(\'Привязать договор к вопросу\')">Привязать договор</button></div></div>'
+    +supAgentBox(it)
     +'<div class="sup-side__box"><div class="sup-side__h">Передать (маршрут)</div>'+supRouteBox(it)+'</div>'
     +'<div class="sup-side__box"><div class="sup-side__h">Действия</div><div class="sup-actions"><button class="btn btn--sm" onclick="toast(\'Создана заявка в 1С из вопроса\')">Создать заявку 1С</button><button class="btn btn--sm" onclick="toast(\'Вопрос закрыт\')">Закрыть вопрос</button></div></div>'
   +'</div>';
