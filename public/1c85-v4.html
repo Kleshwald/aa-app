@@ -1415,7 +1415,7 @@ var svQ='', svFPeriod='all', svFType='all', svFUnans=false;
 function screenMessages(){
   if(svOpen) return '<div class="screen active"><div class="chatpage"><div class="chatpage__body">'+svChatDetail(svOpen)+'</div></div></div>';
   if(svChooser) return '<div class="screen active"><div class="chatpage"><div class="chatpage__body">'+svChooserPanel()+'</div></div></div>';
-  return '<div class="screen active"><div class="chatpage">'+svActionsBar()+'<div class="chatpage__body">'+svTable()+'</div></div></div>';
+  return '<div class="screen active"><div class="chatpage"><div class="ptitle">Поддержка</div>'+svActionsBar()+'<div class="chatpage__body">'+svTable()+'</div></div></div>';
 }
 /* Быстрый выбор темы обращения — поддержка сразу видит категорию и быстрее берёт в работу. */
 var SV_QTOPICS=[
