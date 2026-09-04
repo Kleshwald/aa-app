@@ -1410,6 +1410,8 @@ function callBar(name){ var n=(name||'собеседник').replace(/['"<>]/g,'
     +'<button class="callbtn callbtn--video" title="Видеозвонок" onclick="toast(\'Видеозвонок — '+n+' · Система взаимодействия\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>'
   +'</div>'; }
 var svChooser=false;
+/* Фильтры таблицы обращений: поиск + дата + тип + «Неотвеченные» (предикат тот же, что у бейджа «Поддержки»). */
+var svQ='', svFPeriod='all', svFType='all', svFUnans=false;
 function screenMessages(){
   if(svOpen) return '<div class="screen active"><div class="chatpage"><div class="chatpage__body">'+svChatDetail(svOpen)+'</div></div></div>';
   if(svChooser) return '<div class="screen active"><div class="chatpage"><div class="chatpage__body">'+svChooserPanel()+'</div></div></div>';
@@ -1436,11 +1438,30 @@ function svOpenChooser(){ svChooser=true; rerenderChats(); }
 function svCloseChooser(){ svChooser=false; rerenderChats(); }
 /* Чаты — одно лицо «Поддержка» (куратор стал частью поддержки, отдельного канала у агента нет). */
 function svActionsBar(){
-  return '<div class="chatactions">'
-    +'<button class="btn btn--primary chataction" onclick="svOpenChooser()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M4 13v3a2 2 0 0 0 2 2h1v-6H6a2 2 0 0 0-2 1z"/><path d="M20 13v3a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 1z"/><path d="M17 18a3 3 0 0 1-3 3h-2"/></svg>Обратиться в поддержку</button>'
-    +'<span class="chatactions__hint">Куратор и продукт подключаются через поддержку — отдельно писать не нужно.</span>'
+  var kinds=[]; SV.forEach(function(c){ if(c.group==='object'&&c.kind&&kinds.indexOf(c.kind)<0) kinds.push(c.kind); });
+  var typeOpts='<option value="all"'+(svFType==='all'?' selected':'')+'>Все типы</option>'+kinds.map(function(k){ return '<option value="'+k+'"'+(svFType===k?' selected':'')+'>'+k+'</option>'; }).join('');
+  var perOpts=[['all','За всё время'],['today','Сегодня'],['yest','Вчера'],['older','Ранее']].map(function(p){ return '<option value="'+p[0]+'"'+(svFPeriod===p[0]?' selected':'')+'>'+p[1]+'</option>'; }).join('');
+  var unN=SV.filter(function(c){ return c.group==='object' && ((c.unread||0)>0 || c.action); }).length;
+  return '<div class="tbar">'
+    +'<div class="tfield tfield--search"><label>Поиск</label><div class="tsearch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input value="'+svQ.replace(/"/g,'&quot;')+'" placeholder="ФИО, объект, № полиса или текст обращения" oninput="svQ=this.value;svApplyFilters()"/></div></div>'
+    +'<div class="tfield"><label>Дата</label><select class="tselect" onchange="svFPeriod=this.value;svApplyFilters()">'+perOpts+'</select></div>'
+    +'<div class="tfield"><label>Тип вопроса</label><select class="tselect" onchange="svFType=this.value;svApplyFilters()">'+typeOpts+'</select></div>'
+    +'<label class="tcheck"><input type="checkbox"'+(svFUnans?' checked':'')+' onchange="svFUnans=this.checked;svApplyFilters()"/> Неотвеченные'+(unN?' <span class="tcheck__b">'+unN+'</span>':'')+'</label>'
+    +'<button class="btn btn--primary" style="align-self:flex-end;height:40px" onclick="svOpenChooser()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M4 13v3a2 2 0 0 0 2 2h1v-6H6a2 2 0 0 0-2 1z"/><path d="M20 13v3a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 1z"/><path d="M17 18a3 3 0 0 1-3 3h-2"/></svg>Обратиться в поддержку</button>'
   +'</div>';
 }
+/* Дата обращения → корзина для фильтра: демо-строки различаем по подписи «последнего действия». */
+function svDateBucket(c){ var s=(c.last||'').toLowerCase();
+  if(s.indexOf('сейчас')>-1||s.indexOf('сегодня')>-1||/^\d{1,2}:\d{2}/.test(s)) return 'today';
+  if(s.indexOf('вчера')>-1) return 'yest';
+  return 'older'; }
+function svPassFilters(c){
+  if(svFPeriod!=='all' && svDateBucket(c)!==svFPeriod) return false;
+  if(svFType!=='all' && c.kind!==svFType) return false;
+  if(svFUnans && !((c.unread||0)>0 || c.action)) return false;
+  if(svQ){ var q=svQ.toLowerCase().trim(); if(q){ var hay=((c.holder||'')+' '+(c.objName||'')+' '+(c.num||'')+' '+(c.kind||'')+' '+(c.snip||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; } }
+  return true; }
+function svApplyFilters(){ var tb=document.getElementById('svTbody'); if(tb) tb.innerHTML=svRowsHTML(); }
 function svTabsBar(){
   var tabs=[{k:'personal',t:'Личные чаты'},{k:'object',t:'По обращениям'}];
   var h='<div class="chattabs">';
@@ -1532,10 +1553,10 @@ function svAction(c){
   return { label:BALL[cs.ball]||'—', cls:'none' };
 }
 /* Обращения — полноширинная таблица (динамический список 1С): ориентир по ФИО/объекту/дате/статусу. */
-function svTable(){
+function svRowsHTML(){
   var rows='';
   /* Ранжируем как в мессенджере — по времени последнего действия, свежие сверху. */
-  SV.filter(function(c){ return c.group==='object'; }).slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }).forEach(function(c){
+  SV.filter(function(c){ return c.group==='object' && svPassFilters(c); }).slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }).forEach(function(c){
     var st=svStatus(c);
     var act=svAction(c);
     var byDeal = (c.icon==='q')
@@ -1549,10 +1570,13 @@ function svTable(){
       +'<td><span class="st st--'+st.cls+'">'+st.label+'</span></td>'
       +'<td><span class="todo todo--'+act.cls+'">'+act.label+'</span></td></tr>';
   });
-  return '<div class="chatlead"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>Все обращения одной таблицей — и по договорам (изменения, убытки, автопомощник), и вопросы в поддержку. Статус показывает ход: <b>отправлено → в работе у поддержки → ответ получен</b>. Клик по строке открывает переписку.</span></div>'
-    +'<div class="chattable"><div class="list-wrap"><div class="list-scroll"><table class="list list--chat">'
+  if(!rows) rows='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:26px">Ничего не найдено — измените поиск или фильтры.</td></tr>';
+  return rows;
+}
+function svTable(){
+  return '<div class="chattable"><div class="list-wrap"><div class="list-scroll"><table class="list list--chat">'
     +'<thead><tr><th>Обращение</th><th>Тип</th><th>По договору</th><th>Обновлено</th><th>Статус</th><th>Что сделать</th></tr></thead>'
-    +'<tbody>'+rows+'</tbody></table></div></div></div>';
+    +'<tbody id="svTbody">'+svRowsHTML()+'</tbody></table></div></div></div>';
 }
 /* Новое обращение в поддержку (черновик → отправит агент → поддержка возьмёт в работу → ответит). */
 function svNewRequest(topic){ var id='req-n'+Date.now(); var title=topic||'Новое обращение';
@@ -1665,10 +1689,6 @@ function svMain(id){
   } else if(c.group==='client'){ head+='<div class="svmain__meta">Внешний участник — клиент без доступа к базе 1С</div>'; }
   else { head+='<div class="svmain__meta">'+(c.curator?'Куратор — сопровождение, комиссия и КВ':'Личное обсуждение — пишите по любому вопросу, история не теряется')+'</div>'; }
   head+='</div>';
-  var note='';
-  if(c.external) note='<div class="svnote"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Согласие на обработку персональных данных получено. Переписка с внешним участником — через сервер взаимодействия в РФ (152-ФЗ).</div>';
-  else if(c.group==='object' && c.icon==='q') note='<div class="svnote"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Поддержка берёт обращение в работу и отвечает здесь — статус меняется автоматически. Ответ поднимет сигнал «Ждут ваших действий».</div>';
-  else if(c.group==='object') note='<div class="svnote"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Ответы страховой по этой заявке приходят сюда и поднимают сигнал «Ждут ваших действий».</div>';
   function svtool(label,ico,act){ return '<button class="svtool" title="'+label+'" onclick="'+act+'">'+ico+'<span>'+label+'</span></button>'; }
   var callTarget=(c.name||c.holder||'собеседник').replace(/['"<>]/g,'');
   var tools='<div class="svmain__tools">'
@@ -1677,8 +1697,7 @@ function svMain(id){
     +svtool('Файл','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9 9a4 4 0 0 1-6-6l9-9a2.6 2.6 0 0 1 3.7 3.7l-8.5 8.5a1.2 1.2 0 0 1-1.7-1.7l7.6-7.6"/></svg>',"toast('Файл прикреплён')")+'</div>';
   var composer='<div class="svmain__composer"><input id="svMainInput" placeholder="Сообщение…" onkeydown="if(event.key===\'Enter\')svMainSend()"/>'
     +'<button class="btn btn--primary" onclick="svMainSend()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>Отправить</button></div>';
-  var foot='<div class="svmain__foot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8.01"/></svg>Интерфейс «Системы взаимодействия» рисует платформа 1С — здесь показан смысл, а не точный вид.</div>';
-  return head+note+'<div class="svmain__body" id="svMainBody">'+msgs+'</div>'+tools+composer+foot;
+  return head+'<div class="svmain__body" id="svMainBody">'+msgs+'</div>'+tools+composer;
 }
 function selectSV(id){ svCurrent=id; var c=svFind(id); if(c) svTab=c.group; document.getElementById('workscreen').innerHTML=screenMessages(); }
 function switchSvTab(t){ svTab=t; var f=SV.filter(function(c){ return c.group===t; })[0]; if(f) svCurrent=f.id; document.getElementById('workscreen').innerHTML=screenMessages(); }
