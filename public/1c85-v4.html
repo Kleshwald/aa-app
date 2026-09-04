@@ -1092,43 +1092,64 @@ function procReqDocs(id){ var it=supFind(id); if(!it) return; var inp=document.g
 function procPayLink(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procPayAmt'); var amt=inp?parseInt((inp.value||'').replace(/\D/g,''),10):0; if(!amt) amt=2500; it.payAmount=amt; it.payStale=false; it.cstatus='awaiting_payment'; procApply(it,'support','Выставлена доплата за изменение: '+amt.toLocaleString('ru-RU')+' ₽ — ссылка направлена агенту.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Ссылка на доплату направлена агенту'); supRerender(); }
 function procReissue(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procPayAmt2'); var amt=(inp&&inp.value)?parseInt(inp.value.replace(/\D/g,''),10):it.payAmount; if(amt) it.payAmount=amt; it.payStale=false; it.cstatus='awaiting_payment'; procApply(it,'support','Поддержка перевыпустила ссылку на оплату.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Ссылка перевыпущена'); supRerender(); }
 function procAttachPolicy(id){ procSetStatus(id,'done','support','Поддержка внесла изменение в B2B СК, приложила новый полис и сменила № полиса.'); toast('Новый полис приложен — заявка завершена'); supRerender(); }
+/* Переходы канона по видам: cancel (§4) и loss (§5). */
+function procToSK(id){ procSetStatus(id,'under_review','support','Убыток заведён и передан в СК на рассмотрение.'); toast('Передано в СК — на рассмотрении'); supRerender(); }
+function procToSigning(id){ procSetStatus(id,'signing','support','СК согласовала выплату. Соглашение направлено — подпишите у клиента и загрузите.'); toast('Соглашение направлено агенту на подписание'); supRerender(); }
+function procSettle(id){ procSetStatus(id,'settled','support','Отдано на выплату — убыток урегулирован.'); toast('Убыток урегулирован — выплата произведена'); supRerender(); }
+function procCancelDone(id){ procSetStatus(id,'done','support','Договор отправлен в СК на расторжение. Возврат премии — до 14 календарных дней.'); toast('Договор расторгнут — возврат до 14 дней'); supRerender(); }
 function procReject(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procRejReason'); var r=inp?inp.value.trim():''; if(!r){ toast('Укажите причину отказа'); return; } it.rejectReason=r; it.cstatus='rejected'; procApply(it,'support','Отказ: '+r); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Заявка отклонена'); supRerender(); }
-/* Операторская панель хода ВИ + блок причин/файлов (встраиваются в supRequestBody для kind==='change'). */
-function procOpBox(it){ var cs=it.cstatus; var h='<div class="sup-side__box"><div class="sup-side__h">Ход изменения — '+procSupLabel(it)+'</div><div class="sup-actions">';
+/* Операторская панель хода заявки — переходы по канону ВИДА (change §3 / cancel §4 / loss §5).
+   Статус канон-заявки меняется ТОЛЬКО этими действиями (свободной смены нет — «мок ≠ контракт»). */
+function procOpBox(it){ var cs=it.cstatus, k=it.kind||'change';
+  var h='<div class="sup-side__box"><div class="sup-side__h">Ход заявки — '+procSupLabel(it)+'</div><div class="sup-actions">';
   if(cs==='new') h+='<button class="btn btn--primary btn--sm" onclick="procTake(\''+it.id+'\')">Взять в работу</button>';
   if(cs==='in_work'||cs==='docs_uploaded'||cs==='paid'){
     h+='<div class="proc-row"><input id="procDocReq" class="tselect" placeholder="Документы через запятую (СТС, ВУ…)"/><button class="btn btn--sm" onclick="procReqDocs(\''+it.id+'\')">Запросить документы</button></div>';
-    h+='<div class="proc-row"><input id="procPayAmt" class="tselect" placeholder="Сумма доплаты, ₽"/><button class="btn btn--sm" onclick="procPayLink(\''+it.id+'\')">Ссылка на доплату</button></div>';
-    h+='<button class="btn btn--primary btn--sm" onclick="procAttachPolicy(\''+it.id+'\')">Приложить новый полис → Готово</button>';
+    if(k==='change'){
+      h+='<div class="proc-row"><input id="procPayAmt" class="tselect" placeholder="Сумма доплаты, ₽"/><button class="btn btn--sm" onclick="procPayLink(\''+it.id+'\')">Ссылка на доплату</button></div>';
+      h+='<button class="btn btn--primary btn--sm" onclick="procAttachPolicy(\''+it.id+'\')">Приложить новый полис → Готово</button>';
+    } else if(k==='cancel'){
+      h+='<button class="btn btn--primary btn--sm" onclick="procCancelDone(\''+it.id+'\')">Отправить в СК на расторжение → Готово</button>';
+    } else if(k==='loss'){
+      h+='<button class="btn btn--primary btn--sm" onclick="procToSK(\''+it.id+'\')">Завести в СК → На рассмотрении</button>';
+    }
   }
   if(cs==='awaiting_docs') h+='<div class="proc-wait">Мяч у агента — ждём документы: '+(((it.docRequest&&it.docRequest.items)||[]).join(', ')||'—')+'</div>';
   if(cs==='awaiting_payment'){ if(it.payStale) h+='<div class="proc-wait">Агент сообщил: ссылка не открывается.</div><div class="proc-row"><input id="procPayAmt2" class="tselect" placeholder="Новая сумма, ₽ (опц.)"/><button class="btn btn--primary btn--sm" onclick="procReissue(\''+it.id+'\')">Перевыпустить ссылку</button></div>'; else h+='<div class="proc-wait">Мяч у агента — ждём оплату '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽.</div>'; }
-  if(cs==='done') h+='<div class="proc-done">✓ Готово — изменения внесены.</div>';
+  if(cs==='under_review') h+='<div class="proc-wait">Мяч у страховой — заявка на рассмотрении.</div><button class="btn btn--primary btn--sm" onclick="procToSigning(\''+it.id+'\')">СК согласовала → соглашение на подписание</button>';
+  if(cs==='signing') h+='<div class="proc-wait">Мяч у агента — ждём подписанное клиентом соглашение.</div>';
+  if(cs==='signed') h+='<button class="btn btn--primary btn--sm" onclick="procSettle(\''+it.id+'\')">Отдать на выплату → Урегулирован</button>';
+  if(cs==='done'||cs==='settled') h+='<div class="proc-done">✓ '+((PROC_KIND[k]||{}).done||'Готово')+'</div>';
   if(cs==='rejected') h+='<div class="proc-rej">Отказ: '+(it.rejectReason||'')+'</div>';
-  if(cs!=='done'&&cs!=='rejected') h+='<div class="proc-row" style="margin-top:8px"><input id="procRejReason" class="tselect" placeholder="Причина отказа (свободный текст)"/><button class="btn btn--sm" onclick="procReject(\''+it.id+'\')">Отказать</button></div>';
+  if(!(PROC_STATUS[cs]||{}).term) h+='<div class="proc-row" style="margin-top:8px"><input id="procRejReason" class="tselect" placeholder="Причина отказа (свободный текст)"/><button class="btn btn--sm" onclick="procReject(\''+it.id+'\')">Отказать</button></div>';
   return h+'</div></div>';
 }
-function procReasonsBlock(it){ var reasons=(it.reasons||[]).map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('')||'—';
+function procReasonsBlock(it){ var reasons=(it.reasons||[]).length? it.reasons.map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('') : '<span class="empty-cell">'+(it.what||'—')+'</span>';
   var files=(it.attachments||[]).length? it.attachments.map(function(a){ return '<span class="proc-file">'+a.name+(a.by==='agent'?' · агент':'')+'</span>'; }).join('') : '<span class="empty-cell">файлов нет</span>';
   var dr=(it.docRequest&&it.docRequest.items&&it.docRequest.items.length)? '<div class="kv"><span>Запрошены</span><b>'+it.docRequest.items.join(', ')+'</b></div>':'';
-  return '<div class="sup-changebox"><div class="sup-side__h">Причина изменения</div><div class="prg-reasons">'+reasons+'</div>'
+  var rtitle={change:'Причина изменения',cancel:'Причина расторжения',loss:'Описание убытка'}[it.kind]||'Причина обращения';
+  return '<div class="sup-changebox"><div class="sup-side__h">'+rtitle+'</div><div class="prg-reasons">'+reasons+'</div>'
     +'<div class="sup-side__h" style="margin-top:8px">Приложенные файлы</div><div class="proc-files">'+files+'</div>'+dr
     +(it.reasonComment?'<div class="kv"><span>Комментарий агента</span><b>'+it.reasonComment+'</b></div>':'')+'</div>';
 }
 
 /* ===== Мои клиенты — раскладка как в Angular ===== */
 var clientsAttnOnly=false;
-/* «Ждут ваших действий» — единый счёт клиентов, требующих действия агента (мяч у нас). */
-function clientAttnCount(){ return (DEAL.attn?1:0)+CLIENTS.filter(function(c){ return c.attn; }).length; }
 /* Статус строки клиента деривится от АКТИВНОГО кейса (единый словарь) — захардкоженный stl только фолбэк.
+   Все кейсы терминальные → строка возвращается к статусу полиса «Оформлен» (заявка живёт на договоре/в «Завершённых»).
    Тон: янтарь лишь когда строка помечена attn (ждёт агента), иначе тихий синий/зелёный. */
 function clientCaseView(i){
   var c=CLIENTS[i]; if(!c) return null;
-  var act=procForPolicy(i).filter(function(it){ return !(PROC_STATUS[it.cstatus]||{}).term; });
-  if(!act.length) return null;
+  var list=procForPolicy(i); if(!list.length) return null;
+  var act=list.filter(function(it){ return !(PROC_STATUS[it.cstatus]||{}).term; });
+  if(!act.length) return { stl:'Оформлен', cls:'ok', done:true };
   var it=act[0], e=PROC_STATUS[it.cstatus]||{};
   return { stl:procAgentLabel(it), cls: c.attn?'procurgent':(e.tone==='ok'?'ok':'proc') };
 }
+/* Метка «ждёт вас» живая: гаснет, когда кейс строки завершён (иначе врёт после действий оператора). */
+function clientAttnOn(i){ var c=CLIENTS[i]; if(!c||!c.attn) return false; var cv=clientCaseView(i); return !(cv&&cv.done); }
+/* «Ждут ваших действий» — единый счёт клиентов, требующих действия агента (мяч у нас). */
+function clientAttnCount(){ var n=DEAL.attn?1:0; CLIENTS.forEach(function(c,i){ if(clientAttnOn(i)) n++; }); return n; }
 function rerenderClients(){ var w=document.getElementById('workscreen'); if(w) w.innerHTML=screenClients(); }
 function screenClients(){
   var sortArrow='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7.5 6 4l3 3.5"/></svg>';
@@ -1142,9 +1163,9 @@ function screenClients(){
     +'<td class="company"><span class="empty-cell">Подбираем</span></td></tr>';
   }
   CLIENTS.forEach(function(c,i){
-    if(clientsAttnOnly && !c.attn) return;
+    if(clientsAttnOnly && !clientAttnOn(i)) return;
     var obj = c.p.indexOf('ОСАГО')>-1 || c.sub ? c.o+(c.sub?' <span class="plate">('+c.sub+')</span>':'') : c.o;
-    var attn = c.attn ? '<div class="cl-attn">'+c.attnAct+'</div>' : '';
+    var attn = clientAttnOn(i) ? '<div class="cl-attn">'+c.attnAct+'</div>' : '';
     var cv=clientCaseView(i);
     rows += '<tr class="click'+(c.sel?' sel':'')+'" onclick="openContract('+i+')">'
       +'<td class="date">'+c.d+'</td><td>'+c.n+'</td><td>'+obj+'</td>'
@@ -2127,12 +2148,16 @@ function supDetail(id){
     +body;
 }
 function supRequestBody(it){
+  /* Канон-заявка: статус read-only (меняется только действиями «Хода заявки»); легаси-строки — старый селект. */
+  var statusBox=it.cstatus
+    ? '<div class="sup-side__box"><div class="sup-side__h">Статус</div><div style="margin-bottom:6px"><span class="sup-stbadge sup-stbadge--'+((PROC_STATUS[it.cstatus]||{}).tone||'proc')+'">'+procSupLabel(it)+'</span></div><div class="proc-wait" style="margin:0">Меняется действиями в «Ходе заявки».</div></div>'
+    : '<div class="sup-side__box"><div class="sup-side__h">Статус</div>'
+      +'<select class="tselect" style="width:100%" onchange="supSetStatus(\''+it.id+'\',this.value)"><option>'+it.st+'</option><option>В работе</option><option>Ждём оплату</option><option>Ждём документы</option><option>Передана в СК</option><option>Завершена</option></select></div>';
   var side='<div class="sup-side">'
-    +'<div class="sup-side__box"><div class="sup-side__h">Статус</div>'
-      +'<select class="tselect" style="width:100%" onchange="supSetStatus(\''+it.id+'\',this.value)"><option>'+it.st+'</option><option>В работе</option><option>Ждём оплату</option><option>Ждём документы</option><option>Передана в СК</option><option>Завершена</option></select></div>'
+    +statusBox
     +'<div class="sup-side__box"><div class="sup-side__h">Действия оператора</div><div class="sup-actions">'
-      +'<button class="btn btn--sm" onclick="toast(\'Приложен новый полис (демо)\')">Приложить новый полис</button>'
-      +'<button class="btn btn--sm" onclick="supSendPayLink(\''+it.id+'\')">Ссылка на оплату</button>'
+      +(it.cstatus?'':'<button class="btn btn--sm" onclick="toast(\'Приложен новый полис (демо)\')">Приложить новый полис</button>'
+      +'<button class="btn btn--sm" onclick="supSendPayLink(\''+it.id+'\')">Ссылка на оплату</button>')
       +'<button class="btn btn--sm" onclick="toast(\'Документы прикреплены (демо)\')">Прикрепить документы</button>'
       +'<button class="btn btn--sm" onclick="toast(\'Ответственный изменён (демо)\')">Сменить ответственного</button>'
       +'<button class="btn btn--sm" onclick="toast(\'Открыт полис — '+it.num+'\')">Посмотреть полис</button>'
@@ -2149,7 +2174,7 @@ function supRequestBody(it){
       +'<div class="sup-fld sup-fld--full"><label>Что нужно сделать</label><div class="sup-fld__v">'+it.what+'</div></div>'
       +'<div class="sup-fld sup-fld--full"><label>Комментарий и действия агента</label><div class="sup-fld__v">'+it.ac+'</div></div>'
     +'</div>'
-    +(it.cstatus&&it.kind==='change'?procReasonsBlock(it)+procOpBox(it):'')
+    +(it.cstatus?procReasonsBlock(it)+procOpBox(it):'')
     +'<div class="sup-reply sup-reply--agent"><div class="sup-reply__h">Ответить агенту <span class="sup-reply__tag">агент видит</span></div>'
       +'<textarea class="sup-ta" id="supReplyA" placeholder="Текст ответа — появится в кабинете агента и в чате…"></textarea>'
       +'<div class="sup-reply__row"><button class="btn btn--primary btn--sm" onclick="supReplyAgent(\''+it.id+'\')">Отправить агенту</button></div></div>'
@@ -2434,7 +2459,7 @@ function notifIco(k){ return k==='msg'
   ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>'
   : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg>'; }
 /* ===== Колокольчик — 3 живых блока, только актуальное, каждый проваливается в свой раздел ===== */
-function svAttnItems(){ var a=[]; if(DEAL.attn) a.push({title:DEAL.n,body:DEAL.attnAct,nav:'svGoClientsAttn()'}); CLIENTS.forEach(function(c,i){ if(c.attn) a.push({title:c.n,body:c.attnAct,nav:'svOpenClient('+i+')'}); }); return a; }
+function svAttnItems(){ var a=[]; if(DEAL.attn) a.push({title:DEAL.n,body:DEAL.attnAct,nav:'svGoClientsAttn()'}); CLIENTS.forEach(function(c,i){ if(clientAttnOn(i)) a.push({title:c.n,body:c.attnAct,nav:'svOpenClient('+i+')'}); }); return a; }
 function svReplyItems(){ return SV.filter(function(c){ return c.group==='object' && c.icon==='q' && c.unread; }).map(function(c){ return {title:c.holder,body:c.snip,nav:"openDiscussion('"+c.id+"')"}; }); }
 function svGoClientsAttn(){ clientsAttnOnly=true; closeSV(); go('clients'); }
 function svOpenClient(i){ closeSV(); openContract(i); }
