@@ -524,6 +524,36 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .req__upload{ display:inline-flex; align-items:center; gap:7px; margin-top:11px; height:36px; padding:0 14px; border:1px solid var(--warn); border-radius:8px; color:var(--warn); font-size:calc(12.5px*var(--scale)); font-weight:600; cursor:pointer; background:var(--card); }
 .req__reply{ margin-top:11px; background:none; border:none; color:var(--navy); font:inherit; font-size:calc(12.5px*var(--scale)); font-weight:600; cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:6px; }
 .win[data-1ctheme='dark'] .req__reply{ color:var(--blue); }
+/* --- Заявка на договоре (канон 10a): карточка, бейдж статуса, действия, история --- */
+.prg{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:4px 0 12px; background:var(--card); }
+.prg--act{ border-color:color-mix(in srgb,var(--warn) 45%,var(--line)); background:color-mix(in srgb,var(--warn) 5%,var(--card)); }
+.prg__top{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+.req__num{ color:var(--muted); font-size:calc(12px*var(--scale)); font-variant-numeric:tabular-nums; }
+.prg-badge{ margin-left:auto; padding:3px 10px; border-radius:999px; font-size:calc(11.5px*var(--scale)); font-weight:600; white-space:nowrap; }
+.prg-badge--wait{ background:color-mix(in srgb,var(--muted) 14%,transparent); color:var(--muted); }
+.prg-badge--proc{ background:color-mix(in srgb,var(--wait) 14%,transparent); color:var(--wait); }
+.prg-badge--pay{ background:color-mix(in srgb,var(--warn) 15%,transparent); color:var(--warn); }
+.prg-badge--ok{ background:color-mix(in srgb,var(--ok) 14%,transparent); color:var(--ok); }
+.prg-badge--draft{ background:color-mix(in srgb,var(--muted) 14%,transparent); color:var(--muted); }
+.prg-reasons{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 8px; }
+.prg-chip{ padding:2px 9px; border:1px solid var(--sel-line); background:var(--sel); border-radius:6px; font-size:calc(11.5px*var(--scale)); color:var(--ink); }
+.prg-need{ color:var(--warn); font-size:calc(12.5px*var(--scale)); font-weight:600; margin:2px 0 8px; }
+.prg-wait{ color:var(--muted); font-size:calc(12.5px*var(--scale)); margin:2px 0 2px; }
+.prg-done{ color:var(--ok); font-size:calc(12.5px*var(--scale)); font-weight:600; margin:2px 0 2px; }
+.prg-rej{ color:var(--warn); font-size:calc(12.5px*var(--scale)); margin:2px 0 2px; }
+.prg-pay{ margin:2px 0 4px; font-size:calc(13px*var(--scale)); }
+.prg-disc{ color:var(--muted); font-size:calc(11.5px*var(--scale)); margin:6px 0 8px; padding:7px 10px; background:var(--sel); border:1px solid var(--sel-line); border-radius:8px; }
+.prg-stale{ color:var(--muted); font-size:calc(12px*var(--scale)); margin-top:6px; }
+.prg-payrow{ display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+.prg__hist{ margin-top:9px; }
+.prg__histbtn{ background:none; border:none; padding:0; color:var(--muted); font:inherit; font-size:calc(11.5px*var(--scale)); cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+.prg__histbtn:hover{ color:var(--ink); }
+.prg__timeline{ display:none; margin-top:8px; border-top:1px dashed var(--line); padding-top:8px; }
+.prg__timeline.show{ display:block; }
+.prg__ev{ display:grid; grid-template-columns:92px 175px 1fr; gap:10px; padding:3px 0; font-size:calc(11.5px*var(--scale)); }
+.prg__evd{ color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.prg__evs{ font-weight:600; }
+.prg__evc{ color:var(--muted); }
 .none-note{ color:var(--muted); font-size:calc(12.5px*var(--scale)); }
 /* В узкой правой колонке заголовок и счётчик — в столбик (иначе «ещё» переносится некрасиво). */
 .cross-head{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; margin:0 0 8px; }
@@ -943,12 +973,18 @@ var PROC_STATUS={
   'docs_uploaded':{ag:'Документы загружены',sup:'Документы загружены',ball:'us',tone:'proc'},
   'awaiting_payment':{ag:'Ожидаем оплаты',sup:'Ожидаем оплаты',ball:'agent',tone:'pay'},
   'paid':{ag:'Оплачен',sup:'Оплачен',ball:'us',tone:'proc'},
+  'under_review':{ag:'На рассмотрении у СК',sup:'На рассмотрении',ball:'insurer',tone:'proc'},
+  'signing':{ag:'Подписание соглашения',sup:'Подписание соглашения',ball:'agent',tone:'pay'},
+  'signed':{ag:'Соглашение подписано',sup:'Соглашение подписано',ball:'us',tone:'proc'},
+  'settled':{ag:'Урегулирован — выплата произведена',sup:'Урегулирован',ball:'done',tone:'ok'},
   'done':{ag:'Изменения внесены',sup:'Готово',ball:'done',tone:'ok'},
   'rejected':{ag:'Отказ',sup:'Отказ',ball:'done',tone:'draft'}
 };
+/* Вид заявки: заголовок + терминал «done» словами вида (10a: у убытка и расторжения свой итог). */
+var PROC_KIND={change:{t:'Внесение изменений',done:'Изменения внесены'},cancel:{t:'Расторжение договора',done:'Договор расторгнут'},loss:{t:'Урегулирование убытка',done:'Убыток урегулирован'}};
 /* Нейтральные тексты для истории (не раскрывают агенту слово «Новая»). */
-var PROC_FALLBACK={'new':'Заявка создана','in_work':'Заявка в работе у поддержки','awaiting_docs':'Запрошены документы','docs_uploaded':'Документы загружены','awaiting_payment':'Выставлена доплата','paid':'Оплата подтверждена','done':'Изменения внесены, новый полис приложен','rejected':'Отказ по заявке'};
-function procAgentLabel(it){ var s=PROC_STATUS[it.cstatus]; return s?s.ag:it.st; }
+var PROC_FALLBACK={'new':'Заявка создана','in_work':'Заявка в работе у поддержки','awaiting_docs':'Запрошены документы','docs_uploaded':'Документы загружены','awaiting_payment':'Выставлена доплата','paid':'Оплата подтверждена','under_review':'Передано страховой на рассмотрение','signing':'Соглашение готово к подписанию','signed':'Соглашение подписано','settled':'Урегулировано, выплата произведена','done':'Заявка завершена','rejected':'Отказ по заявке'};
+function procAgentLabel(it){ if(it.cstatus==='done'&&PROC_KIND[it.kind]) return PROC_KIND[it.kind].done; var s=PROC_STATUS[it.cstatus]; return s?s.ag:it.st; }
 function procSupLabel(it){ var s=PROC_STATUS[it.cstatus]; return s?s.sup:it.st; }
 function procIsAgentBall(it){ var s=PROC_STATUS[it.cstatus]; return s&&s.ball==='agent'; }
 /* Применить cstatus: ball, sup-лейбл (st), флаги очереди (fresh/back), шаг в ход дела (canonical cs для лейбла по роли). */
@@ -1002,12 +1038,15 @@ function screenChange(){ var c=CLIENTS[changeIdx]||CLIENTS[0];
 }
 
 /* --- Прогресс заявки на договоре (сторона агента) --- */
-function procForPolicy(idx){ return SUP.filter(function(it){ return it.kind==='change' && it.policyIdx===idx; }).sort(function(a,b){ return (b._ts||0)-(a._ts||0); }); }
+function procForPolicy(idx){ return SUP.filter(function(it){ return it.cstatus && it.policyIdx===idx; }).sort(function(a,b){ return (b._ts||0)-(a._ts||0); }); }
 function procActiveReq(idx){ var list=procForPolicy(idx);
   if(!list.length) return '<p class="none-note">Активных заявок по договору нет — все обращения закрыты.</p>';
-  return list.map(function(it){ var s=PROC_STATUS[it.cstatus]; var agBall=procIsAgentBall(it);
-    var badge='<span class="prg-badge prg-badge--'+s.tone+'">'+procAgentLabel(it)+'</span>';
-    var reasons='<div class="prg-reasons">'+it.reasons.map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('')+'</div>';
+  return list.map(function(it){ var s=PROC_STATUS[it.cstatus]||{}; var agBall=procIsAgentBall(it);
+    var kindT=(PROC_KIND[it.kind]||{}).t||it.vid||'Заявка';
+    var badge='<span class="prg-badge prg-badge--'+(s.tone||'proc')+'">'+procAgentLabel(it)+'</span>';
+    var reasons=(it.reasons&&it.reasons.length)
+      ? '<div class="prg-reasons">'+it.reasons.map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('')+'</div>'
+      : (it.what?'<p class="card__lead" style="margin:4px 0 8px">'+it.what+'</p>':'');
     var action='';
     if(it.cstatus==='awaiting_docs'){
       var req=(it.docRequest&&it.docRequest.items&&it.docRequest.items.length)? '<div class="prg-need">Нужны документы: '+it.docRequest.items.join(', ')+'</div>':'<div class="prg-need">Поддержка запросила документы.</div>';
@@ -1016,17 +1055,22 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
       var disc='<div class="prg-disc">⚠ Ссылка на оплату может стать недействительной. Если оплата не проходит — запросите новую у поддержки.</div>';
       if(it.payStale) action='<div class="prg-pay"><b>К доплате: '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽</b><div class="prg-stale">Вы запросили новую ссылку — поддержка перевыставит.</div></div>';
       else action='<div class="prg-pay"><b>К доплате: '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽</b>'+disc+'<div class="prg-payrow"><button class="btn btn--primary btn--sm" onclick="procAgentPay(\''+it.id+'\')">Оплатить '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽</button><button class="btn btn--sm" onclick="procReqNewLink(\''+it.id+'\')">Ссылка не открывается</button></div></div>';
-    } else if(it.cstatus==='done'){ action='<div class="prg-done">✓ Изменения внесены — новый полис доступен в документах.</div>'; }
+    } else if(it.cstatus==='signing'){
+      action='<div class="prg-need">Соглашение о выплате готово — подпишите у клиента и загрузите скан.</div><button class="btn btn--primary btn--sm" onclick="procAgentSign(\''+it.id+'\')">Загрузить подписанное соглашение</button>';
+    } else if(it.cstatus==='under_review'){ action='<div class="prg-wait">Заявка у страховой — на рассмотрении. Ответ придёт сюда и оповещением.</div>'; }
+    else if(it.cstatus==='settled'){ action='<div class="prg-done">✓ Урегулировано — выплата произведена.</div>'; }
+    else if(it.cstatus==='done'){ action='<div class="prg-done">✓ '+((PROC_KIND[it.kind]||{}).done||'Заявка завершена')+(it.kind==='change'?' — новый полис доступен в документах.':'.')+'</div>'; }
     else if(it.cstatus==='rejected'){ action='<div class="prg-rej">Отказано'+(it.rejectReason?': '+it.rejectReason:'')+'. Вы можете подать заявку заново.</div>'; }
     else { action='<div class="prg-wait">Заявка у поддержки — ждём ответа.</div>'; }
     var chatBtn=(CLIENTS[idx]&&CLIENTS[idx].chat)? '<div style="margin-top:6px"><button class="req__reply" onclick="openDiscussion(\''+CLIENTS[idx].chat+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Открыть переписку по обращению — в Чатах →</button></div>':'';
     var hist='<div class="prg__hist"><button class="prg__histbtn" onclick="this.nextElementSibling.classList.toggle(\'show\')">Показать историю статусов</button><div class="prg__timeline">'+it.steps.map(function(st){ var lbl=st.cs&&PROC_STATUS[st.cs]?PROC_STATUS[st.cs].ag:(st.s||''); return '<div class="prg__ev"><span class="prg__evd">'+st.d+'</span><span class="prg__evs">'+lbl+'</span><span class="prg__evc">'+st.c+'</span></div>'; }).join('')+'</div></div>';
-    return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">Внесение изменений</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+reasons+action+hist+chatBtn+'</div>';
+    return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+reasons+action+hist+chatBtn+'</div>';
   }).join('');
 }
 /* Действия агента */
 function procAgentUpload(id){ var it=supFind(id); if(!it) return; it.attachments=(it.attachments||[]).concat([{name:'Документ агента.pdf',by:'agent',at:'сейчас'}]); it.docRequest=null; it.cstatus='docs_uploaded'; procApply(it,'agent','Агент приложил запрошенные документы.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Документы отправлены поддержке'); render('contract',it.policyIdx); }
 function procAgentPay(id){ var it=supFind(id); if(!it) return; it.payStale=false; it.cstatus='paid'; procApply(it,'agent','Агент подтвердил оплату доплаты '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Оплата отправлена — поддержка продолжит оформление'); render('contract',it.policyIdx); }
+function procAgentSign(id){ var it=supFind(id); if(!it) return; it.attachments=(it.attachments||[]).concat([{name:'Соглашение (подписано).pdf',by:'agent',at:'сейчас'}]); it.cstatus='signed'; procApply(it,'agent','Агент загрузил подписанное клиентом соглашение.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Соглашение отправлено — страховая произведёт выплату'); render('contract',it.policyIdx); }
 function procReqNewLink(id){ var it=supFind(id); if(!it) return; it.payStale=true; it.ball='us'; it.back=true; it._ts=Date.now(); (it.steps=it.steps||[]).push({d:'сейчас',cs:'awaiting_payment',c:'Агент: ссылка на оплату не открывается — прошу новую.'}); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Запрос новой ссылки отправлен поддержке'); render('contract',it.policyIdx); }
 /* Действия оператора (переходы канона) */
 function procTake(id){ procSetStatus(id,'in_work','support','Поддержка взяла заявку в работу.'); toast('Заявка в работе'); supRerender(); }
@@ -1837,8 +1881,49 @@ var SUP=[
     what:'ОСАГО ФЛ оформлен, полис выпущен.',ac:'Полис направлен агенту.',
     steps:[{d:'15.08 10:00',s:'Новая',c:'Оформление ОСАГО ФЛ.'},{d:'15.08 14:00',s:'Полис оформлен',c:'Направлен агенту.'}]}
 ];
+/* --- Канон-сиды (10a): заявки строк «Мои клиенты» — те же объекты видны на договоре агента И в очереди оператора. --- */
+function seedCase(o){ var c=CLIENTS[o.idx]; if(!c) return; var s=PROC_STATUS[o.cstatus]||{};
+  SUP.push({ id:o.id, src:'1c', kind:o.kind, vid:(PROC_KIND[o.kind]||{}).t||'Заявка', cstatus:o.cstatus, policyIdx:o.idx,
+    ball:s.ball||'us', st:s.sup||'', sla:o.sla||0, fresh:o.cstatus==='new',
+    num:c.num, holder:c.n, obj:c.o+(c.sub?' · '+c.sub:''), region:'Красноярский',
+    agent:'Филь Виктория Викторовна', sk:c.sk, type:o.type||'Простая',
+    what:o.what, ac:o.ac||'', reasons:o.reasons||[], attachments:[],
+    docRequest:o.docRequest||null, payAmount:o.payAmount||0, payStale:!!o.payStale,
+    steps:o.steps, _ts:Date.now()-(o.ago||1)*3600000 }); }
+seedCase({idx:0,id:'000015171',kind:'change',cstatus:'awaiting_docs',ago:2,reasons:['policy-error'],docRequest:{items:['Справка о ДТП']},
+  what:'Изменение по договору после ДТП.',ac:'Ждём справку о ДТП от агента.',
+  steps:[{d:'21.08 10:02',cs:'new',c:'Заявка создана из кабинета.'},{d:'21.08 10:40',cs:'in_work',c:'Ваша заявка принята в работу.'},{d:'21.08 12:15',cs:'awaiting_docs',c:'Приложите, пожалуйста, справку о ДТП.'}]});
+seedCase({idx:1,id:'000015172',kind:'loss',cstatus:'signing',ago:4,type:'Сложная',
+  what:'Убыток по ОСАГО — соглашение о выплате 64 200 ₽ готово.',ac:'Ждём подписанное клиентом соглашение.',
+  steps:[{d:'18.08 09:30',cs:'new',c:'Убыток заявлен.'},{d:'19.08 11:00',cs:'under_review',c:'Передано страховой на рассмотрение.'},{d:'21.08 09:00',cs:'signing',c:'Соглашение о выплате 64 200 ₽ готово — подпишите у клиента и загрузите.'}]});
+seedCase({idx:3,id:'000015173',kind:'cancel',cstatus:'awaiting_docs',ago:6,docRequest:{items:['Заявление на расторжение']},
+  what:'Расторжение полиса ОСАГО — клиент продал автомобиль.',ac:'Ждём подписанное заявление от агента.',
+  steps:[{d:'20.08 15:00',cs:'new',c:'Заявка на расторжение создана.'},{d:'21.08 09:10',cs:'awaiting_docs',c:'Приложите заявление на расторжение с подписью клиента.'}]});
+seedCase({idx:5,id:'000015174',kind:'change',cstatus:'new',ago:1,reasons:['add-driver'],
+  what:'Добавление водителя в полис.',ac:'',
+  steps:[{d:'21.08 12:40',cs:'new',c:'Заявка создана из кабинета.'}]});
+seedCase({idx:8,id:'000015175',kind:'loss',cstatus:'under_review',ago:26,type:'Сложная',
+  what:'Убыток по НС «Спорт» — травма на тренировке.',ac:'Полный пакет документов передан в Югорию.',
+  steps:[{d:'17.08 10:00',cs:'new',c:'Убыток заявлен.'},{d:'18.08 13:00',cs:'docs_uploaded',c:'Документы загружены.'},{d:'19.08 10:00',cs:'under_review',c:'Передано в Югорию на рассмотрение.'}]});
+seedCase({idx:9,id:'000015176',kind:'change',cstatus:'awaiting_payment',ago:3,reasons:['replace-plate-sts'],payAmount:1350,
+  what:'Замена ГРЗ и СТС — выставлена доплата.',ac:'Ссылка на оплату направлена агенту.',
+  steps:[{d:'20.08 11:00',cs:'new',c:'Заявка создана.'},{d:'21.08 10:20',cs:'awaiting_payment',c:'Выставлена доплата 1 350 ₽ — ссылка направлена.'}]});
+seedCase({idx:10,id:'000015177',kind:'change',cstatus:'awaiting_payment',ago:20,reasons:['add-driver'],payAmount:980,
+  what:'Добавление водителя — доплата, ссылка у клиента.',ac:'Клиент оплачивает по ссылке.',
+  steps:[{d:'19.08 16:00',cs:'new',c:'Заявка создана.'},{d:'20.08 12:00',cs:'awaiting_payment',c:'Выставлена доплата 980 ₽ — ссылка направлена клиенту.'}]});
+seedCase({idx:13,id:'000015178',kind:'loss',cstatus:'awaiting_docs',ago:8,docRequest:{items:['Чеки на лечение']},type:'Сложная',
+  what:'Убыток по НС «Спорт» — расчёт выплаты.',ac:'Ждём чеки на лечение от агента.',
+  steps:[{d:'19.08 14:00',cs:'new',c:'Убыток заявлен.'},{d:'21.08 09:40',cs:'awaiting_docs',c:'Приложите чеки на лечение для расчёта выплаты.'}]});
 /* Дата + Ответственный (оператор поддержки) — колонки боевой «Мои заявки». Кладём метой, чтобы не трогать массив. */
 var SUP_META={
+  '000015171':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
+  '000015172':{date:'21.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015173':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
+  '000015174':{date:'21.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015175':{date:'19.08.2026',resp:'Кулагина Мария Сергеевна'},
+  '000015176':{date:'21.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015177':{date:'20.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015178':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
   '000015168':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
   '000015153':{date:'21.08.2026',resp:'Мартынова Ольга Ивановна'},
   '000015147':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'},
@@ -2034,6 +2119,7 @@ function supRequestBody(it){
       +'<div class="sup-fld sup-fld--full"><label>Что нужно сделать</label><div class="sup-fld__v">'+it.what+'</div></div>'
       +'<div class="sup-fld sup-fld--full"><label>Комментарий и действия агента</label><div class="sup-fld__v">'+it.ac+'</div></div>'
     +'</div>'
+    +(it.cstatus&&it.kind==='change'?procReasonsBlock(it)+procOpBox(it):'')
     +'<div class="sup-reply sup-reply--agent"><div class="sup-reply__h">Ответить агенту <span class="sup-reply__tag">агент видит</span></div>'
       +'<textarea class="sup-ta" id="supReplyA" placeholder="Текст ответа — появится в кабинете агента и в чате…"></textarea>'
       +'<div class="sup-reply__row"><button class="btn btn--primary btn--sm" onclick="supReplyAgent(\''+it.id+'\')">Отправить агенту</button></div></div>'
@@ -2069,7 +2155,7 @@ function supChatBody(it){
   return '<div class="supcard">'+main+side+'</div>';
 }
 function supTimeline(it){
-  var rows=(it.steps||[]).map(function(s){ var pill=s.internal?'pay':'proc'; var col=s.internal?' style="color:var(--warn)"':''; return '<tr><td>'+s.d+'</td><td><span class="st st--'+pill+'">'+s.s+'</span></td><td'+col+'>'+s.c+'</td></tr>'; }).join('');
+  var rows=(it.steps||[]).map(function(s){ var pill=s.internal?'pay':'proc'; var col=s.internal?' style="color:var(--warn)"':''; var lbl=(s.cs&&PROC_STATUS[s.cs])?PROC_STATUS[s.cs].sup:(s.s||''); return '<tr><td>'+s.d+'</td><td><span class="st st--'+pill+'">'+lbl+'</span></td><td'+col+'>'+s.c+'</td></tr>'; }).join('');
   return '<div class="suptl"><h3>Ход дела</h3><div class="list-wrap" style="margin:0"><div class="list-scroll"><table class="list"><thead><tr><th>Дата</th><th>Статус</th><th>Комментарий</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
 }
 function supFoot(it){ return '<div class="supfoot"><button class="btn btn--sm" onclick="supBack()">Закрыть</button><button class="btn btn--primary btn--sm" onclick="supSave(\''+it.id+'\')">Сохранить</button></div>'; }
