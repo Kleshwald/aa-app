@@ -911,7 +911,7 @@ var CLIENTS = [
   {d:'16.07.2026',n:'Ершова Марина Павловна',o:'Skoda Octavia',sub:'Е222ХМ124',num:'ТТТ 7052661849',p:'ОСАГО',price:'9 940',proc:'change',procL:'Изменение',urgent:true,st:'procurgent',sti:'alert',stl:'Ожидаем оплаты',sk:'Согласие',attn:true,attnAct:'Запросите новую ссылку'},
   {d:'15.07.2026',n:'Никитин Владимир Олегович',o:'Renault Duster',sub:'Е553РТ124',num:'ТТТ 7049221056',p:'ОСАГО',price:'11 260',proc:'change',procL:'Изменение',urgent:false,st:'proc',sti:'clock',stl:'Ожидаем оплаты',sk:'Зетта',chat:'d-pay'},
   {d:'14.07.2026',n:'Фёдорова Татьяна Михайловна',o:'Nissan Qashqai',sub:'У884КА124',num:'ТТТ 7061007342',p:'ОСАГО',price:'10 050',st:'ok',sti:'check',stl:'Оформлен',sk:'Ренессанс'},
-  {d:'12.07.2026',n:'Осипов Максим Юрьевич',o:'Здоровье',sub:'',num:'РРР-40560421',p:'Несч. случай',price:'2 100',st:'ok',sti:'check',stl:'Оформлен',sk:'СОГАЗ'},
+  {d:'12.07.2026',n:'Осипов Максим Юрьевич',o:'Здоровье',sub:'',num:'РРР-40560421',p:'Несч. случай',price:'2 100',st:'ok',sti:'check',stl:'Оформлен',sk:'СОГАЗ',chat:'d-settled'},
   {d:'11.07.2026',n:'Гусев Пётр Ильич',o:'Здоровье',sub:'',num:'РРР-40563377',p:'НС Спорт',price:'2 400',proc:'loss',procL:'Урегулирование',urgent:true,st:'procurgent',sti:'alert',stl:'Ожидаем документы',sk:'Ренессанс',attn:true,attnAct:'Приложите чеки на лечение'},
   {d:'10.07.2026',n:'Данилова Светлана Борисовна',o:'ВАЗ Granta',sub:'С317ОР124',num:'ТТТ 7047339815',p:'ОСАГО',price:'5 990',st:'draft',sti:'edit',stl:'Черновик',sk:'РГС',attn:true,attnAct:'Завершите оформление'},
   {d:'08.07.2026',n:'Тихонов Артём Валерьевич',o:'UAZ Patriot',sub:'М668ВК124',num:'ТТТ 7055120097',p:'ОСАГО',price:'13 470',st:'ok',sti:'check',stl:'Оформлен',sk:'Согласие'}
@@ -1077,7 +1077,7 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
     else if(it.cstatus==='rejected'){ action='<div class="prg-rej">Отказ'+(it.rejectReason?' — '+it.rejectReason:'')+'</div><button class="btn btn--sm" onclick="'+(it.kind==='change'?('openChange('+idx+')'):'toast(\'Повторная подача — через новую заявку из договора\')')+'">Подать заявку заново</button>'; }
     else { action='<div class="prg-wait">Заявка у поддержки — ждём ответа.</div>'; }
     var chatBtn=(CLIENTS[idx]&&CLIENTS[idx].chat)? '<div style="margin-top:6px"><button class="req__reply" onclick="openDiscussion(\''+CLIENTS[idx].chat+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Открыть переписку по обращению — в Чатах →</button></div>':'';
-    var hist='<div class="prg__hist"><button class="prg__histbtn" onclick="this.nextElementSibling.classList.toggle(\'show\')">Показать историю статусов</button><div class="prg__timeline">'+it.steps.map(function(st){ var lbl=st.cs&&PROC_STATUS[st.cs]?PROC_STATUS[st.cs].ag:(st.s||''); return '<div class="prg__ev"><span class="prg__evd">'+st.d+'</span><span class="prg__evs">'+lbl+'</span><span class="prg__evc">'+st.c+'</span></div>'; }).join('')+'</div></div>';
+    var hist='<div class="prg__hist"><button class="prg__histbtn" onclick="this.nextElementSibling.classList.toggle(\'show\')">Показать историю статусов</button><div class="prg__timeline">'+it.steps.filter(function(st){ return !st.internal; }).map(function(st){ var lbl=st.cs&&PROC_STATUS[st.cs]?PROC_STATUS[st.cs].ag:(st.s||''); return '<div class="prg__ev"><span class="prg__evd">'+st.d+'</span><span class="prg__evs">'+lbl+'</span><span class="prg__evc">'+st.c+'</span></div>'; }).join('')+'</div></div>';
     return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+reasons+action+hist+chatBtn+'</div>';
   }).join('')+closedBlock;
 }
@@ -1459,6 +1459,7 @@ var svChooser=false;
    svSeg: Активные | Завершённые (терминал уходит в «Завершённые» после первого открытия — правило Анвара). */
 var svQ='', svFPeriod='all', svFType='all', svFUnans=false, svSeg='active';
 function screenMessages(){
+  if(typeof svSyncAll==='function') svSyncAll();
   if(svOpen) return '<div class="screen active"><div class="chatpage"><div class="chatpage__body">'+svChatDetail(svOpen)+'</div></div></div>';
   if(svChooser) return '<div class="screen active"><div class="chatpage"><div class="chatpage__body">'+svChooserPanel()+'</div></div></div>';
   return '<div class="screen active"><div class="chatpage"><div class="ptitle">Поддержка</div>'+svActionsBar()+'<div class="chatpage__body">'+svTable()+'</div></div></div>';
@@ -1521,6 +1522,14 @@ function svTabsBar(){
 /* ═══ Статусная модель обращений — ЕДИНЫЙ словарь PROC_STATUS (канон 10a §7.1). ═══
    SV-строки (c.st = ключ канона) читают тот же объект, что договор и оператор:
    один статус = одни слова, один тон, один «мяч» на всех поверхностях. */
+/* Связанная канон-заявка SUP — один источник правды для диалога (статус/доплата/история). */
+function svCase(c){ return (c&&c.caseId&&typeof supFind==='function')? supFind(c.caseId):null; }
+function svSyncFromCase(c){ var k=svCase(c); if(!k) return c;
+  c.st=k.cstatus; c.payStale=!!k.payStale;
+  if(k.payAmount) c.payAmount=k.payAmount.toLocaleString('ru-RU')+' ₽';
+  if(k.cstatus==='rejected') c.rejectReason=k.rejectReason;
+  return c; }
+function svSyncAll(){ if(typeof SV!=='undefined') SV.forEach(svSyncFromCase); }
 /* Текущий статус обращения (агентский лейбл; терминал — словами ВИДА: «что произошло», не «Готово»). */
 function caseStatus(c){
   var code=c.st||'in_work', e=PROC_STATUS[code]||PROC_STATUS.in_work, kind=c.k||'change';
@@ -1559,6 +1568,7 @@ function svClosed(c){
    Одна колонка «Статус»: чип + глагол .cl-attn под ним при мяче у агента; непрочитанное — жирная строка с точкой. */
 function svRowsHTML(){
   var rows='';
+  svSyncAll();
   /* Ранжируем как в мессенджере — по времени последнего действия, свежие сверху. */
   SV.filter(function(c){ return c.group==='object' && (svSeg==='closed'?svClosed(c):!svClosed(c)) && svPassFilters(c); }).slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }).forEach(function(c){
     var st=svStatus(c);
@@ -1601,19 +1611,23 @@ function svNewRequest(topic){ var id='req-n'+Date.now(); var title=topic||'Но�
 /* Перевыпуск ссылки на доплату (§3.3): срок не показываем, ссылку инвалидируем явно.
    Демо-петля: новая ссылка → клиент оплатил → paid → изменения внесены (done). */
 function svReissueLink(id){
-  var c=svFind(id); if(!c||c.st!=='awaiting_payment')return;
-  c.payStale=false; c.last='сейчас'; c.ts=Date.now(); c.snip='Новая ссылка на оплату отправлена клиенту';
+  var c=svFind(id); svSyncFromCase(c); if(!c||c.st!=='awaiting_payment')return;
+  var k=svCase(c);
+  if(k){ k.payStale=false; (k.steps=k.steps||[]).push({d:'сейчас',cs:'awaiting_payment',c:'Поддержка отправила клиенту новую ссылку на оплату.'}); }
+  c.payStale=false; c.reissued=true; c.last='сейчас'; c.ts=Date.now(); c.snip='Новая ссылка на оплату отправлена клиенту';
   (SV_THREADS[id]=SV_THREADS[id]||[]).push({sys:1,t:'Отправили клиенту новую ссылку на оплату.'});
   toast('Новая ссылка отправлена клиенту');
   if(svOnMessages()) rerenderChats();
-  setTimeout(function(){ var p=svFind(id); if(!p||p.st!=='awaiting_payment')return;
-    p.st='paid'; p.last='сейчас'; p.ts=Date.now(); p.snip='Оплата получена';
-    (SV_THREADS[id]=SV_THREADS[id]||[]).push({sys:1,t:'Оплата 1 350 ₽ получена.'});
-    notifyToast('status','Смена статуса заявки','Изменение · '+p.holder+': «Оплачено»',id);
+  setTimeout(function(){ var p=svFind(id); svSyncFromCase(p); if(!p||p.st!=='awaiting_payment')return;
+    var pk=svCase(p); if(pk) procSetStatus(pk.id,'paid','support','Оплата '+(p.payAmount||'')+' получена.'); else p.st='paid';
+    p.last='сейчас'; p.ts=Date.now(); p.snip='Оплата получена';
+    (SV_THREADS[id]=SV_THREADS[id]||[]).push({sys:1,t:'Оплата '+(p.payAmount||'')+' получена.'});
+    notifyToast('status','Смена статуса заявки','Изменение · '+p.holder+': «Оплачен»',id);
     updateBell(); if(svOnMessages()) rerenderChats();
   }, 6000);
-  setTimeout(function(){ var p=svFind(id); if(!p||p.st!=='paid')return;
-    p.st='done'; p.last='сейчас'; p.ts=Date.now(); p.snip='Изменения внесены'; p.unread=(p.unread||0)+1;
+  setTimeout(function(){ var p=svFind(id); svSyncFromCase(p); if(!p||p.st!=='paid')return;
+    var pk=svCase(p); if(pk) procSetStatus(pk.id,'done','support','Изменения внесены. Обновлённый полис приложен к договору.'); else p.st='done';
+    p.last='сейчас'; p.ts=Date.now(); p.snip='Изменения внесены'; p.unread=(p.unread||0)+1;
     (SV_THREADS[id]=SV_THREADS[id]||[]).push({i:1,t:'Изменения внесены. Обновлённый полис — в документах договора.',w:'Поддержка · сейчас'});
     notifyToast('status','Смена статуса заявки','Изменение · '+p.holder+': «Изменения внесены»',id);
     updateBell(); if(svOnMessages()) rerenderChats();
@@ -1691,12 +1705,15 @@ function svMain(id){
     var qs=svStatus(c);
     head+='<div class="svctx"><div class="svctx__row"><span class="sv-chip sv-chip--q">Вопрос в поддержку</span><b>'+c.holder+'</b></div><div class="svq-status"><span class="svq-status__l">Статус:</span><span class="st st--'+qs.cls+'">'+qs.label+'</span></div></div>';
   } else if(c.group==='object'){
+    svSyncFromCase(c);
     var cs=caseStatus(c);
     var st2=svStatus(c);
+    var k=svCase(c);
     var stLine='<div class="svq-status"><span class="svq-status__l">Статус:</span><span class="st st--'+st2.cls+'">'+cs.label+(c.payout?' · '+c.payout:'')+'</span></div>';
     /* «Что дальше» одной строкой: глагол янтарём при мяче у агента, иначе тихо — у кого мяч и что будет. */
     var verb=svVerb(c), nextLine='';
     if(cs.code==='awaiting_payment') nextLine='';
+    else if(cs.code==='rejected') nextLine='<div class="svq-next">Отказ'+(c.rejectReason?' — '+c.rejectReason:'')+'. Можно подать заявку заново с договора.</div>';
     else if(verb) nextLine='<div class="cl-attn" style="margin-top:6px">'+verb+'</div>';
     else if(!cs.term) nextLine='<div class="svq-next">Сейчас '+({us:'у поддержки',insurer:'у страховой',client:'у клиента'}[cs.ball]||'в работе')+' — ответ придёт в это обращение.</div>';
     var payBlock='';
@@ -1704,9 +1721,16 @@ function svMain(id){
       payBlock='<div class="pop__note" style="margin:8px 0 0"><b>К доплате '+(c.payAmount||'')+'.</b> Ссылка на оплату отправлена клиенту. Срок её действия мы не указываем — ссылка может стать недействительной; если оплата не проходит, запросите новую. '
         +(c.payStale
           ? '<button class="btn btn--sm btn--primary" style="margin-top:8px" onclick="svReissueLink(\''+c.id+'\')">Запросить новую ссылку</button>'
-          : '<span class="st st--ok">Новая ссылка отправлена клиенту ✓</span>')+'</div>';
+          : (c.reissued?'<span class="st st--ok">Новая ссылка отправлена клиенту ✓</span>':''))+'</div>';
     }
-    head+='<div class="svctx"><div class="svctx__row"><span class="sv-chip sv-chip--'+c.icon+'">'+c.kind+'</span><b>'+c.holder+'</b><span class="svctx__sep">·</span>'+c.objName+'<span class="svctx__sep">·</span><span class="polnum">'+c.num+'</span></div>'+stLine+nextLine+payBlock+'</div>';
+    /* История заявки — та же лента, что на договоре (единый атом; внутренние заметки поддержки скрыты). */
+    var hist='';
+    if(k&&k.steps&&k.steps.length){
+      var evs=k.steps.filter(function(st){ return !st.internal; }).map(function(st){ var lbl=st.cs&&PROC_STATUS[st.cs]?PROC_STATUS[st.cs].ag:(st.s||''); return '<div class="prg__ev"><span class="prg__evd">'+st.d+'</span><span class="prg__evs">'+lbl+'</span><span class="prg__evc">'+st.c+'</span></div>'; }).join('');
+      hist='<div class="prg__hist" style="margin-top:8px"><button class="prg__histbtn" onclick="this.nextElementSibling.classList.toggle(\'show\')">История заявки</button><div class="prg__timeline">'+evs+'</div></div>';
+    }
+    var numRow=k?'<span class="svctx__sep">·</span><span class="req__num">№ '+k.id+'</span>':'';
+    head+='<div class="svctx"><div class="svctx__row"><span class="sv-chip sv-chip--'+c.icon+'">'+c.kind+'</span><b>'+c.holder+'</b><span class="svctx__sep">·</span>'+c.objName+'<span class="svctx__sep">·</span><span class="polnum">'+c.num+'</span>'+numRow+'</div>'+stLine+nextLine+payBlock+hist+'</div>';
   } else if(c.group==='client'){ head+='<div class="svmain__meta">Внешний участник — клиент без доступа к базе 1С</div>'; }
   else { head+='<div class="svmain__meta">'+(c.curator?'Куратор — сопровождение, комиссия и КВ':'Личное обсуждение — пишите по любому вопросу, история не теряется')+'</div>'; }
   head+='</div>';
@@ -1948,9 +1972,9 @@ seedCase({idx:8,id:'000015175',kind:'loss',cstatus:'under_review',ago:26,type:'�
 seedCase({idx:9,id:'000015176',kind:'change',cstatus:'awaiting_payment',ago:3,reasons:['replace-plate-sts'],payAmount:1350,
   what:'Замена ГРЗ и СТС — выставлена доплата.',ac:'Ссылка на оплату направлена агенту.',
   steps:[{d:'20.08 11:00',cs:'new',c:'Заявка создана.'},{d:'21.08 10:20',cs:'awaiting_payment',c:'Выставлена доплата 1 350 ₽ — ссылка направлена.'}]});
-seedCase({idx:10,id:'000015177',kind:'change',cstatus:'awaiting_payment',ago:20,reasons:['add-driver'],payAmount:1350,
-  what:'Добавление водителя — доплата, ссылка у клиента.',ac:'Клиент оплачивает по ссылке.',
-  steps:[{d:'19.08 16:00',cs:'new',c:'Заявка создана.'},{d:'20.08 12:00',cs:'awaiting_payment',c:'Выставлена доплата 980 ₽ — ссылка направлена клиенту.'}]});
+seedCase({idx:10,id:'000015177',kind:'change',cstatus:'awaiting_payment',ago:20,reasons:['add-driver'],payAmount:1350,payStale:true,
+  what:'Добавление водителя — доплата, ссылка у клиента.',ac:'Ссылка у клиента не открывается — агент запросил новую.',
+  steps:[{d:'19.08 16:00',cs:'new',c:'Заявка создана.'},{d:'20.08 12:00',cs:'awaiting_payment',c:'Выставлена доплата 1 350 ₽ — ссылка направлена клиенту.'},{d:'сегодня 09:55',cs:'awaiting_payment',c:'Агент: ссылка у клиента не открывается — прошу новую.'}]});
 seedCase({idx:13,id:'000015178',kind:'loss',cstatus:'awaiting_docs',ago:8,docRequest:{items:['Чеки на лечение']},type:'Сложная',
   what:'Убыток по НС «Спорт» — расчёт выплаты.',ac:'Ждём чеки на лечение от агента.',
   steps:[{d:'19.08 14:00',cs:'new',c:'Убыток заявлен.'},{d:'21.08 09:40',cs:'awaiting_docs',c:'Приложите чеки на лечение для расчёта выплаты.'}]});
@@ -1958,6 +1982,10 @@ seedCase({idx:13,id:'000015178',kind:'loss',cstatus:'awaiting_docs',ago:8,docReq
 seedCase({idx:0,id:'000015179',kind:'change',cstatus:'done',ago:340,reasons:['owner-doc'],
   what:'Изменение документа собственника — внесено.',ac:'Завершена, новый полис приложен.',
   steps:[{d:'05.08 09:00',cs:'new',c:'Заявка создана из кабинета.'},{d:'05.08 12:30',cs:'in_work',c:'Ваша заявка принята в работу.'},{d:'06.08 10:00',cs:'done',c:'Изменения внесены, новый полис приложен к договору.'}]});
+/* Закрытый убыток Осипова — источник для диалога d-settled и «Завершённых заявок» на договоре. */
+seedCase({idx:12,id:'000015182',kind:'loss',cstatus:'settled',ago:330,type:'Сложная',
+  what:'Убыток по НС — травма. Выплата 47 300 ₽ произведена.',ac:'Завершён, выплата перечислена.',
+  steps:[{d:'24.06 10:00',cs:'new',c:'Убыток заявлен.'},{d:'25.06 14:00',cs:'under_review',c:'Передано в СОГАЗ на рассмотрение.'},{d:'30.06 11:00',cs:'signing',c:'Соглашение о выплате 47 300 ₽ — подпишите у клиента.'},{d:'01.07 16:00',cs:'signed',c:'Соглашение подписано.'},{d:'02.07 12:00',cs:'settled',c:'Выплата 47 300 ₽ перечислена.'}]});
 /* Отказ (терминал, свободная причина — решение владельца): нейтральный тон + «Подать заново». */
 seedCase({idx:11,id:'000015180',kind:'change',cstatus:'rejected',ago:120,reasons:['policy-error'],
   rejectReason:'по данным СК номер VIN в СТС не совпадает с базой — проверьте документ и подайте заявку заново',
@@ -1998,7 +2026,8 @@ var SUP_META={
   'chat-6':{date:'19.08.2026',resp:'Денисова Анна Викторовна'},
   '000014950':{date:'15.08.2026',resp:'Мартынова Ольга Ивановна'},
   '000015179':{date:'06.08.2026',resp:'Кулагина Мария Сергеевна'},
-  '000015180':{date:'15.08.2026',resp:'Мартынова Ольга Ивановна'}
+  '000015180':{date:'15.08.2026',resp:'Мартынова Ольга Ивановна'},
+  '000015182':{date:'02.07.2026',resp:'Денисова Анна Викторовна'}
 };
 SUP.forEach(function(it){ var m=SUP_META[it.id]; if(m){ it.date=m.date; it.resp=m.resp; if(m.days!=null) it.days=m.days; } });
 var supOpen=null, supTab='us', supSrc='all', supSK='all', supVid='all', supStuck=false;
@@ -2383,10 +2412,13 @@ var SV=[
   {id:'req-kbm',group:'object',ts:400,icon:'q',kind:'Вопрос',holder:'Расчёт ОСАГО — ошибка КБМ',objName:'—',num:'—',last:'11:02',snip:'Не проходит расчёт по Toyota Camry Т432ЕК124',unread:0,obj:'Вопрос',qstate:'inwork'},
   {id:'req-kv',group:'object',ts:200,icon:'q',kind:'Вопрос',holder:'Комиссия (КВ) за июль',objName:'—',num:'—',last:'вчера',snip:'Поддержка ответила: выплата в пятницу на карту',unread:1,obj:'Вопрос',qstate:'answered'},
   /* Договорные обращения — канон Case: k=вид (change/cancel/loss/deal), st=ключ из единого PROC_STATUS. */
-  {id:'d-change',group:'object',ts:300,icon:'change',kind:'Изменение',k:'change',st:'awaiting_docs',holder:'Кузнецова Ольга Ивановна',objName:'Toyota Camry · Т432ЕК124',num:'ТТТ 7056214893',last:'сегодня, 10:15',snip:'Страховая ждёт справку о ДТП — приложите',unread:1,obj:'Изменение',action:true,act:'Приложите справку о ДТП'},
-  {id:'d-loss',group:'object',ts:100,icon:'loss',kind:'Убыток',k:'loss',st:'settled',holder:'Григорьева Елена Дмитриевна',objName:'НС «Спорт» · Здоровье',num:'РРР-40571908',last:'2 дн назад',snip:'Выплата 47 300 ₽ перечислена',unread:0,obj:'Убыток',payout:'47 300 ₽'},
+  /* caseId = связь с канон-заявкой SUP: статус/история диалога деривятся из ОДНОГО источника (не копия). */
+  {id:'d-change',group:'object',ts:300,icon:'change',kind:'Изменение',k:'change',st:'awaiting_docs',caseId:'000015171',holder:'Кузнецова Ольга Ивановна',objName:'Toyota Camry · Т432ЕК124',num:'ТТТ 7056214893',last:'сегодня, 10:15',snip:'Страховая ждёт справку о ДТП — приложите',unread:1,obj:'Изменение',action:true,act:'Приложите справку о ДТП'},
+  {id:'d-loss',group:'object',ts:100,icon:'loss',kind:'Убыток',k:'loss',st:'under_review',caseId:'000015175',holder:'Григорьева Елена Дмитриевна',objName:'НС «Спорт» · Здоровье',num:'РРР-40571908',last:'2 дн назад',snip:'Передано в Югорию на рассмотрение',unread:0,obj:'Убыток'},
+  /* Закрытый убыток (пример вкладки «Завершённые» + блока на договоре Осипова). */
+  {id:'d-settled',group:'object',ts:50,icon:'loss',kind:'Убыток',k:'loss',st:'settled',caseId:'000015182',holder:'Осипов Максим Юрьевич',objName:'Несч. случай · Здоровье',num:'РРР-40560421',last:'2 нед назад',snip:'Выплата 47 300 ₽ перечислена',unread:0,obj:'Убыток',payout:'47 300 ₽'},
   /* Доплата ВИ (§3.3 модели): срок ссылки НЕ показываем — дисклеймер + перевыпуск. */
-  {id:'d-pay',group:'object',ts:250,icon:'change',kind:'Изменение',k:'change',st:'awaiting_payment',holder:'Никитин Владимир Олегович',objName:'Renault Duster · Е553РТ124',num:'ТТТ 7049221056',last:'сегодня, 09:40',snip:'Доплата 1 350 ₽ — ссылка отправлена клиенту',unread:0,obj:'Изменение',payAmount:'1 350 ₽',payStale:true},
+  {id:'d-pay',group:'object',ts:250,icon:'change',kind:'Изменение',k:'change',st:'awaiting_payment',caseId:'000015177',holder:'Никитин Владимир Олегович',objName:'Renault Duster · Е553РТ124',num:'ТТТ 7049221056',last:'сегодня, 09:40',snip:'Доплата 1 350 ₽ — ссылка отправлена клиенту',unread:0,obj:'Изменение',payAmount:'1 350 ₽',payStale:true},
   {id:'deal',group:'object',ts:500,icon:'deal',kind:'Автопомощник',k:'deal',st:'done',holder:'Абрамов Сергей Николаевич',objName:'Toyota RAV4 · К771ХМ124',num:'ХХХ 0712345678',last:'сегодня, 12:40',snip:'Поддержка оформила ОСАГО вручную и приложила документы',unread:1,obj:'Автопомощник',action:true,act:'Проверьте полис'}
 ];
 var SV_THREADS={
@@ -2394,7 +2426,8 @@ var SV_THREADS={
   'req-kbm':[{o:1,t:'Не проходит расчёт ОСАГО по Toyota Camry Т432ЕК124 — пишет «ошибка КБМ». Помогите, пожалуйста.',w:'Вы · 11:02'}],
   'req-kv':[{o:1,t:'Подскажите, когда придёт выплата КВ за июль?',w:'Вы · вчера'},{i:1,t:'Выплата уйдёт в пятницу на карту. Детали и суммы — в разделе «Мои финансы».',w:'Поддержка · вчера'}],
   'd-change':[{i:1,t:'Заявка на изменение (второй водитель) принята. Для внесения нужна справка о ДТП.',w:'Ренессанс · 10:05'},{o:1,t:'Поняла, запрошу у клиента.',w:'Вы · 10:12'},{i:1,t:'Ждём справку о ДТП — как приложите, сразу передадим андеррайтеру. Ответим в этом обсуждении.',w:'Ренессанс · 10:15'}],
-  'd-loss':[{i:1,t:'Убыток урегулирован. Выплата 47 300 ₽ перечислена 2 июля.',w:'Югория · 2 дн'}],
+  'd-loss':[{o:1,t:'Заявляю убыток по НС «Спорт» — травма на тренировке. Документы приложила.',w:'Вы · 17.08'},{i:1,t:'Документы получены, убыток заведён. Передали в Югорию на рассмотрение — ответ придёт в это обращение.',w:'Поддержка · 2 дн'}],
+  'd-settled':[{i:1,t:'Убыток урегулирован. Выплата 47 300 ₽ перечислена 2 июля.',w:'СОГАЗ · 2 нед'}],
   'd-pay':[{i:1,t:'Добавление водителя увеличивает премию. К доплате 1 350 ₽ — ссылка направлена клиенту.',w:'Поддержка · 09:40'},{o:1,t:'Клиент говорит, ссылка не открывается.',w:'Вы · 09:55'}],
   deal:[{i:1,t:'По 4 ТС предложим тариф до конца дня.',w:'Андеррайтер · 3 дн'},{o:1,t:'Ждём, клиент готов оплатить по счёту.',w:'Вы · 3 дн'}],
   client:[{o:1,t:'Ольга, здравствуйте! Полис ОСАГО оформлен — отправляю ссылку и PDF.',w:'Вы · вчера'},{i:1,t:'Спасибо большое, полис получила!',w:'Кузнецова О. И. · вчера'}]
@@ -2446,7 +2479,7 @@ function curSend(id){ var inp=document.getElementById('curInput'); if(!inp||!inp
 var NOTIF=[
   {id:'n1',kind:'status',thread:'d-change',title:'Смена статуса заявки',body:'Ренессанс · Изменение по Toyota Camry Кузнецовой: «В работе у страховой»',time:'10:15',unread:true},
   {id:'n2',kind:'msg',thread:'req-kv',title:'Ответ поддержки',body:'По обращению «Комиссия (КВ) за июль»: выплата уйдёт в пятницу на карту',time:'вчера',unread:true},
-  {id:'n3',kind:'status',thread:'d-loss',title:'Смена статуса заявки',body:'Югория · Убыток урегулирован, выплата 47 300 ₽',time:'2 дн',unread:false}
+  {id:'n3',kind:'status',thread:'d-settled',title:'Смена статуса заявки',body:'СОГАЗ · Убыток урегулирован, выплата 47 300 ₽',time:'2 нед',unread:false}
 ];
 function svIco(k){
   if(k==='change') return '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>';
@@ -2526,10 +2559,14 @@ function simNotif(kind){
     var s=svFind('req-kbm'); if(s){ s.unread=(s.unread||0)+1; s.time='сейчас'; s.snip='Поддержка ответила по ошибке КБМ'; s.action=false; }
     notifyToast('msg','Ответ поддержки','Обращение «Расчёт ОСАГО — ошибка КБМ»','req-kbm');
   } else {
-    /* Двигаем d-change по каноническим переходам ВИ (10a §3.1: документы → загружены → готово). */
-    var c=svFind('d-change');
+    /* Двигаем d-change по каноническим переходам ВИ (10a §3.1) — через СВЯЗАННУЮ заявку SUP, не копию. */
+    var c=svFind('d-change'); svSyncFromCase(c);
     var seq=['awaiting_docs','docs_uploaded','done'], ci=seq.indexOf(c.st||'awaiting_docs');
-    if(ci>-1 && ci<seq.length-1) c.st=seq[ci+1];
+    if(ci>-1 && ci<seq.length-1){ var next=seq[ci+1]; var kk=svCase(c);
+      if(kk) procSetStatus(kk.id,next,(next==='docs_uploaded')?'agent':'support',(next==='docs_uploaded')?'Агент приложил справку о ДТП.':'Изменения внесены, новый полис приложен к договору.');
+      else c.st=next;
+      svSyncFromCase(c);
+    }
     if(c.st!=='awaiting_docs'){ c.action=false; }
     if(c.st==='done'){ c.unread=(c.unread||0)+1; }
     c.last='сейчас'; c.ts=Date.now(); c.snip='Статус обновлён — см. ход заявки';
