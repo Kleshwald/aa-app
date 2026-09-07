@@ -584,6 +584,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .sup-lead svg{ color:var(--navy); flex:none; margin-top:1px; } .win[data-1ctheme='dark'] .sup-lead svg{ color:var(--blue); }
 .sup-src{ display:inline-block; padding:1px 6px; border-radius:4px; font-size:calc(9.5px*var(--scale)); font-weight:700; letter-spacing:.02em; }
 .sup-src--1c{ background:color-mix(in srgb,var(--navy) 13%,transparent); color:var(--navy); } .win[data-1ctheme='dark'] .sup-src--1c{ color:var(--blue); }
+.sup-src--api{ background:var(--sel); border:1px solid var(--sel-line); color:var(--navy); }
 .sup-src--chat{ background:color-mix(in srgb,var(--blue) 16%,transparent); color:var(--blue); }
 .sup-src--max{ background:#efe7fb; color:#6d28d9; } .win[data-1ctheme='dark'] .sup-src--max{ background:color-mix(in srgb,#8b5cf6 22%,transparent); color:#c4b5fd; }
 .sup-num{ display:inline-flex; align-items:center; gap:6px; font-variant-numeric:tabular-nums; }
@@ -1901,7 +1902,7 @@ var SUP=[
     num:'ХХХ 0579205802',holder:'Безруких Анастасия Андреевна',obj:'Skoda Yeti · А268ТУ124',region:'Красноярский',agent:'Полушина Наталья Викторовна',sk:'Ренессанс',type:'Сложная',
     what:'Убыток урегулирован, выплата перечислена.',ac:'Выплата 62 400 ₽ перечислена 20.08.',
     steps:[{d:'15.08 10:00',s:'Новая',c:'Убыток заявлен.'},{d:'20.08 12:00',s:'Убыток урегулирован',c:'Выплата 62 400 ₽ перечислена.'}]},
-  {id:'000014891',src:'1c',ball:'done',vid:'Оформление ОСАГО ЮЛ',st:'Полис оформлен',sla:0,
+  {id:'000014891',src:'1c',ball:'done',vid:'Оформление ОСАГО ЮЛ',st:'Полис оформлен',sla:0,api:true,
     num:'ХХХ 0699120043',holder:'ООО «Комета»',obj:'Isuzu Elf · Р308МУ154',region:'Новосибирская',agent:'Ковалёв Виктор Сергеевич',sk:'Евроинс',type:'Сложная',
     what:'ОСАГО ЮЛ оформлен, полис выпущен.',ac:'Полис направлен агенту.',
     steps:[{d:'17.08 09:00',s:'Новая',c:'Оформление ОСАГО ЮЛ.'},{d:'17.08 16:00',s:'Полис оформлен',c:'Полис выпущен и направлен агенту.'}]},
@@ -1917,7 +1918,7 @@ var SUP=[
     chat:[{i:1,t:'Из МАХ: не считается КАСКО на Hyundai Creta — выдаёт ошибку. Поможете?',w:'Агент (МАХ) · сейчас'}]},
   /* ===== доп. примеры (чтобы очередь была плотной как в боевой) ===== */
   /* --- ещё у нас --- */
-  {id:'000015181',src:'1c',ball:'us',vid:'Оформление ОСАГО ФЛ',st:'Новая',sla:55,fresh:true,
+  {id:'000015181',src:'1c',ball:'us',vid:'Оформление ОСАГО ФЛ',st:'Новая',sla:55,fresh:true,api:true,
     num:'—',holder:'Пименова Ольга Сергеевна',obj:'Kia Rio · Н321ОР124',region:'Красноярский',agent:'Гимальтдинова Алия Ринатовна',sk:'Тинькофф Страхование',type:'Простая',
     what:'Новый расчёт ОСАГО ФЛ, клиент выбрал СК — выпустить полис и выставить счёт.',ac:'Клиент подтвердил данные, ждёт ссылку на оплату.',
     steps:[{d:'21.08 10:30',s:'Новая',c:'Заявка на оформление ОСАГО ФЛ.'}]},
@@ -2054,6 +2055,8 @@ var SUP_META={
 };
 SUP.forEach(function(it){ var m=SUP_META[it.id]; if(m){ it.date=m.date; it.resp=m.resp; if(m.days!=null) it.days=m.days; } });
 var supOpen=null, supTab='us', supSrc='all', supSK='all', supVid='all', supStuck=false, supTriage=false;
+/* Фильтр-бар боевой «Мои заявки» — ЖИВОЙ целиком: поиск, период, задачи, ответственный, регион, API, скрыть готовые. */
+var supQ='', supPeriod='month', supTask='all', supResp='all', supRegion='all', supApi=false, supHideDone=false;
 /* Группа «Переписка с агентом» в карточке: свёрнута по умолчанию; авто-разворот при входе по маркеру «↩ ответ агента». */
 var supTalkOpen=false;
 /* supHost: '1' — объединённый кокпит (screenSupport), '2' — раздельная версия (screenSupport2). */
@@ -2094,9 +2097,26 @@ function supFmt(m){ var h=Math.floor(m/60), mm=m%60; return (h?h+' ч ':'')+mm+'
 function supSla(it,big){ if(it.ball!=='us') return ''; var m=it.sla, cls, txt; if(m<0){ cls='err'; txt='Просрочено на '+supFmt(-m); } else if(m<=30){ cls='warn'; txt='SLA '+supFmt(m); } else { cls='ok'; txt='SLA '+supFmt(m); }
   return '<span class="sup-sla sup-sla--'+cls+'"'+(big?' style="font-size:calc(15px*var(--scale));padding:3px 11px;margin:0"':'')+'>'+txt+'</span>'; }
 function supSrcChip(it){ if(it.channel==='max') return '<span class="sup-src sup-src--max">МАХ</span>'; return it.src==='chat' ? '<span class="sup-src sup-src--chat">Чат</span>' : '<span class="sup-src sup-src--1c">1С</span>'; }
-function supPass(it){ var srcOk = supSrc==='all' || it.src===supSrc || (supSrc==='max' && it.channel==='max'); return srcOk && (supSK==='all'||it.sk===supSK); }
+function supPass(it){
+  var srcOk = supSrc==='all' || it.src===supSrc || (supSrc==='max' && it.channel==='max');
+  if(!srcOk) return false;
+  if(supSK!=='all' && it.sk!==supSK) return false;
+  if(supHideDone && it.ball==='done') return false;
+  if(supApi && !it.api) return false;
+  if(supTask!=='all' && (it.type||'')!==supTask) return false;
+  if(supResp!=='all' && (it.resp||'')!==supResp) return false;
+  if(supRegion!=='all' && (it.region||'')!==supRegion) return false;
+  if(supPeriod!=='all'){
+    var d=supDateNum(it.date);
+    if(supPeriod==='month' && (d<20260801||d>20260831)) return false;
+    if(supPeriod==='today'){ var mx=0; SUP.forEach(function(x){ var v=supDateNum(x.date); if(v>mx) mx=v; }); if(d!==mx) return false; }
+  }
+  if(supQ){ var q=supQ.toLowerCase(); var hay=(it.id+' '+(it.num||'')+' '+(it.holder||'')+' '+(it.agent||'')+' '+(it.obj||'')+' '+(it.vid||'')).toLowerCase(); if(hay.indexOf(q)===-1) return false; }
+  return true;
+}
+function supDoSearch(){ var i=document.getElementById('supQIn'); supQ=i?i.value.trim():''; supRerender(); }
 function supCount(ball){ return SUP.filter(function(it){ return it.ball===ball && supPass(it); }).length; }
-function supEmpty(){ if(supTriage&&!supStuck) return 'Разбор пуст — просрочек, ответов агента и новых нет.'; if(supTab==='us') return 'Мяч сейчас не у нас — новых задач по фильтру нет.'; if(supTab==='agent') return 'Нет заявок, где мяч у агента.'; if(supTab==='insurer') return 'Нет заявок на стороне страховой.'; return 'Завершённых по фильтру нет.'; }
+function supEmpty(){ if(supTriage&&!supStuck) return 'Разбор пуст — просрочек, ответов агента и новых нет.'; if(supTab==='done'&&supHideDone) return 'Готовые скрыты — снимите галочку «Скрыть готовые».'; if(supQ) return 'Ничего не найдено по запросу «'+supQ+'» — измените поиск или фильтры.'; if(supTab==='us') return 'Мяч сейчас не у нас — новых задач по фильтру нет.'; if(supTab==='agent') return 'Нет заявок, где мяч у агента.'; if(supTab==='insurer') return 'Нет заявок на стороне страховой.'; return 'Завершённых по фильтру нет.'; }
 function supWarnIco(){ return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.51"/></svg>'; }
 function screenSupport(){ return '<div class="screen active sup-screen">'+(supOpen?supDetail(supOpen):supQueue())+'</div>'; }
 function supRerender(){ var w=document.getElementById('workscreen'); if(w) w.innerHTML=(supHost==='2'?screenSupport2():screenSupport()); }
@@ -2122,7 +2142,7 @@ function supQueue(){
   var rows=items.map(function(it){
     var isChat=it.src==='chat';
     /* Вопрос: ТЕМА-чип (не «объект»); заявка: вид как есть */
-    var vidCell = isChat ? 'Вопрос'+(it.topic?' · <span class="sup-topic">#'+it.topic+'</span>':'') : it.vid;
+    var vidCell = (isChat ? 'Вопрос'+(it.topic?' · <span class="sup-topic">#'+it.topic+'</span>':'') : it.vid)+(it.api?' <span class="sup-src sup-src--api">API</span>':'');
     /* Объект: у заявки — объект; у вопроса — упомянутый объект ИЛИ честное «—» (у общего вопроса объекта нет) */
     var objCell = isChat ? (it.objref? it.objref : '<span class="empty-cell">—</span>') : it.obj;
     /* Страхователь: у вопроса клиента нет (агент — в своей колонке) */
@@ -2146,25 +2166,25 @@ function supQueue(){
   SUP.forEach(function(it){ if(it.sk&&it.sk!=='—') sks[it.sk]=1; vids[it.vid]=1; if(it.resp) resps[it.resp]=1; if(it.region) regions[it.region]=1; });
   var skOpts='<option value="all">Все СК</option>'+Object.keys(sks).map(function(s){ return '<option'+(supSK===s?' selected':'')+'>'+s+'</option>'; }).join('');
   var vidOpts='<option value="all">Все виды заявок</option>'+Object.keys(vids).map(function(s){ return '<option'+(supVid===s?' selected':'')+'>'+s+'</option>'; }).join('');
-  var respOpts='<option>Все ответственные</option>'+Object.keys(resps).map(function(s){ return '<option>'+s+'</option>'; }).join('');
-  var regOpts='<option>Все регионы</option>'+Object.keys(regions).map(function(s){ return '<option>'+s+'</option>'; }).join('');
+  var respOpts='<option value="all">Все ответственные</option>'+Object.keys(resps).map(function(s){ return '<option'+(supResp===s?' selected':'')+'>'+s+'</option>'; }).join('');
+  var regOpts='<option value="all">Все регионы</option>'+Object.keys(regions).map(function(s){ return '<option'+(supRegion===s?' selected':'')+'>'+s+'</option>'; }).join('');
   var searchIco='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
   return '<div class="ptitle">Поддержка — Мои заявки</div>'
     /* --- фильтр-бар как в боевой «Мои заявки» (преемственность) --- */
     +'<div class="tbar">'
-      +'<div class="tfield tfield--search"><label>Поиск</label><div class="tsearch">'+searchIco+'<input placeholder="Ctrl+F — № заявки, договор, страхователь"/></div></div>'
-      +'<div class="tfield"><label>&nbsp;</label><button class="btn btn--primary" onclick="toast(\'Поиск по заявкам\')">Поиск</button></div>'
-      +'<div class="tfield"><label>Период</label><select class="tselect"><option>Этот месяц</option><option>Сегодня</option><option>Этот квартал</option><option>Этот год</option><option>Всё время</option></select></div>'
+      +'<div class="tfield tfield--search"><label>Поиск</label><div class="tsearch">'+searchIco+'<input id="supQIn" value="'+(supQ||'').replace(/"/g,'&quot;')+'" placeholder="№ заявки, договор, страхователь, агент" onkeydown="if(event.key===\'Enter\')supDoSearch()"/></div></div>'
+      +'<div class="tfield"><label>&nbsp;</label><button class="btn btn--primary" onclick="supDoSearch()">Поиск</button>'+(supQ?'<button class="btn" style="margin-left:6px" title="Сбросить поиск" onclick="supQ=\'\';supRerender()">×</button>':'')+'</div>'
+      +'<div class="tfield"><label>Период</label><select class="tselect" onchange="supPeriod=this.value;supRerender()"><option value="month"'+(supPeriod==='month'?' selected':'')+'>Этот месяц</option><option value="today"'+(supPeriod==='today'?' selected':'')+'>Сегодня</option><option value="all"'+(supPeriod==='all'?' selected':'')+'>Всё время</option></select></div>'
       +'<div class="tfield"><label>Вид заявки</label><select class="tselect" onchange="supVid=this.value;supRerender()">'+vidOpts+'</select></div>'
-      +'<div class="tfield"><label>Задачи</label><select class="tselect"><option>Все задачи</option><option>Простые</option><option>Сложные</option></select></div>'
+      +'<div class="tfield"><label>Задачи</label><select class="tselect" onchange="supTask=this.value;supRerender()"><option value="all">Все задачи</option><option value="Простая"'+(supTask==='Простая'?' selected':'')+'>Простые</option><option value="Сложная"'+(supTask==='Сложная'?' selected':'')+'>Сложные</option></select></div>'
       +'<div class="tfield"><label>Статусы</label><span class="sup-multichip">+20<button class="sup-multichip__x" title="Сбросить" onclick="toast(\'Фильтр по статусам (мультивыбор)\')">×</button></span></div>'
-      +'<div class="tfield"><label>Ответственные</label><select class="tselect">'+respOpts+'</select></div>'
+      +'<div class="tfield"><label>Ответственные</label><select class="tselect" onchange="supResp=this.value;supRerender()">'+respOpts+'</select></div>'
       +'<div class="tfield"><label>Страховая компания</label><select class="tselect" onchange="supSK=this.value;supRerender()">'+skOpts+'</select></div>'
-      +'<div class="tfield"><label>Регион</label><select class="tselect">'+regOpts+'</select></div>'
+      +'<div class="tfield"><label>Регион</label><select class="tselect" onchange="supRegion=this.value;supRerender()">'+regOpts+'</select></div>'
     +'</div>'
     +'<div class="sup-frow2"><a class="sup-flink" onclick="toast(\'Аналитика по заявкам поддержки\')">Посмотреть аналитику</a>'
-      +'<label class="tcheck" style="margin:0"><input type="checkbox"/> API</label>'
-      +'<label class="tcheck" style="margin:0"><input type="checkbox"/> Скрыть готовые</label></div>'
+      +'<label class="tcheck" style="margin:0"><input type="checkbox"'+(supApi?' checked':'')+' onchange="supApi=this.checked;supRerender()"/> API</label>'
+      +'<label class="tcheck" style="margin:0"><input type="checkbox"'+(supHideDone?' checked':'')+' onchange="supHideDone=this.checked;supRerender()"/> Скрыть готовые</label></div>'
     /* --- надстройка Agent Academy: чей мяч + источник + SLA --- */
     +'<div class="sup-mine-bar"><span class="sup-mine-cap">Разбор — чей мяч:</span><div class="chattabs sup-tabs">'+tbar+'</div>'
       +'<span class="sup-mine-cap" style="margin-left:6px">Источник:</span><select class="tselect sup-select--sm" onchange="supSrc=this.value;supRerender();supUpdateBadge()"><option value="all"'+(supSrc==='all'?' selected':'')+'>Все</option><option value="1c"'+(supSrc==='1c'?' selected':'')+'>Заявки 1С</option><option value="chat"'+(supSrc==='chat'?' selected':'')+'>Вопросы чата</option><option value="max"'+(supSrc==='max'?' selected':'')+'>Мессенджер МАХ</option></select>'
