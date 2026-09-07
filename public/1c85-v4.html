@@ -624,7 +624,8 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .sup-stbadge--wait::before{ background:var(--wait); }
 .sup-stbadge--draft::before{ background:var(--muted); }
 /* надстройка: чип «Требуют разбора» (кликабельный, возвращает приоритет) + «Показать зависшие» */
-.sup-trg{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px; border-radius:8px; border:1px solid var(--warn); background:color-mix(in srgb,var(--warn) 12%,transparent); color:var(--warn); font-size:calc(12px*var(--scale)); font-weight:700; cursor:pointer; }
+.sup-trg{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px; border-radius:8px; border:1px solid var(--warn); background:color-mix(in srgb,var(--warn) 12%,transparent); color:var(--badge-attn); font-size:calc(12px*var(--scale)); font-weight:700; cursor:pointer; }
+.sup-trg--on{ background:color-mix(in srgb,var(--warn) 24%,transparent); box-shadow:inset 0 0 0 1px var(--warn); }
 .sup-trg--zero{ border-color:var(--line); background:transparent; color:var(--muted); font-weight:600; cursor:default; }
 .sup-trg__n{ min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--warn); color:#fff; font-size:calc(10.5px*var(--scale)); display:grid; place-items:center; }
 .sup-stuck{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px; border-radius:8px; border:1px dashed var(--warn); background:transparent; color:var(--warn); font-size:calc(12px*var(--scale)); font-weight:600; cursor:pointer; }
@@ -2052,7 +2053,7 @@ var SUP_META={
   '000015162':{date:'21.08.2026',resp:'Кулагина Мария Сергеевна'}
 };
 SUP.forEach(function(it){ var m=SUP_META[it.id]; if(m){ it.date=m.date; it.resp=m.resp; if(m.days!=null) it.days=m.days; } });
-var supOpen=null, supTab='us', supSrc='all', supSK='all', supVid='all', supStuck=false;
+var supOpen=null, supTab='us', supSrc='all', supSK='all', supVid='all', supStuck=false, supTriage=false;
 /* Группа «Переписка с агентом» в карточке: свёрнута по умолчанию; авто-разворот при входе по маркеру «↩ ответ агента». */
 var supTalkOpen=false;
 /* supHost: '1' — объединённый кокпит (screenSupport), '2' — раздельная версия (screenSupport2). */
@@ -2095,7 +2096,7 @@ function supSla(it,big){ if(it.ball!=='us') return ''; var m=it.sla, cls, txt; i
 function supSrcChip(it){ if(it.channel==='max') return '<span class="sup-src sup-src--max">МАХ</span>'; return it.src==='chat' ? '<span class="sup-src sup-src--chat">Чат</span>' : '<span class="sup-src sup-src--1c">1С</span>'; }
 function supPass(it){ var srcOk = supSrc==='all' || it.src===supSrc || (supSrc==='max' && it.channel==='max'); return srcOk && (supSK==='all'||it.sk===supSK); }
 function supCount(ball){ return SUP.filter(function(it){ return it.ball===ball && supPass(it); }).length; }
-function supEmpty(){ if(supTab==='us') return 'Мяч сейчас не у нас — новых задач по фильтру нет.'; if(supTab==='agent') return 'Нет заявок, где мяч у агента.'; if(supTab==='insurer') return 'Нет заявок на стороне страховой.'; return 'Завершённых по фильтру нет.'; }
+function supEmpty(){ if(supTriage&&!supStuck) return 'Разбор пуст — просрочек, ответов агента и новых нет.'; if(supTab==='us') return 'Мяч сейчас не у нас — новых задач по фильтру нет.'; if(supTab==='agent') return 'Нет заявок, где мяч у агента.'; if(supTab==='insurer') return 'Нет заявок на стороне страховой.'; return 'Завершённых по фильтру нет.'; }
 function supWarnIco(){ return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.51"/></svg>'; }
 function screenSupport(){ return '<div class="screen active sup-screen">'+(supOpen?supDetail(supOpen):supQueue())+'</div>'; }
 function supRerender(){ var w=document.getElementById('workscreen'); if(w) w.innerHTML=(supHost==='2'?screenSupport2():screenSupport()); }
@@ -2109,10 +2110,12 @@ function supQueue(){
   var tabs=[['us','У нас'],['agent','У агента'],['insurer','У страховой'],['done','Завершено']];
   var tbar=tabs.map(function(t){ var n=supCount(t[0]); var extra='';
     if(t[0]==='agent'||t[0]==='insurer'){ var m=supStuckCount(t[0]); if(m) extra=' <span class="svtab__b svtab__b--warn" title="Зависли — мяч у них ≥3 дн без движения">'+m+' зав.</span>'; }
-    return '<button class="chattab'+((!supStuck&&supTab===t[0])?' chattab--active':'')+'" onclick="supStuck=false;supSetTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="svtab__b">'+n+'</span>':'')+extra+'</button>'; }).join('');
+    return '<button class="chattab'+((!supStuck&&!supTriage&&supTab===t[0])?' chattab--active':'')+'" onclick="supStuck=false;supTriage=false;supSetTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="svtab__b">'+n+'</span>':'')+extra+'</button>'; }).join('');
   var items=supStuck
     ? supSortItems(SUP.filter(function(it){ return (it.ball==='agent'||it.ball==='insurer') && (it.days||0)>=3 && supPass(it) && (supVid==='all'||it.vid===supVid); }))
-    : supSortItems(SUP.filter(function(it){ return it.ball===supTab && supPass(it) && (supVid==='all'||it.vid===supVid); }));
+    : supTriage
+      ? supSortItems(SUP.filter(function(it){ return it.ball==='us' && (it.sla<0||it.back||it.fresh) && supPass(it) && (supVid==='all'||it.vid===supVid); }))
+      : supSortItems(SUP.filter(function(it){ return it.ball===supTab && supPass(it) && (supVid==='all'||it.vid===supVid); }));
   var total=items.length;
   var triageN=supTriageCount();
   var showSla = supTab==='us';
@@ -2165,15 +2168,17 @@ function supQueue(){
     /* --- надстройка Agent Academy: чей мяч + источник + SLA --- */
     +'<div class="sup-mine-bar"><span class="sup-mine-cap">Разбор — чей мяч:</span><div class="chattabs sup-tabs">'+tbar+'</div>'
       +'<span class="sup-mine-cap" style="margin-left:6px">Источник:</span><select class="tselect sup-select--sm" onchange="supSrc=this.value;supRerender();supUpdateBadge()"><option value="all"'+(supSrc==='all'?' selected':'')+'>Все</option><option value="1c"'+(supSrc==='1c'?' selected':'')+'>Заявки 1С</option><option value="chat"'+(supSrc==='chat'?' selected':'')+'>Вопросы чата</option><option value="max"'+(supSrc==='max'?' selected':'')+'>Мессенджер МАХ</option></select>'
-      +(triageN
-          ? '<button class="sup-trg" title="Просрочка, ответ агента и новые — мяч у нас. Клик — показать их сверху." onclick="supStuck=false;supTab=\'us\';supSort={key:\'prio\',dir:\'desc\'};supRerender()">Требуют разбора <span class="sup-trg__n">'+triageN+'</span></button>'
+      +((triageN||supTriage)
+          ? '<button class="sup-trg'+(supTriage?' sup-trg--on':'')+'" title="Просрочка, ответ агента и новые — мяч у нас. Клик — показать только их; повторный — вся очередь." onclick="supStuck=false;supTab=\'us\';supTriage=!supTriage;supSort={key:\'prio\',dir:\'desc\'};supRerender()">Требуют разбора <span class="sup-trg__n">'+triageN+'</span></button>'
           : '<span class="sup-trg sup-trg--zero">Разбор пуст</span>')
-      +'<button class="sup-stuck'+(supStuck?' sup-stuck--on':'')+'" title="Мяч у агента/страховой ≥3 дн без движения — пора пнуть" onclick="supStuck=!supStuck;supRerender()">⧗ Показать зависшие</button>'
+      +'<button class="sup-stuck'+(supStuck?' sup-stuck--on':'')+'" title="Мяч у агента/страховой ≥3 дн без движения — пора пнуть" onclick="supStuck=!supStuck;supTriage=false;supRerender()">⧗ Показать зависшие</button>'
     +'</div>'
     +'<div class="sup-mine-note">'+(supStuck
         ? 'Зависшие: мяч у агента/страховой ≥3 дн без движения — <b>'+total+'</b> '+supPlural(total)+'.'
-        : (supSort.key==='prio' ? 'Порядок: <b>сначала требуют разбора</b> (просрочка → ответ агента → новые → по дате). Клик по колонке «Дата»/«Номер» — привычная 1С-сортировка.' : 'Порядок: 1С-сортировка по колонке. «Требуют разбора» вернёт приоритетный порядок.'))+'</div>'
-    +'<div class="sup-count">'+(supStuck?'Зависших: <b>'+total+'</b> '+supPlural(total):'В очереди: <b>'+total+'</b> '+supPlural(total)+' · вкладка «'+SUP_BALL[supTab]+'»')+'</div>'
+        : supTriage
+          ? 'Фильтр: <b>только требующие разбора</b> — просрочка, ответ агента и новые (мяч у нас). Повторный клик по чипу — вся очередь.'
+          : (supSort.key==='prio' ? 'Порядок: <b>сначала требуют разбора</b> (просрочка → ответ агента → новые → по дате). Клик по колонке «Дата»/«Номер» — привычная 1С-сортировка.' : 'Порядок: 1С-сортировка по колонке. «Требуют разбора» вернёт приоритетный порядок.'))+'</div>'
+    +'<div class="sup-count">'+(supStuck?'Зависших: <b>'+total+'</b> '+supPlural(total):supTriage?'Требуют разбора: <b>'+total+'</b> '+supPlural(total):'В очереди: <b>'+total+'</b> '+supPlural(total)+' · вкладка «'+SUP_BALL[supTab]+'»')+'</div>'
     +'<div class="list-wrap sup-listwrap" style="margin-top:0"><div class="list-scroll"><table class="list sup-list">'
     +'<thead><tr>'+supSortTh('id','Номер заявки')+supSortTh('date','Дата')+'<th>Вид заявки</th><th>Номер договора</th><th>Страхователь</th><th>Объект страхования</th><th>Регион</th><th>Агент</th><th>Ответственный</th><th>Статус заявки · SLA</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div></div>';
