@@ -429,6 +429,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .svq-next{ color:var(--muted); font-size:calc(12px*var(--scale)); margin-top:6px; }
 .svtab__b--quiet{ background:var(--bg); color:var(--muted); }
 .prg-closed{ margin-top:10px; }
+.prg-script{ margin:6px 0 8px; padding:8px 11px; border-left:3px solid var(--sel-line); background:var(--sel); border-radius:6px; color:var(--ink); font-size:calc(12px*var(--scale)); line-height:1.45; }
 .chatcards{ flex:1; overflow-y:auto; padding:18px 20px; display:flex; flex-direction:column; gap:12px; }
 .chatcard{ display:flex; align-items:center; gap:14px; padding:16px 18px; border:1px solid var(--line); border-radius:12px; background:var(--card); cursor:pointer; }
 .chatcard:hover{ border-color:var(--navy); background:var(--hover); }
@@ -455,8 +456,10 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .notif-empty{ padding:24px; text-align:center; color:var(--muted); font-size:calc(12.5px*var(--scale)); }
 .sv__demo{ padding:10px 14px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:7px; align-items:center; background:var(--bg); }
 .sv__demo-t{ width:100%; font-size:calc(11px*var(--scale)); color:var(--muted); font-weight:600; }
-/* нативное оповещение снизу справа (ПоказатьОповещениеПользователя) */
-.ntoast{ position:fixed; right:20px; bottom:20px; z-index:80; display:flex; align-items:center; gap:12px; width:340px; max-width:calc(100vw - 40px); padding:13px 14px; background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:0 12px 34px rgba(0,0,0,.2); transform:translateY(16px); opacity:0; transition:transform .3s ease, opacity .3s ease; }
+/* нативные оповещения снизу справа — ОДИН вертикальный стек (не наложение в точку) */
+#toaststack{ position:fixed; right:20px; bottom:20px; z-index:80; display:flex; flex-direction:column; align-items:flex-end; gap:10px; pointer-events:none; }
+#toaststack>*{ pointer-events:auto; }
+.ntoast{ display:flex; align-items:center; gap:12px; width:340px; max-width:calc(100vw - 40px); padding:13px 14px; background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:0 12px 34px rgba(0,0,0,.2); transform:translateY(16px); opacity:0; transition:transform .3s ease, opacity .3s ease; }
 .ntoast--in{ transform:none; opacity:1; }
 .ntoast--msg{ border-left:3px solid var(--navy); } .ntoast--status{ border-left:3px solid var(--warn); }
 .ntoast__ic{ width:34px; height:34px; border-radius:8px; display:grid; place-items:center; flex:none; }
@@ -829,6 +832,44 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .sup-thread{ margin-top:10px; border:1px solid var(--line); border-left:3px solid var(--blue); border-radius:9px; padding:10px 12px; }
 .sup-thread__h{ font-size:calc(11.5px*var(--scale)); color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
 .sup-thread .supchat{ overflow-y:auto; border:none; padding:0; background:transparent; }
+/* ── Визард ВИ (слой был без стилей — рендерился на дефолтах браузера) ── */
+.chg-wrap{ max-width:780px; margin:0 20px; display:flex; flex-direction:column; gap:14px; padding-bottom:22px; }
+.chg-reasons{ display:grid; grid-template-columns:1fr 1fr; gap:2px 22px; margin-top:6px; }
+.chg-group{ grid-column:1/-1; margin:12px 0 3px; font-size:calc(10.5px*var(--scale)); font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.chg-reasons .chg-group:first-child{ margin-top:0; }
+.chk{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:calc(13px*var(--scale)); }
+.chk:hover{ background:var(--hover); }
+.chk--on{ background:var(--sel); }
+.chk input{ position:absolute; opacity:0; width:0; height:0; }
+.chk__box{ width:20px; height:20px; border:2px solid var(--line); border-radius:5px; flex:none; display:grid; place-items:center; background:var(--card); }
+.chk--on .chk__box{ background:var(--navy); border-color:var(--navy); }
+.chk--on .chk__box::after{ content:''; width:10px; height:6px; border-left:2.5px solid #fff; border-bottom:2.5px solid #fff; transform:rotate(-45deg) translateY(-1px); }
+.chg-need{ margin-top:12px; padding:11px 13px; border-radius:8px; background:var(--sel); border:1px solid var(--sel-line); font-size:calc(12.5px*var(--scale)); color:var(--ink); line-height:1.5; }
+.chg-need b{ font-weight:600; }
+.chg-need__pay{ display:block; margin-top:4px; color:var(--muted); }
+.chg-err{ display:flex; align-items:center; gap:7px; margin-top:10px; color:var(--err); font-size:calc(12.5px*var(--scale)); font-weight:600; }
+.chg-files{ display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 10px; }
+.chg-file{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--line); border-radius:7px; background:var(--bg); font-size:calc(12px*var(--scale)); }
+.chg-none{ color:var(--muted); font-size:calc(12.5px*var(--scale)); margin:2px 0 10px; }
+.chg-upload{ display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 14px; border:1px dashed var(--navy); border-radius:8px; color:var(--navy); font-size:calc(12.5px*var(--scale)); font-weight:600; cursor:pointer; background:var(--card); }
+.chg-foot{ display:flex; align-items:center; gap:14px; margin-top:2px; }
+.chg-next{ margin-right:auto; color:var(--muted); font-size:calc(11.5px*var(--scale)); line-height:1.5; max-width:460px; }
+.fld-label{ display:block; font-size:calc(11px*var(--scale)); font-weight:600; color:var(--muted); margin:10px 0 4px; }
+/* ── Операторские блоки процесса (тоже были без стилей) ── */
+.sup-changebox{ margin:14px 0 4px; padding:12px 14px; border:1px solid var(--line); border-radius:9px; background:var(--bg); }
+.proc-row{ display:flex; gap:8px; align-items:flex-end; margin:8px 0; }
+.proc-fld{ flex:1; min-width:0; }
+.proc-fld label{ display:block; font-size:calc(10.5px*var(--scale)); font-weight:600; color:var(--muted); margin-bottom:3px; }
+.proc-fld .tselect{ width:100%; }
+.proc-wait{ margin:8px 0; padding:8px 11px; border-radius:7px; background:var(--sel); border:1px solid var(--sel-line); color:var(--muted); font-size:calc(12px*var(--scale)); line-height:1.45; }
+.proc-done{ margin:8px 0 2px; color:var(--ok-text); font-weight:600; font-size:calc(12.5px*var(--scale)); }
+.proc-rej{ margin:8px 0 2px; color:var(--muted); font-size:calc(12.5px*var(--scale)); }
+.proc-files{ display:flex; flex-wrap:wrap; gap:6px; margin:4px 0; }
+.proc-file{ display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border:1px solid var(--line); border-radius:6px; background:var(--card); font-size:calc(11.5px*var(--scale)); }
+.proc-sep{ border-top:1px dashed var(--line); margin:12px 0 8px; }
+.proc-err{ color:var(--err); font-size:calc(11.5px*var(--scale)); font-weight:600; margin-top:4px; }
+/* бейдж «Новый» у строки документа */
+.doc-new{ margin-left:8px; padding:1px 7px; border-radius:5px; background:color-mix(in srgb,var(--ok) 14%,transparent); color:var(--ok-text); font-size:calc(10px*var(--scale)); font-weight:700; }
 .sup-tag--pub{ background:color-mix(in srgb,var(--blue) 16%,transparent); color:var(--blue); font-size:calc(10px*var(--scale)); font-weight:700; padding:1px 6px; border-radius:4px; }
 .sup-talk__empty{ color:var(--muted); font-size:calc(12px*var(--scale)); padding:4px 2px 8px; }
 .sup-talk__err{ margin-top:6px; color:var(--err); font-size:calc(12px*var(--scale)); font-weight:600; }
@@ -971,21 +1012,30 @@ function procIco(k){
 /* ===== Процесс «Внесение изменений» (ВИ / change) — модель Белова (docs/knowledge/10a §3,§7) =====
    Единый стор = массив SUP (та же очередь оператора). Один канон-статус cstatus → ДВА словаря (агент/поддержка) + чей мяч.
    Живой круг: заявку, созданную агентом, видит оператор; действия оператора видит агент (память вкладки). */
+/* Группы для сканирования (2 колонки × 3 группы, частые сверху); docs = ЧЕРНОВОЙ пакет «обычно нужны»
+   (сверить с боевой поддержкой ДО показа агентам — бэклог); pay = возможна доплата (факт без суммы). */
 var CHANGE_REASONS=[
-  {code:'add-driver',label:'Добавление нового водителя'},
-  {code:'replace-license',label:'Замена ВУ'},
-  {code:'policy-error',label:'Ошибка в полисе'},
-  {code:'change-owner',label:'Смена собственника ТС'},
-  {code:'replace-plate-sts',label:'Замена ГРЗ и (или) СТС'},
-  {code:'unlimited-drivers',label:'ЛДУ без ограничений'},
-  {code:'with-trailer',label:'Используется с прицепом'},
-  {code:'policyholder-doc',label:'Изменение документа страхователя'},
-  {code:'owner-doc',label:'Изменение документа собственника'},
-  {code:'remove-driver',label:'Удаление водителя'},
-  {code:'owner-name',label:'Смена ФИО собственника'},
-  {code:'policyholder-name',label:'Смена ФИО страхователя'}
+  {code:'add-driver',label:'Добавление нового водителя',g:'Водители',docs:['Копия ВУ нового водителя'],pay:true},
+  {code:'replace-license',label:'Замена ВУ',g:'Водители',docs:['Копия нового ВУ']},
+  {code:'remove-driver',label:'Удаление водителя',g:'Водители',docs:[]},
+  {code:'unlimited-drivers',label:'ЛДУ без ограничений',g:'Водители',docs:[],pay:true},
+  {code:'replace-plate-sts',label:'Замена ГРЗ и (или) СТС',g:'ТС и собственник',docs:['Копия СТС с новым ГРЗ']},
+  {code:'change-owner',label:'Смена собственника ТС',g:'ТС и собственник',docs:['ДКП или документ о смене собственника','Копия СТС'],pay:true},
+  {code:'with-trailer',label:'Используется с прицепом',g:'ТС и собственник',docs:[],pay:true},
+  {code:'owner-name',label:'Смена ФИО собственника',g:'ТС и собственник',docs:['Документ о смене ФИО (свидетельство)','Новый паспорт']},
+  {code:'policy-error',label:'Ошибка в полисе',g:'Документы и страхователь',docs:['Документ с верными данными (СТС / ВУ / паспорт)'],hint:'Укажите в комментарии, что именно указано неверно — поддержка исправит без уточняющих вопросов.'},
+  {code:'policyholder-doc',label:'Изменение документа страхователя',g:'Документы и страхователь',docs:['Новый документ страхователя']},
+  {code:'owner-doc',label:'Изменение документа собственника',g:'Документы и страхователь',docs:['Новый документ собственника']},
+  {code:'policyholder-name',label:'Смена ФИО страхователя',g:'Документы и страхователь',docs:['Документ о смене ФИО (свидетельство)','Новый паспорт']}
 ];
 function reasonLabel(code){ for(var i=0;i<CHANGE_REASONS.length;i++){ if(CHANGE_REASONS[i].code===code) return CHANGE_REASONS[i].label; } return code; }
+function reasonByCode(code){ for(var i=0;i<CHANGE_REASONS.length;i++){ if(CHANGE_REASONS[i].code===code) return CHANGE_REASONS[i]; } return null; }
+/* «Обычно нужны» — union черновых пакетов выбранных причин (+признак возможной доплаты). */
+function reasonNeeds(codes){ var docs=[],seen={},pay=false,hints=[];
+  (codes||[]).forEach(function(cd){ var r=reasonByCode(cd); if(!r) return; if(r.pay) pay=true; if(r.hint) hints.push(r.hint);
+    (r.docs||[]).forEach(function(d){ if(!seen[d]){ seen[d]=1; docs.push(d); } }); });
+  return {docs:docs,pay:pay,hints:hints};
+}
 /* cstatus → {ag:лейбл агенту, sup:лейбл поддержке, ball, tone}. Разведение bounded contexts (Белов §2). */
 var PROC_STATUS={
   'new':{ag:'Проверка документов',sup:'Новая',ball:'us',tone:'wait'},
@@ -1038,7 +1088,12 @@ function procSyncSV(it,actor,comment){
     (SV_THREADS[row.id]=SV_THREADS[row.id]||[]).push({sys:1,t:txt});
     if(e.ball==='agent'||e.term) row.unread=(row.unread||0)+1;
     row.action=(e.ball==='agent'); row.act=row.action?caseVerb(it):'';
-    if(actor==='support'&&typeof notifyToast==='function') notifyToast('status','Смена статуса заявки',((PROC_KIND[it.kind]||{}).t||'Заявка')+' · '+row.holder+': «'+procAgentLabel(it)+'»',row.id);
+    /* Оповещение АГЕНТА: kind-aware заголовок на терминале; глушим, когда открыт экран «Оператор»
+       (в демо одна вкладка — оператор не должен видеть агентскую нотификацию о своём же действии). */
+    if(actor==='support'&&typeof notifyToast==='function'&&!document.querySelector('.sup-screen')){
+      var ttl=(e.term&&it.cstatus!=='rejected')?((PROC_KIND[it.kind]||{}).done||'Готово'):'Смена статуса заявки';
+      notifyToast('status',ttl,((PROC_KIND[it.kind]||{}).t||'Заявка')+' · '+row.holder+': «'+procAgentLabel(it)+'»',row.id);
+    }
   }
   if(typeof updateBell==='function') updateBell();
   if(typeof svOnMessages==='function'&&svOnMessages()&&!svOpen) rerenderChats();
@@ -1066,28 +1121,48 @@ function procCreate(idx,reasons,comment,files){ var c=CLIENTS[idx]; if(!c) retur
 
 /* --- Визард агента --- */
 var changeIdx=0, changeSel={}, changeFiles=[];
-function openChange(idx){ changeIdx=idx; changeSel={}; changeFiles=[]; render('change');
+function openChange(idx){ changeIdx=idx; changeSel={}; changeFiles=[]; changeErr=false; render('change');
   document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); });
   document.getElementById('activeTab').innerHTML='Внесение изменений <span class="tab__x">×</span>'; }
-function changeToggle(code){ if(changeSel[code]) delete changeSel[code]; else changeSel[code]=1; render('change'); }
+function changeToggle(code){ if(changeSel[code]) delete changeSel[code]; else changeSel[code]=1; if(Object.keys(changeSel).length) changeErr=false; render('change'); }
 function changeAddFile(){ changeFiles.push('Документ '+(changeFiles.length+1)+'.pdf'); render('change'); }
-function changeSubmit(){ var reasons=Object.keys(changeSel); if(!reasons.length){ toast('Выберите хотя бы одну причину изменения'); return; } var ta=document.getElementById('changeComment'); procCreate(changeIdx, reasons, ta?ta.value.trim():'', changeFiles); }
+var changeErr=false;
+function changeSubmit(){ var reasons=Object.keys(changeSel);
+  if(!reasons.length){ changeErr=true; render('change'); var e=document.querySelector('.chg-err'); if(e) e.scrollIntoView({block:'center'}); return; }
+  changeErr=false; var ta=document.getElementById('changeComment'); procCreate(changeIdx, reasons, ta?ta.value.trim():'', changeFiles); }
 function screenChange(){ var c=CLIENTS[changeIdx]||CLIENTS[0];
-  var reasons=CHANGE_REASONS.map(function(r){ var on=!!changeSel[r.code]; return '<label class="chk'+(on?' chk--on':'')+'"><input type="checkbox" '+(on?'checked':'')+' onchange="changeToggle(\''+r.code+'\')"><span class="chk__box"></span><span>'+r.label+'</span></label>'; }).join('');
-  var files=changeFiles.length? changeFiles.map(function(f){ return '<div class="chg-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+f+'</div>'; }).join('') : '<div class="chg-none">Документы не приложены — можно отправить и приложить позже по запросу поддержки.</div>';
-  var n=Object.keys(changeSel).length;
+  /* 3 смысловые группы, 2 колонки — вертикальное сканирование, частые сверху. */
+  var reasons='', lastG='';
+  CHANGE_REASONS.forEach(function(r){ var on=!!changeSel[r.code];
+    if(r.g!==lastG){ reasons+='<div class="chg-group">'+r.g+'</div>'; lastG=r.g; }
+    reasons+='<label class="chk'+(on?' chk--on':'')+'"><input type="checkbox" '+(on?'checked':'')+' onchange="changeToggle(\''+r.code+'\')"><span class="chk__box"></span><span>'+r.label+'</span></label>';
+  });
+  var sel=Object.keys(changeSel), n=sel.length;
+  /* «Обычно нужны» — прогноз, не обещание (черновой пакет; сверка с поддержкой — до показа агентам). */
+  var needs=reasonNeeds(sel), needBox='';
+  if(n){
+    needBox='<div class="chg-need">'
+      +(needs.docs.length?('<b>Обычно нужны:</b> '+needs.docs.join(' · ')+'. Поддержка может запросить ещё.'):'Дополнительные документы обычно не нужны.')
+      +(needs.pay?'<span class="chg-need__pay">Возможна доплата — сумму рассчитает страховая, ссылку на оплату пришлём сюда.</span>':'')
+      +needs.hints.map(function(h){ return '<span class="chg-need__pay">'+h+'</span>'; }).join('')
+    +'</div>';
+  }
+  var err=changeErr?'<div class="chg-err"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Отметьте хотя бы одну причину — без неё поддержка не поймёт, что менять.</div>':'';
+  var files=changeFiles.length? changeFiles.map(function(f){ return '<div class="chg-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+f+'</div>'; }).join('') : '<div class="chg-none">Приложите документы сейчас — заявка пройдёт быстрее, без запроса от поддержки. Если документов под рукой нет, можно отправить и приложить позже.</div>';
   return '<div class="screen active">'
     +'<div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+changeIdx+',false)">Договор</a> / Внесение изменений</div>'
     +'<div class="ptitle">Внесение изменений в договор</div>'
     +'<div class="chg-wrap">'
       +'<div class="card"><div class="kv"><span>Договор</span><b>'+c.p+' · '+c.num+'</b></div><div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+c.o+(c.sub?' · '+c.sub:'')+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+c.sk+'</b></div></div>'
-      +'<div class="card"><h3>Укажите причину, по которой необходимо внести изменения в договор</h3><div class="chg-reasons">'+reasons+'</div></div>'
-      +'<div class="card"><h3>Документы и комментарий</h3><p class="card__lead">Приложите подтверждающие документы (СТС, ВУ, ПТС и т.п.). Можно отправить и без них — поддержка запросит недостающее.</p>'
+      +'<div class="card"><h3>Что меняем в договоре?</h3><div class="chg-reasons">'+reasons+'</div>'+needBox+err+'</div>'
+      +'<div class="card"><h3>Документы и комментарий</h3>'
         +'<div class="chg-files">'+files+'</div>'
         +'<label class="chg-upload"><input type="file" hidden onchange="changeAddFile()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>Приложить документ</label>'
-        +'<textarea class="sup-ta" id="changeComment" placeholder="Комментарий для поддержки (что и почему меняем)…" style="margin-top:10px;width:100%"></textarea>'
+        +'<label class="fld-label" for="changeComment">Комментарий для поддержки</label>'
+        +'<textarea class="sup-ta" id="changeComment" placeholder="Например: впишите второго водителя — Морозова Ирина Петровна…" style="width:100%"></textarea>'
       +'</div>'
-      +'<div class="chg-foot"><button class="btn" onclick="openContract('+changeIdx+',false)">Назад</button><button class="btn btn--primary" onclick="changeSubmit()">Отправить заявку'+(n?' ('+n+')':'')+'</button></div>'
+      +'<div class="chg-foot"><span class="chg-next">После отправки: поддержка проверит заявку → если понадобятся документы или доплата, попросим здесь же → приложим новый полис к договору. О каждом шаге сообщим оповещением.</span>'
+        +'<button class="btn btn--primary" onclick="changeSubmit()">Отправить заявку'+(n?' ('+n+')':'')+'</button></div>'
     +'</div></div>';
 }
 
@@ -1118,17 +1193,24 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
       var req=(it.docRequest&&it.docRequest.items&&it.docRequest.items.length)? '<div class="prg-need">Нужны документы: '+it.docRequest.items.join(', ')+'</div>':'<div class="prg-need">Поддержка запросила документы.</div>';
       action=req+'<button class="btn btn--primary btn--sm" onclick="procAgentUpload(\''+it.id+'\')">Загрузить документы</button>';
     } else if(it.cstatus==='awaiting_payment'){
-      var disc='<div class="prg-disc">⚠ Ссылка на оплату может стать недействительной. Если оплата не проходит — запросите новую у поддержки.</div>';
-      if(it.payStale) action='<div class="prg-pay"><b>К доплате: '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽</b><div class="prg-stale">Вы запросили новую ссылку — поддержка перевыставит.</div></div>';
-      else action='<div class="prg-pay"><b>К доплате: '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽</b>'+disc+'<div class="prg-payrow"><button class="btn btn--primary btn--sm" onclick="procAgentPay(\''+it.id+'\')">Оплатить '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽</button><button class="btn btn--sm" onclick="procReqNewLink(\''+it.id+'\')">Ссылка не открывается</button></div></div>';
+      /* Платит КЛИЕНТ: ссылка у агента — передать (WhatsApp/СМС) или показать QR; агент лишь подтверждает оплату. */
+      var amtS=(it.payAmount||0).toLocaleString('ru-RU')+' ₽';
+      var disc='<div class="prg-disc">⚠ Ссылка может стать недействительной. Если оплата не проходит — запросите новую у поддержки.</div>';
+      if(it.payStale) action='<div class="prg-pay"><b>К доплате: '+amtS+'</b><div class="prg-stale">Вы запросили новую ссылку — поддержка перевыставит.</div></div>';
+      else if(!it.linkShared) action='<div class="prg-pay"><b>К доплате: '+amtS+' — платит клиент.</b>'
+        +'<div class="prg-script">Скажите клиенту: «За изменение страховая рассчитала доплату '+amtS+' — отправляю вам ссылку на оплату».</div>'+disc
+        +'<div class="prg-payrow"><button class="btn btn--primary btn--sm" onclick="procShareLink(\''+it.id+'\')">Отправить ссылку клиенту</button><button class="btn btn--sm" onclick="procShareLink(\''+it.id+'\',1)">Показать QR для оплаты</button></div></div>';
+      else action='<div class="prg-pay"><b>К доплате: '+amtS+' — ссылка у клиента.</b>'+disc
+        +'<div class="prg-payrow"><button class="btn btn--primary btn--sm" onclick="procAgentPay(\''+it.id+'\')">Клиент оплатил — подтвердить</button><button class="btn btn--sm" onclick="procReqNewLink(\''+it.id+'\')">Ссылка не открывается</button></div></div>';
     } else if(it.cstatus==='signing'){
       action='<div class="prg-need">Соглашение о выплате готово — подпишите у клиента и загрузите скан.</div><button class="btn btn--primary btn--sm" onclick="procAgentSign(\''+it.id+'\')">Загрузить подписанное соглашение</button>';
     } else if(it.cstatus==='under_review'){ action='<div class="prg-wait">Заявка у страховой — на рассмотрении. Ответ придёт сюда и оповещением.</div>'; }
     else if(it.cstatus==='settled'){ action='<div class="prg-done">✓ Урегулировано — выплата произведена.</div>'; }
     else if(it.cstatus==='done'){ action='<div class="prg-done">✓ '+((PROC_KIND[it.kind]||{}).done||'Заявка завершена')+(it.kind==='change'?' — новый полис доступен в документах.':'.')+'</div>'; }
     else if(it.cstatus==='rejected'){ action='<div class="prg-rej">Отказ'+(it.rejectReason?' — '+it.rejectReason:'')+'</div><button class="btn btn--sm" onclick="'+(it.kind==='change'?('openChange('+idx+')'):'toast(\'Повторная подача — через новую заявку из договора\')')+'">Подать заявку заново</button>'; }
+    else if(it.cstatus==='new'){ action='<div class="prg-wait">Поддержка возьмёт заявку в работу. Дальше: проверим → если понадобятся документы или доплата — попросим здесь же → приложим новый полис. О каждом шаге сообщим оповещением — проверять не нужно.</div>'; }
     else { action='<div class="prg-wait">Заявка у поддержки — ждём ответа.</div>'; }
-    var chatBtn=(CLIENTS[idx]&&CLIENTS[idx].chat)? '<div style="margin-top:6px"><button class="req__reply" onclick="openDiscussion(\''+CLIENTS[idx].chat+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Открыть переписку по обращению — в Чатах →</button></div>':'';
+    var chatBtn=(CLIENTS[idx]&&CLIENTS[idx].chat)? '<div style="margin-top:6px"><button class="req__reply" onclick="openDiscussion(\''+CLIENTS[idx].chat+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка по обращению →</button></div>':'';
     var hist='<div class="prg__hist"><button class="prg__histbtn" onclick="this.nextElementSibling.classList.toggle(\'show\')">История заявки</button><div class="prg__timeline">'+it.steps.filter(function(st){ return !st.internal; }).map(function(st){ var lbl=st.cs&&PROC_STATUS[st.cs]?PROC_STATUS[st.cs].ag:(st.s||''); return '<div class="prg__ev"><span class="prg__evd">'+st.d+'</span><span class="prg__evs">'+lbl+'</span><span class="prg__evc">'+st.c+'</span></div>'; }).join('')+'</div></div>';
     return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+reasons+action+hist+chatBtn+'</div>';
   }).join('')+closedBlock;
@@ -1137,28 +1219,41 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
 function procAgentUpload(id){ var it=supFind(id); if(!it) return; it.attachments=(it.attachments||[]).concat([{name:'Документ агента.pdf',by:'agent',at:'сейчас'}]); it.docRequest=null; it.cstatus='docs_uploaded'; procApply(it,'agent','Агент приложил запрошенные документы.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Документы отправлены поддержке'); render('contract',it.policyIdx); }
 function procAgentPay(id){ var it=supFind(id); if(!it) return; it.payStale=false; it.cstatus='paid'; procApply(it,'agent','Агент подтвердил оплату доплаты '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Оплата отправлена — поддержка продолжит оформление'); render('contract',it.policyIdx); }
 function procAgentSign(id){ var it=supFind(id); if(!it) return; it.attachments=(it.attachments||[]).concat([{name:'Соглашение (подписано).pdf',by:'agent',at:'сейчас'}]); it.cstatus='signed'; procApply(it,'agent','Агент загрузил подписанное клиентом соглашение.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Соглашение отправлено — страховая произведёт выплату'); render('contract',it.policyIdx); }
-function procReqNewLink(id){ var it=supFind(id); if(!it) return; it.payStale=true; it.ball='us'; it.back=true; it._ts=Date.now(); (it.steps=it.steps||[]).push({d:'сейчас',cs:'awaiting_payment',c:'Агент: ссылка на оплату не открывается — прошу новую.'}); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Запрос новой ссылки отправлен поддержке'); render('contract',it.policyIdx); }
+function procReqNewLink(id){ var it=supFind(id); if(!it) return; it.payStale=true; it.linkShared=false; it.ball='us'; it.back=true; it._ts=Date.now(); (it.steps=it.steps||[]).push({d:'сейчас',cs:'awaiting_payment',c:'Агент: ссылка на оплату не открывается — прошу новую.'}); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Запрос новой ссылки отправлен поддержке'); render('contract',it.policyIdx); }
+/* Ссылку на доплату получает агент и ПЕРЕДАЁТ клиенту (WhatsApp/СМС) или показывает QR — платит клиент. */
+function procShareLink(id,qr){ var it=supFind(id); if(!it) return; it.linkShared=true;
+  (it.steps=it.steps||[]).push({d:'сейчас',cs:'awaiting_payment',c:qr?'Агент показал клиенту QR для оплаты.':'Агент передал клиенту ссылку на оплату.'});
+  toast(qr?'QR показан клиенту — после оплаты нажмите «Клиент оплатил»':'Ссылка скопирована — отправьте клиенту в WhatsApp или СМС');
+  render('contract',it.policyIdx); }
 /* Действия оператора (переходы канона) */
 function procTake(id){ procSetStatus(id,'in_work','support','Поддержка взяла заявку в работу.'); toast('Заявка в работе'); supRerender(); }
 function procReqDocs(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procDocReq'); var items=(inp&&inp.value.trim())? inp.value.split(',').map(function(x){return x.trim();}).filter(Boolean):['СТС','Водительское удостоверение']; it.docRequest={items:items}; it.cstatus='awaiting_docs'; procApply(it,'support','Поддержка запросила документы: '+items.join(', ')+'.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Запрос документов отправлен агенту'); supRerender(); }
 function procPayLink(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procPayAmt'); var amt=inp?parseInt((inp.value||'').replace(/\D/g,''),10):0; if(!amt) amt=2500; it.payAmount=amt; it.payStale=false; it.cstatus='awaiting_payment'; procApply(it,'support','Выставлена доплата за изменение: '+amt.toLocaleString('ru-RU')+' ₽ — ссылка направлена агенту.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Ссылка на доплату направлена агенту'); supRerender(); }
 function procReissue(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procPayAmt2'); var amt=(inp&&inp.value)?parseInt(inp.value.replace(/\D/g,''),10):it.payAmount; if(amt) it.payAmount=amt; it.payStale=false; it.cstatus='awaiting_payment'; procApply(it,'support','Поддержка перевыпустила ссылку на оплату.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Ссылка перевыпущена'); supRerender(); }
-function procAttachPolicy(id){ procSetStatus(id,'done','support','Поддержка внесла изменение в B2B СК, приложила новый полис и сменила № полиса.'); toast('Новый полис приложен — заявка завершена'); supRerender(); }
+function procAttachPolicy(id){ var it=supFind(id); if(!it) return;
+  /* Канон ВИ-ФТ-6: поддержка меняет № полиса — фиксируем old/new, договор показывает новый. */
+  var c=CLIENTS[it.policyIdx];
+  if(c&&it.kind==='change'){ it.oldNum=c.num; var m=c.num.match(/^(.*?)(\d+)$/); it.newNum=m? m[1]+String(parseInt(m[2],10)+1):c.num+'-1'; c.num=it.newNum; }
+  it.valueSeen=false;
+  procSetStatus(id,'done','support','Изменения внесены — новый полис приложен к договору'+(it.newNum?(', новый номер '+it.newNum):'')+'.');
+  toast('Новый полис приложен — заявка завершена'); supRerender(); }
 /* Переходы канона по видам: cancel (§4) и loss (§5). */
 function procToSK(id){ procSetStatus(id,'under_review','support','Убыток заведён и передан в СК на рассмотрение.'); toast('Передано в СК — на рассмотрении'); supRerender(); }
 function procToSigning(id){ procSetStatus(id,'signing','support','СК согласовала выплату. Соглашение направлено — подпишите у клиента и загрузите.'); toast('Соглашение направлено агенту на подписание'); supRerender(); }
 function procSettle(id){ procSetStatus(id,'settled','support','Отдано на выплату — убыток урегулирован.'); toast('Убыток урегулирован — выплата произведена'); supRerender(); }
 function procCancelDone(id){ procSetStatus(id,'done','support','Договор отправлен в СК на расторжение. Возврат премии — до 14 календарных дней.'); toast('Договор расторгнут — возврат до 14 дней'); supRerender(); }
-function procReject(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procRejReason'); var r=inp?inp.value.trim():''; if(!r){ toast('Укажите причину отказа'); return; } it.rejectReason=r; it.cstatus='rejected'; procApply(it,'support','Отказ: '+r); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Заявка отклонена'); supRerender(); }
+function procReject(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procRejReason'); var r=inp?inp.value.trim():''; if(!r){ var e=document.getElementById('procRejErr'); if(e) e.hidden=false; return; } it.rejectReason=r; it.cstatus='rejected'; procApply(it,'support','Отказ: '+r); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Заявка отклонена'); supRerender(); }
 /* Операторская панель хода заявки — переходы по канону ВИДА (change §3 / cancel §4 / loss §5).
    Статус канон-заявки меняется ТОЛЬКО этими действиями (свободной смены нет — «мок ≠ контракт»). */
 function procOpBox(it){ var cs=it.cstatus, k=it.kind||'change';
   var h='<div class="sup-side__box"><div class="sup-side__h">Действия по заявке — '+procSupLabel(it)+'</div><div class="sup-actions">';
   if(cs==='new') h+='<button class="btn btn--primary btn--sm" onclick="procTake(\''+it.id+'\')">Взять в работу</button>';
   if(cs==='in_work'||cs==='docs_uploaded'||cs==='paid'){
-    h+='<div class="proc-row"><input id="procDocReq" class="tselect" placeholder="Документы через запятую (СТС, ВУ…)"/><button class="btn btn--sm" onclick="procReqDocs(\''+it.id+'\')">Запросить документы</button></div>';
+    /* Предзаполнение из причин заявки — оператор видит и правит, тихих дефолтов нет. */
+    var predoc=reasonNeeds(it.reasons||[]).docs.join(', ');
+    h+='<div class="proc-row"><span class="proc-fld"><label for="procDocReq">Какие документы запросить</label><input id="procDocReq" class="tselect" value="'+(predoc||'СТС, Водительское удостоверение').replace(/"/g,'&quot;')+'" placeholder="Через запятую"/></span><button class="btn btn--sm" onclick="procReqDocs(\''+it.id+'\')">Запросить документы</button></div>';
     if(k==='change'){
-      h+='<div class="proc-row"><input id="procPayAmt" class="tselect" placeholder="Сумма доплаты, ₽"/><button class="btn btn--sm" onclick="procPayLink(\''+it.id+'\')">Ссылка на доплату</button></div>';
+      h+='<div class="proc-row"><span class="proc-fld"><label for="procPayAmt">Сумма доплаты, ₽</label><input id="procPayAmt" class="tselect" placeholder="Например: 450"/></span><button class="btn btn--sm" onclick="procPayLink(\''+it.id+'\')">Ссылка на доплату</button></div>';
       h+='<button class="btn btn--primary btn--sm" onclick="procAttachPolicy(\''+it.id+'\')">Приложить новый полис → Готово</button>';
     } else if(k==='cancel'){
       h+='<button class="btn btn--primary btn--sm" onclick="procCancelDone(\''+it.id+'\')">Отправить в СК на расторжение → Готово</button>';
@@ -1167,21 +1262,21 @@ function procOpBox(it){ var cs=it.cstatus, k=it.kind||'change';
     }
   }
   if(cs==='awaiting_docs') h+='<div class="proc-wait">Мяч у агента — ждём документы: '+(((it.docRequest&&it.docRequest.items)||[]).join(', ')||'—')+'</div>';
-  if(cs==='awaiting_payment'){ if(it.payStale) h+='<div class="proc-wait">Агент сообщил: ссылка не открывается.</div><div class="proc-row"><input id="procPayAmt2" class="tselect" placeholder="Новая сумма, ₽ (опц.)"/><button class="btn btn--primary btn--sm" onclick="procReissue(\''+it.id+'\')">Перевыпустить ссылку</button></div>'; else h+='<div class="proc-wait">Мяч у агента — ждём оплату '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽.</div>'; }
+  if(cs==='awaiting_payment'){ if(it.payStale) h+='<div class="proc-wait">Агент сообщил: ссылка не открывается.</div><div class="proc-row"><span class="proc-fld"><label for="procPayAmt2">Новая сумма, ₽ (необязательно)</label><input id="procPayAmt2" class="tselect" placeholder="Оставьте пустым — сумма прежняя"/></span><button class="btn btn--primary btn--sm" onclick="procReissue(\''+it.id+'\')">Перевыпустить ссылку</button></div>'; else h+='<div class="proc-wait">Мяч у агента — ждём оплату '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽ от клиента.</div>'; }
   if(cs==='under_review') h+='<div class="proc-wait">Мяч у страховой — заявка на рассмотрении.</div><button class="btn btn--primary btn--sm" onclick="procToSigning(\''+it.id+'\')">СК согласовала → соглашение на подписание</button>';
   if(cs==='signing') h+='<div class="proc-wait">Мяч у агента — ждём подписанное клиентом соглашение.</div>';
   if(cs==='signed') h+='<button class="btn btn--primary btn--sm" onclick="procSettle(\''+it.id+'\')">Отдать на выплату → Урегулирован</button>';
   if(cs==='done'||cs==='settled') h+='<div class="proc-done">✓ '+((PROC_KIND[k]||{}).done||'Готово')+'</div>';
   if(cs==='rejected') h+='<div class="proc-rej">Отказ: '+(it.rejectReason||'')+'</div>';
-  if(!(PROC_STATUS[cs]||{}).term) h+='<div class="proc-row" style="margin-top:8px"><input id="procRejReason" class="tselect" placeholder="Причина отказа (свободный текст)"/><button class="btn btn--sm" onclick="procReject(\''+it.id+'\')">Отказать</button></div>';
+  if(!(PROC_STATUS[cs]||{}).term) h+='<div class="proc-sep"></div><div class="proc-row"><span class="proc-fld"><label for="procRejReason">Причина отказа (свободный текст)</label><input id="procRejReason" class="tselect" placeholder="Например: VIN в СТС не совпадает с базой"/></span><button class="btn btn--sm" onclick="procReject(\''+it.id+'\')">Отказать</button></div><div class="proc-err" id="procRejErr" hidden>Укажите причину отказа — агент увидит её дословно.</div>';
   return h+'</div></div>';
 }
 function procReasonsBlock(it){ var reasons=(it.reasons||[]).length? it.reasons.map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('') : '<span class="empty-cell">'+(it.what||'—')+'</span>';
   var files=(it.attachments||[]).length? it.attachments.map(function(a){ return '<span class="proc-file">'+a.name+(a.by==='agent'?' · агент':'')+'</span>'; }).join('') : '<span class="empty-cell">файлов нет</span>';
-  var dr=(it.docRequest&&it.docRequest.items&&it.docRequest.items.length)? '<div class="kv"><span>Запрошены</span><b>'+it.docRequest.items.join(', ')+'</b></div>':'';
+  /* «Запрошены» тут не дублируем — единственное место этого факта: «Мяч у агента — ждём документы…» в действиях. */
   var rtitle={change:'Причина изменения',cancel:'Причина расторжения',loss:'Описание убытка'}[it.kind]||'Причина обращения';
   return '<div class="sup-changebox"><div class="sup-side__h">'+rtitle+'</div><div class="prg-reasons">'+reasons+'</div>'
-    +'<div class="sup-side__h" style="margin-top:8px">Приложенные файлы</div><div class="proc-files">'+files+'</div>'+dr
+    +'<div class="sup-side__h" style="margin-top:8px">Приложенные файлы</div><div class="proc-files">'+files+'</div>'
     +(it.reasonComment?'<div class="kv"><span>Комментарий агента</span><b>'+it.reasonComment+'</b></div>':'')+'</div>';
 }
 
@@ -1443,6 +1538,14 @@ function screenContract(i){
   var reqCls=c.urgent?'urgent':'work';
 
   var success=contractIssued?'<div class="success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg><div><b>Полис оформлен</b><div style="color:var(--muted);font-size:12px">'+c.p+' · '+c.n+'</div></div></div>':'';
+  /* Момент ценности ВИ: изменения внесены — передайте клиенту НОВЫЙ полис (тот же атом .success, что при оформлении). */
+  var doneChg=procForPolicy(i).filter(function(it){ return it.kind==='change'&&it.cstatus==='done'&&it.newNum&&!it.valueSeen; })[0];
+  if(doneChg){ success+='<div class="success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>'
+    +'<div style="flex:1"><b>Изменения внесены — передайте клиенту обновлённый полис</b>'
+    +'<div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">Новый номер: <span class="polnum">'+doneChg.newNum+'</span> · Прежний полис № '+doneChg.oldNum+' недействителен — клиент должен пользоваться новым.</div>'
+    +'<div style="margin-top:9px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn--primary btn--sm" onclick="toast(\'Скачивание нового полиса (демо)\')">Скачать новый полис (PDF)</button>'
+    +'<button class="btn btn--sm" onclick="var q=document.querySelector(\'.qr-wrap\'); if(q){ q.classList.add(\'show\'); q.scrollIntoView({block:\'center\'}); }">Показать QR клиенту</button></div></div>'
+    +'<button class="sv__x" title="Скрыть" onclick="var k=supFind(\''+doneChg.id+'\'); if(k) k.valueSeen=true; render(\'contract\','+i+')">×</button></div>'; }
 
   var summary='<div class="card">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+skLogoImg(c.sk)+'<div style="flex:1"><h3 style="margin:0">'+c.p+'</h3><div style="color:var(--muted);font-size:12px">'+c.sk+'</div></div><span class="status-text '+statusCls+'">'+statusText+'</span></div>'
@@ -1457,7 +1560,7 @@ function screenContract(i){
 
   var docs='<div class="card"><h3>Документы клиенту</h3><p class="card__lead">Полис и документы — скачайте и передайте клиенту (печать из PDF).</p>'
     +docRow('Полис '+c.p+' · '+c.num)
-    +(procForPolicy(i).some(function(it){ return it.kind==='change'&&it.cstatus==='done'; })?docRow('Полис '+c.p+' (обновлён после изменений) · '+c.num):'')
+    +(procForPolicy(i).some(function(it){ return it.kind==='change'&&it.cstatus==='done'; })?docRow('Полис '+c.p+' (обновлён после изменений) · '+c.num+'<span class="doc-new">Новый</span>'):'')
     +(addon?docRow('Полис '+addon.name+' · '+addon.num):'')+docRow('Квитанция об оплате')
     +'<div class="doc-actions"><button class="btn'+(contractIssued?' btn--primary':'')+'" onclick="toast(\'Скачивание полиса (демо)\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 11l5 4 5-4"/><path d="M5 21h14"/></svg>Скачать документы (PDF)</button>'
       +'<button class="btn" onclick="this.closest(\'.card\').querySelector(\'.qr-wrap\').classList.toggle(\'show\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><path d="M13 13h3v3M20 13v7M16 20h4"/></svg>Показать QR клиенту</button></div>'
@@ -1684,9 +1787,9 @@ function svReissueLink(id){
   var c=svFind(id); svSyncFromCase(c); if(!c||c.st!=='awaiting_payment')return;
   var k=svCase(c);
   if(k){ k.payStale=false; (k.steps=k.steps||[]).push({d:'сейчас',cs:'awaiting_payment',c:'Поддержка отправила клиенту новую ссылку на оплату.'}); }
-  c.payStale=false; c.reissued=true; c.last='сейчас'; c.ts=Date.now(); c.snip='Новая ссылка на оплату отправлена клиенту';
-  (SV_THREADS[id]=SV_THREADS[id]||[]).push({sys:1,t:'Отправили клиенту новую ссылку на оплату.'});
-  toast('Новая ссылка отправлена клиенту');
+  c.payStale=false; c.reissued=true; c.last='сейчас'; c.ts=Date.now(); c.snip='Новая ссылка на оплату получена — передайте клиенту';
+  (SV_THREADS[id]=SV_THREADS[id]||[]).push({sys:1,t:'Новая ссылка на оплату получена — передайте клиенту.'});
+  toast('Новая ссылка получена — передайте клиенту');
   if(svOnMessages()) rerenderChats();
   /* Кейсовый путь: procSetStatus сам уведомит через procSyncSV (сниппет, тред, оповещение, бейджи). */
   setTimeout(function(){ var p=svFind(id); svSyncFromCase(p); if(!p||p.st!=='awaiting_payment')return;
@@ -1786,18 +1889,20 @@ function svMain(id){
     var st2=svStatus(c);
     var k=svCase(c);
     var stLine='<div class="svq-status"><span class="svq-status__l">Статус:</span><span class="st st--'+st2.cls+'">'+cs.label+(c.payout?' · '+c.payout:'')+'</span></div>';
-    /* «Что дальше» одной строкой: глагол янтарём при мяче у агента, иначе тихо — у кого мяч и что будет. */
-    var verb=svVerb(c), nextLine='';
+    /* «Что дальше» одной строкой + ДЕЙСТВИЕ В 1 КЛИК: из любого канала обнаружения — сразу к делу. */
+    var verb=svVerb(c), nextLine='', k2=svCase(c);
     if(cs.code==='awaiting_payment') nextLine='';
-    else if(cs.code==='rejected') nextLine='<div class="svq-next">Отказ'+(c.rejectReason?' — '+c.rejectReason:'')+'. Можно подать заявку заново с договора.</div>';
-    else if(verb) nextLine='<div class="cl-attn" style="margin-top:6px">'+verb+'</div>';
+    else if(cs.code==='rejected') nextLine='<div class="svq-next">Отказ'+(c.rejectReason?' — '+c.rejectReason:'')+'.</div>'
+      +(k2?'<div style="margin-top:7px"><button class="btn btn--sm" onclick="openChange('+k2.policyIdx+')">Подать заявку заново</button></div>':'');
+    else if(verb) nextLine='<div class="cl-attn" style="margin-top:6px">'+verb+'</div>'
+      +(k2?'<div style="margin-top:7px"><button class="btn btn--primary btn--sm" onclick="openContract('+k2.policyIdx+',false)">К договору — '+(cs.code==='awaiting_docs'?'приложить документы':(cs.code==='signing'?'загрузить соглашение':'выполнить действие'))+'</button></div>':'');
     else if(!cs.term) nextLine='<div class="svq-next">Сейчас '+({us:'у поддержки',insurer:'у страховой',client:'у клиента'}[cs.ball]||'в работе')+' — ответ придёт в это обращение.</div>';
     var payBlock='';
     if(cs.code==='awaiting_payment'){
-      payBlock='<div class="pop__note" style="margin:8px 0 0"><b>К доплате '+(c.payAmount||'')+'.</b> Ссылка на оплату отправлена клиенту. Срок её действия мы не указываем — ссылка может стать недействительной; если оплата не проходит, запросите новую. '
+      payBlock='<div class="pop__note" style="margin:8px 0 0"><b>К доплате '+(c.payAmount||'')+' — платит клиент.</b> Ссылка у вас — передайте клиенту (WhatsApp/СМС) или покажите QR на договоре. Ссылка может стать недействительной; если оплата не проходит — запросите новую. '
         +(c.payStale
           ? '<button class="btn btn--sm btn--primary" style="margin-top:8px" onclick="svReissueLink(\''+c.id+'\')">Запросить новую ссылку</button>'
-          : (c.reissued?'<span class="st st--ok">Новая ссылка отправлена клиенту ✓</span>':''))+'</div>';
+          : (c.reissued?'<span class="st st--ok">Новая ссылка получена — передайте клиенту ✓</span>':''))+'</div>';
     }
     /* История заявки — та же лента, что на договоре (единый атом; внутренние заметки поддержки скрыты). */
     var hist='';
@@ -2366,9 +2471,10 @@ function supRequestBody(it){
       +'<div class="sup-fld"><label>№ полиса</label><div class="sup-fld__v">'+it.num+'</div></div>'
       +'<div class="sup-fld"><label>Страховая компания</label><div class="sup-fld__v">'+it.sk+'</div></div>'
       +'<div class="sup-fld"><label>Страхователь</label><div class="sup-fld__v">'+it.holder+'</div></div>'
-      +'<div class="sup-fld"><label>Тип заявки</label><div class="sup-fld__v">'+(it.type||'—')+'</div></div>'
-      +'<div class="sup-fld sup-fld--full"><label>Что нужно сделать</label><div class="sup-fld__v">'+it.what+'</div></div>'
-      +'<div class="sup-fld sup-fld--full"><label>Комментарий и действия агента</label><div class="sup-fld__v">'+it.ac+'</div></div>'
+      +'<div class="sup-fld"><label>Тип заявки</label><div class="sup-fld__v">'+(it.type||it.vid||'—')+'</div></div>'
+      /* Дедупы: при канон-заявке причины-чипы полнее «что нужно сделать», комментарий агента живёт в блоке причин. */
+      +(it.cstatus&&(it.reasons||[]).length?'':'<div class="sup-fld sup-fld--full"><label>Что нужно сделать</label><div class="sup-fld__v">'+it.what+'</div></div>')
+      +(it.cstatus?'':'<div class="sup-fld sup-fld--full"><label>Комментарий и действия агента</label><div class="sup-fld__v">'+it.ac+'</div></div>')
     +'</div>'
     +(it.cstatus?procReasonsBlock(it)+procOpBox(it):'')
     /* ОДИН вход в общение: свертываемая группа «Переписка с агентом» = тред + композер (читать и писать в одном месте).
@@ -2572,8 +2678,9 @@ function go(view){
 }
 function openContract(i,issued){ contractIssued=!!issued; render('contract',i); document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); }); document.getElementById('activeTab').innerHTML='Договор <span class="tab__x">×</span>'; }
 function openDeal(){ toast('Согласование тарифа — сделка ЮЛ (форма /deals/:id)'); }
-/* нативное оповещение 1С — светлая карточка снизу справа (ПоказатьОповещениеПользователя) */
-function toast(msg){ var t=document.createElement('div'); t.textContent=msg; t.style.cssText='position:fixed;right:20px;bottom:20px;background:#ffffff;color:#1F2937;padding:11px 14px;border:1px solid #E5E7EB;border-left:3px solid #0C3363;border-radius:8px;font-family:Segoe UI,system-ui,sans-serif;font-size:13px;max-width:300px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.18)'; document.body.appendChild(t); setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 1900); }
+/* нативные оповещения 1С — все в один вертикальный стек снизу справа (не наложение) */
+function toastStack(){ var s=document.getElementById('toaststack'); if(!s){ s=document.createElement('div'); s.id='toaststack'; (document.querySelector('.win')||document.body).appendChild(s); } return s; }
+function toast(msg){ var t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:var(--card);color:var(--ink);padding:11px 14px;border:1px solid var(--line);border-left:3px solid var(--navy);border-radius:8px;font:inherit;font-size:calc(12px*var(--scale));max-width:300px;box-shadow:0 8px 24px rgba(0,0,0,.18)'; toastStack().appendChild(t); setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 1900); }
 /* Тема/масштаб убраны из шапки: прототип только СВЕТЛЫЙ (решение владельца), масштаб фикс 1.12 под 45+. */
 /* Клавиатура для кликабельных плиток процессов (.ptile — div с onclick): Enter/Пробел = клик. */
 document.addEventListener('keydown',function(e){ if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.classList&&e.target.classList.contains('ptile')){ e.preventDefault(); e.target.click(); } });
@@ -2723,7 +2830,7 @@ function notifyToast(kind,title,body,thread){
   var t=document.createElement('div'); t.className='ntoast ntoast--'+kind;
   t.innerHTML='<span class="ntoast__ic">'+notifIco(kind)+'</span><div class="ntoast__b"><b>'+title+'</b><span>'+body+'</span></div><button class="ntoast__go">Открыть</button>';
   t.querySelector('.ntoast__go').onclick=function(){ openDiscussion(thread); t.remove(); };
-  (document.querySelector('.win')||document.body).appendChild(t);
+  toastStack().appendChild(t);
   requestAnimationFrame(function(){ t.classList.add('ntoast--in'); });
   setTimeout(function(){ t.classList.remove('ntoast--in'); setTimeout(function(){ if(t.parentNode)t.remove(); },350); }, 6500);
 }
