@@ -824,9 +824,13 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .sup-agrow:hover{ background:var(--hover); }
 .sup-agrow__t{ font-size:calc(12px*var(--scale)); font-weight:600; color:var(--ink); }
 .sup-agrow__m{ font-size:calc(11px*var(--scale)); color:var(--muted); margin-top:2px; }
-.sup-thread{ margin-top:10px; border:1px solid var(--line); border-radius:9px; padding:10px 12px; }
-.sup-thread__h{ font-size:calc(11.5px*var(--scale)); color:var(--muted); margin-bottom:8px; }
-.sup-thread .supchat{ overflow-y:auto; border:none; padding:0; }
+.sup-thread{ margin-top:10px; border:1px solid var(--line); border-left:3px solid var(--blue); border-radius:9px; padding:10px 12px; }
+.sup-thread__h{ font-size:calc(11.5px*var(--scale)); color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.sup-thread .supchat{ overflow-y:auto; border:none; padding:0; background:transparent; }
+.sup-tag--pub{ background:color-mix(in srgb,var(--blue) 16%,transparent); color:var(--blue); font-size:calc(10px*var(--scale)); font-weight:700; padding:1px 6px; border-radius:4px; }
+.sup-talk__empty{ color:var(--muted); font-size:calc(12px*var(--scale)); padding:4px 2px 8px; }
+.sup-talk__err{ margin-top:6px; color:var(--err); font-size:calc(12px*var(--scale)); font-weight:600; }
+.supchat--full{ max-height:56vh; min-height:220px; }
 .sup-side{ display:flex; flex-direction:column; gap:10px; }
 .sup-side__box{ border:1px solid var(--line); border-radius:9px; padding:13px; }
 .sup-side__h{ font-size:calc(12px*var(--scale)); color:var(--muted); font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:.03em; }
@@ -1652,7 +1656,10 @@ function svMainSend(){
   var inp=document.getElementById('svMainInput'); if(!inp||!inp.value.trim())return;
   var id=svOpen, txt=inp.value.trim(); inp.value='';
   (SV_THREADS[id]=SV_THREADS[id]||[]).push({o:1,t:txt,w:'Вы · сейчас'});
-  var c=svFind(id); if(c){ c.last='сейчас'; c.ts=Date.now(); c.snip=txt; if(c.icon==='q' && (c.qstate==='draft'||!c.qstate)){ c.qstate='sent'; setTimeout(function(){ svQTake(id); }, 2600); } }
+  var c=svFind(id); if(c){ c.last='сейчас'; c.ts=Date.now(); c.snip=txt; if(c.icon==='q' && (c.qstate==='draft'||!c.qstate)){ c.qstate='sent'; setTimeout(function(){ svQTake(id); }, 2600); }
+    /* ЛЮБОЕ сообщение агента поднимает связанную заявку в разбор у оператора (back), не только статусное действие. */
+    if(c.caseId&&typeof supFind==='function'){ var k=supFind(c.caseId); if(k){ k.back=true; k.fresh=false; k._ts=Date.now(); } }
+  }
   rerenderChats();
 }
 function svQTake(id){ var c=svFind(id); if(!c||c.qstate!=='sent')return; c.qstate='inwork'; c.last='сейчас'; c.ts=Date.now(); c.snip='Поддержка приняла обращение в работу';
@@ -1916,7 +1923,8 @@ var SUP=[
   {id:'000015162',src:'1c',ball:'us',vid:'Внесение изменений',st:'В работе',sla:20,back:true,
     num:'ХХХ 0662140077',holder:'Сафонов Игорь Петрович',obj:'Hyundai Solaris · Т905ВК124',region:'Красноярский',agent:'Гусарова Елена Сергеевна',sk:'Ренессанс',type:'Сложная',
     what:'Изменение адреса собственника.',ac:'Агент приложил скан прописки — можно вносить изменение.',
-    steps:[{d:'21.08 09:10',s:'Новая',c:'Изменение адреса собственника.'},{d:'21.08 11:15',s:'В работе',c:'Агент ответил: приложил скан прописки.'}]},
+    chat:[{i:1,t:'Приложил скан прописки — можно вносить изменение.',w:'Агент · 21.08 11:15'}],
+    steps:[{d:'21.08 09:10',s:'Новая',c:'Изменение адреса собственника.'},{d:'21.08 11:15',talk:true,c:'Ответ агента — в переписке'}]},
   {id:'000015159',src:'1c',ball:'us',vid:'Урегулирование убытка',st:'На расчёте',sla:150,
     num:'ХХХ 0641239855',holder:'Мельникова Дарья Олеговна',obj:'Renault Duster · О412ХН124',region:'Иркутская',agent:'Тетерина Галина Александровна',sk:'Согласие',type:'Сложная',
     what:'Расчёт выплаты по факту ДТП.',ac:'Ждём заключение оценщика.',
@@ -2045,6 +2053,8 @@ var SUP_META={
 };
 SUP.forEach(function(it){ var m=SUP_META[it.id]; if(m){ it.date=m.date; it.resp=m.resp; if(m.days!=null) it.days=m.days; } });
 var supOpen=null, supTab='us', supSrc='all', supSK='all', supVid='all', supStuck=false;
+/* Группа «Переписка с агентом» в карточке: свёрнута по умолчанию; авто-разворот при входе по маркеру «↩ ответ агента». */
+var supTalkOpen=false;
 /* supHost: '1' — объединённый кокпит (screenSupport), '2' — раздельная версия (screenSupport2). */
 var supHost='1', sup2Mode='req', sup2ChatOpen=null;
 /* дефолт очереди — приоритет «Сначала требуют разбора»; клик по колонке недеструктивно даёт 1С-сортировку (key date/id). */
@@ -2069,10 +2079,15 @@ function supSortItems(items){ items.sort(function(a,b){ var av,bv;
 function supSortTh(key,label){ var active=supSort.key===key; var dir=active&&supSort.dir==='desc'?' sorth--desc':'';
   return '<th><button class="sorth'+(active?' sorth--active':'')+dir+'" onclick="supSetSort(\''+key+'\')">'+label+' <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7.5 6 4l3 3.5"/></svg></button></th>'; }
 /* Прикрепить документ в чат-переписку — оператор отправляет файл агенту. */
-function supChatAttach(id){ var it=supFind(id); var inp=document.getElementById('supChatInput');
+function supChatAttach(id){ var it=supFind(id); var inp=document.getElementById('supTalkIn-'+id);
   var txt = inp&&inp.value.trim() ? inp.value.trim() : 'Направляю документ по вашему вопросу.';
-  (it.chat=it.chat||[]).push({o:1,t:txt,att:'Памятка — '+(it.topic||'поддержка')+'.pdf',atype:'PDF · 240 КБ',w:'Поддержка · сейчас'});
-  if(inp) inp.value=''; toast('Документ прикреплён и отправлен агенту'); supRerender(); }
+  var att='Памятка — '+(it.topic||'поддержка')+'.pdf';
+  var row=null; SV.forEach(function(c){ if(c.caseId===id) row=c; });
+  if(row){ (SV_THREADS[row.id]=SV_THREADS[row.id]||[]).push({i:1,t:txt+' 📎 '+att,w:'Поддержка · сейчас'});
+    row.unread=(row.unread||0)+1; row.snip=txt; row.last='сейчас'; row.ts=Date.now(); if(typeof updateBell==='function') updateBell();
+  } else { (it.chat=it.chat||[]).push({o:1,t:txt,att:att,atype:'PDF · 240 КБ',w:'Поддержка · сейчас'}); }
+  (it.steps=it.steps||[]).push({d:'сейчас',talk:true,c:'Документ агенту — отправлен в переписку'});
+  if(inp) inp.value=''; toast('Документ прикреплён и отправлен агенту'); supTalkOpen=true; supRerender(); supTalkScroll(id); }
 function supPill(it){ if(it.ball==='done') return {cls:'ok',label:it.st}; if(it.ball==='us') return {cls:'pay',label:it.st}; if(it.ball==='insurer') return {cls:'proc',label:it.st}; return {cls:'draft',label:it.st}; }
 function supFmt(m){ var h=Math.floor(m/60), mm=m%60; return (h?h+' ч ':'')+mm+' мин'; }
 function supSla(it,big){ if(it.ball!=='us') return ''; var m=it.sla, cls, txt; if(m<0){ cls='err'; txt='Просрочено на '+supFmt(-m); } else if(m<=30){ cls='warn'; txt='SLA '+supFmt(m); } else { cls='ok'; txt='SLA '+supFmt(m); }
@@ -2218,8 +2233,37 @@ function supThreadHTML(it){
     return '<div class="svm '+(m.o?'svm--in':'svm--out')+'">'+(m.t||'')+'<small>'+(m.o?'Агент':(m.w||'Поддержка'))+'</small></div>';
   }).join('');
 }
-function supRequestBody(it){
+/* ЕДИНЫЙ атом переписки: тред + композер (звонок · документ · отправить · слот ошибки).
+   Один и тот же в карточке заявки, чат-обращении и раздельной версии — оператор учит один композер. */
+function supTalkCount(it){ if(it.chat&&it.chat.length) return it.chat.length; var row=null; SV.forEach(function(c){ if(c.caseId===it.id) row=c; }); return row?(SV_THREADS[row.id]||[]).length:0; }
+function supTalk(it,opts){ opts=opts||{};
   var thread=supThreadHTML(it);
+  var body=thread || '<div class="sup-talk__empty">Сообщений пока нет — напишите агенту первым.</div>';
+  return '<div class="supchat'+(opts.full?' supchat--full':'')+'" id="supTalkThread-'+it.id+'">'+body+'</div>'
+    +'<div class="supchat__composer">'+(opts.noCall?'':callBar(it.agent))
+      +'<input id="supTalkIn-'+it.id+'" placeholder="Сообщение агенту…" aria-label="Сообщение агенту" onkeydown="if(event.key===\'Enter\')supTalkSend(\''+it.id+'\')"/>'
+      +'<button class="btn btn--sm" onclick="supChatAttach(\''+it.id+'\')" title="Прикрепить документ агенту"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.2-9.2a3.33 3.33 0 0 1 4.71 4.71l-9.2 9.2a1.67 1.67 0 0 1-2.36-2.36l8.49-8.49"/></svg>Документ</button>'
+      +'<button class="btn btn--primary btn--sm" onclick="supTalkSend(\''+it.id+'\')">Отправить</button></div>'
+    +'<div class="sup-talk__err" id="supTalkErr-'+it.id+'" hidden>Введите текст сообщения — пустое не отправляем.</div>';
+}
+/* Единый write-path: сообщение оператора летит В ТРЕД, который видит агент (для связанных заявок — физически
+   в диалог кабинета SV_THREADS: живая петля честная). В «Историю заявки» — только СОБЫТИЕ, без текста. */
+function supTalkSend(id){ var it=supFind(id); if(!it) return;
+  var inp=document.getElementById('supTalkIn-'+id), err=document.getElementById('supTalkErr-'+id);
+  var txt=inp?inp.value.trim():'';
+  if(!txt){ if(err) err.hidden=false; return; }
+  var row=null; SV.forEach(function(c){ if(c.caseId===id) row=c; });
+  if(row){ (SV_THREADS[row.id]=SV_THREADS[row.id]||[]).push({i:1,t:txt,w:'Поддержка · сейчас'});
+    row.unread=(row.unread||0)+1; row.snip=txt; row.last='сейчас'; row.ts=Date.now();
+    if(typeof updateBell==='function') updateBell();
+  } else { (it.chat=it.chat||[]).push({o:1,t:txt,w:'Поддержка · сейчас'}); }
+  (it.steps=it.steps||[]).push({d:'сейчас',talk:true,c:'Ответ агенту — отправлен в переписку'});
+  inp.value='';
+  toast('Отправлено агенту — в переписку обращения');
+  supTalkOpen=true; supRerender(); supTalkScroll(id);
+}
+function supTalkScroll(id){ var th=document.getElementById('supTalkThread-'+id); if(th) th.scrollTop=th.scrollHeight; }
+function supRequestBody(it){
   /* Канон-заявка: статус read-only (меняется только действиями «Хода заявки»); легаси-строки — старый селект. */
   var statusBox=it.cstatus
     ? '<div class="sup-side__box"><div class="sup-side__h">Статус</div><div style="margin-bottom:6px"><span class="sup-stbadge sup-stbadge--'+((PROC_STATUS[it.cstatus]||{}).tone||'proc')+'">'+procSupLabel(it)+'</span></div><div class="proc-wait" style="margin:0">Меняется действиями по заявке.</div></div>'
@@ -2248,18 +2292,15 @@ function supRequestBody(it){
       +'<div class="sup-fld sup-fld--full"><label>Комментарий и действия агента</label><div class="sup-fld__v">'+it.ac+'</div></div>'
     +'</div>'
     +(it.cstatus?procReasonsBlock(it)+procOpBox(it):'')
-    /* Окон ввода посреди карточки нет (вёрстка 1С: свертываемые группы по ссылке; ответ ложится в «Историю заявки»). */
+    /* ОДИН вход в общение: свертываемая группа «Переписка с агентом» = тред + композер (читать и писать в одном месте).
+       Заметка для своих — отдельная поверхность (лок 2026-08-11: публичное и внутреннее не смешивать, никаких режимов). */
     +'<div class="sup-replylinks">'
-      +'<button class="req__reply" onclick="supToggle(\'supReplyBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Ответить агенту</button>'
+      +'<button class="req__reply" aria-expanded="'+(supTalkOpen?'true':'false')+'" onclick="supTalkOpen=!supTalkOpen;supRerender();if(supTalkOpen)supTalkScroll(\''+it.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка с агентом ('+supTalkCount(it)+')</button>'
       +'<button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Заметка для своих</button>'
-      +(thread?'<button class="req__reply" onclick="supToggle(\'supThreadBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v13H4z" fill="none"/><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка с агентом</button>':'')
     +'</div>'
-    +(thread?'<div id="supThreadBox" class="sup-thread" hidden><div class="sup-thread__h">Переписка с агентом · '+supChanLabel(it)+' — видна агенту в его диалоге</div><div class="supchat" style="max-height:280px">'+thread+'</div></div>':'')
-    +'<div id="supReplyBox" class="sup-reply sup-reply--agent" hidden><div class="sup-reply__h">Ответить агенту <span class="sup-reply__tag">агент видит</span></div>'
-      +'<textarea class="sup-ta" id="supReplyA" placeholder="Текст ответа — попадёт в историю заявки и в кабинет агента…"></textarea>'
-      +'<div class="sup-reply__row"><button class="btn btn--primary btn--sm" onclick="supReplyAgent(\''+it.id+'\')">Отправить агенту</button></div></div>'
+    +'<div id="supTalkBox" class="sup-thread"'+(supTalkOpen?'':' hidden')+'><div class="sup-thread__h">Переписка с агентом · '+supChanLabel(it)+' <span class="sup-reply__tag sup-tag--pub">агент видит</span></div>'+supTalk(it)+'</div>'
     +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div>'
-      +'<textarea class="sup-ta" id="supNoteA" placeholder="Внутренняя заметка поддержки…"></textarea>'
+      +'<textarea class="sup-ta" id="supNoteA" aria-label="Внутренняя заметка поддержки" placeholder="Внутренняя заметка поддержки…"></textarea>'
       +'<div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
   +'</div>';
   return '<div class="supcard">'+main+side+'</div>'+supTimeline(it)+supFoot(it);
@@ -2267,14 +2308,11 @@ function supRequestBody(it){
 function supFileChip(m){ return '<a class="svm-file" onclick="toast(\'Открыть документ: '+m.att+'\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+m.att+(m.atype?' · <span>'+m.atype+'</span>':'')+'</a>'; }
 function supChatMsg(m){ return '<div class="svm '+(m.o?'svm--out':'svm--in')+'">'+(m.t||'')+(m.att?supFileChip(m):'')+'<small>'+m.w+'</small></div>'; }
 function supChatBody(it){
-  var msgs=(it.chat||[]).map(supChatMsg).join('');
   var main='<div>'
-    +'<div class="supchat" id="supChatBody">'+msgs+'</div>'
-    +'<div class="supchat__composer">'+callBar(it.agent)+'<input id="supChatInput" placeholder="Ответ агенту…" onkeydown="if(event.key===\'Enter\')supChatSend(\''+it.id+'\')"/>'
-      +'<button class="btn btn--sm" onclick="supChatAttach(\''+it.id+'\')" title="Прикрепить документ агенту"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.2-9.2a3.33 3.33 0 0 1 4.71 4.71l-9.2 9.2a1.67 1.67 0 0 1-2.36-2.36l8.49-8.49"/></svg>Документ</button>'
-      +'<button class="btn btn--primary btn--sm" onclick="supChatSend(\''+it.id+'\')">Отправить</button></div>'
+    +supTalk(it,{full:true})
     +'<div class="supchat__hint">Звонок (аудио/видео) — слева от поля. Прикреплённый документ уходит агенту в переписку; файлы хранятся при обращении, а не в теле сообщения.</div>'
-    +'<div class="sup-reply sup-reply--note" style="margin-top:12px"><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div><textarea class="sup-ta" id="supNoteA" placeholder="Внутренняя заметка…"></textarea><div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
+    +'<div class="sup-replylinks" style="margin-top:10px"><button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Заметка для своих</button></div>'
+    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div><textarea class="sup-ta" id="supNoteA" aria-label="Внутренняя заметка поддержки" placeholder="Внутренняя заметка…"></textarea><div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
   +'</div>';
   var side='<div class="sup-side">'
     +'<div class="sup-side__box"><div class="sup-side__h">Обращение</div>'
@@ -2292,12 +2330,18 @@ function supChatBody(it){
   return '<div class="supcard">'+main+side+'</div>';
 }
 function supTimeline(it){
-  var rows=(it.steps||[]).map(function(s){ var pill=s.internal?'pay':'proc'; var col=s.internal?' style="color:var(--badge-attn)"':''; var lbl=(s.cs&&PROC_STATUS[s.cs])?PROC_STATUS[s.cs].sup:(s.s||''); return '<tr><td>'+s.d+'</td><td><span class="st st--'+pill+'">'+lbl+'</span></td><td'+col+'>'+s.c+'</td></tr>'; }).join('');
+  var rows=(it.steps||[]).map(function(s){
+    /* Событие «ответ в переписке» — серой строкой БЕЗ текста (текст живёт в треде); клик раскрывает переписку. */
+    if(s.talk) return '<tr class="click" onclick="supTalkOpen=true;supRerender();supTalkScroll(\''+it.id+'\')"><td>'+s.d+'</td><td><span class="st st--draft">Сообщение</span></td><td style="color:var(--muted)">'+s.c+' →</td></tr>';
+    var pill=s.internal?'pay':'proc'; var col=s.internal?' style="color:var(--badge-attn)"':''; var lbl=(s.cs&&PROC_STATUS[s.cs])?PROC_STATUS[s.cs].sup:(s.s||''); return '<tr><td>'+s.d+'</td><td><span class="st st--'+pill+'">'+lbl+'</span></td><td'+col+'>'+s.c+'</td></tr>'; }).join('');
   return '<div class="suptl"><h3>История заявки</h3><div class="list-wrap" style="margin:0"><div class="list-scroll"><table class="list"><thead><tr><th>Дата</th><th>Статус</th><th>Комментарий</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
 }
 function supFoot(it){ return '<div class="supfoot"><button class="btn btn--sm" onclick="supBack()">Закрыть</button><button class="btn btn--primary btn--sm" onclick="supSave(\''+it.id+'\')">Сохранить</button></div>'; }
 /* Открыл заявку — событие «требует разбора» гасим (оператор взял в работу): снимаем маркеры new/back и обновляем счётчик. */
-function supSelect(id){ var it=supFind(id); if(it){ it.back=false; it.fresh=false; } supOpen=id; supRerender(); supUpdateBadge(); }
+function supSelect(id){ var it=supFind(id);
+  /* Вход по маркеру «↩ ответ агента» — переписка раскрыта и прокручена к сообщению: гашение back честное (увидел). */
+  supTalkOpen=!!(it&&it.back);
+  if(it){ it.back=false; it.fresh=false; } supOpen=id; supRerender(); supUpdateBadge(); if(supTalkOpen) supTalkScroll(id); }
 /* Кейс «ссылка умерла»: оператор шлёт ссылку на оплату → мяч уходит агенту (SLA гаснет) → демо-возврат «ссылка не открылась» поднимает заявку. */
 function supSendPayLink(id){ var it=supFind(id); if(!it)return; it.cstatus='awaiting_payment'; if(!it.payAmount) it.payAmount=980; it.payStale=false;
   procApply(it,'support','Ссылка на оплату направлена агенту.');
@@ -2306,16 +2350,19 @@ function supSendPayLink(id){ var it=supFind(id); if(!it)return; it.cstatus='awai
 function supAgentDeadLink(id){ var it=supFind(id); if(!it||it.ball!=='agent')return; it.cstatus='in_work';
   procApply(it,'agent','Агент: ссылка не открылась — прошу новую.'); it._ts=Date.now();
   toast('Агент вернулся: ссылка не открылась — заявка поднялась в разбор'); supRerender(); supUpdateBadge(); }
-function supBack(){ supOpen=null; supRerender(); }
+function supBack(){ supOpen=null; supTalkOpen=false; supRerender(); }
 /* Свертываемая группа (аналог 1С «Свертываемая»): разворот окна ввода по ссылке. */
 function supToggle(id){ var el=document.getElementById(id); if(el) el.hidden=!el.hidden; }
 function supSetTab(t){ supTab=t; supRerender(); }
-function supReplyAgent(id){ var it=supFind(id); var ta=document.getElementById('supReplyA'); if(!ta||!ta.value.trim())return; it.steps.push({d:'сейчас',s:it.st,c:'Ответ агенту: '+ta.value.trim()}); ta.value=''; toast('Ответ отправлен агенту — виден в кабинете'); supRerender(); }
 function supNote(id){ var it=supFind(id); var ta=document.getElementById('supNoteA'); if(!ta||!ta.value.trim())return; (it.steps=it.steps||[]).push({d:'сейчас',s:'Заметка',c:ta.value.trim(),internal:true}); ta.value=''; toast('Заметка сохранена — агент её не видит'); supRerender(); }
 function supEscalate(id){ var it=supFind(id); var sel=document.getElementById('supEscTopic'); var topic=sel?sel.value:SUP_TOPICS[0]; it.escalation={topic:topic}; it.steps.push({d:'сейчас',s:'2-я линия',c:'Передано во 2-ю линию: '+topic,internal:true}); toast('Передано во 2-ю линию: '+topic); supRerender(); }
-function supEscAnswer(id){ var it=supFind(id); var ta=document.getElementById('supEscAns'); if(!ta||!ta.value.trim())return; it.steps.push({d:'сейчас',s:'2-я линия',c:'2-я линия ответила: '+ta.value.trim(),internal:true}); it.escalation=null; toast('Ответ 2-й линии внесён — блок снят'); supRerender(); }
+/* Возврат ответа 2-й линии агенту — через ТОТ ЖЕ единый вход: internal-событие + переписка с преднабранным текстом. */
+function supEscAnswer(id){ var it=supFind(id); var ta=document.getElementById('supEscAns'); if(!ta||!ta.value.trim())return; var txt=ta.value.trim();
+  it.steps.push({d:'сейчас',s:'2-я линия',c:'2-я линия ответила: '+txt,internal:true}); it.escalation=null;
+  supTalkOpen=true; supRerender(); supTalkScroll(id);
+  var inp=document.getElementById('supTalkIn-'+id); if(inp){ inp.value=txt; inp.focus(); }
+  toast('Ответ 2-й линии готов — отправьте агенту в переписке'); }
 function supEscalateChat(id){ var it=supFind(id); var sel=document.getElementById('supEscTopic'); var topic=sel?sel.value:SUP_TOPICS[0]; (it.chat=it.chat||[]).push({o:1,t:'Передаю ваш вопрос профильному специалисту ('+topic+') — вернёмся с ответом.',w:'Поддержка · сейчас'}); toast('Вопрос передан специалисту'); supRerender(); }
-function supChatSend(id){ var it=supFind(id); var inp=document.getElementById('supChatInput'); if(!inp||!inp.value.trim())return; (it.chat=it.chat||[]).push({o:1,t:inp.value.trim(),w:'Поддержка · сейчас'}); inp.value=''; toast('Ответ отправлен агенту'); supRerender(); }
 /* Единая маршрутизация из поддержки: 2-я линия (по теме) · Куратор (внутри поддержки) · Продакт (задача в Kaiten). Всё — внутренняя кухня, агент видит одно лицо «Поддержка». */
 function supRouteBox(it){
   var isChat = it.src==='chat';
@@ -2410,15 +2457,11 @@ function sup2ChatView(){
 }
 function sup2Conv(it){
   if(!it) return '';
-  var msgs=(it.chat||[]).map(supChatMsg).join('');
   var head='<div class="sup2-conv__head"><div class="sup2-conv__who"><span class="sv-av">'+sup2Initials(it.agent)+'</span><div><div class="sup2-conv__name">'+it.agent+'</div>'
     +'<div class="sup2-conv__sub">'+supKind(it)+(it.topic?' · тема #'+it.topic:'')+(it.num!=='—'?' · '+it.num:'')+(it.region?' · '+it.region:'')+'</div></div></div>'
     +callBar(it.agent)+'<button class="btn btn--sm" style="margin-left:8px" onclick="supSelect(\''+it.id+'\')">Открыть карточку</button></div>';
   return head
-    +'<div class="supchat" id="supChatBody">'+msgs+'</div>'
-    +'<div class="supchat__composer"><input id="supChatInput" placeholder="Ответ агенту…" onkeydown="if(event.key===\'Enter\')supChatSend(\''+it.id+'\')"/>'
-      +'<button class="btn btn--sm" onclick="supChatAttach(\''+it.id+'\')" title="Прикрепить документ агенту"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.2-9.2a3.33 3.33 0 0 1 4.71 4.71l-9.2 9.2a1.67 1.67 0 0 1-2.36-2.36l8.49-8.49"/></svg>Документ</button>'
-      +'<button class="btn btn--primary btn--sm" onclick="supChatSend(\''+it.id+'\')">Отправить</button></div>'
+    +supTalk(it,{full:true,noCall:true})
     +'<div class="supchat__hint">Прикреплённый документ уходит агенту в переписку. Ответ виден в кабинете агента.</div>';
 }
 
