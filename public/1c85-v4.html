@@ -402,7 +402,8 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .svrow__time{ color:var(--muted); font-size:calc(10.5px*var(--scale)); white-space:nowrap; flex:none; }
 .svrow__meta{ margin-top:3px; font-size:calc(11.5px*var(--scale)); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sv-chip--change{ background:color-mix(in srgb,var(--wait) 16%,transparent); border-color:transparent; color:var(--wait); }
-.sv-chip--loss{ background:color-mix(in srgb,var(--warn) 16%,transparent); border-color:transparent; color:var(--warn); }
+.sv-chip--loss{ background:color-mix(in srgb,var(--warn) 16%,transparent); border-color:transparent; color:var(--badge-attn); }
+.sv-chip--cancel{ background:var(--bg); border:1px solid var(--line); color:var(--muted); }
 .sv-chip--deal{ background:var(--sel); border-color:var(--sel-line); color:var(--navy); } .win[data-1ctheme='dark'] .sv-chip--deal{ color:var(--blue); }
 /* ===== Чаты v2: полноширинная таблица обращений + переписка на всю ширину ===== */
 .chatpage{ display:flex; flex-direction:column; height:calc(100vh - 82px); min-height:0; }
@@ -1030,6 +1031,24 @@ var CHANGE_REASONS=[
 ];
 function reasonLabel(code){ for(var i=0;i<CHANGE_REASONS.length;i++){ if(CHANGE_REASONS[i].code===code) return CHANGE_REASONS[i].label; } return code; }
 function reasonByCode(code){ for(var i=0;i<CHANGE_REASONS.length;i++){ if(CHANGE_REASONS[i].code===code) return CHANGE_REASONS[i]; } return null; }
+/* Причины расторжения (§4): пакет зависит от причины; базовый документ — заявление с подписью клиента. */
+var CANCEL_REASONS=[
+  {code:'sold',label:'Продажа автомобиля',docs:['Договор купли-продажи']},
+  {code:'total',label:'Гибель (утилизация) ТС',docs:['Свидетельство об утилизации или акт о гибели ТС']},
+  {code:'owner-death',label:'Смерть страхователя',docs:['Свидетельство о смерти','Документ наследника']},
+  {code:'other',label:'Другая причина',docs:[],hint:'Опишите причину в комментарии — поддержка подскажет пакет документов.'}
+];
+function cancelReason(code){ for(var i=0;i<CANCEL_REASONS.length;i++){ if(CANCEL_REASONS[i].code===code) return CANCEL_REASONS[i]; } return null; }
+/* Возврат части премии считаем у себя (канон §4): по неистёкшим дням от даты оформления до «сегодня» имитации. */
+function cancelRefund(c){
+  var price=parseInt(String(c.price||'').replace(/\D/g,''),10)||0; if(!price) return 0;
+  var p=String(c.d||'').split('.'); if(p.length!==3) return Math.round(price*0.5);
+  var start=new Date(+p[2],+p[1]-1,+p[0]), today=new Date(2026,7,27);
+  var passed=Math.max(0,Math.round((today-start)/86400000));
+  return Math.max(0,Math.round(price*(365-Math.min(passed,365))/365));
+}
+/* Базовый пакет FNOL по убытку (§5) — черновой, сверить с поддержкой (бэклог). */
+var LOSS_DOCS=['Извещение о ДТП (европротокол)','Постановление или определение ГИБДД','Фото повреждений','Банковские реквизиты для выплаты'];
 /* «Обычно нужны» — union черновых пакетов выбранных причин (+признак возможной доплаты). */
 function reasonNeeds(codes){ var docs=[],seen={},pay=false,hints=[];
   (codes||[]).forEach(function(cd){ var r=reasonByCode(cd); if(!r) return; if(r.pay) pay=true; if(r.hint) hints.push(r.hint);
@@ -1101,23 +1120,30 @@ function procSyncSV(it,actor,comment){
 function procSetStatus(id,cstatus,actor,comment){ var it=supFind(id); if(!it) return; it.cstatus=cstatus; procApply(it,actor,comment); supUpdateBadge(); if(typeof updateBell==='function') updateBell(); }
 function procGenNo(){ var n=15181; SUP.forEach(function(it){ if(/^\d+$/.test(it.id)){ var v=parseInt(it.id,10); if(v>n) n=v; } }); return ('000000000'+(n+1)).slice(-9); }
 
-/* Агент создаёт заявку ВИ по договору idx → в общий стор SUP (появляется у оператора). */
-function procCreate(idx,reasons,comment,files){ var c=CLIENTS[idx]; if(!c) return; var id=procGenNo();
-  var it={ id:id, src:'1c', kind:'change', vid:'Внесение изменений', cstatus:'new', policyIdx:idx,
-    num:c.num, holder:c.n, obj:c.o+(c.sub?' · '+c.sub:''), region:'Красноярский', agent:'Филь Виктория Викторовна', sk:c.sk, resp:'', date:'27.08.2026',
-    reasons:reasons.slice(), reasonComment:comment||'', attachments:(files||[]).map(function(f){ return {name:f,by:'agent',at:'сейчас'}; }),
+/* Агент создаёт заявку по договору idx — ЛЮБОГО вида (change/cancel/loss), в общий стор SUP.
+   Обращение в «Поддержке» рождается вместе с заявкой — единая лента с первого шага. */
+function procCreateCase(idx,kind,payload){ var c=CLIENTS[idx]; if(!c) return; var id=procGenNo();
+  var kindT=(PROC_KIND[kind]||{}).t||'Заявка';
+  var it={ id:id, src:'1c', kind:kind, vid:kindT, cstatus:'new', policyIdx:idx,
+    num:c.num, holder:c.n, obj:c.o+(c.sub?' · '+c.sub:''), region:'Красноярский', agent:'Филь Виктория Викторовна', sk:c.sk, resp:'', date:'27.08.2026', type:payload.type||'Простая',
+    reasons:(payload.reasons||[]).slice(), reasonComment:payload.comment||'', attachments:(payload.files||[]).map(function(f){ return {name:f,by:'agent',at:'сейчас'}; }),
     docRequest:null, payAmount:null, payStale:false, rejectReason:null,
-    what:'Внесение изменений в полис ОСАГО. Причины: '+reasons.map(reasonLabel).join(', ')+'.', ac:comment||'—', steps:[] };
+    refund:payload.refund||null, lossDate:payload.lossDate||'', claimant:payload.claimant||'',
+    what:payload.what, ac:payload.comment||'—', steps:[] };
   SUP.unshift(it);
-  /* Обращение в «Поддержке» агента рождается ВМЕСТЕ с заявкой — единая лента с первого шага. */
   if(typeof SV!=='undefined'){ var did='d-case-'+id;
-    SV.push({id:did,group:'object',ts:Date.now(),icon:'change',kind:'Изменение',k:'change',st:'new',caseId:id,holder:c.n,objName:c.o+(c.sub?' · '+c.sub:''),num:c.num,last:'сейчас',snip:'Заявка № '+id+' отправлена — поддержка возьмёт в работу',unread:0,obj:'Изменение'});
-    SV_THREADS[did]=[{sys:1,t:'Заявка № '+id+' создана. Причины: '+reasons.map(reasonLabel).join(', ')+'.'}];
+    var svKind={change:'Изменение',cancel:'Расторжение',loss:'Убыток'}[kind]||'Заявка';
+    SV.push({id:did,group:'object',ts:Date.now(),icon:(kind==='loss'?'loss':(kind==='cancel'?'cancel':'change')),kind:svKind,k:kind,st:'new',caseId:id,holder:c.n,objName:c.o+(c.sub?' · '+c.sub:''),num:c.num,last:'сейчас',snip:'Заявка № '+id+' отправлена — поддержка возьмёт в работу',unread:0,obj:svKind});
+    SV_THREADS[did]=[{sys:1,t:'Заявка № '+id+' создана. '+payload.what}];
     c.chat=did;
   }
-  procApply(it,'agent','Заявка создана агентом. Причины: '+reasons.map(reasonLabel).join(', ')+'.');
+  procApply(it,'agent','Заявка создана агентом. '+payload.what);
   supUpdateBadge(); if(typeof updateBell==='function') updateBell();
   toast('Заявка № '+id+' создана — поддержка возьмёт в работу'); openContract(idx,false); }
+function procCreate(idx,reasons,comment,files){
+  procCreateCase(idx,'change',{reasons:reasons,comment:comment,files:files,
+    what:'Внесение изменений в полис ОСАГО. Причины: '+reasons.map(reasonLabel).join(', ')+'.'});
+}
 
 /* --- Визард агента --- */
 var changeIdx=0, changeSel={}, changeFiles=[];
@@ -1166,6 +1192,74 @@ function screenChange(){ var c=CLIENTS[changeIdx]||CLIENTS[0];
     +'</div></div>';
 }
 
+/* --- Визард расторжения (§4): одна причина, пакет по причине, расчёт возврата виден сразу --- */
+var cancelIdx=0, cancelSel='', cancelFiles=[], cancelErr=false;
+function openCancel(idx){ cancelIdx=idx; cancelSel=''; cancelFiles=[]; cancelErr=false; render('cancelw');
+  document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); });
+  document.getElementById('activeTab').innerHTML='Расторжение договора <span class="tab__x">×</span>'; }
+function cancelPick(code){ cancelSel=(cancelSel===code)?'':code; if(cancelSel) cancelErr=false; render('cancelw'); }
+function cancelAddFile(){ cancelFiles.push('Документ '+(cancelFiles.length+1)+'.pdf'); render('cancelw'); }
+function cancelSubmit(){ if(!cancelSel){ cancelErr=true; render('cancelw'); var e=document.querySelector('.chg-err'); if(e) e.scrollIntoView({block:'center'}); return; }
+  var c=CLIENTS[cancelIdx], r=cancelReason(cancelSel), ta=document.getElementById('cancelComment');
+  procCreateCase(cancelIdx,'cancel',{comment:ta?ta.value.trim():'',files:cancelFiles,refund:cancelRefund(c),
+    what:'Расторжение полиса '+c.p+' — '+r.label.toLowerCase()+'.'}); }
+function screenCancel(){ var c=CLIENTS[cancelIdx]||CLIENTS[0];
+  var rs=CANCEL_REASONS.map(function(r){ var on=cancelSel===r.code; return '<label class="chk'+(on?' chk--on':'')+'"><input type="checkbox" '+(on?'checked':'')+' onchange="cancelPick(\''+r.code+'\')"><span class="chk__box"></span><span>'+r.label+'</span></label>'; }).join('');
+  var r=cancelReason(cancelSel), needBox='';
+  if(r){ var docs=['Заявление на расторжение (подпись клиента)'].concat(r.docs);
+    needBox='<div class="chg-need"><b>Обычно нужны:</b> '+docs.join(' · ')+'. Поддержка может запросить ещё.'+(r.hint?'<span class="chg-need__pay">'+r.hint+'</span>':'')+'</div>'; }
+  var refundBox='<div class="chg-need"><b>К возврату ≈ '+cancelRefund(c).toLocaleString('ru-RU')+' ₽</b> — расчёт по неистёкшим дням страхования.<span class="chg-need__pay">Сумму может скорректировать страховая. Выплата клиенту — до 14 календарных дней после расторжения.</span></div>';
+  var err=cancelErr?'<div class="chg-err"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Выберите причину расторжения.</div>':'';
+  var files=cancelFiles.length? cancelFiles.map(function(f){ return '<div class="chg-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+f+'</div>'; }).join('') : '<div class="chg-none">Приложите документы сейчас — заявка пройдёт быстрее, без запроса от поддержки.</div>';
+  return '<div class="screen active">'
+    +'<div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+cancelIdx+',false)">Договор</a> / Расторжение</div>'
+    +'<div class="ptitle">Расторжение договора</div>'
+    +'<div class="chg-wrap">'
+      +'<div class="card"><div class="kv"><span>Договор</span><b>'+c.p+' · '+c.num+'</b></div><div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+c.o+(c.sub?' · '+c.sub:'')+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+c.sk+'</b></div></div>'
+      +'<div class="card"><h3>Почему расторгаем?</h3><div class="chg-reasons">'+rs+'</div>'+needBox+refundBox+err+'</div>'
+      +'<div class="card"><h3>Документы и комментарий</h3><div class="chg-files">'+files+'</div>'
+        +'<label class="chg-upload"><input type="file" hidden onchange="cancelAddFile()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>Приложить документ</label>'
+        +'<label class="fld-label" for="cancelComment">Комментарий для поддержки</label>'
+        +'<textarea class="sup-ta" id="cancelComment" placeholder="Например: клиент продал автомобиль 20 августа…" style="width:100%"></textarea>'
+      +'</div>'
+      +'<div class="chg-foot"><span class="chg-next">После отправки: поддержка проверит заявку → отправим договор в СК на расторжение → возврат клиенту до 14 календарных дней. О каждом шаге сообщим оповещением.</span>'
+        +'<button class="btn btn--primary" onclick="cancelSubmit()">Отправить заявку</button></div>'
+    +'</div></div>';
+}
+/* --- Визард убытка (FNOL §5): что произошло + базовый пакет документов --- */
+var lossIdx=0, lossFiles=[], lossErr=false;
+function openLoss(idx){ lossIdx=idx; lossFiles=[]; lossErr=false; render('lossw');
+  document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); });
+  document.getElementById('activeTab').innerHTML='Урегулирование убытка <span class="tab__x">×</span>'; }
+function lossAddFile(){ var d=(document.getElementById('lossDesc')||{}).value; lossFiles.push('Документ '+(lossFiles.length+1)+'.pdf'); render('lossw'); var ta=document.getElementById('lossDesc'); if(ta&&d) ta.value=d; }
+function lossSubmit(){ var ta=document.getElementById('lossDesc'); var d=ta?ta.value.trim():'';
+  if(!d){ lossErr=true; render('lossw'); var e=document.querySelector('.chg-err'); if(e) e.scrollIntoView({block:'center'}); return; }
+  var dt=(document.getElementById('lossDate')||{}).value||''; var cl=(document.getElementById('lossClaimant')||{}).value||'Собственник';
+  procCreateCase(lossIdx,'loss',{comment:d,files:lossFiles,lossDate:dt,claimant:cl,type:'Сложная',
+    what:'Убыток по '+CLIENTS[lossIdx].p+(dt?(' — событие '+dt):'')+'. '+d}); }
+function screenLoss(){ var c=CLIENTS[lossIdx]||CLIENTS[0];
+  var err=lossErr?'<div class="chg-err"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Опишите, что произошло — без этого страховая не примет убыток.</div>':'';
+  var needBox='<div class="chg-need"><b>Обычно нужны:</b> '+LOSS_DOCS.join(' · ')+'. Поддержка может запросить ещё.'
+    +'<span class="chg-need__pay">После рассмотрения СК пришлём соглашение о выплате — подпишете у клиента и загрузите здесь же.</span></div>';
+  var files=lossFiles.length? lossFiles.map(function(f){ return '<div class="chg-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+f+'</div>'; }).join('') : '<div class="chg-none">Приложите документы сейчас — заявка пройдёт быстрее, без запроса от поддержки.</div>';
+  return '<div class="screen active">'
+    +'<div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+lossIdx+',false)">Договор</a> / Урегулирование убытка</div>'
+    +'<div class="ptitle">Урегулирование убытка</div>'
+    +'<div class="chg-wrap">'
+      +'<div class="card"><div class="kv"><span>Договор</span><b>'+c.p+' · '+c.num+'</b></div><div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+c.o+(c.sub?' · '+c.sub:'')+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+c.sk+'</b></div></div>'
+      +'<div class="card"><h3>Что произошло?</h3>'
+        +'<div style="display:flex;gap:14px;flex-wrap:wrap"><span style="flex:1;min-width:180px"><label class="fld-label" for="lossDate" style="margin-top:0">Дата события</label><input id="lossDate" class="tselect" style="width:100%" placeholder="ДД.ММ.ГГГГ"/></span>'
+        +'<span style="flex:1;min-width:220px"><label class="fld-label" for="lossClaimant" style="margin-top:0">Заявитель</label><select id="lossClaimant" class="tselect" style="width:100%"><option>Собственник</option><option>Представитель по доверенности</option></select></span></div>'
+        +'<label class="fld-label" for="lossDesc">Описание события</label>'
+        +'<textarea class="sup-ta" id="lossDesc" placeholder="Например: ДТП на парковке — повреждён задний бампер, второй участник оформлен по европротоколу…" style="width:100%"></textarea>'
+        +needBox+err+'</div>'
+      +'<div class="card"><h3>Документы</h3><div class="chg-files">'+files+'</div>'
+        +'<label class="chg-upload"><input type="file" hidden onchange="lossAddFile()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>Приложить документ</label></div>'
+      +'<div class="chg-foot"><span class="chg-next">После отправки: поддержка проверит заявку → передадим страховой на рассмотрение → соглашение о выплате на подпись у клиента → выплата. О каждом шаге сообщим оповещением.</span>'
+        +'<button class="btn btn--primary" onclick="lossSubmit()">Отправить заявку</button></div>'
+    +'</div></div>';
+}
+
 /* --- Прогресс заявки на договоре (сторона агента) --- */
 function procForPolicy(idx){ return SUP.filter(function(it){ return it.cstatus && it.policyIdx===idx; }).sort(function(a,b){ return (b._ts||0)-(a._ts||0); }); }
 function procActiveReq(idx){ var list=procForPolicy(idx);
@@ -1188,6 +1282,8 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
     var reasons=(it.reasons&&it.reasons.length)
       ? '<div class="prg-reasons">'+it.reasons.map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('')+'</div>'
       : (it.what?'<p class="card__lead" style="margin:4px 0 8px">'+it.what+'</p>':'');
+    /* Расторжение: расчёт возврата виден всю дорогу (канон §4 — сумму может скорректировать СК). */
+    var refundLine=(it.kind==='cancel'&&it.refund)?'<div class="prg-pay"><b>К возврату ≈ '+it.refund.toLocaleString('ru-RU')+' ₽</b><div class="prg-disc">Расчёт по неистёкшим дням; сумму может скорректировать страховая. Выплата клиенту — до 14 календарных дней после расторжения.</div></div>':'';
     var action='';
     if(it.cstatus==='awaiting_docs'){
       var req=(it.docRequest&&it.docRequest.items&&it.docRequest.items.length)? '<div class="prg-need">Нужны документы: '+it.docRequest.items.join(', ')+'</div>':'<div class="prg-need">Поддержка запросила документы.</div>';
@@ -1212,7 +1308,7 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
     else { action='<div class="prg-wait">Заявка у поддержки — ждём ответа.</div>'; }
     var chatBtn=(CLIENTS[idx]&&CLIENTS[idx].chat)? '<div style="margin-top:6px"><button class="req__reply" onclick="openDiscussion(\''+CLIENTS[idx].chat+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка по обращению →</button></div>':'';
     var hist='<div class="prg__hist"><button class="prg__histbtn" onclick="this.nextElementSibling.classList.toggle(\'show\')">История заявки</button><div class="prg__timeline">'+it.steps.filter(function(st){ return !st.internal; }).map(function(st){ var lbl=st.cs&&PROC_STATUS[st.cs]?PROC_STATUS[st.cs].ag:(st.s||''); return '<div class="prg__ev"><span class="prg__evd">'+st.d+'</span><span class="prg__evs">'+lbl+'</span><span class="prg__evc">'+st.c+'</span></div>'; }).join('')+'</div></div>';
-    return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+reasons+action+hist+chatBtn+'</div>';
+    return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+reasons+refundLine+action+hist+chatBtn+'</div>';
   }).join('')+closedBlock;
 }
 /* Действия агента */
@@ -1240,8 +1336,8 @@ function procAttachPolicy(id){ var it=supFind(id); if(!it) return;
 /* Переходы канона по видам: cancel (§4) и loss (§5). */
 function procToSK(id){ procSetStatus(id,'under_review','support','Убыток заведён и передан в СК на рассмотрение.'); toast('Передано в СК — на рассмотрении'); supRerender(); }
 function procToSigning(id){ procSetStatus(id,'signing','support','СК согласовала выплату. Соглашение направлено — подпишите у клиента и загрузите.'); toast('Соглашение направлено агенту на подписание'); supRerender(); }
-function procSettle(id){ procSetStatus(id,'settled','support','Отдано на выплату — убыток урегулирован.'); toast('Убыток урегулирован — выплата произведена'); supRerender(); }
-function procCancelDone(id){ procSetStatus(id,'done','support','Договор отправлен в СК на расторжение. Возврат премии — до 14 календарных дней.'); toast('Договор расторгнут — возврат до 14 дней'); supRerender(); }
+function procSettle(id){ var it=supFind(id); if(it) it.valueSeen=false; procSetStatus(id,'settled','support','Отдано на выплату — убыток урегулирован.'); toast('Убыток урегулирован — выплата произведена'); supRerender(); }
+function procCancelDone(id){ var it=supFind(id); if(it) it.valueSeen=false; procSetStatus(id,'done','support','Договор отправлен в СК на расторжение. Возврат премии — до 14 календарных дней.'); toast('Договор расторгнут — возврат до 14 дней'); supRerender(); }
 function procReject(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procRejReason'); var r=inp?inp.value.trim():''; if(!r){ var e=document.getElementById('procRejErr'); if(e) e.hidden=false; return; } it.rejectReason=r; it.cstatus='rejected'; procApply(it,'support','Отказ: '+r); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Заявка отклонена'); supRerender(); }
 /* Операторская панель хода заявки — переходы по канону ВИДА (change §3 / cancel §4 / loss §5).
    Статус канон-заявки меняется ТОЛЬКО этими действиями (свободной смены нет — «мок ≠ контракт»). */
@@ -1249,9 +1345,10 @@ function procOpBox(it){ var cs=it.cstatus, k=it.kind||'change';
   var h='<div class="sup-side__box"><div class="sup-side__h">Действия по заявке — '+procSupLabel(it)+'</div><div class="sup-actions">';
   if(cs==='new') h+='<button class="btn btn--primary btn--sm" onclick="procTake(\''+it.id+'\')">Взять в работу</button>';
   if(cs==='in_work'||cs==='docs_uploaded'||cs==='paid'){
-    /* Предзаполнение из причин заявки — оператор видит и правит, тихих дефолтов нет. */
+    /* Предзаполнение по ВИДУ и причинам заявки — оператор видит и правит, тихих дефолтов нет. */
     var predoc=reasonNeeds(it.reasons||[]).docs.join(', ');
-    h+='<div class="proc-row"><span class="proc-fld"><label for="procDocReq">Какие документы запросить</label><input id="procDocReq" class="tselect" value="'+(predoc||'СТС, Водительское удостоверение').replace(/"/g,'&quot;')+'" placeholder="Через запятую"/></span><button class="btn btn--sm" onclick="procReqDocs(\''+it.id+'\')">Запросить документы</button></div>';
+    if(!predoc){ predoc=(k==='cancel')?'Заявление на расторжение (подпись клиента)':(k==='loss'?'Извещение о ДТП, Банковские реквизиты для выплаты':'СТС, Водительское удостоверение'); }
+    h+='<div class="proc-row"><span class="proc-fld"><label for="procDocReq">Какие документы запросить</label><input id="procDocReq" class="tselect" value="'+predoc.replace(/"/g,'&quot;')+'" placeholder="Через запятую"/></span><button class="btn btn--sm" onclick="procReqDocs(\''+it.id+'\')">Запросить документы</button></div>';
     if(k==='change'){
       h+='<div class="proc-row"><span class="proc-fld"><label for="procPayAmt">Сумма доплаты, ₽</label><input id="procPayAmt" class="tselect" placeholder="Например: 450"/></span><button class="btn btn--sm" onclick="procPayLink(\''+it.id+'\')">Ссылка на доплату</button></div>';
       h+='<button class="btn btn--primary btn--sm" onclick="procAttachPolicy(\''+it.id+'\')">Приложить новый полис → Готово</button>';
@@ -1289,7 +1386,10 @@ function clientCaseView(i){
   var c=CLIENTS[i]; if(!c) return null;
   var list=procForPolicy(i); if(!list.length) return null;
   var act=list.filter(function(it){ return !(PROC_STATUS[it.cstatus]||{}).term; });
-  if(!act.length) return { stl:'Оформлен', cls:'ok', done:true };
+  if(!act.length){
+    var canc=list.some(function(it){ return it.kind==='cancel'&&it.cstatus==='done'; });
+    return canc? { stl:'Расторгнут', cls:'draft', done:true } : { stl:'Оформлен', cls:'ok', done:true };
+  }
   var it=act[0], e=PROC_STATUS[it.cstatus]||{};
   return { stl:procAgentLabel(it), cls: c.attn?'procurgent':(e.tone==='ok'?'ok':'proc') };
 }
@@ -1519,7 +1619,7 @@ function osagoDone(sk,total){
 
 /* ===== Договор ===== */
 var contractIssued=false;
-function ctile(kind,label,benefit,idx){ var act=kind==='change'?('openChange('+(idx||0)+')'):('toast(\''+label+'\')'); return '<div class="ptile" tabindex="0" role="button" onclick="'+act+'"><span class="ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+procIco(kind)+'</svg></span><div class="ptile__t"><b>'+label+'</b><span>'+benefit+'</span></div></div>'; }
+function ctile(kind,label,benefit,idx){ var act={change:'openChange',cancel:'openCancel',loss:'openLoss'}[kind]+'('+(idx||0)+')'; return '<div class="ptile" tabindex="0" role="button" onclick="'+act+'"><span class="ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+procIco(kind)+'</svg></span><div class="ptile__t"><b>'+label+'</b><span>'+benefit+'</span></div></div>'; }
 function ccross(icon,name,benefit,price){ var ic=icon==='shield'?'<path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>':(icon==='law'?'<path d="M5 13l2-5h10l2 5"/><path d="M5 13h14v4H5z"/>':'<path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.4-7 10-7 10z"/>'); return '<div class="cross-card"><span class="cico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+ic+'</svg></span><b>'+name+'</b><span class="benefit">'+benefit+'</span><div class="crow"><span class="price">'+price+'</span><button class="btn btn--sm" onclick="toast(\''+name+' — добавлено\')">Добавить</button></div></div>'; }
 function docRow(name){ return '<div class="doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span>'+name+'</span><span style="margin-left:auto;color:var(--muted);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 6px">PDF</span></div>'; }
 function qrSvg(){ return '<svg width="118" height="118" viewBox="0 0 90 90"><g fill="currentColor" style="color:var(--navy)"><rect x="6" y="6" width="24" height="24"/><rect x="60" y="6" width="24" height="24"/><rect x="6" y="60" width="24" height="24"/><rect x="38" y="6" width="8" height="8"/><rect x="38" y="20" width="8" height="8"/><rect x="38" y="38" width="16" height="16"/><rect x="62" y="42" width="10" height="10"/><rect x="42" y="62" width="12" height="12"/><rect x="66" y="66" width="12" height="12"/></g></svg>'; }
@@ -1531,21 +1631,31 @@ function screenContract(i){
   var total=premiumNum+(addon?addon.price:0);
   var fmt=function(n){ return n.toLocaleString('ru-RU'); };
   var statusText=c.st==='draft'?'Черновик':(c.st==='pay'?'Ожидает оплаты':(c.st==='wait'?'Оформляется':'Оформлен'));
+  /* Расторгнутый договор — статус честный и в шапке договора. */
+  var cvHead=clientCaseView(i);
   var statusCls=c.st==='draft'?'draft':(c.st==='pay'?'pay':(c.st==='wait'?'wait':'ok'));
+  if(cvHead&&cvHead.done&&cvHead.stl==='Расторгнут'){ statusText='Расторгнут'; statusCls='draft'; }
   var hasProc=!!c.proc;
   var reqNo='№ '+(4400+i*7);
   var reqState=c.urgent?'Страховая ждёт документы':'В работе у страховой с 3 июля';
   var reqCls=c.urgent?'urgent':'work';
 
   var success=contractIssued?'<div class="success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg><div><b>Полис оформлен</b><div style="color:var(--muted);font-size:12px">'+c.p+' · '+c.n+'</div></div></div>':'';
-  /* Момент ценности ВИ: изменения внесены — передайте клиенту НОВЫЙ полис (тот же атом .success, что при оформлении). */
-  var doneChg=procForPolicy(i).filter(function(it){ return it.kind==='change'&&it.cstatus==='done'&&it.newNum&&!it.valueSeen; })[0];
-  if(doneChg){ success+='<div class="success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>'
-    +'<div style="flex:1"><b>Изменения внесены — передайте клиенту обновлённый полис</b>'
-    +'<div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">Новый номер: <span class="polnum">'+doneChg.newNum+'</span> · Прежний полис № '+doneChg.oldNum+' недействителен — клиент должен пользоваться новым.</div>'
-    +'<div style="margin-top:9px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn--primary btn--sm" onclick="toast(\'Скачивание нового полиса (демо)\')">Скачать новый полис (PDF)</button>'
-    +'<button class="btn btn--sm" onclick="var q=document.querySelector(\'.qr-wrap\'); if(q){ q.classList.add(\'show\'); q.scrollIntoView({block:\'center\'}); }">Показать QR клиенту</button></div></div>'
-    +'<button class="sv__x" title="Скрыть" onclick="var k=supFind(\''+doneChg.id+'\'); if(k) k.valueSeen=true; render(\'contract\','+i+')">×</button></div>'; }
+  /* Момент ценности — единый атом .success по ВИДУ заявки: что получил клиент и что сделать агенту. */
+  var doneCase=procForPolicy(i).filter(function(it){ var e=PROC_STATUS[it.cstatus]||{}; return e.term && it.cstatus!=='rejected' && !it.valueSeen && (it.newNum||it.kind==='cancel'||it.kind==='loss'); })[0];
+  if(doneCase){ var vb='';
+    if(doneCase.kind==='change'&&doneCase.newNum) vb='<b>Изменения внесены — передайте клиенту обновлённый полис</b>'
+      +'<div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">Новый номер: <span class="polnum">'+doneCase.newNum+'</span> · Прежний полис № '+doneCase.oldNum+' недействителен — клиент должен пользоваться новым.</div>'
+      +'<div style="margin-top:9px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn--primary btn--sm" onclick="toast(\'Скачивание нового полиса (демо)\')">Скачать новый полис (PDF)</button>'
+      +'<button class="btn btn--sm" onclick="var q=document.querySelector(\'.qr-wrap\'); if(q){ q.classList.add(\'show\'); q.scrollIntoView({block:\'center\'}); }">Показать QR клиенту</button></div>';
+    else if(doneCase.kind==='cancel') vb='<b>Договор расторгнут</b>'
+      +'<div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">Возврат части премии'+(doneCase.refund?(' ≈ '+doneCase.refund.toLocaleString('ru-RU')+' ₽'):'')+' придёт клиенту в течение 14 календарных дней — сумму подтвердит страховая.</div>'
+      +'<div style="margin-top:9px"><button class="btn btn--sm" onclick="toast(\'Скачивание соглашения о расторжении (демо)\')">Скачать соглашение о расторжении (PDF)</button></div>';
+    else if(doneCase.kind==='loss') vb='<b>Убыток урегулирован — выплата произведена</b>'
+      +'<div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">'+(doneCase.payout?('Выплата '+doneCase.payout+' перечислена клиенту. '):'')+'Сообщите клиенту о поступлении выплаты.</div>';
+    if(vb) success+='<div class="success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>'
+      +'<div style="flex:1">'+vb+'</div>'
+      +'<button class="sv__x" title="Скрыть" onclick="var k=supFind(\''+doneCase.id+'\'); if(k) k.valueSeen=true; render(\'contract\','+i+')">×</button></div>'; }
 
   var summary='<div class="card">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+skLogoImg(c.sk)+'<div style="flex:1"><h3 style="margin:0">'+c.p+'</h3><div style="color:var(--muted);font-size:12px">'+c.sk+'</div></div><span class="status-text '+statusCls+'">'+statusText+'</span></div>'
@@ -1571,7 +1681,7 @@ function screenContract(i){
 
   var service='<div class="card"><h3>Обслуживание договора — онлайн</h3><p class="card__lead">Изменения, расторжение и урегулирование убытка — за пару кликов. Без писем и поездок в офис.</p>'
     +activeReq
-    +'<div class="ptiles">'+ctile('change','Внести изменения','Данные ТС, водители, срок',i)+ctile('cancel','Расторгнуть договор','Возврат части премии')+ctile('loss','Урегулировать убыток','Заявить о страховом случае')+'</div>'
+    +'<div class="ptiles">'+ctile('change','Внести изменения','Данные ТС, водители, срок',i)+ctile('cancel','Расторгнуть договор','Возврат части премии',i)+ctile('loss','Урегулировать убыток','Заявить о страховом случае',i)+'</div>'
   +'</div>';
 
   // Уже купленное (addon = МиниКАСКО у ОСАГО) НЕ предлагаем снова; счётчик = реальность.
@@ -2657,6 +2767,8 @@ function render(view,arg){
   if(view==='clients') w.innerHTML=screenClients();
   else if(view==='contract') w.innerHTML=screenContract(arg);
   else if(view==='change') w.innerHTML=screenChange();
+  else if(view==='cancelw') w.innerHTML=screenCancel();
+  else if(view==='lossw') w.innerHTML=screenLoss();
   else if(view==='osago') w.innerHTML=screenOsago();
   else if(view==='health') w.innerHTML=screenHealth();
   else if(view==='prolongation') w.innerHTML=screenProlongation();
