@@ -810,6 +810,28 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .sup-fld{ display:flex; flex-direction:column; gap:4px; } .sup-fld--full{ grid-column:1/-1; }
 .sup-fld label{ font-size:calc(12px*var(--scale)); color:var(--muted); font-weight:600; }
 .sup-fld__v{ min-height:38px; padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:var(--bg); color:var(--ink); font-size:calc(14px*var(--scale)); white-space:pre-wrap; }
+.loss-op{ margin:12px 0; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+.loss-op__head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.loss-op__head h3{ margin:0; color:var(--navy); font-size:calc(15px*var(--scale)); }
+.win[data-1ctheme='dark'] .loss-op__head h3{ color:var(--blue); }
+.loss-op__grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px 12px; }
+.loss-op__grid .sup-fld--wide{ grid-column:span 2; }
+.loss-op .tselect{ width:100%; }
+.loss-op__checks{ min-height:38px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.loss-op__foot{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+.loss-sub{ margin-top:12px; padding:12px; border-left:3px solid var(--warn); border-radius:7px; background:color-mix(in srgb,var(--warn) 7%,transparent); }
+.loss-sub__title{ font-weight:700; margin-bottom:9px; }
+.loss-service{ margin-top:8px; padding-top:8px; border-top:1px solid var(--line); }
+.loss-track{ display:flex; align-items:flex-start; gap:0; margin:10px 0 14px; overflow-x:auto; }
+.loss-track__step{ position:relative; flex:1 0 112px; padding-top:20px; color:var(--muted); font-size:calc(10.5px*var(--scale)); text-align:center; }
+.loss-track__step::before{ content:''; position:absolute; z-index:1; top:2px; left:calc(50% - 7px); width:14px; height:14px; border-radius:50%; background:var(--line); border:2px solid var(--card); box-shadow:0 0 0 1px var(--line); }
+.loss-track__step::after{ content:''; position:absolute; top:8px; left:0; width:100%; height:2px; background:var(--line); }
+.loss-track__step:first-child::after{ left:50%; width:50%; }.loss-track__step:last-child::after{ width:50%; }
+.loss-track__step.is-done::before,.loss-track__step.is-current::before{ background:var(--navy); box-shadow:0 0 0 1px var(--navy); }
+.loss-track__step.is-done::after{ background:var(--navy); }.loss-track__step.is-current{ color:var(--ink); font-weight:700; }
+.loss-summary{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:0 0 12px; }
+.loss-summary .sup-fld__v{ min-height:34px; padding:6px 9px; font-size:calc(12px*var(--scale)); }
+@media (max-width:900px){ .loss-op__grid{ grid-template-columns:1fr 1fr; } }
 .sup-reply{ margin-top:12px; padding:12px 13px; border-radius:9px; border:1px solid var(--line); }
 .sup-reply--agent{ border-left:3px solid var(--blue); background:color-mix(in srgb,var(--blue) 5%,transparent); }
 .sup-reply--note{ border-left:3px solid var(--warn); background:color-mix(in srgb,var(--warn) 6%,transparent); }
@@ -856,6 +878,40 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .chg-foot{ display:flex; align-items:center; gap:14px; margin-top:2px; }
 .chg-next{ margin-right:auto; color:var(--muted); font-size:calc(11.5px*var(--scale)); line-height:1.5; max-width:460px; }
 .fld-label{ display:block; font-size:calc(11px*var(--scale)); font-weight:600; color:var(--muted); margin:10px 0 4px; }
+/* Подача убытка: пошаговая форма вместо двух пустых модальных окон 8.3. */
+.loss-progress{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin:0 0 2px; }
+.loss-progress__item{ position:relative; display:flex; align-items:center; gap:8px; color:var(--muted); font-size:calc(11.5px*var(--scale)); font-weight:600; }
+.loss-progress__item:not(:last-child)::after{ content:''; position:absolute; left:30px; right:8px; top:13px; height:2px; background:var(--line); z-index:0; }
+.loss-progress__num{ position:relative; z-index:1; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; border:2px solid var(--line); background:var(--card); color:var(--muted); }
+.loss-progress__item>span:last-child{ position:relative; z-index:1; padding-right:8px; background:var(--card); }
+.loss-progress__item.is-current{ color:var(--navy); }
+.loss-progress__item.is-current .loss-progress__num{ border-color:var(--navy); box-shadow:0 0 0 3px var(--sel); }
+.loss-progress__item.is-done .loss-progress__num{ border-color:var(--navy); background:var(--navy); color:#fff; }
+.loss-progress__item.is-done::after{ background:var(--navy); }
+.loss-lead{ color:var(--muted); font-size:calc(12.5px*var(--scale)); line-height:1.5; margin:5px 0 13px; }
+.loss-options{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.loss-option{ display:flex; gap:12px; align-items:flex-start; padding:14px; border:1px solid var(--line); border-radius:9px; background:var(--card); cursor:pointer; }
+.loss-option:hover{ border-color:var(--navy); background:var(--hover); }
+.loss-option.is-selected{ border-color:var(--navy); background:var(--sel); box-shadow:inset 3px 0 0 var(--navy); }
+.loss-option input{ position:absolute; opacity:0; }
+.loss-option__radio{ width:20px; height:20px; border:2px solid var(--line); border-radius:50%; background:var(--card); flex:none; margin-top:1px; display:grid; place-items:center; }
+.loss-option.is-selected .loss-option__radio{ border-color:var(--navy); }
+.loss-option.is-selected .loss-option__radio::after{ content:''; width:10px; height:10px; border-radius:50%; background:var(--navy); }
+.loss-option b{ display:block; font-size:calc(13px*var(--scale)); }
+.loss-option small{ display:block; margin-top:3px; color:var(--muted); font-size:calc(11.5px*var(--scale)); line-height:1.4; }
+.loss-fields{ display:grid; grid-template-columns:220px 1fr; gap:14px; }
+.loss-docs{ border-top:1px solid var(--line); }
+.loss-doc{ display:grid; grid-template-columns:minmax(220px,1fr) minmax(160px,.75fr) auto; gap:12px; align-items:center; min-height:58px; padding:10px 0; border-bottom:1px solid var(--line); }
+.loss-doc__title{ font-size:calc(12.5px*var(--scale)); font-weight:600; }
+.loss-doc__meta{ display:block; margin-top:2px; color:var(--muted); font-size:calc(10.5px*var(--scale)); font-weight:400; }
+.loss-doc__help{ color:var(--blue); font-size:calc(11px*var(--scale)); cursor:pointer; font-weight:600; }
+.loss-doc__file{ color:var(--muted); font-size:calc(11.5px*var(--scale)); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.loss-doc__file.is-ready{ color:var(--ok-text); font-weight:600; }
+.loss-doc__auto{ display:inline-flex; align-items:center; gap:6px; color:var(--ok-text); font-size:calc(11.5px*var(--scale)); font-weight:600; }
+.loss-upload{ display:inline-flex; align-items:center; justify-content:center; min-height:36px; padding:0 12px; border:1px solid var(--navy); border-radius:7px; color:var(--navy); font-size:calc(11.5px*var(--scale)); font-weight:600; cursor:pointer; white-space:nowrap; background:var(--card); }
+.loss-upload:hover{ background:var(--sel); }
+.loss-actions{ display:flex; align-items:center; justify-content:flex-end; gap:10px; }
+@media (max-width:900px){ .loss-options,.loss-fields{ grid-template-columns:1fr; } .loss-doc{ grid-template-columns:1fr auto; } .loss-doc__file{ grid-column:1/-1; grid-row:2; } }
 /* ── Операторские блоки процесса (тоже были без стилей) ── */
 .sup-changebox{ margin:14px 0 4px; padding:12px 14px; border:1px solid var(--line); border-radius:9px; background:var(--bg); }
 .proc-row{ display:flex; gap:8px; align-items:flex-end; margin:8px 0; }
@@ -1128,7 +1184,8 @@ function procCreateCase(idx,kind,payload){ var c=CLIENTS[idx]; if(!c) return; va
     num:c.num, holder:c.n, obj:c.o+(c.sub?' · '+c.sub:''), region:'Красноярский', agent:'Филь Виктория Викторовна', sk:c.sk, resp:'', date:'27.08.2026', type:payload.type||'Простая',
     reasons:(payload.reasons||[]).slice(), reasonComment:payload.comment||'', attachments:(payload.files||[]).map(function(f){ return {name:f,by:'agent',at:'сейчас'}; }),
     docRequest:null, payAmount:null, payStale:false, rejectReason:null,
-    refund:payload.refund||null, lossDate:payload.lossDate||'', claimant:payload.claimant||'',
+    refund:payload.refund||null, lossDate:payload.lossDate||'', claimant:payload.claimant||'', lossProduct:payload.lossProduct||'',
+    lossDetails:kind==='loss'?{claimNumber:'',claimType:'primary',claimSign:'pvu',inspectionType:'',applicant:payload.claimant==='Представитель по доверенности'?'representative':'owner',claimDate:payload.lossDate||'',insurerAgreementDate:'',agentAgreementDate:'',paymentDate:'',payoutAmount:'',rs:false,go:false,hasComplaint:false,note:''}:null,
     what:payload.what, ac:payload.comment||'—', steps:[] };
   SUP.unshift(it);
   if(typeof SV!=='undefined'){ var did='d-case-'+id;
@@ -1139,7 +1196,7 @@ function procCreateCase(idx,kind,payload){ var c=CLIENTS[idx]; if(!c) return; va
   }
   procApply(it,'agent','Заявка создана агентом. '+payload.what);
   supUpdateBadge(); if(typeof updateBell==='function') updateBell();
-  toast('Заявка № '+id+' создана — поддержка возьмёт в работу'); openContract(idx,false); }
+  toast('Заявка № '+id+' создана — поддержка возьмёт в работу'); if(!payload.stay) openContract(idx,false); return id; }
 function procCreate(idx,reasons,comment,files){
   procCreateCase(idx,'change',{reasons:reasons,comment:comment,files:files,
     what:'Внесение изменений в полис ОСАГО. Причины: '+reasons.map(reasonLabel).join(', ')+'.'});
@@ -1226,42 +1283,72 @@ function screenCancel(){ var c=CLIENTS[cancelIdx]||CLIENTS[0];
         +'<button class="btn btn--primary" onclick="cancelSubmit()">Отправить заявку</button></div>'
     +'</div></div>';
 }
-/* --- Визард убытка (FNOL §5): что произошло + базовый пакет документов --- */
-var lossIdx=0, lossFiles=[], lossErr=false;
-function openLoss(idx){ lossIdx=idx; lossFiles=[]; lossErr=false; render('lossw');
+/* --- Визард убытка (FNOL §5): сценарий 8.3 сохранён, но разбит на ясные шаги. --- */
+var lossIdx=0, lossStep=1, lossClaimant='owner', lossProduct='osago', lossProtocol='', lossSecond='yes', lossInjured='no', lossDate='', lossDesc='', lossComment='', lossFiles={}, lossFileChecks={}, lossErr='', lossCreatedId='', lossDuplicateCount=0, lossDuplicateAccepted=false;
+var LOSS_UPLOADS=[
+  {id:'application',title:'Заявление на выплату страхового возмещения',meta:'Заполните и подпишите у клиента',help:'Скачать бланк'},
+  {id:'photos',title:'Фото осмотра транспортного средства',meta:'До 30 фотографий',help:'Инструкция по осмотру',multiple:true},
+  {id:'passport',title:'Паспорт РФ собственника',meta:'Разворот с фото и регистрация'},
+  {id:'bank',title:'Реквизиты расчётного счёта',meta:'Для перечисления страховой выплаты'},
+  {id:'vehicle',title:'ПТС или СТС',meta:'Достаточно одного документа'},
+  {id:'gibdd',title:'Документы из ГИБДД',meta:'Если ДТП оформляли сотрудники ГИБДД'},
+  {id:'notice',title:'Извещение о ДТП',meta:'Если оформляли европротокол'},
+  {id:'policy',title:'Полис ОСАГО',meta:'Уже есть в системе',auto:true},
+  {id:'other',title:'Другие документы',meta:'Если относятся к страховому случаю',multiple:true}
+];
+function openLoss(idx){ lossIdx=idx; lossStep=1; lossClaimant='owner'; lossProduct=((CLIENTS[idx]||{}).p||'').indexOf('ОСАГО')>-1?'osago':'health'; lossProtocol=''; lossSecond='yes'; lossInjured='no'; lossDate=''; lossDesc=''; lossComment=''; lossFiles={}; lossFileChecks={}; lossErr=''; lossCreatedId=''; lossDuplicateCount=procForPolicy(idx).filter(function(x){return x.kind==='loss';}).length; lossDuplicateAccepted=!lossDuplicateCount; render('lossw');
   document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); });
   document.getElementById('activeTab').innerHTML='Урегулирование убытка <span class="tab__x">×</span>'; }
-function lossAddFile(){ var d=(document.getElementById('lossDesc')||{}).value; lossFiles.push('Документ '+(lossFiles.length+1)+'.pdf'); render('lossw'); var ta=document.getElementById('lossDesc'); if(ta&&d) ta.value=d; }
-function lossSubmit(){ var ta=document.getElementById('lossDesc'); var d=ta?ta.value.trim():'';
-  if(!d){ lossErr=true; render('lossw'); var e=document.querySelector('.chg-err'); if(e) e.scrollIntoView({block:'center'}); return; }
-  var dt=(document.getElementById('lossDate')||{}).value||''; var cl=(document.getElementById('lossClaimant')||{}).value||'Собственник';
-  procCreateCase(lossIdx,'loss',{comment:d,files:lossFiles,lossDate:dt,claimant:cl,type:'Сложная',
-    what:'Убыток по '+CLIENTS[lossIdx].p+(dt?(' — событие '+dt):'')+'. '+d}); }
-function screenLoss(){ var c=CLIENTS[lossIdx]||CLIENTS[0];
-  var err=lossErr?'<div class="chg-err"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Опишите, что произошло — без этого страховая не примет убыток.</div>':'';
-  var needBox='<div class="chg-need"><b>Обычно нужны:</b> '+LOSS_DOCS.join(' · ')+'. Поддержка может запросить ещё.'
-    +'<span class="chg-need__pay">После рассмотрения СК пришлём соглашение о выплате — подпишете у клиента и загрузите здесь же.</span></div>';
-  var files=lossFiles.length? lossFiles.map(function(f){ return '<div class="chg-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+f+'</div>'; }).join('') : '<div class="chg-none">Приложите документы сейчас — заявка пройдёт быстрее, без запроса от поддержки.</div>';
-  return '<div class="screen active">'
-    +'<div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+lossIdx+',false)">Договор</a> / Урегулирование убытка</div>'
-    +'<div class="ptitle">Урегулирование убытка</div>'
-    +'<div class="chg-wrap">'
-      +'<div class="card"><div class="kv"><span>Договор</span><b>'+c.p+' · '+c.num+'</b></div><div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+c.o+(c.sub?' · '+c.sub:'')+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+c.sk+'</b></div></div>'
-      +'<div class="card"><h3>Что произошло?</h3>'
-        +'<div style="display:flex;gap:14px;flex-wrap:wrap"><span style="flex:1;min-width:180px"><label class="fld-label" for="lossDate" style="margin-top:0">Дата события</label><input id="lossDate" class="tselect" style="width:100%" placeholder="ДД.ММ.ГГГГ"/></span>'
-        +'<span style="flex:1;min-width:220px"><label class="fld-label" for="lossClaimant" style="margin-top:0">Заявитель</label><select id="lossClaimant" class="tselect" style="width:100%"><option>Собственник</option><option>Представитель по доверенности</option></select></span></div>'
-        +'<label class="fld-label" for="lossDesc">Описание события</label>'
-        +'<textarea class="sup-ta" id="lossDesc" placeholder="Например: ДТП на парковке — повреждён задний бампер, второй участник оформлен по европротоколу…" style="width:100%"></textarea>'
-        +needBox+err+'</div>'
-      +'<div class="card"><h3>Документы</h3><div class="chg-files">'+files+'</div>'
-        +'<label class="chg-upload"><input type="file" hidden onchange="lossAddFile()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>Приложить документ</label></div>'
-      +'<div class="chg-foot"><span class="chg-next">После отправки: поддержка проверит заявку → передадим страховой на рассмотрение → соглашение о выплате на подпись у клиента → выплата. О каждом шаге сообщим оповещением.</span>'
-        +'<button class="btn btn--primary" onclick="lossSubmit()">Отправить заявку</button></div>'
-    +'</div></div>';
+function lossSaveDraft(){ var dt=document.getElementById('lossDate'), ds=document.getElementById('lossDesc'), cm=document.getElementById('lossComment');
+  if(dt) lossDate=dt.value; if(ds) lossDesc=ds.value; if(cm) lossComment=cm.value; }
+function lossPickClaimant(v){ lossClaimant=v; lossErr=''; render('lossw'); }
+function lossNext(){ lossSaveDraft();
+  if(lossStep===1 && (!lossDate.trim() || !lossDesc.trim())){ lossErr='Укажите дату и коротко опишите событие.'; render('lossw'); return; }
+  lossErr=''; lossStep=Math.min(2,lossStep+1); render('lossw'); var w=document.getElementById('work'); if(w) w.scrollTop=0; }
+function lossPrev(){ lossSaveDraft(); lossErr=''; lossStep=Math.max(1,lossStep-1); render('lossw'); var w=document.getElementById('work'); if(w) w.scrollTop=0; }
+function lossAddFile(code,input){ lossSaveDraft(); var fs=input&&input.files; var names=[];
+  if(fs&&fs.length){ for(var i=0;i<fs.length;i++) names.push(fs[i].name); }
+  lossFiles[code]=names.length?names:['Документ.pdf']; lossFileChecks[code]={state:'ok',text:'Файл читается · формат подходит'}; render('lossw'); }
+function lossRemoveFile(code){ lossSaveDraft(); delete lossFiles[code]; delete lossFileChecks[code]; render('lossw'); }
+function lossSubmit(){ lossSaveDraft(); var files=[];
+  Object.keys(lossFiles).forEach(function(k){ files=files.concat(lossFiles[k]); });
+  var cl=lossClaimant==='proxy'?'Представитель по доверенности':'Собственник';
+  lossCreatedId=procCreateCase(lossIdx,'loss',{comment:lossDesc+(lossComment?' '+lossComment:''),files:files,lossDate:lossDate,claimant:cl,type:'Сложная',stay:true,lossProduct:lossProduct,
+    what:'Убыток по '+CLIENTS[lossIdx].p+' — событие '+lossDate+'. '+lossDesc}); lossStep=3; render('lossw'); }
+function lossProgress(){ var labels=['Событие','Документы']; return '<div class="loss-progress">'+labels.map(function(t,i){ var n=i+1,cl=(lossStep>2||n<lossStep)?' is-done':(n===lossStep?' is-current':''); return '<div class="loss-progress__item'+cl+'"><span class="loss-progress__num">'+((lossStep>2||n<lossStep)?'✓':n)+'</span><span>'+t+'</span></div>'; }).join('')+'</div>'; }
+function lossContractCard(c){ return '<div class="card"><div class="kv"><span>Договор</span><b>'+c.p+' · '+c.num+'</b></div><div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+c.o+(c.sub?' · '+c.sub:'')+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+c.sk+'</b></div></div>'; }
+function lossDocRow(d){ var names=lossFiles[d.id]||[];
+  if(d.auto) return '<div class="loss-doc"><div><div class="loss-doc__title">'+d.title+'</div><span class="loss-doc__meta">'+d.meta+'</span></div><span class="loss-doc__auto">✓ Прикреплён автоматически</span><span></span></div>';
+  var check=lossFileChecks[d.id], state=names.length?'<span class="loss-doc__file is-ready">✓ '+(names.length>1?names.length+' файла':names[0])+'<small style="display:block;color:var(--ok);font-weight:600">'+(check?check.text:'Проверяем качество…')+'</small><small style="display:block;color:var(--muted);font-weight:400">Сжато и подготовлено для СК</small></span>':'<span class="loss-doc__file">Файл не выбран</span>';
+  var action=names.length?'<button class="btn btn--sm" onclick="lossRemoveFile(\''+d.id+'\')">Удалить</button>':'<label class="loss-upload"><input type="file" '+(d.multiple?'multiple ':'')+'hidden onchange="lossAddFile(\''+d.id+'\',this)">Выбрать файл</label>';
+  return '<div class="loss-doc"><div><div class="loss-doc__title">'+d.title+'</div><span class="loss-doc__meta">'+d.meta+'</span>'+(d.help?'<a class="loss-doc__help" onclick="toast(\''+d.help+' (демо)\')">'+d.help+'</a>':'')+'</div>'+state+action+'</div>'; }
+function screenLoss(){ var c=CLIENTS[lossIdx]||CLIENTS[0], body='', actions='';
+  if(!lossDuplicateAccepted){
+    body='<div class="card"><h3>По договору уже есть '+lossDuplicateCount+' '+(lossDuplicateCount===1?'убыток':'убытка')+'</h3><p class="loss-lead">Проверьте историю договора, чтобы случайно не создать повторную заявку. Если это другой страховой случай, можно продолжить.</p></div>';
+    actions='<div class="loss-actions"><button class="btn" onclick="openContract('+lossIdx+',false)">Посмотреть существующие</button><button class="btn btn--primary" onclick="lossDuplicateAccepted=true;render(\'lossw\')">Заявить новый убыток</button></div>';
+  } else if(lossStep===1){
+    body='<div class="card"><h3>Какой страховой случай заявляем?</h3><div class="loss-options"><label class="loss-option'+(lossProduct==='osago'?' is-selected':'')+'"><input type="radio" name="lossProduct" '+(lossProduct==='osago'?'checked':'')+' onchange="lossProduct=\'osago\';render(\'lossw\')"><span class="loss-option__radio"></span><span><b>ОСАГО</b><small>ДТП и повреждение автомобиля</small></span></label><label class="loss-option'+(lossProduct==='health'?' is-selected':'')+'"><input type="radio" name="lossProduct" '+(lossProduct==='health'?'checked':'')+' onchange="lossProduct=\'health\';render(\'lossw\')"><span class="loss-option__radio"></span><span><b>Несчастный случай</b><small>Травма или вред здоровью</small></span></label></div></div>'
+      +'<div class="card"><h3>Что произошло?</h3><p class="loss-lead">Ответьте на несколько вопросов — по ним составим точный список документов.</p><div class="loss-fields"><span><label class="fld-label" for="lossDate" style="margin-top:0">Дата события</label><input id="lossDate" class="tselect" style="width:100%" placeholder="ДД.ММ.ГГГГ" value="'+lossDate.replace(/"/g,'&quot;')+'"></span><span><label class="fld-label" for="lossDesc" style="margin-top:0">Кратко опишите событие</label><textarea class="sup-ta" id="lossDesc" placeholder="Например: ДТП на парковке, повреждён задний бампер…" style="width:100%">'+lossDesc+'</textarea></span></div>'
+      +(lossProduct==='osago'?'<div class="loss-op__grid" style="margin-top:12px"><div class="sup-fld"><label>Как оформляли ДТП?</label><select class="tselect" onchange="lossProtocol=this.value"><option value="">Выберите</option><option value="gibdd"'+(lossProtocol==='gibdd'?' selected':'')+'>Сотрудники ГИБДД</option><option value="notice"'+(lossProtocol==='notice'?' selected':'')+'>Европротокол</option></select></div><div class="sup-fld"><label>Есть второй участник?</label><select class="tselect" onchange="lossSecond=this.value"><option value="yes"'+(lossSecond==='yes'?' selected':'')+'>Да</option><option value="no"'+(lossSecond==='no'?' selected':'')+'>Нет</option></select></div><div class="sup-fld"><label>Есть пострадавшие?</label><select class="tselect" onchange="lossInjured=this.value"><option value="no"'+(lossInjured==='no'?' selected':'')+'>Нет</option><option value="yes"'+(lossInjured==='yes'?' selected':'')+'>Да</option></select></div></div>':'<div class="loss-op__grid" style="margin-top:12px"><div class="sup-fld"><label>Кто обращается?</label><select class="tselect" onchange="lossClaimant=this.value"><option value="owner">Застрахованный</option><option value="proxy">Представитель</option></select></div><div class="sup-fld"><label>Есть медицинские документы?</label><select class="tselect"><option>Да, приложу</option><option>Пока нет</option></select></div></div>')
+      +(lossErr?'<div class="chg-err"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>'+lossErr+'</div>':'')+'</div>';
+    actions='<div class="loss-actions"><button class="btn btn--primary" onclick="lossNext()">Продолжить</button></div>';
+  } else if(lossStep===2) {
+    var smartDocs=LOSS_UPLOADS.filter(function(d){ if(lossProduct==='health') return ['application','passport','bank','other'].indexOf(d.id)>-1; if(d.id==='gibdd') return lossProtocol==='gibdd'; if(d.id==='notice') return lossProtocol==='notice'||!lossProtocol; return true; });
+    if(lossProduct==='health') smartDocs.splice(1,0,{id:'medical',title:'Медицинские документы',meta:'Справка, выписка или заключение врача',multiple:true});
+    var docs=smartDocs.map(lossDocRow).join('');
+    body='<div class="card"><h3>Приложите документы</h3><p class="loss-lead">Добавьте всё, что уже есть. Система сожмёт файлы и подготовит подходящий для страховой формат. Если документа пока нет, поддержка запросит его в переписке.</p><div class="loss-docs">'+docs+'</div>'
+      +'<label class="fld-label" for="lossComment">Комментарий для поддержки <span style="font-weight:400">(необязательно)</span></label><textarea class="sup-ta" id="lossComment" placeholder="Например: второй участник оформлен по европротоколу…" style="width:100%">'+lossComment+'</textarea></div>';
+    actions='<div class="chg-foot"><span class="chg-next">После отправки присвоим номер заявки. Статус, запросы документов и переписка будут доступны в договоре.</span><button class="btn" onclick="lossPrev()">Назад</button><button class="btn btn--primary" onclick="lossSubmit()">Отправить заявку</button></div>';
+  } else {
+    body='<div class="card" style="text-align:center;padding:34px"><div style="font-size:36px;color:var(--ok)">✓</div><h3>Убыток зарегистрирован</h3><p class="loss-lead">Заявка № '+lossCreatedId+' создана.</p><div class="loss-op__grid" style="text-align:left;margin-top:18px"><div class="sup-fld"><label>Дата подачи</label><div class="sup-fld__v">сегодня</div></div><div class="sup-fld"><label>Статус</label><div class="sup-fld__v">Проверка документов</div></div><div class="sup-fld"><label>Следующий шаг</label><div class="sup-fld__v">Проверка поддержкой</div></div><div class="sup-fld"><label>Ориентировочный срок</label><div class="sup-fld__v">1 рабочий день</div></div></div></div>';
+    actions='<div class="loss-actions"><button class="btn" onclick="openContract('+lossIdx+',false)">Перейти в договор</button><button class="btn btn--primary" onclick="go(\'chats\')">Открыть переписку</button></div>';
+  }
+  return '<div class="screen active"><div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+lossIdx+',false)">Договор</a> / Урегулирование убытка</div><div class="ptitle">Сообщить о страховом случае</div><div class="chg-wrap">'+lossProgress()+lossContractCard(c)+body+actions+'</div></div>';
 }
 
 /* --- Прогресс заявки на договоре (сторона агента) --- */
 function procForPolicy(idx){ return SUP.filter(function(it){ return it.cstatus && it.policyIdx===idx; }).sort(function(a,b){ return (b._ts||0)-(a._ts||0); }); }
+function lossTrack(it){ if(it.kind!=='loss') return ''; var order=['new','in_work','awaiting_docs','docs_uploaded','under_review','signing','signed','settled'], pos=order.indexOf(it.cstatus); if(pos<0) pos=0; var stages=[{p:0,t:'Заявка подана'},{p:1,t:'Проверка документов'},{p:4,t:'Передано в СК'},{p:5,t:'Решение и соглашение'},{p:7,t:'Выплата'}]; return '<div class="loss-track">'+stages.map(function(s){return '<div class="loss-track__step '+(pos>s.p?'is-done':(pos===s.p?'is-current':''))+'">'+s.t+'</div>';}).join('')+'</div>'; }
 function procActiveReq(idx){ var list=procForPolicy(idx);
   /* Активные — полной карточкой; done/settled — строкой в свёрнутом «Завершённые заявки» (лок process_visibility).
      rejected остаётся карточкой: терминал, но действенный — рядом вход «Подать заново». */
@@ -1286,8 +1373,8 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
     var refundLine=(it.kind==='cancel'&&it.refund)?'<div class="prg-pay"><b>К возврату ≈ '+it.refund.toLocaleString('ru-RU')+' ₽</b><div class="prg-disc">Расчёт по неистёкшим дням; сумму может скорректировать страховая. Выплата клиенту — до 14 календарных дней после расторжения.</div></div>':'';
     var action='';
     if(it.cstatus==='awaiting_docs'){
-      var req=(it.docRequest&&it.docRequest.items&&it.docRequest.items.length)? '<div class="prg-need">Нужны документы: '+it.docRequest.items.join(', ')+'</div>':'<div class="prg-need">Поддержка запросила документы.</div>';
-      action=req+'<button class="btn btn--primary btn--sm" onclick="procAgentUpload(\''+it.id+'\')">Загрузить документы</button>';
+      var reqItems=(it.docRequest&&it.docRequest.items)||[], req=reqItems.length?'<div class="prg-need"><b>Поддержка запросила:</b>'+reqItems.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:7px"><span>'+x+'</span><button class="btn btn--sm" onclick="procAgentUpload(\''+it.id+'\')">Загрузить</button></div>';}).join('')+'</div>':'<div class="prg-need">Поддержка запросила документы.</div>';
+      action=req;
     } else if(it.cstatus==='awaiting_payment'){
       /* Платит КЛИЕНТ: ссылка у агента — передать (WhatsApp/СМС) или показать QR; агент лишь подтверждает оплату. */
       var amtS=(it.payAmount||0).toLocaleString('ru-RU')+' ₽';
@@ -1299,16 +1386,23 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
       else action='<div class="prg-pay"><b>К доплате: '+amtS+' — ссылка у клиента.</b>'+disc
         +'<div class="prg-payrow"><button class="btn btn--primary btn--sm" onclick="procAgentPay(\''+it.id+'\')">Клиент оплатил — подтвердить</button><button class="btn btn--sm" onclick="procReqNewLink(\''+it.id+'\')">Ссылка не открывается</button></div></div>';
     } else if(it.cstatus==='signing'){
-      action='<div class="prg-need">Соглашение о выплате готово — подпишите у клиента и загрузите скан.</div><button class="btn btn--primary btn--sm" onclick="procAgentSign(\''+it.id+'\')">Загрузить подписанное соглашение</button>';
+      var currentAgreement=(it.attachments||[]).filter(function(a){return a.agreement&&a.current;})[0];
+      action='<div class="prg-need">Соглашение о выплате готово — подпишите у клиента и загрузите скан.</div>'+(currentAgreement?'<button class="btn btn--sm" onclick="toast(\'Скачивается актуальное соглашение: '+currentAgreement.name+'\')">Скачать актуальное соглашение</button> ':'')+'<button class="btn btn--primary btn--sm" onclick="procAgentSign(\''+it.id+'\')">Загрузить подписанное соглашение</button>';
     } else if(it.cstatus==='under_review'){ action='<div class="prg-wait">Заявка у страховой — на рассмотрении. Ответ придёт сюда и оповещением.</div>'; }
     else if(it.cstatus==='settled'){ action='<div class="prg-done">✓ Урегулировано — выплата произведена.</div>'; }
     else if(it.cstatus==='done'){ action='<div class="prg-done">✓ '+((PROC_KIND[it.kind]||{}).done||'Заявка завершена')+(it.kind==='change'?' — новый полис доступен в документах.':'.')+'</div>'; }
     else if(it.cstatus==='rejected'){ action='<div class="prg-rej">Отказ'+(it.rejectReason?' — '+it.rejectReason:'')+'</div><button class="btn btn--sm" onclick="'+(it.kind==='change'?('openChange('+idx+')'):'toast(\'Повторная подача — через новую заявку из договора\')')+'">Подать заявку заново</button>'; }
-    else if(it.cstatus==='new'){ action='<div class="prg-wait">Поддержка возьмёт заявку в работу. Дальше: проверим → если понадобятся документы или доплата — попросим здесь же → приложим новый полис. О каждом шаге сообщим оповещением — проверять не нужно.</div>'; }
+    else if(it.cstatus==='new'){
+      var nextText=it.kind==='loss'
+        ?'Поддержка проверит заявку и передаст её страховой. Если понадобятся документы — запросим здесь же. После решения СК пришлём соглашение на подпись, затем сообщим о выплате.'
+        :(it.kind==='cancel'
+          ?'Поддержка проверит заявку и передаст её страховой на расторжение. Если понадобятся документы — запросим здесь же. О решении и возврате сообщим оповещением.'
+          :'Поддержка проверит заявку. Если понадобятся документы или доплата — попросим здесь же, затем приложим новый полис к договору.');
+      action='<div class="prg-wait">'+nextText+' Проверять статус вручную не нужно — сообщим о каждом шаге.</div>'; }
     else { action='<div class="prg-wait">Заявка у поддержки — ждём ответа.</div>'; }
     var chatBtn=(CLIENTS[idx]&&CLIENTS[idx].chat)? '<div style="margin-top:6px"><button class="req__reply" onclick="openDiscussion(\''+CLIENTS[idx].chat+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка по обращению →</button></div>':'';
     var hist='<div class="prg__hist"><button class="prg__histbtn" onclick="this.nextElementSibling.classList.toggle(\'show\')">История заявки</button><div class="prg__timeline">'+it.steps.filter(function(st){ return !st.internal; }).map(function(st){ var lbl=st.cs&&PROC_STATUS[st.cs]?PROC_STATUS[st.cs].ag:(st.s||''); return '<div class="prg__ev"><span class="prg__evd">'+st.d+'</span><span class="prg__evs">'+lbl+'</span><span class="prg__evc">'+st.c+'</span></div>'; }).join('')+'</div></div>';
-    return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+reasons+refundLine+action+hist+chatBtn+'</div>';
+    return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+lossTrack(it)+reasons+refundLine+action+hist+chatBtn+'</div>';
   }).join('')+closedBlock;
 }
 /* Действия агента */
@@ -1336,7 +1430,8 @@ function procAttachPolicy(id){ var it=supFind(id); if(!it) return;
 /* Переходы канона по видам: cancel (§4) и loss (§5). */
 function procToSK(id){ procSetStatus(id,'under_review','support','Убыток заведён и передан в СК на рассмотрение.'); toast('Передано в СК — на рассмотрении'); supRerender(); }
 function procToSigning(id){ procSetStatus(id,'signing','support','СК согласовала выплату. Соглашение направлено — подпишите у клиента и загрузите.'); toast('Соглашение направлено агенту на подписание'); supRerender(); }
-function procSettle(id){ var it=supFind(id); if(it) it.valueSeen=false; procSetStatus(id,'settled','support','Отдано на выплату — убыток урегулирован.'); toast('Убыток урегулирован — выплата произведена'); supRerender(); }
+function lossCloseChecks(it){ var d=lossOpData(it), miss=[]; if(!d.claimNumber) miss.push('номер убытка'); if(!d.payoutAmount) miss.push('сумма выплаты'); if(!d.paymentDate) miss.push('дата выплаты'); if(!(it.attachments||[]).some(function(a){return a.agreement&&a.current;})) miss.push('актуальное соглашение'); if(it.docRequest&&it.docRequest.items&&it.docRequest.items.length) miss.push('незакрытый запрос документов'); return miss; }
+function procSettle(id){ var it=supFind(id); if(!it) return; var miss=lossCloseChecks(it); if(miss.length){ toast('Нельзя завершить: '+miss.join(', ')); var e=document.getElementById('lossCloseErr'); if(e){e.hidden=false;e.textContent='Для завершения заполните: '+miss.join(', ')+'.';} return; } it.valueSeen=false; procSetStatus(id,'settled','support','Отдано на выплату — убыток урегулирован.'); toast('Убыток урегулирован — выплата произведена'); supRerender(); }
 function procCancelDone(id){ var it=supFind(id); if(it) it.valueSeen=false; procSetStatus(id,'done','support','Договор отправлен в СК на расторжение. Возврат премии — до 14 календарных дней.'); toast('Договор расторгнут — возврат до 14 дней'); supRerender(); }
 function procReject(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procRejReason'); var r=inp?inp.value.trim():''; if(!r){ var e=document.getElementById('procRejErr'); if(e) e.hidden=false; return; } it.rejectReason=r; it.cstatus='rejected'; procApply(it,'support','Отказ: '+r); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Заявка отклонена'); supRerender(); }
 /* Операторская панель хода заявки — переходы по канону ВИДА (change §3 / cancel §4 / loss §5).
@@ -1362,19 +1457,46 @@ function procOpBox(it){ var cs=it.cstatus, k=it.kind||'change';
   if(cs==='awaiting_payment'){ if(it.payStale) h+='<div class="proc-wait">Агент сообщил: ссылка не открывается.</div><div class="proc-row"><span class="proc-fld"><label for="procPayAmt2">Новая сумма, ₽ (необязательно)</label><input id="procPayAmt2" class="tselect" placeholder="Оставьте пустым — сумма прежняя"/></span><button class="btn btn--primary btn--sm" onclick="procReissue(\''+it.id+'\')">Перевыпустить ссылку</button></div>'; else h+='<div class="proc-wait">Мяч у агента — ждём оплату '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽ от клиента.</div>'; }
   if(cs==='under_review') h+='<div class="proc-wait">Мяч у страховой — заявка на рассмотрении.</div><button class="btn btn--primary btn--sm" onclick="procToSigning(\''+it.id+'\')">СК согласовала → соглашение на подписание</button>';
   if(cs==='signing') h+='<div class="proc-wait">Мяч у агента — ждём подписанное клиентом соглашение.</div>';
-  if(cs==='signed') h+='<button class="btn btn--primary btn--sm" onclick="procSettle(\''+it.id+'\')">Отдать на выплату → Урегулирован</button>';
+  if(cs==='signed') h+='<div class="proc-err" id="lossCloseErr" hidden></div><button class="btn btn--primary btn--sm" onclick="procSettle(\''+it.id+'\')">Отдать на выплату → Урегулирован</button>';
   if(cs==='done'||cs==='settled') h+='<div class="proc-done">✓ '+((PROC_KIND[k]||{}).done||'Готово')+'</div>';
   if(cs==='rejected') h+='<div class="proc-rej">Отказ: '+(it.rejectReason||'')+'</div>';
   if(!(PROC_STATUS[cs]||{}).term) h+='<div class="proc-sep"></div><div class="proc-row"><span class="proc-fld"><label for="procRejReason">Причина отказа (свободный текст)</label><input id="procRejReason" class="tselect" placeholder="Например: VIN в СТС не совпадает с базой"/></span><button class="btn btn--sm" onclick="procReject(\''+it.id+'\')">Отказать</button></div><div class="proc-err" id="procRejErr" hidden>Укажите причину отказа — агент увидит её дословно.</div>';
   return h+'</div></div>';
 }
 function procReasonsBlock(it){ var reasons=(it.reasons||[]).length? it.reasons.map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('') : '<span class="empty-cell">'+(it.what||'—')+'</span>';
-  var files=(it.attachments||[]).length? it.attachments.map(function(a){ return '<span class="proc-file">'+a.name+(a.by==='agent'?' · агент':'')+'</span>'; }).join('') : '<span class="empty-cell">файлов нет</span>';
+  var files=(it.attachments||[]).length? it.attachments.map(function(a){ return '<span class="proc-file">'+a.name+(a.by==='agent'?' · агент':'')+(a.agreement&&a.current?' · актуальное':'')+'</span>'; }).join('') : '<span class="empty-cell">файлов нет</span>';
   /* «Запрошены» тут не дублируем — единственное место этого факта: «Мяч у агента — ждём документы…» в действиях. */
   var rtitle={change:'Причина изменения',cancel:'Причина расторжения',loss:'Описание убытка'}[it.kind]||'Причина обращения';
   return '<div class="sup-changebox"><div class="sup-side__h">'+rtitle+'</div><div class="prg-reasons">'+reasons+'</div>'
-    +'<div class="sup-side__h" style="margin-top:8px">Приложенные файлы</div><div class="proc-files">'+files+'</div>'
+    +'<div class="sup-side__h" style="margin-top:8px">Приложенные файлы</div>'+(it.kind==='loss'?'<div style="display:flex;gap:6px;margin-bottom:7px"><button class="btn btn--sm" onclick="lossSortFiles(\''+it.id+'\',\'name\')">По названию</button><button class="btn btn--sm" onclick="lossSortFiles(\''+it.id+'\',\'date\')">По дате</button></div>':'')+'<div class="proc-files">'+files+'</div>'
     +(it.reasonComment?'<div class="kv"><span>Комментарий агента</span><b>'+it.reasonComment+'</b></div>':'')+'</div>';
+}
+function lossSortFiles(id,mode){ var it=supFind(id); if(!it) return; (it.attachments||[]).sort(function(a,b){ return mode==='name'?a.name.localeCompare(b.name,'ru'):String(b.at||'').localeCompare(String(a.at||''),'ru'); }); toast(mode==='name'?'Документы отсортированы по названию':'Документы отсортированы по дате'); supRerender(); }
+
+function lossOpData(it){ if(!it.lossDetails) it.lossDetails={claimNumber:'',claimType:'primary',claimSign:'pvu',inspectionType:'',applicant:(it.claimant==='Представитель по доверенности'?'representative':'owner'),claimDate:it.lossDate||'',insurerAgreementDate:'',agentAgreementDate:'',paymentDate:'',payoutAmount:'',rs:false,go:false,hasComplaint:false,complaints:[],note:''}; if(!it.lossDetails.complaints) it.lossDetails.complaints=it.lossDetails.hasComplaint?[{date:it.lossDetails.complaintDate||'',amount:it.lossDetails.complaintAmount||'',paymentDate:it.lossDetails.complaintPaymentDate||''}]:[]; return it.lossDetails; }
+function lossOpSet(id,key,value){ var it=supFind(id); if(!it) return; var d=lossOpData(it); d[key]=value; }
+function lossOpSave(id){ var it=supFind(id); if(!it) return; var d=lossOpData(it); it.lossDate=d.claimDate||it.lossDate; (it.steps=it.steps||[]).push({d:'сейчас',internal:true,s:'Данные сохранены',c:'Реквизиты убытка обновлены поддержкой.'}); toast('Данные убытка сохранены'); }
+function lossAssign(id){ var it=supFind(id), sel=document.getElementById('lossResp-'+id); if(!it||!sel||!sel.value) return; it.resp=sel.value; (it.steps=it.steps||[]).push({d:'сейчас',internal:true,s:'Ответственный',c:'Назначен: '+it.resp}); toast('Ответственный: '+it.resp); supRerender(); }
+function lossAgreement(id){ var it=supFind(id); if(!it) return; var d=lossOpData(it), list=(it.attachments=it.attachments||[]); d.agentAgreementDate=d.agentAgreementDate||'17.09.2026'; list.forEach(function(a){if(a.agreement)a.current=false;}); var ver=list.filter(function(a){return a.agreement;}).length+1; list.push({name:'Соглашение_о_выплате_v'+ver+'.pdf',by:'support',at:'сейчас',agreement:true,current:true}); (it.steps=it.steps||[]).push({d:'сейчас',internal:true,s:'Документ',c:'Прикреплена актуальная версия соглашения №'+ver+'.'}); toast('Актуальная версия соглашения прикреплена'); supRerender(); }
+function lossComplaint(id){ var it=supFind(id); if(!it) return; var d=lossOpData(it); d.hasComplaint=true; d.complaints.push({reason:'',status:'Новая',date:'',amount:'',paymentDate:''}); (it.steps=it.steps||[]).push({d:'сейчас',cs:it.cstatus,c:'Открыта претензия №'+d.complaints.length+' по убытку.'}); toast('Претензия №'+d.complaints.length+' добавлена'); supRerender(); }
+function lossComplaintSet(id,index,key,value){ var it=supFind(id); if(!it) return; var d=lossOpData(it); if(d.complaints[index]) d.complaints[index][key]=value; }
+function lossHistory(id){ var el=document.getElementById('supTimeline-'+id); if(el){ el.scrollIntoView({behavior:'smooth',block:'start'}); el.style.boxShadow='0 0 0 2px var(--navy)'; setTimeout(function(){el.style.boxShadow='';},1400); } }
+function lossSummary(it){ var d=lossOpData(it), isHealth=(it.lossProduct==='health')||(it.num||'').indexOf('РРР')===0||(it.what||'').indexOf('НС')>-1, total=isHealth?5:8, got=(it.attachments||[]).filter(function(a){return a.by==='agent';}).length, complete=Math.min(100,Math.round((got+1)/total*100)); return '<div class="loss-summary"><div class="sup-fld"><label>Продукт</label><div class="sup-fld__v"><b>'+(isHealth?'НС':'ОСАГО')+'</b></div></div><div class="sup-fld"><label>Дата события</label><div class="sup-fld__v">'+(d.claimDate||it.lossDate||'Не указана')+'</div></div><div class="sup-fld"><label>Комплектность</label><div class="sup-fld__v"><b>'+complete+'%</b></div></div><div class="sup-fld"><label>Чей ход</label><div class="sup-fld__v">'+(SUP_BALL[it.ball]||'Поддержка')+'</div></div><div class="sup-fld"><label>Заявитель</label><div class="sup-fld__v">'+(d.applicant==='representative'?'Представитель':'Собственник')+'</div></div><div class="sup-fld"><label>Ответственный</label><div class="sup-fld__v">'+(it.resp||'Не назначен')+'</div></div><div class="sup-fld"><label>Статус</label><div class="sup-fld__v">'+(it.cstatus?procSupLabel(it):it.st)+'</div></div><div class="sup-fld"><label>Срок</label><div class="sup-fld__v">'+(it.ball==='us'&&it.sla?'SLA '+it.sla+' мин':'Не считается')+'</div></div></div>'; }
+function lossOpBlock(it){ if(it.kind!=='loss'&&it.vid!=='Урегулирование убытка') return ''; var d=lossOpData(it), isHealth=(it.lossProduct==='health')||(it.num||'').indexOf('РРР')===0||(it.obj||'').indexOf('Здоровье')>-1||(it.what||'').indexOf('НС')>-1, path=isHealth?'НС — запрос документов уточняется в переписке':'ОСАГО — проверка документов и передача в СК', esc=function(v){return String(v||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');};
+  var complaint=d.complaints.map(function(cp,i){return '<div class="loss-sub"><div class="loss-sub__title">Претензия №'+(i+1)+'</div><div class="loss-op__grid"><div class="sup-fld"><label>Причина</label><input class="tselect" value="'+esc(cp.reason)+'" placeholder="Что оспаривает клиент" onchange="lossComplaintSet(\''+it.id+'\','+i+',\'reason\',this.value)"></div><div class="sup-fld"><label>Статус</label><select class="tselect" onchange="lossComplaintSet(\''+it.id+'\','+i+',\'status\',this.value)"><option>Новая</option><option>На рассмотрении</option><option>Удовлетворена</option><option>Отказ</option></select></div><div class="sup-fld"><label>Дата заявления</label><input class="tselect" type="date" value="'+esc(cp.date)+'" onchange="lossComplaintSet(\''+it.id+'\','+i+',\'date\',this.value)"></div><div class="sup-fld"><label>Сумма требования, ₽</label><input class="tselect" inputmode="decimal" value="'+esc(cp.amount)+'" onchange="lossComplaintSet(\''+it.id+'\','+i+',\'amount\',this.value)"></div><div class="sup-fld"><label>Дата решения / оплаты</label><input class="tselect" type="date" value="'+esc(cp.paymentDate)+'" onchange="lossComplaintSet(\''+it.id+'\','+i+',\'paymentDate\',this.value)"></div><div class="sup-fld"><label>Документы</label><button class="btn btn--sm" onclick="toast(\'Документы претензии №'+(i+1)+' прикреплены (демо)\')">Прикрепить документы</button></div></div></div>';}).join('');
+  return '<div class="loss-op"><div class="loss-op__head"><h3>Данные убытка</h3><span class="st st--proc">'+path+'</span></div><div class="loss-op__grid">'
+    +'<div class="sup-fld"><label>Заявитель</label><select class="tselect" onchange="lossOpSet(\''+it.id+'\',\'applicant\',this.value)"><option value="owner"'+(d.applicant==='owner'?' selected':'')+'>Собственник</option><option value="representative"'+(d.applicant==='representative'?' selected':'')+'>Представитель по доверенности</option></select></div>'
+    +'<div class="sup-fld"><label>Дата события / заявления</label><input class="tselect" type="date" value="'+esc(d.claimDate||it.lossDate)+'" onchange="lossOpSet(\''+it.id+'\',\'claimDate\',this.value)"></div>'
+    +'<div class="sup-fld"><label>Номер убытка</label><input class="tselect" placeholder="После регистрации в СК" value="'+esc(d.claimNumber)+'" onchange="lossOpSet(\''+it.id+'\',\'claimNumber\',this.value)"></div>'
+    +'<div class="sup-fld"><label>Тип убытка</label><select class="tselect" onchange="lossOpSet(\''+it.id+'\',\'claimType\',this.value)"><option value="primary"'+(d.claimType==='primary'?' selected':'')+'>Первичный</option><option value="secondary"'+(d.claimType==='secondary'?' selected':'')+'>Вторичный</option><option value="complaint"'+(d.claimType==='complaint'?' selected':'')+'>Претензия</option></select></div>'
+    +'<div class="sup-fld"><label>Признак убытка</label><select class="tselect" onchange="lossOpSet(\''+it.id+'\',\'claimSign\',this.value)"><option value="pvu"'+(d.claimSign==='pvu'?' selected':'')+'>ПВУ</option><option value="classic"'+(d.claimSign==='classic'?' selected':'')+'>Классика</option></select></div>'
+    +'<div class="sup-fld"><label>Дополнительные признаки</label><div class="loss-op__checks"><label><input type="checkbox"'+(d.rs?' checked':'')+' onchange="lossOpSet(\''+it.id+'\',\'rs\',this.checked)"> РС</label><label><input type="checkbox"'+(d.go?' checked':'')+' onchange="lossOpSet(\''+it.id+'\',\'go\',this.checked)"> ГО</label></div></div>'
+    +'<div class="sup-fld"><label>Тип осмотра</label><select class="tselect" onchange="lossOpSet(\''+it.id+'\',\'inspectionType\',this.value)"><option value="">Не выбран</option><option value="by_agent"'+(d.inspectionType==='by_agent'?' selected':'')+'>Осмотр агентом</option><option value="client_independent"'+(d.inspectionType==='client_independent'?' selected':'')+'>АО-НЭ клиента</option><option value="field"'+(d.inspectionType==='field'?' selected':'')+'>Выездной осмотр</option></select></div>'
+    +'<div class="sup-fld"><label>Дата соглашения от СК</label><input class="tselect" type="date" value="'+esc(d.insurerAgreementDate)+'" onchange="lossOpSet(\''+it.id+'\',\'insurerAgreementDate\',this.value)"></div>'
+    +'<div class="sup-fld"><label>Дата соглашения от агента</label><input class="tselect" type="date" value="'+esc(d.agentAgreementDate)+'" onchange="lossOpSet(\''+it.id+'\',\'agentAgreementDate\',this.value)"></div>'
+    +'<div class="sup-fld"><label>Дата выплаты</label><input class="tselect" type="date" value="'+esc(d.paymentDate)+'" onchange="lossOpSet(\''+it.id+'\',\'paymentDate\',this.value)"></div>'
+    +'<div class="sup-fld"><label>Сумма выплаты, ₽</label><input class="tselect" inputmode="decimal" value="'+esc(d.payoutAmount)+'" onchange="lossOpSet(\''+it.id+'\',\'payoutAmount\',this.value)"></div>'
+    +'<div class="sup-fld sup-fld--wide"><label>Заметка по урегулированию</label><input class="tselect" value="'+esc(d.note)+'" onchange="lossOpSet(\''+it.id+'\',\'note\',this.value)"></div></div>'+complaint+'<div class="loss-op__foot"><button class="btn btn--primary btn--sm" onclick="lossOpSave(\''+it.id+'\')">Сохранить данные</button></div></div>';
 }
 
 /* ===== Мои клиенты — раскладка как в Angular ===== */
@@ -2125,7 +2247,7 @@ function screenStub(title,desc){ return '<div class="screen active"><div class="
 /* ===== Рабочее место поддержки — очередь заявок 1С + вопросы чата ===== */
 /* Один экран оператора. Ось «чей мяч» (У нас / У агента / У страховой), SLA капает ТОЛЬКО пока мяч у нас.
    Заявки 1С и вопросы из чата — одна очередь. Логика взята из боевой 1С: «Мои заявки» + карточка заявки + ход дела.
-   Два раздельных поля ответа: агенту (видит) и заметка для своих (не видит). Эскалация во 2-ю линию — по теме, скрытая кухня. */
+   Два раздельных поля ответа: агенту (видит) и внутренняя заметка (не видит). Эскалация во 2-ю линию — по теме, скрытая кухня. */
 var SUP_BALL={us:'У нас',agent:'У агента',insurer:'У страховой',done:'Завершено'};
 var SUP_TOPICS=['Расчёт тарифа','Скоринг / андеррайтинг','Пул / Автопомощник','Технический сбой'];
 var SUP=[
@@ -2395,6 +2517,9 @@ function supStTone(it){ if(it.ball==='done') return 'ok'; var s=it.st;
   if(s==='Отложена') return 'draft';
   if(s.indexOf('Новы')===0) return 'wait';
   return 'proc'; }
+function supAnalytics(){ var losses=SUP.filter(function(x){return x.kind==='loss'||x.vid==='Урегулирование убытка';}), closed=losses.filter(function(x){return x.cstatus==='settled'||x.st==='Убыток урегулирован';}), pending=losses.filter(function(x){return x.ball==='agent';}), insurer=losses.filter(function(x){return x.ball==='insurer';});
+  var old=document.getElementById('supAnalyticsModal'); if(old) old.remove(); var el=document.createElement('div'); el.id='supAnalyticsModal'; el.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(20,30,45,.38);display:grid;place-items:center;padding:24px';
+  el.innerHTML='<div class="card" style="width:min(760px,95vw);max-height:85vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Аналитика по урегулированию убытков</h3><button class="btn btn--sm" onclick="document.getElementById(\'supAnalyticsModal\').remove()">Закрыть</button></div><div class="loss-op__grid"><div class="sup-fld"><label>Всего убытков</label><div class="sup-fld__v"><b>'+losses.length+'</b></div></div><div class="sup-fld"><label>Урегулировано</label><div class="sup-fld__v"><b>'+closed.length+'</b></div></div><div class="sup-fld"><label>Ждём агента</label><div class="sup-fld__v"><b>'+pending.length+'</b></div></div><div class="sup-fld"><label>На стороне СК</label><div class="sup-fld__v"><b>'+insurer.length+'</b></div></div></div><div style="margin-top:14px"><button class="btn btn--primary btn--sm" onclick="toast(\'Отчёт УУ подготовлен в XLSX (демо)\')">Скачать XLSX</button></div></div>'; document.body.appendChild(el); }
 function supQueue(){
   var tabs=[['us','У нас'],['agent','У агента'],['insurer','У страховой'],['done','Завершено']];
   var tbar=tabs.map(function(t){ var n=supCount(t[0]); var extra='';
@@ -2451,7 +2576,7 @@ function supQueue(){
       +'<div class="tfield"><label>Страховая компания</label><select class="tselect" onchange="supSK=this.value;supRerender()">'+skOpts+'</select></div>'
       +'<div class="tfield"><label>Регион</label><select class="tselect" onchange="supRegion=this.value;supRerender()">'+regOpts+'</select></div>'
     +'</div>'
-    +'<div class="sup-frow2"><a class="sup-flink" onclick="toast(\'Аналитика по заявкам поддержки\')">Посмотреть аналитику</a>'
+    +'<div class="sup-frow2"><a class="sup-flink" onclick="supAnalytics()">Посмотреть аналитику по УУ</a>'
       +'<label class="tcheck" style="margin:0"><input type="checkbox"'+(supApi?' checked':'')+' onchange="supApi=this.checked;supRerender()"/> API</label>'
       +'<label class="tcheck" style="margin:0"><input type="checkbox"'+(supHideDone?' checked':'')+' onchange="supHideDone=this.checked;supRerender()"/> Скрыть готовые</label></div>'
     /* --- надстройка Agent Academy: чей мяч + источник + SLA --- */
@@ -2558,25 +2683,30 @@ function supTalkSend(id){ var it=supFind(id); if(!it) return;
 }
 function supTalkScroll(id){ var th=document.getElementById('supTalkThread-'+id); if(th) th.scrollTop=th.scrollHeight; }
 function supRequestBody(it){
+  var isLoss=it.kind==='loss'||it.vid==='Урегулирование убытка';
   /* Канон-заявка: статус read-only (меняется только действиями «Хода заявки»); легаси-строки — старый селект. */
   var statusBox=it.cstatus
     ? '<div class="sup-side__box"><div class="sup-side__h">Статус</div><div style="margin-bottom:6px"><span class="sup-stbadge sup-stbadge--'+((PROC_STATUS[it.cstatus]||{}).tone||'proc')+'">'+procSupLabel(it)+'</span></div><div class="proc-wait" style="margin:0">Меняется действиями по заявке.</div></div>'
     : '<div class="sup-side__box"><div class="sup-side__h">Статус</div>'
       +'<select class="tselect" style="width:100%" onchange="supSetStatus(\''+it.id+'\',this.value)"><option>'+it.st+'</option><option>В работе</option><option>Ждём оплату</option><option>Ждём документы</option><option>Передана в СК</option><option>Завершена</option></select></div>';
+  var serviceButtons=isLoss
+    ? '<button class="btn btn--sm" onclick="toast(\'Документы убытка открыты\')">Документы убытка</button>'
+      +'<button class="btn btn--sm" onclick="lossAgreement(\''+it.id+'\')">Прикрепить соглашение</button>'
+      +'<button class="btn btn--sm" onclick="lossComplaint(\''+it.id+'\')">Добавить претензию'+(lossOpData(it).complaints.length?' ('+lossOpData(it).complaints.length+')':'')+'</button>'
+      +'<button class="btn btn--sm" onclick="toast(\'Открыт полис — '+it.num+'\')">Посмотреть полис</button>'
+      +'<button class="btn btn--sm" onclick="lossHistory(\''+it.id+'\')">История статусов</button>'
+    : (it.cstatus?'':'<button class="btn btn--sm" onclick="toast(\'Приложен новый полис (демо)\')">Приложить новый полис</button><button class="btn btn--sm" onclick="supSendPayLink(\''+it.id+'\')">Ссылка на оплату</button>')
+      +'<button class="btn btn--sm" onclick="toast(\'Документы прикреплены (демо)\')">Прикрепить документы</button><button class="btn btn--sm" onclick="toast(\'Открыт полис — '+it.num+'\')">Посмотреть полис</button>';
   var side='<div class="sup-side">'
     +statusBox
     +supAgentBox(it)
-    +'<div class="sup-side__box"><div class="sup-side__h">Сервис</div><div class="sup-actions">'
-      +(it.cstatus?'':'<button class="btn btn--sm" onclick="toast(\'Приложен новый полис (демо)\')">Приложить новый полис</button>'
-      +'<button class="btn btn--sm" onclick="supSendPayLink(\''+it.id+'\')">Ссылка на оплату</button>')
-      +'<button class="btn btn--sm" onclick="toast(\'Документы прикреплены (демо)\')">Прикрепить документы</button>'
-      +'<button class="btn btn--sm" onclick="toast(\'Ответственный изменён (демо)\')">Сменить ответственного</button>'
-      +'<button class="btn btn--sm" onclick="toast(\'Открыт полис — '+it.num+'\')">Посмотреть полис</button>'
-    +'</div></div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">'+(isLoss?'Сервис УУ':'Сервис')+'</div><div class="sup-actions">'+serviceButtons+'</div></div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">Ответственный</div><div class="kv"><span>Сейчас</span><b>'+(it.resp||'Не назначен')+'</b></div><select id="lossResp-'+it.id+'" class="tselect" style="width:100%;margin:7px 0"><option value="">Выберите сотрудника</option><option>Ксения Устюжанина</option><option>Мария Словакова</option><option>Юлия Рязанцева</option><option>Екатерина Кулаева</option><option>Анастасия Уланова</option></select><button class="btn btn--sm" onclick="lossAssign(\''+it.id+'\')">Сменить ответственного</button></div>'
     +'<div class="sup-side__box"><div class="sup-side__h">Передать (маршрут)</div>'+supRouteBox(it)+'</div>'
     +'<div class="sup-side__box"><div class="sup-side__h">Связанное</div><div class="sup-links"><a onclick="toast(\'Файлы заявки (демо)\')">Файлы (4)</a><a onclick="toast(\'Таблица изменений (демо)\')">Таблица изменений</a><a onclick="toast(\'Текущие обращения: 2\')">Текущие обращения 2</a><a onclick="toast(\'Архив: 25\')">Архив 25</a></div></div>'
   +'</div>';
   var main='<div>'
+    +(isLoss?lossSummary(it):'')
     +'<div class="sup-grid">'
       +'<div class="sup-fld"><label>№ полиса</label><div class="sup-fld__v">'+it.num+'</div></div>'
       +'<div class="sup-fld"><label>Страховая компания</label><div class="sup-fld__v">'+it.sk+'</div></div>'
@@ -2586,15 +2716,15 @@ function supRequestBody(it){
       +(it.cstatus&&(it.reasons||[]).length?'':'<div class="sup-fld sup-fld--full"><label>Что нужно сделать</label><div class="sup-fld__v">'+it.what+'</div></div>')
       +(it.cstatus?'':'<div class="sup-fld sup-fld--full"><label>Комментарий и действия агента</label><div class="sup-fld__v">'+it.ac+'</div></div>')
     +'</div>'
-    +(it.cstatus?procReasonsBlock(it)+procOpBox(it):'')
+    +(it.cstatus?procReasonsBlock(it)+lossOpBlock(it)+procOpBox(it):(isLoss?lossOpBlock(it):''))
     /* ОДИН вход в общение: свертываемая группа «Переписка с агентом» = тред + композер (читать и писать в одном месте).
-       Заметка для своих — отдельная поверхность (лок 2026-08-11: публичное и внутреннее не смешивать, никаких режимов). */
+       Внутренняя заметка — отдельная поверхность (лок 2026-08-11: публичное и внутреннее не смешивать, никаких режимов). */
     +'<div class="sup-replylinks">'
       +'<button class="req__reply" aria-expanded="'+(supTalkOpen?'true':'false')+'" onclick="supTalkOpen=!supTalkOpen;supRerender();if(supTalkOpen)supTalkScroll(\''+it.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка с агентом ('+supTalkCount(it)+')</button>'
-      +'<button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Заметка для своих</button>'
+      +'<button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Внутренняя заметка</button>'
     +'</div>'
     +'<div id="supTalkBox" class="sup-thread"'+(supTalkOpen?'':' hidden')+'><div class="sup-thread__h">Переписка с агентом · '+supChanLabel(it)+' <span class="sup-reply__tag sup-tag--pub">агент видит</span></div>'+supTalk(it)+'</div>'
-    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div>'
+    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Внутренняя заметка <span class="sup-reply__tag">агент не видит</span></div>'
       +'<textarea class="sup-ta" id="supNoteA" aria-label="Внутренняя заметка поддержки" placeholder="Внутренняя заметка поддержки…"></textarea>'
       +'<div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
   +'</div>';
@@ -2606,8 +2736,8 @@ function supChatBody(it){
   var main='<div>'
     +supTalk(it,{full:true})
     +'<div class="supchat__hint">Ответ и документ уходят агенту — он увидит их в своей переписке по обращению. Файлы хранятся при обращении, а не в теле сообщения.</div>'
-    +'<div class="sup-replylinks" style="margin-top:10px"><button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Заметка для своих</button></div>'
-    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div><textarea class="sup-ta" id="supNoteA" aria-label="Внутренняя заметка поддержки" placeholder="Внутренняя заметка…"></textarea><div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
+    +'<div class="sup-replylinks" style="margin-top:10px"><button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Внутренняя заметка</button></div>'
+    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Внутренняя заметка <span class="sup-reply__tag">агент не видит</span></div><textarea class="sup-ta" id="supNoteA" aria-label="Внутренняя заметка поддержки" placeholder="Внутренняя заметка…"></textarea><div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
   +'</div>';
   var side='<div class="sup-side">'
     +'<div class="sup-side__box"><div class="sup-side__h">Обращение</div>'
@@ -2629,7 +2759,7 @@ function supTimeline(it){
     /* Событие «ответ в переписке» — серой строкой БЕЗ текста (текст живёт в треде); клик раскрывает переписку. */
     if(s.talk) return '<tr class="click" onclick="supTalkOpen=true;supRerender();supTalkScroll(\''+it.id+'\')"><td>'+s.d+'</td><td><span class="st st--draft">Сообщение</span></td><td style="color:var(--muted)">'+s.c+' →</td></tr>';
     var pill=s.internal?'pay':'proc'; var col=s.internal?' style="color:var(--badge-attn)"':''; var lbl=(s.cs&&PROC_STATUS[s.cs])?PROC_STATUS[s.cs].sup:(s.s||''); return '<tr><td>'+s.d+'</td><td><span class="st st--'+pill+'">'+lbl+'</span></td><td'+col+'>'+s.c+'</td></tr>'; }).join('');
-  return '<div class="suptl"><h3>История заявки</h3><div class="list-wrap" style="margin:0"><div class="list-scroll"><table class="list"><thead><tr><th>Дата</th><th>Статус</th><th>Комментарий</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+  return '<div class="suptl" id="supTimeline-'+it.id+'"><h3>История заявки</h3><div class="list-wrap" style="margin:0"><div class="list-scroll"><table class="list"><thead><tr><th>Дата</th><th>Статус</th><th>Комментарий</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
 }
 function supFoot(it){ return '<div class="supfoot"><button class="btn btn--sm" onclick="supBack()">Закрыть</button><button class="btn btn--primary btn--sm" onclick="supSave(\''+it.id+'\')">Сохранить</button></div>'; }
 /* Открыл заявку — событие «требует разбора» гасим (оператор взял в работу): снимаем маркеры new/back и обновляем счётчик. */
