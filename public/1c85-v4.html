@@ -14,8 +14,15 @@ html,body{ margin:0; height:100%; }
   --navy:#0C3363; --navy-2:#164a8a; --blue:#3992E4;
   --ok:#16A34A; --warn:#D97706; --err:#DC2626; --wait:#2f6fb0; --badge-attn:#B45309;
   --ok-text:#15803D;             /* зелёный ТЕКСТ ≥4.5:1 (сам --ok — точкам/рамкам/заливкам) */
+  /* янтарный ТЕКСТ ≥4.5:1 — это --badge-attn (пара к --ok-text); --warn — рамкам/фонам/точкам */
   --sel:#EFF4F9;                 /* ВЫДЕЛЕНИЕ — наш бледно-голубой brand-50 (было бледно-жёлтым) */
   --sel-line:#C7D9EC; --hover:#F6F8FA; --titlebar:#FBFBFC;
+  /* эталон-слой (свод 2026-09-19): --accent — ЕДИНЫЙ акцент вместо пары navy/blue-в-тёмной.
+     Использовать в новых канонах и dark-фиксах; старые правила сворачиваем «при касании» экрана. */
+  --accent:var(--navy); --on-accent:#fff;
+  --ctl-h:44px;                  /* закон 44px — контролам главного пути; read-only таблицы — осознанный компакт */
+  --shadow-1:0 8px 24px rgba(0,0,0,.18); --shadow-2:0 1px 2px rgba(0,0,0,.3);
+  --chan-max:#5B21B6; --chan-max-bg:color-mix(in srgb,#6D28D9 12%,transparent); /* канал «Мессенджер МАХ» */
   width:100vw; height:100vh; overflow:hidden;
   background:var(--card); color:var(--ink);
   display:grid; grid-template-rows:auto auto 1fr;
@@ -27,6 +34,9 @@ html,body{ margin:0; height:100%; }
   --navy:#5BA5E8; --navy-2:#7fbdf2; --blue:#6BA6E6;
   --ok:#22C55E; --warn:#F59E0B; --err:#EF4444; --wait:#6BA6E6;
   --sel:#22303F; --sel-line:#33465A; --hover:#2A2C2F; --titlebar:#1A1B1D;
+  --accent:var(--blue); --on-accent:#0b1220;
+  --shadow-1:0 8px 24px rgba(0,0,0,.5);
+  --chan-max:#c4b5fd; --chan-max-bg:color-mix(in srgb,#8b5cf6 22%,transparent);
   color-scheme:dark; /* нативные контролы тёмные — только когда включён СВОЙ тёмный режим */
 }
 .win[data-scale='compact']{ --scale:.9; }
@@ -125,9 +135,10 @@ html,body{ margin:0; height:100%; }
 .tselect{ height:40px; padding:0 30px 0 12px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink);
   font:inherit; font-size:calc(13.5px*var(--scale)); appearance:none; cursor:pointer;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234B5563' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
+.win[data-1ctheme='dark'] .tselect{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
 .ttoggle{ display:inline-flex; align-items:center; gap:9px; height:40px; padding:0 4px; border:none; background:transparent; cursor:pointer; color:var(--ink); font:inherit; font-size:calc(13px*var(--scale)); margin-left:auto; }
 .ttrack{ width:36px; height:20px; border-radius:11px; background:var(--line); position:relative; transition:background .15s; }
-.tthumb{ position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.3); transition:left .15s; }
+.tthumb{ position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:var(--shadow-2); transition:left .15s; }
 .ttoggle[aria-checked='true'] .ttrack{ background:var(--navy); } .ttoggle[aria-checked='true'] .tthumb{ left:18px; }
 
 .list-wrap{ margin:0 20px 18px; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
@@ -148,7 +159,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .win[data-1ctheme='dark'] .polnum{ color:var(--blue); } .company{ color:var(--ink); }
 .proc-badge{ display:inline-flex; align-items:center; gap:5px; margin-top:5px; padding:2px 8px; border-radius:5px; border:1px solid var(--line); font-size:calc(11.5px*var(--scale)); color:var(--muted); }
 .proc-badge svg{ width:12px; height:12px; }
-.proc-badge.urgent{ color:var(--warn); border-color:var(--warn); }
+.proc-badge.urgent{ color:var(--badge-attn); border-color:var(--warn); }
 .st{ display:inline-flex; align-items:center; gap:7px; }
 .st svg{ width:15px; height:15px; }
 .st--ok{ color:var(--ok-text); } .st--draft{ color:var(--muted); } .st--wait{ color:var(--wait); } .st--pay{ color:var(--badge-attn); }
@@ -195,7 +206,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .osec__title{ font-size:calc(15px*var(--scale)); font-weight:600; color:var(--navy); display:flex; align-items:center; gap:10px; }
 .win[data-1ctheme='dark'] .osec__title{ color:var(--ink); }
 .badge{ font-size:calc(11.5px*var(--scale)); padding:2px 9px; border-radius:6px; background:var(--line); color:var(--muted); display:inline-flex; align-items:center; gap:5px; }
-.badge--done{ background:color-mix(in srgb,var(--ok) 15%,transparent); color:var(--ok); }
+.badge--done{ background:color-mix(in srgb,var(--ok) 15%,transparent); color:var(--ok-text); }
 .badge svg{ width:12px; height:12px; }
 .osec__head .sp{ flex:1; }
 .osearch{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 12px; background:var(--bg); border-radius:8px; margin-bottom:14px; }
@@ -208,7 +219,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .win[data-1ctheme='dark'] .pill--active{ color:var(--blue); box-shadow:inset 0 -2px 0 var(--blue); }
 .sw{ display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:calc(12.5px*var(--scale)); color:var(--ink); margin-left:auto; }
 .sw__t{ width:34px; height:18px; border-radius:10px; background:var(--line); position:relative; }
-.sw__k{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.3); transition:left .15s; }
+.sw__k{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:var(--shadow-2); transition:left .15s; }
 .sw input{ display:none; } .sw input:checked + .sw__t{ background:var(--navy); } .sw input:checked + .sw__t .sw__k{ left:18px; }
 .orow{ display:flex; flex-wrap:wrap; gap:12px 14px; align-items:flex-end; }
 .of{ display:flex; flex-direction:column; gap:5px; } .of label{ font-size:calc(12.5px*var(--scale)); color:var(--muted); font-weight:600; }
@@ -237,12 +248,12 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .rcarrier{ font-weight:600; font-size:calc(14px*var(--scale)); }
 .rqtype{ display:inline-block; margin-top:3px; font-size:calc(11px*var(--scale)); font-weight:600; color:var(--muted); }
 .rqtype--seg{ color:var(--wait); }   /* Сегмент — синий (наш пул рынка) */
-.rqtype--pool{ color:var(--warn); }  /* Перестраховочный пул — янтарь (дороже, «навязанный») */
+.rqtype--pool{ color:var(--badge-attn); }  /* Перестраховочный пул — янтарный ТЕКСТ ≥4.5:1 */
 /* «Урегулирование в ЛК Агента» — наше отличие: янтарным (не синей ссылкой), с «?». */
-.rlk{ display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:calc(11px*var(--scale)); color:var(--warn); font-weight:600; }
+.rlk{ display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:calc(11px*var(--scale)); color:var(--badge-attn); font-weight:600; }
 .rlk svg{ width:12px; height:12px; flex:none; }
 .rlk-info{ width:15px; height:15px; border-radius:50%; border:1px solid currentColor; background:none; color:inherit; font-size:10px; line-height:1; cursor:pointer; flex:none; }
-.rbest{ display:inline-flex; align-items:center; gap:5px; margin-top:5px; padding:2px 8px; border-radius:5px; background:color-mix(in srgb,var(--ok) 14%,transparent); color:var(--ok); font-size:calc(11px*var(--scale)); font-weight:600; }
+.rbest{ display:inline-flex; align-items:center; gap:5px; margin-top:5px; padding:2px 8px; border-radius:5px; background:color-mix(in srgb,var(--ok) 14%,transparent); color:var(--ok-text); font-size:calc(11px*var(--scale)); font-weight:600; }
 .rbest svg{ width:12px; height:12px; }
 .rprice{ font-size:calc(17px*var(--scale)); font-weight:600; font-variant-numeric:tabular-nums; }
 .rprice-info{ margin-left:6px; width:18px; height:18px; border-radius:50%; border:1px solid var(--line); background:none; color:var(--muted); font-size:11px; cursor:pointer; }
@@ -250,8 +261,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
    бы всплывающая подсказка/сообщение; здесь показываем разложение по коэффициентам —
    прозрачность цены и есть наше отличие. */
 .pop-back{ position:fixed; inset:0; z-index:60; background:transparent; }
-.pop{ position:absolute; z-index:61; width:252px; background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.18); padding:12px 14px; font-size:calc(12px*var(--scale)); color:var(--ink); }
-.win[data-1ctheme='dark'] .pop{ box-shadow:0 8px 30px rgba(0,0,0,.5); }
+.pop{ position:absolute; z-index:61; width:252px; background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow-1); padding:12px 14px; font-size:calc(12px*var(--scale)); color:var(--ink); }
 .pop__h{ font-weight:600; color:var(--navy); margin-bottom:8px; }
 .win[data-1ctheme='dark'] .pop__h{ color:var(--ink); }
 .pop__r{ display:flex; justify-content:space-between; gap:12px; padding:4px 0; color:var(--muted); }
@@ -287,6 +297,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 /* карточки прочих экранов */
 .pad{ padding:10px 20px 22px; }
 .grid2{ display:grid; grid-template-columns:1.2fr 1fr; gap:18px; padding:10px 20px 6px; align-items:start; }
+/* лого СК всегда на белой плитке — СОЗНАТЕЛЬНО (узнаваемость фирменных знаков), в тёмной теме тоже */
 img.sk-logo{ object-fit:contain; background:#fff; border:1px solid var(--line); padding:2px; }
 img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); padding:2px; }
 /* Кросс-сел теперь в правой колонке (по сценарию) — карточки списком, не в 3 ряда. */
@@ -329,8 +340,9 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .chat{ display:flex; flex-direction:column; height:calc(100vh - 82px); }
 .chat__head{ display:flex; align-items:center; gap:12px; padding:14px 20px; background:var(--bg); border-bottom:1px solid var(--line); }
 .chat__av{ width:38px; height:38px; border-radius:50%; background:var(--navy); color:#fff; display:grid; place-items:center; font-weight:600; font-size:13px; }
+.win[data-1ctheme='dark'] .chat__av{ color:#0b1220; } /* как .sv-av: в тёмной navy становится светлым */
 .chat__av--curator{ background:var(--blue); margin-left:-14px; box-shadow:0 0 0 2px var(--bg); }
-.chat__ti b{ font-size:calc(13.5px*var(--scale)); } .chat__ti span{ display:block; color:var(--ok); font-size:calc(11.5px*var(--scale)); }
+.chat__ti b{ font-size:calc(13.5px*var(--scale)); } .chat__ti span{ display:block; color:var(--ok-text); font-size:calc(11.5px*var(--scale)); }
 .chat__stream{ flex:1; overflow-y:auto; padding:18px 20px; display:flex; flex-direction:column; gap:12px; background:var(--bg); }
 .msg{ max-width:66%; padding:9px 13px; border-radius:12px; font-size:calc(12.5px*var(--scale)); line-height:1.4; }
 .msg--in{ align-self:flex-start; background:var(--card); border:1px solid var(--line); border-bottom-left-radius:4px; }
@@ -526,8 +538,8 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .req__kind{ font-weight:600; font-size:calc(13px*var(--scale)); }
 .req__num{ color:var(--muted); font-size:calc(12px*var(--scale)); font-variant-numeric:tabular-nums; }
 .req__state{ margin-left:auto; font-weight:600; font-size:calc(12.5px*var(--scale)); }
-.req__state.urgent{ color:var(--warn); } .req__state.work{ color:var(--wait); }
-.req__upload{ display:inline-flex; align-items:center; gap:7px; margin-top:11px; height:36px; padding:0 14px; border:1px solid var(--warn); border-radius:8px; color:var(--warn); font-size:calc(12.5px*var(--scale)); font-weight:600; cursor:pointer; background:var(--card); }
+.req__state.urgent{ color:var(--badge-attn); } .req__state.work{ color:var(--wait); }
+.req__upload{ display:inline-flex; align-items:center; gap:7px; margin-top:11px; height:36px; padding:0 14px; border:1px solid var(--warn); border-radius:8px; color:var(--badge-attn); font-size:calc(12.5px*var(--scale)); font-weight:600; cursor:pointer; background:var(--card); }
 .req__reply{ margin-top:11px; background:none; border:none; color:var(--navy); font:inherit; font-size:calc(12.5px*var(--scale)); font-weight:600; cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:6px; }
 .win[data-1ctheme='dark'] .req__reply{ color:var(--blue); }
 /* --- Заявка на договоре (канон 10a): карточка, бейдж статуса, действия, история --- */
@@ -726,9 +738,9 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .win[data-1ctheme='dark'] .ch2-new{ color:var(--blue); border-color:var(--blue); }
 .ch2-st{ display:inline-block; padding:1px 8px; border-radius:5px; font-size:calc(11px*var(--scale)); font-weight:600; }
 .ch2-st--open{ background:color-mix(in srgb,var(--wait) 15%,transparent); color:var(--wait); }
-.ch2-st--ans{ background:color-mix(in srgb,var(--ok) 16%,transparent); color:var(--ok); }
+.ch2-st--ans{ background:color-mix(in srgb,var(--ok) 16%,transparent); color:var(--ok-text); }
 .ch2-st--closed{ background:var(--line); color:var(--muted); }
-.ch2-st--act{ background:color-mix(in srgb,var(--warn) 16%,transparent); color:var(--warn); }
+.ch2-st--act{ background:color-mix(in srgb,var(--warn) 16%,transparent); color:var(--badge-attn); }
 .ch2-st--cur{ background:color-mix(in srgb,var(--navy) 10%,transparent); color:var(--navy); }
 .win[data-1ctheme='dark'] .ch2-st--cur{ color:var(--blue); background:color-mix(in srgb,var(--blue) 16%,transparent); }
 .ch2-empty{ color:var(--muted); font-size:calc(13px*var(--scale)); padding:20px 4px; text-align:center; }
@@ -771,8 +783,8 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .chatactions{ display:flex; gap:10px; align-items:center; padding:14px 20px 12px; }
 .chataction{ height:46px; padding:0 20px; font-size:calc(14px*var(--scale)); gap:9px; }
 .chataction svg{ flex:none; }
-.chataction .svtab__b{ background:rgba(255,255,255,.28); }
-.btn.chataction:not(.btn--primary) .svtab__b{ background:var(--badge-attn); color:#fff; }
+/* бейдж на кнопках-входах — всегда янтарь из токена (белая полупрозрачность терялась на светлой кнопке) */
+.chataction .svtab__b{ background:var(--badge-attn); color:#fff; }
 /* v3: экран быстрого выбора темы обращения */
 .chooser{ max-width:560px; margin:8px auto 0; padding:0 20px 20px; }
 .chooser__h{ margin:8px 0 4px; font-size:calc(20px*var(--scale)); font-weight:600; color:var(--navy); text-align:center; }
@@ -780,6 +792,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .qtopics{ display:flex; flex-direction:column; gap:10px; }
 .qtopic{ display:flex; align-items:center; gap:13px; width:100%; padding:13px 16px; border:1px solid var(--line); border-radius:10px; background:var(--card); cursor:pointer; font:inherit; font-size:calc(15px*var(--scale)); font-weight:500; color:var(--ink); text-align:left; transition:border-color .12s, background .12s, box-shadow .12s; }
 .qtopic:hover{ border-color:var(--navy); background:color-mix(in srgb,var(--navy) 3%,transparent); box-shadow:0 1px 4px rgba(12,51,99,.08); }
+.win[data-1ctheme='dark'] .qtopic:hover{ background:color-mix(in srgb,var(--blue) 7%,transparent); box-shadow:none; }
 .qtopic__ic{ flex:none; width:38px; height:38px; border-radius:9px; display:grid; place-items:center; background:color-mix(in srgb,var(--navy) 8%,transparent); color:var(--navy); }
 .qtopic__ic svg{ width:20px; height:20px; }
 .qtopic > span:nth-of-type(2){ flex:1; }
@@ -792,8 +805,8 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .win[data-1ctheme='dark'] .sv-chip--q{ color:var(--blue); background:color-mix(in srgb,var(--blue) 16%,transparent); }
 /* SLA-бейдж — считаем только когда мяч у нас; янтарь на «скоро», красный на просрочке */
 .sup-sla{ display:inline-block; margin-left:8px; padding:1px 7px; border-radius:5px; font-size:calc(10.5px*var(--scale)); font-weight:700; font-variant-numeric:tabular-nums; }
-.sup-sla--ok{ background:color-mix(in srgb,var(--ok) 13%,transparent); color:var(--ok); }
-.sup-sla--warn{ background:color-mix(in srgb,var(--warn) 16%,transparent); color:var(--warn); }
+.sup-sla--ok{ background:color-mix(in srgb,var(--ok) 13%,transparent); color:var(--ok-text); }
+.sup-sla--warn{ background:color-mix(in srgb,var(--warn) 16%,transparent); color:var(--badge-attn); }
 .sup-sla--err{ background:color-mix(in srgb,var(--err) 14%,transparent); color:var(--err); }
 /* карточка заявки — две колонки как в боевой 1С: слева поля+ответ, справа статус+действия */
 .supback{ padding:12px 20px 0; }
@@ -824,7 +837,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 [hidden]{ display:none !important; }
 /* Канал обращения (система / мессенджер МАХ) + список всех обращений агента */
 .sup-chan{ display:inline-block; padding:1px 7px; border-radius:5px; background:var(--sel); border:1px solid var(--sel-line); color:var(--navy); font-size:calc(10px*var(--scale)); font-weight:700; vertical-align:middle; }
-.sup-chan--max{ background:color-mix(in srgb,#6D28D9 12%,transparent); border-color:transparent; color:#5B21B6; }
+.sup-chan--max{ background:var(--chan-max-bg); border-color:transparent; color:var(--chan-max); }
 .sup-aglist{ margin-top:8px; border-top:1px solid var(--line); }
 .sup-agrow{ padding:8px 2px; border-bottom:1px solid var(--line); cursor:pointer; }
 .sup-agrow:hover{ background:var(--hover); }
@@ -2792,7 +2805,7 @@ function openContract(i,issued){ contractIssued=!!issued; render('contract',i); 
 function openDeal(){ toast('Согласование тарифа — сделка ЮЛ (форма /deals/:id)'); }
 /* нативные оповещения 1С — все в один вертикальный стек снизу справа (не наложение) */
 function toastStack(){ var s=document.getElementById('toaststack'); if(!s){ s=document.createElement('div'); s.id='toaststack'; (document.querySelector('.win')||document.body).appendChild(s); } return s; }
-function toast(msg){ var t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:var(--card);color:var(--ink);padding:11px 14px;border:1px solid var(--line);border-left:3px solid var(--navy);border-radius:8px;font:inherit;font-size:calc(12px*var(--scale));max-width:300px;box-shadow:0 8px 24px rgba(0,0,0,.18)'; toastStack().appendChild(t); setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 1900); }
+function toast(msg){ var t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:var(--card);color:var(--ink);padding:11px 14px;border:1px solid var(--line);border-left:3px solid var(--navy);border-radius:8px;font:inherit;font-size:calc(12px*var(--scale));max-width:300px;box-shadow:var(--shadow-1)'; toastStack().appendChild(t); setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 1900); }
 /* Тема/масштаб убраны из шапки: прототип только СВЕТЛЫЙ (решение владельца), масштаб фикс 1.12 под 45+. */
 /* Клавиатура для кликабельных плиток процессов (.ptile — div с onclick): Enter/Пробел = клик. */
 document.addEventListener('keydown',function(e){ if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.classList&&e.target.classList.contains('ptile')){ e.preventDefault(); e.target.click(); } });
