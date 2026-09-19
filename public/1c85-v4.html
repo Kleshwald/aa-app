@@ -204,6 +204,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .tools .tb-icon:hover{ background:var(--card); }
 .chip-note{ display:flex; align-items:center; gap:7px; margin:0 20px 12px; padding:8px 12px; border-radius:8px; background:var(--sel); border:1px solid var(--sel-line); color:var(--muted); font-size:calc(12px*var(--scale)); }
 .chip-note svg{ color:var(--navy); flex:none; }
+.chip-note--gap{ margin-top:10px; }
 
 /* ===== ОСАГО (как в Angular) ===== */
 .otabs{ display:flex; gap:4px; padding:4px 20px 0; }
@@ -1495,48 +1496,55 @@ function badge(done){ return done
 function otab(el){ var p=el.parentNode; var t=p.querySelectorAll('.otab'); for(var i=0;i<t.length;i++) t[i].classList.remove('otab--active'); el.classList.add('otab--active'); }
 function pill(el){ var t=el.parentNode.querySelectorAll('.pill'); for(var i=0;i<t.length;i++) t[i].classList.remove('pill--active'); el.classList.add('pill--active'); }
 function toggleCustomMM(cb){ var mk=document.getElementById('mmMake'), md=document.getElementById('mmModel'); if(!mk||!md) return;
-  if(cb.checked){ mk.innerHTML='<label>Марка</label><input placeholder="Марка ТС"/>'; md.innerHTML='<label>Модель</label><input placeholder="Модель ТС"/>'; }
-  else{ mk.innerHTML='<label>Марка</label><select><option>Toyota</option><option>Kia</option></select>'; md.innerHTML='<label>Модель</label><select><option>Camry</option><option>Corolla</option></select>'; } }
+  /* placeholder — только пример формата, подпись остаётся в label (не дублируем) */
+  if(cb.checked){ mk.innerHTML='<label for="oMake">Марка</label><input id="oMake" placeholder="например, Toyota"/>'; md.innerHTML='<label for="oModel">Модель</label><input id="oModel" placeholder="например, Camry"/>'; }
+  else{ mk.innerHTML='<label for="oMake">Марка</label><select id="oMake"><option>Toyota</option><option>Kia</option></select>'; md.innerHTML='<label for="oModel">Модель</label><select id="oModel"><option>Camry</option><option>Corolla</option></select>'; } }
+function otabNote(kind){ var n=document.getElementById('otabNote'); if(!n) return; n.hidden=false;
+  n.querySelector('span').textContent = kind==='ip'
+    ? 'В этой версии показан путь физического лица. Для ИП путь тот же — добавляются ОГРНИП и расчётный счёт.'
+    : 'В этой версии — путь физического лица. Юридическое лицо оформляется через запрос тарифа — пример: «Мои клиенты» → Заявка №2418.'; }
 function screenOsago(){ return '<div class="screen active" id="osagoScreen">'+osagoForm()+'</div>'; }
 function osagoForm(){
   return '<div class="ptitle">ОСАГО</div>'
-    +'<div class="otabs"><button class="otab otab--active" onclick="otab(this)">Физическое лицо</button><button class="otab" onclick="otab(this);toast(\'ИП: как физлицо + ОГРНИП и расчётный счёт\')">Физическое лицо ИП</button><button class="otab" onclick="otab(this);toast(\'Для ЮЛ: ИНН, КПП, ОГРН, оплата по счёту\')">Юридическое лицо</button></div>'
+    /* Вкладки ИП/ЮЛ не переключаются (контент один — ФЛ): раньше подсветка «врала» про смену формы. */
+    +'<div class="otabs"><button class="otab otab--active">Физическое лицо</button><button class="otab" onclick="otabNote(\'ip\')">Физическое лицо ИП</button><button class="otab" onclick="otabNote(\'ul\')">Юридическое лицо</button></div>'
+    +'<div id="otabNote" class="chip-note chip-note--gap" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5v.01"/></svg><span></span></div>'
     /* Транспортное средство */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Транспортное средство '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox"/> С прицепом</label></div>'
-      +'<div class="osearch"><span class="osearch__lbl">Поиск по</span>'
+      +'<div class="osearch"><label class="osearch__lbl" for="oSearchVal">Поиск по</label>'
       +'<div class="pills"><button class="pill pill--active">Гос.номер</button><button class="pill">VIN</button><button class="pill">Кузов</button></div>'
-      +'<input value="Т432ЕК124" /><button class="btn btn--sm" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
-      +'<label class="sw" style="margin-left:auto"><input type="checkbox" onchange="toggleCustomMM(this)"/><span class="sw__t"><span class="sw__k"></span></span>Произвольная марка/модель</label></div>'
+      +'<input id="oSearchVal" value="Т432ЕК124" /><button class="btn" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
+      +'<label class="tcheck"><input type="checkbox" onchange="toggleCustomMM(this)"/> Произвольная марка/модель</label></div>'
       +'<div class="orow">'
-        +'<div class="of of--narrow"><label>Гос.знак</label><input value="Т432ЕК124"/></div>'
+        +'<div class="of of--narrow"><label for="oPlate">Гос.знак</label><input id="oPlate" value="Т432ЕК124"/></div>'
         +'<label class="ocheck"><input type="checkbox"/> Без номера</label>'
-        +'<div class="of of--small"><label>Категория</label><select><option>B — легковые</option><option>C — грузовые</option><option>D — автобусы</option></select></div>'
-        +'<div class="of of--small" id="mmMake"><label>Марка</label><select><option>Toyota</option><option>Kia</option></select></div>'
-        +'<div class="of of--small" id="mmModel"><label>Модель</label><select><option>Camry</option><option>Corolla</option></select></div>'
-        +'<div class="of of--narrow"><label>Год выпуска</label><input value="2021"/></div>'
-        +'<div class="of of--narrow"><label>Мощность (л.с.)</label><input value="181"/></div>'
+        +'<div class="of of--small"><label for="oCat">Категория</label><select id="oCat"><option>B — легковые</option><option>C — грузовые</option><option>D — автобусы</option></select></div>'
+        +'<div class="of of--small" id="mmMake"><label for="oMake">Марка</label><select id="oMake"><option>Toyota</option><option>Kia</option></select></div>'
+        +'<div class="of of--small" id="mmModel"><label for="oModel">Модель</label><select id="oModel"><option>Camry</option><option>Corolla</option></select></div>'
+        +'<div class="of of--narrow"><label for="oYear">Год выпуска</label><input id="oYear" value="2021"/></div>'
+        +'<div class="of of--narrow"><label for="oPower">Мощность (л.с.)</label><input id="oPower" value="181"/></div>'
       +'</div>'
       +'<div class="orow">'
-        +'<div class="of"><label>Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input style="width:200px" value="XW7BK4FK90S123456"/></div></div>'
+        +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input id="oVin" class="of--small" value="XW7BK4FK90S123456"/></div></div>'
         +'<div class="of"><label>Документ ТС</label><div class="pills"><button class="pill pill--active" onclick="pill(this)">СТС</button><button class="pill" onclick="pill(this)">ПТС</button><button class="pill" onclick="pill(this)">ЭПТС</button></div></div>'
-        +'<div class="of of--small"><label>Серия и номер</label><input value="99 23 456789"/></div>'
-        +'<div class="of of--narrow"><label>Дата выдачи</label><input value="15.05.2022"/></div>'
+        +'<div class="of of--small"><label for="oDocNum">Серия и номер</label><input id="oDocNum" value="99 23 456789"/></div>'
+        +'<div class="of of--narrow"><label for="oDocDate">Дата выдачи</label><input id="oDocDate" value="15.05.2022"/></div>'
       +'</div>'
       +'<div class="omore"><a onclick="toast(\'Доп. сведения ТС: расшифровка VIN, изменения конструкции, ограничения\')">Дополнительные сведения ТС</a></div></article>'
     /* Страхователь */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Страхователь '+badge(true)+'</span></div>'
       +'<div class="orow">'
-        +'<div class="of of--small"><label>Фамилия</label><input value="Кузнецова"/></div>'
-        +'<div class="of of--small"><label>Имя</label><input value="Ольга"/></div>'
-        +'<div class="of of--grow"><label>Отчество</label><input value="Ивановна"/></div>'
+        +'<div class="of of--small"><label for="oLn">Фамилия</label><input id="oLn" value="Кузнецова"/></div>'
+        +'<div class="of of--small"><label for="oFn">Имя</label><input id="oFn" value="Ольга"/></div>'
+        +'<div class="of of--grow"><label for="oMn">Отчество</label><input id="oMn" value="Ивановна"/></div>'
         +'<label class="ocheck"><input type="checkbox"/> Без отчества</label>'
-        +'<div class="of of--narrow"><label>Дата рождения</label><input value="14.03.1978"/></div>'
+        +'<div class="of of--narrow"><label for="oBd">Дата рождения</label><input id="oBd" value="14.03.1978"/></div>'
       +'</div>'
       +'<div class="orow">'
-        +'<div class="of of--small"><label>Тип документа</label><select><option>Паспорт РФ</option></select></div>'
-        +'<div class="of of--narrow"><label>Серия и номер</label><input value="0412 567890"/></div>'
-        +'<div class="of of--narrow"><label>Дата выдачи</label><input value="20.04.1998"/></div>'
-        +'<div class="of of--wide"><label>Адрес регистрации</label><input value="Минусинск, ул. Ленина, 12"/></div>'
+        +'<div class="of of--small"><label for="oDocT">Тип документа</label><select id="oDocT"><option>Паспорт РФ</option></select></div>'
+        +'<div class="of of--narrow"><label for="oPass">Серия и номер</label><input id="oPass" value="0412 567890"/></div>'
+        +'<div class="of of--narrow"><label for="oPassD">Дата выдачи</label><input id="oPassD" value="20.04.1998"/></div>'
+        +'<div class="of of--wide"><label for="oAddr">Адрес регистрации</label><input id="oAddr" value="Минусинск, ул. Ленина, 12"/></div>'
       +'</div></article>'
     /* Собственник */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Собственник '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox" checked/> Совпадает со страхователем</label></div></article>'
@@ -1544,20 +1552,20 @@ function osagoForm(){
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Водители '+badge(true)+'</span><span class="sp"></span><div class="pills"><button class="pill pill--active">Ограниченный список</button><button class="pill">Без ограничений</button></div></div>'
       +'<div class="pills" style="margin-bottom:12px"><button class="pill pill--active">Страхователь</button><button class="pill">Собственник</button><button class="pill">Иное лицо</button></div>'
       +'<div class="orow">'
-        +'<div class="of of--small"><label>Фамилия</label><input value="Кузнецова"/></div>'
-        +'<div class="of of--small"><label>Имя</label><input value="Ольга"/></div>'
-        +'<div class="of of--grow"><label>Отчество</label><input value="Ивановна"/></div>'
-        +'<div class="of of--narrow"><label>Стаж с</label><input value="12.05.2014"/></div>'
+        +'<div class="of of--small"><label for="oDLn">Фамилия</label><input id="oDLn" value="Кузнецова"/></div>'
+        +'<div class="of of--small"><label for="oDFn">Имя</label><input id="oDFn" value="Ольга"/></div>'
+        +'<div class="of of--grow"><label for="oDMn">Отчество</label><input id="oDMn" value="Ивановна"/></div>'
+        +'<div class="of of--narrow"><label for="oDExp">Стаж с</label><input id="oDExp" value="12.05.2014"/></div>'
       +'</div>'
-      +'<div class="oactions" style="padding:12px 0 0"><button class="btn btn--sm" onclick="toast(\'Добавлен водитель\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div></article>'
+      +'<div class="oactions" style="padding:12px 0 0"><button class="btn" onclick="toast(\'Добавлен водитель\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div></article>'
     /* Параметры */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Параметры и контакты '+badge(true)+'</span></div>'
       +'<div class="orow">'
-        +'<div class="of of--narrow"><label>Дата начала</label><input value="24.07.2026"/></div>'
-        +'<div class="of of--narrow"><label>Дата окончания</label><input value="23.07.2027"/></div>'
-        +'<div class="of of--small"><label>Цель использования</label><select><option>Личная</option><option>Такси</option></select></div>'
-        +'<div class="of of--small"><label>Телефон клиента</label><input value="+7 (902) 111-41-08"/></div>'
-        +'<div class="of of--small"><label>Email</label><input value="o.kuznetsova@mail.ru"/></div>'
+        +'<div class="of of--narrow"><label for="oStart">Дата начала</label><input id="oStart" value="24.07.2026"/></div>'
+        +'<div class="of of--narrow"><label for="oEnd">Дата окончания</label><input id="oEnd" value="23.07.2027"/></div>'
+        +'<div class="of of--small"><label for="oPurpose">Цель использования</label><select id="oPurpose"><option>Личная</option><option>Такси</option></select></div>'
+        +'<div class="of of--small"><label for="oPhone">Телефон клиента</label><input id="oPhone" value="+7 (902) 111-41-08"/></div>'
+        +'<div class="of of--small"><label for="oEmail">Email (необязательно)</label><input id="oEmail" value="" placeholder="ivanova@mail.ru"/><span class="of__hint">Сюда страховая пришлёт е-полис</span></div>'
       +'</div></article>'
     +'<div class="osticky">'
       +'<span class="osticky__prog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Все разделы заполнены</span>'
