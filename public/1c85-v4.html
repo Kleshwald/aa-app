@@ -310,7 +310,10 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .spinner{ width:42px; height:42px; margin:8px auto; border:4px solid var(--line); border-top-color:var(--navy); border-radius:50%; animation:spin 1s linear infinite; }
 @keyframes spin{ to{ transform:rotate(360deg); } } @media (prefers-reduced-motion:reduce){ .spinner{ animation:none; } }
 .pay__step{ font-size:calc(13.5px*var(--scale)); } .pay__hint{ color:var(--muted); font-size:calc(12px*var(--scale)); }
-.pay__cancel{ margin-top:14px; background:none; border:none; color:var(--blue); font:inherit; font-size:calc(12.5px*var(--scale)); cursor:pointer; }
+.pay__cancel{ margin-top:14px; min-height:44px; background:none; border:none; color:var(--blue); font:inherit; font-size:calc(13px*var(--scale)); cursor:pointer; }
+.pay__act{ display:flex; flex-direction:column; gap:7px; margin-top:14px; }
+.pay__act .btn{ width:100%; justify-content:center; }
+.pay__act .cap{ margin-bottom:7px; }
 .calc-loader{ display:flex; flex-direction:column; align-items:center; gap:16px; padding:70px 20px; }
 .calc-loader p{ color:var(--muted); font-size:calc(13.5px*var(--scale)); }
 
@@ -1501,8 +1504,8 @@ function otab(el){ var p=el.parentNode; var t=p.querySelectorAll('.otab'); for(v
 function pill(el){ var t=el.parentNode.querySelectorAll('.pill'); for(var i=0;i<t.length;i++) t[i].classList.remove('pill--active'); el.classList.add('pill--active'); }
 function toggleCustomMM(cb){ var mk=document.getElementById('mmMake'), md=document.getElementById('mmModel'); if(!mk||!md) return;
   /* placeholder — только пример формата, подпись остаётся в label (не дублируем) */
-  if(cb.checked){ mk.innerHTML='<label for="oMake">Марка</label><input id="oMake" placeholder="например, Toyota"/>'; md.innerHTML='<label for="oModel">Модель</label><input id="oModel" placeholder="например, Camry"/>'; }
-  else{ mk.innerHTML='<label for="oMake">Марка</label><select id="oMake"><option>Toyota</option><option>Kia</option></select>'; md.innerHTML='<label for="oModel">Модель</label><select id="oModel"><option>Camry</option><option>Corolla</option></select>'; } }
+  if(cb.checked){ mk.innerHTML='<label for="oMake">Марка</label><input id="oMake" placeholder="например, Kia"/>'; md.innerHTML='<label for="oModel">Модель</label><input id="oModel" placeholder="например, Rio"/>'; }
+  else{ mk.innerHTML='<label for="oMake">Марка</label><select id="oMake"><option>Kia</option><option>Toyota</option></select>'; md.innerHTML='<label for="oModel">Модель</label><select id="oModel"><option>Rio</option><option>Sportage</option></select>'; } }
 function otabNote(kind){ var n=document.getElementById('otabNote'); if(!n) return; n.hidden=false;
   n.querySelector('span').textContent = kind==='ip'
     ? 'В этой версии показан путь физического лица. Для ИП путь тот же — добавляются ОГРНИП и расчётный счёт.'
@@ -1517,19 +1520,19 @@ function osagoForm(){
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Транспортное средство '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox"/> С прицепом</label></div>'
       +'<div class="osearch"><label class="osearch__lbl" for="oSearchVal">Поиск по</label>'
       +'<div class="pills"><button class="pill pill--active">Гос.номер</button><button class="pill">VIN</button><button class="pill">Кузов</button></div>'
-      +'<input id="oSearchVal" value="Т432ЕК124" /><button class="btn" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
+      +'<input id="oSearchVal" value="А307ЕТ124" /><button class="btn" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
       +'<label class="tcheck"><input type="checkbox" onchange="toggleCustomMM(this)"/> Произвольная марка/модель</label></div>'
       +'<div class="orow">'
-        +'<div class="of of--narrow"><label for="oPlate">Гос.знак</label><input id="oPlate" value="Т432ЕК124"/></div>'
+        +'<div class="of of--narrow"><label for="oPlate">Гос.знак</label><input id="oPlate" value="А307ЕТ124"/></div>'
         +'<label class="ocheck"><input type="checkbox"/> Без номера</label>'
         +'<div class="of of--small"><label for="oCat">Категория</label><select id="oCat"><option>B — легковые</option><option>C — грузовые</option><option>D — автобусы</option></select></div>'
-        +'<div class="of of--small" id="mmMake"><label for="oMake">Марка</label><select id="oMake"><option>Toyota</option><option>Kia</option></select></div>'
-        +'<div class="of of--small" id="mmModel"><label for="oModel">Модель</label><select id="oModel"><option>Camry</option><option>Corolla</option></select></div>'
-        +'<div class="of of--narrow"><label for="oYear">Год выпуска</label><input id="oYear" value="2021"/></div>'
-        +'<div class="of of--narrow"><label for="oPower">Мощность (л.с.)</label><input id="oPower" value="181"/></div>'
+        +'<div class="of of--small" id="mmMake"><label for="oMake">Марка</label><select id="oMake"><option>Kia</option><option>Toyota</option></select></div>'
+        +'<div class="of of--small" id="mmModel"><label for="oModel">Модель</label><select id="oModel"><option>Rio</option><option>Sportage</option></select></div>'
+        +'<div class="of of--narrow"><label for="oYear">Год выпуска</label><input id="oYear" value="2022"/></div>'
+        +'<div class="of of--narrow"><label for="oPower">Мощность (л.с.)</label><input id="oPower" value="123"/></div>'
       +'</div>'
       +'<div class="orow">'
-        +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input id="oVin" class="of--small" value="XW7BK4FK90S123456"/></div></div>'
+        +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input id="oVin" class="of--small" value="Z94C241BAKR123456"/></div></div>'
         +'<div class="of"><label>Документ ТС</label><div class="pills"><button class="pill pill--active" onclick="pill(this)">СТС</button><button class="pill" onclick="pill(this)">ПТС</button><button class="pill" onclick="pill(this)">ЭПТС</button></div></div>'
         +'<div class="of of--small"><label for="oDocNum">Серия и номер</label><input id="oDocNum" value="99 23 456789"/></div>'
         +'<div class="of of--narrow"><label for="oDocDate">Дата выдачи</label><input id="oDocDate" value="15.05.2022"/></div>'
@@ -1538,17 +1541,17 @@ function osagoForm(){
     /* Страхователь */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Страхователь '+badge(true)+'</span></div>'
       +'<div class="orow">'
-        +'<div class="of of--small"><label for="oLn">Фамилия</label><input id="oLn" value="Кузнецова"/></div>'
-        +'<div class="of of--small"><label for="oFn">Имя</label><input id="oFn" value="Ольга"/></div>'
-        +'<div class="of of--grow"><label for="oMn">Отчество</label><input id="oMn" value="Ивановна"/></div>'
+        +'<div class="of of--small"><label for="oLn">Фамилия</label><input id="oLn" value="Смирнова"/></div>'
+        +'<div class="of of--small"><label for="oFn">Имя</label><input id="oFn" value="Анна"/></div>'
+        +'<div class="of of--grow"><label for="oMn">Отчество</label><input id="oMn" value="Павловна"/></div>'
         +'<label class="ocheck"><input type="checkbox"/> Без отчества</label>'
-        +'<div class="of of--narrow"><label for="oBd">Дата рождения</label><input id="oBd" value="14.03.1978"/></div>'
+        +'<div class="of of--narrow"><label for="oBd">Дата рождения</label><input id="oBd" value="02.09.1981"/></div>'
       +'</div>'
       +'<div class="orow">'
         +'<div class="of of--small"><label for="oDocT">Тип документа</label><select id="oDocT"><option>Паспорт РФ</option></select></div>'
-        +'<div class="of of--narrow"><label for="oPass">Серия и номер</label><input id="oPass" value="0412 567890"/></div>'
-        +'<div class="of of--narrow"><label for="oPassD">Дата выдачи</label><input id="oPassD" value="20.04.1998"/></div>'
-        +'<div class="of of--wide"><label for="oAddr">Адрес регистрации</label><input id="oAddr" value="Минусинск, ул. Ленина, 12"/></div>'
+        +'<div class="of of--narrow"><label for="oPass">Серия и номер</label><input id="oPass" value="0417 664215"/></div>'
+        +'<div class="of of--narrow"><label for="oPassD">Дата выдачи</label><input id="oPassD" value="15.10.2001"/></div>'
+        +'<div class="of of--wide"><label for="oAddr">Адрес регистрации</label><input id="oAddr" value="Минусинск, ул. Гагарина, 7"/></div>'
       +'</div></article>'
     /* Собственник */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Собственник '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox" checked/> Совпадает со страхователем</label></div></article>'
@@ -1556,9 +1559,9 @@ function osagoForm(){
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Водители '+badge(true)+'</span><span class="sp"></span><div class="pills"><button class="pill pill--active">Ограниченный список</button><button class="pill">Без ограничений</button></div></div>'
       +'<div class="pills" style="margin-bottom:12px"><button class="pill pill--active">Страхователь</button><button class="pill">Собственник</button><button class="pill">Иное лицо</button></div>'
       +'<div class="orow">'
-        +'<div class="of of--small"><label for="oDLn">Фамилия</label><input id="oDLn" value="Кузнецова"/></div>'
-        +'<div class="of of--small"><label for="oDFn">Имя</label><input id="oDFn" value="Ольга"/></div>'
-        +'<div class="of of--grow"><label for="oDMn">Отчество</label><input id="oDMn" value="Ивановна"/></div>'
+        +'<div class="of of--small"><label for="oDLn">Фамилия</label><input id="oDLn" value="Смирнова"/></div>'
+        +'<div class="of of--small"><label for="oDFn">Имя</label><input id="oDFn" value="Анна"/></div>'
+        +'<div class="of of--grow"><label for="oDMn">Отчество</label><input id="oDMn" value="Павловна"/></div>'
         +'<div class="of of--narrow"><label for="oDExp">Стаж с</label><input id="oDExp" value="12.05.2014"/></div>'
       +'</div>'
       +'<div class="oactions" style="padding:12px 0 0"><button class="btn" onclick="toast(\'Добавлен водитель\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div></article>'
@@ -1568,7 +1571,7 @@ function osagoForm(){
         +'<div class="of of--narrow"><label for="oStart">Дата начала</label><input id="oStart" value="24.07.2026"/></div>'
         +'<div class="of of--narrow"><label for="oEnd">Дата окончания</label><input id="oEnd" value="23.07.2027"/></div>'
         +'<div class="of of--small"><label for="oPurpose">Цель использования</label><select id="oPurpose"><option>Личная</option><option>Такси</option></select></div>'
-        +'<div class="of of--small"><label for="oPhone">Телефон клиента</label><input id="oPhone" value="+7 (902) 111-41-08"/></div>'
+        +'<div class="of of--small"><label for="oPhone">Телефон клиента</label><input id="oPhone" value="+7 (902) 555-30-17"/></div>'
         +'<div class="of of--small"><label for="oEmail">Email (необязательно)</label><input id="oEmail" value="" placeholder="ivanova@mail.ru"/><span class="of__hint">Сюда страховая пришлёт е-полис</span></div>'
       +'</div></article>'
     +'<div class="osticky">'
@@ -1659,22 +1662,71 @@ function lkPop(ev){
 }
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePop(); });
 
+/* ── Оплата первичного оформления: платит ВСЕГДА клиент (эквайринг у СК).
+   Два контекста: «клиент рядом» (дефолт — поворачиваем экран, клиент вводит СВОЮ карту)
+   и дистанционный (ссылка WhatsApp/СМС — канон адресата как в доплате ВИ: ссылку получает
+   агент и передаёт клиенту). У СК с «Оплатой по счёту» (РГС/СОГАЗ) — счёт, не шлюз.
+   Полис РОЖДАЕТСЯ строкой в «Мои клиенты» (unshift + сдвиг policyIdx у заявок SUP). ── */
+var OSAGO_PENDING=null, osagoPayTimer=null;
+var OSAGO_DRAFT={ name:'Смирнова Анна Павловна', obj:'Kia Rio', plate:'А307ЕТ124' };
 function osagoPay(sk,total){
+  var q=null; QUOTES.forEach(function(x){ if(x.sk===sk) q=x; });
+  OSAGO_PENDING={ sk:sk, total:total, base:(q&&q.price)||total, inv:!!(q&&q.pay==='Оплата по счёту'),
+    addon:(q&&q.svcName&&q.svc!=='off')?{name:q.svcName,price:parseInt(String(q.svcPrice).replace(/\s/g,''))||0}:null };
+  osagoPayScreen();
+}
+function osagoPayScreen(){
+  var P=OSAGO_PENDING; if(!P) return;
+  if(osagoPayTimer){ clearTimeout(osagoPayTimer); osagoPayTimer=null; }
+  var meta='<div class="pay__amount">'+P.total+' ₽</div><div class="pay__carrier">'+P.sk+' · '+OSAGO_DRAFT.obj+' · '+OSAGO_DRAFT.plate+'<br>'+OSAGO_DRAFT.name+'</div>';
+  var body = P.inv
+    ? '<div class="pay__act">'
+      +'<button class="btn btn--primary btn--lg" onclick="osagoInvoiceSend()">Отправить счёт клиенту</button>'
+      +'<div class="cap">Оплата по счёту — карта не нужна. Полис выпустится после поступления денег; строка появится в «Мои клиенты» со статусом «Ожидает оплаты».</div>'
+      +'<button class="btn btn--lg" onclick="toast(\'Скачивание счёта (демо)\')">Скачать счёт (PDF)</button>'
+      +'</div>'
+    : '<div class="pay__act">'
+      +'<button class="btn btn--primary btn--lg" onclick="osagoPayNow()">Клиент оплатит сейчас</button>'
+      +'<div class="cap">Поверните экран к клиенту — он вводит данные СВОЕЙ карты на странице банка.</div>'
+      +'<button class="btn btn--lg" onclick="osagoPayLink()">Отправить ссылку на оплату</button>'
+      +'<div class="cap">WhatsApp или СМС — клиент оплатит со своего телефона, полис появится после оплаты.</div>'
+      +'</div>';
   document.getElementById('osagoScreen').innerHTML =
-    '<div class="pay"><div class="pay__card"><h2 style="margin:0">Оплата полиса</h2>'
-    +'<div class="pay__amount">'+total+' ₽</div><div class="pay__carrier">'+sk+' · Toyota Camry · Т432ЕК124</div>'
-    +'<div class="oprog" style="margin:10px auto"><span></span></div><p class="pay__step">Перенаправляем на платёжный шлюз…</p>'
+    '<div class="ptitle">Оплата полиса — платит клиент</div>'
+    +'<div class="pay"><div class="pay__card">'+meta+body
+    +'<button class="pay__cancel" onclick="osagoResults()">← Вернуться к результатам расчёта</button></div></div>';
+}
+function osagoPayNow(){
+  var P=OSAGO_PENDING; if(!P) return;
+  document.getElementById('osagoScreen').innerHTML =
+    '<div class="ptitle">Оплата полиса — платит клиент</div>'
+    +'<div class="pay"><div class="pay__card">'
+    +'<div class="pay__amount">'+P.total+' ₽</div><div class="pay__carrier">Страница оплаты банка · '+P.sk+'</div>'
+    +'<div class="oprog" style="margin:10px auto"><span></span></div>'
+    +'<p class="pay__step">Клиент вводит данные своей карты…</p>'
     +'<p class="pay__hint">Не закрывайте окно во время оплаты.</p>'
-    +'<button class="pay__cancel" onclick="osagoResults()">Отменить оплату</button></div></div>';
-  setTimeout(function(){ osagoDone(sk,total); }, 2000);
+    +'<button class="pay__cancel" onclick="osagoPayScreen()">Отменить оплату</button></div></div>';
+  osagoPayTimer=setTimeout(osagoIssued, 2200);
 }
-function osagoDone(sk,total){
-  document.getElementById('osagoScreen').innerHTML =
-    '<div class="success"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg><div><b>Полис оформлен</b><div style="color:var(--muted);font-size:12px">'+sk+' · ТТТ 7056214893 · '+total+' ₽</div></div></div>'
-    +'<div class="pad"><div class="card"><h3>Что дальше</h3>'
-    +'<div class="doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Полис ОСАГО (PDF)<a onclick="toast(\'Скачивание (демо)\')">Скачать</a></div>'
-    +'<div style="margin-top:14px;display:flex;gap:8px"><button class="btn btn--primary" onclick="openContract(0,true)">Открыть договор</button><button class="btn" onclick="go(\'clients\')">К списку клиентов</button></div></div></div>';
+function osagoBirth(st){
+  var P=OSAGO_PENDING||{};
+  var num='ТТТ 70'+(64100000+Math.floor(Math.random()*899999));
+  var c={ d:'27.08.2026', until:'26.08.2027', phone:'+7 902 555-30-17', n:OSAGO_DRAFT.name, o:OSAGO_DRAFT.obj, sub:OSAGO_DRAFT.plate, num:num, p:'ОСАГО',
+    price:P.base||P.total, st:st, sti:st==='ok'?'check':'clock', stl:st==='ok'?'Оформлен':'Ожидает оплаты', sk:P.sk,
+    addonName:P.addon?P.addon.name:null, addonPrice:P.addon?P.addon.price:0 };
+  CLIENTS.unshift(c);
+  /* индексные привязки: заявки SUP держат policyIdx — сдвиг обязателен, иначе чужие процессы уедут на новый полис */
+  SUP.forEach(function(s){ if(typeof s.policyIdx==='number') s.policyIdx++; });
+  return 0;
 }
+function osagoIssued(){
+  osagoPayTimer=null;
+  if(!document.getElementById('osagoScreen')) return; /* агент ушёл с экрана оплаты — не дёргаем витрину */
+  osagoBirth('ok'); OSAGO_PENDING=null;
+  openContract(0,true); /* после оплаты сразу «горячий» договор (лок issue→contract) — отдельного экрана успеха нет */
+}
+function osagoPayLink(){ osagoBirth('pay'); OSAGO_PENDING=null; toast('Ссылка на оплату отправлена клиенту'); go('clients'); }
+function osagoInvoiceSend(){ osagoBirth('pay'); OSAGO_PENDING=null; toast('Счёт отправлен клиенту — полис выпустится после оплаты'); go('clients'); }
 
 /* ===== Договор ===== */
 var contractIssued=false;
@@ -1686,7 +1738,12 @@ function screenContract(i){
   var c=CLIENTS[i]||CLIENTS[0];
   var isOsago=c.p.indexOf('ОСАГО')>-1;
   var premiumNum=parseInt((c.price||'0').replace(/\s/g,''))||0;
-  var addon=isOsago?{name:'МиниКАСКО',num:'001SHG-'+((c.num.replace(/\D/g,'')||'204471').slice(-6)),price:2450}:null;
+  /* Доп: у рождённых в этой сессии полисов — честно из котировки (addonName:null = «без допа»);
+     у сидов поля нет (undefined) — прежний демо-МиниКАСКО, сиды не трогаем. */
+  var addonNum='001SHG-'+((c.num.replace(/\D/g,'')||'204471').slice(-6));
+  var addon=null;
+  if(c.addonName) addon={name:c.addonName,num:addonNum,price:c.addonPrice||0};
+  else if(c.addonName===undefined && isOsago) addon={name:'МиниКАСКО',num:addonNum,price:2450};
   var total=premiumNum+(addon?addon.price:0);
   var fmt=function(n){ return n.toLocaleString('ru-RU'); };
   var statusText=c.st==='draft'?'Черновик':(c.st==='pay'?'Ожидает оплаты':(c.st==='wait'?'Оформляется':'Оформлен'));
@@ -1721,10 +1778,10 @@ function screenContract(i){
     +'<div class="cost"><div class="cost-row"><span><span>'+c.p+'</span><span class="cost-row__num">'+c.num+'</span></span><span class="cost-row__v">'+fmt(premiumNum)+' ₽</span></div>'
       +(addon?'<div class="cost-row"><span><span>'+addon.name+'</span><span class="cost-row__num">'+addon.num+'</span></span><span class="cost-row__v">'+fmt(addon.price)+' ₽</span></div>':'')
       +(addon?'<div class="cost-row cost-row--total"><span>Итого, клиент оплатил</span><span class="cost-row__v">'+fmt(total)+' ₽</span></div>':'')+'</div>'
-    +'<div class="kv"><span>Период страхования</span><b>'+c.d+' — 21.07.2027</b></div>'
+    +'<div class="kv"><span>Период страхования</span><b>'+c.d+' — '+(c.until||'21.07.2027')+'</b></div>'
     +(isOsago?'<div class="kv"><span>Транспортное средство</span><b>'+c.o+' ('+c.sub+')</b></div>':'<div class="kv"><span>Объект страхования</span><b>'+c.o+'</b></div>')
     +'<div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'
-    +'<div class="kv"><span>Телефон клиента</span><b><a style="color:var(--blue)" href="tel:+79021114108">+7 902 111-41-08</a></b></div>'
+    +'<div class="kv"><span>Телефон клиента</span><b><a style="color:var(--blue)" href="tel:'+((c.phone||'+7 902 111-41-08').replace(/[^+\d]/g,''))+'">'+(c.phone||'+7 902 111-41-08')+'</a></b></div>'
   +'</div>';
 
   var docs='<div class="card"><h3>Документы клиенту</h3><p class="card__lead">Полис и документы — скачайте и передайте клиенту (печать из PDF).</p>'
@@ -1745,8 +1802,8 @@ function screenContract(i){
 
   // Уже купленное (addon = МиниКАСКО у ОСАГО) НЕ предлагаем снова; счётчик = реальность.
   var offers=[];
-  if(!addon){ offers.push(ccross('shield','МиниКАСКО','Ремонт при мелком ДТП без справок','2 450 ₽')); }
-  offers.push(ccross('law','Юрист поможет','Юрподдержка при спорах на дороге','от 500 ₽'));
+  if(!(addon&&addon.name==='МиниКАСКО')) offers.push(ccross('shield','МиниКАСКО','Ремонт при мелком ДТП без справок','2 450 ₽'));
+  if(!(addon&&addon.name==='Юрист поможет')) offers.push(ccross('law','Юрист поможет','Юрподдержка при спорах на дороге','от 500 ₽'));
   offers.push(ccross('heart','НС при ДТП','Защита водителя и пассажиров на 100 000 ₽','от 800 ₽'));
   var added=addon?1:0;
   var cross='<div class="card"><div class="cross-head"><h3>Предложите клиенту ещё</h3><span class="cross-limit">Добавлено '+added+' из 3 — можно ещё '+(3-added)+'</span></div>'
