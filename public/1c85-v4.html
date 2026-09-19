@@ -263,7 +263,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .rlogo{ width:40px; height:40px; border-radius:8px; background:var(--sel); border:1px solid var(--sel-line); display:grid; place-items:center; font-weight:700; color:var(--navy); font-size:11px; }
 .win[data-1ctheme='dark'] .rlogo{ color:var(--blue); }
 .rcarrier{ font-weight:600; font-size:calc(14px*var(--scale)); }
-.rqtype{ display:inline-block; margin-top:3px; font-size:calc(11px*var(--scale)); font-weight:600; color:var(--muted); }
+.rqtype{ display:inline-flex; align-items:center; gap:5px; margin-top:3px; font-size:calc(11px*var(--scale)); font-weight:600; color:var(--muted); }
 .rqtype--seg{ color:var(--wait); }   /* Сегмент — синий (наш пул рынка) */
 .rqtype--pool{ color:var(--badge-attn); }  /* Перестраховочный пул — янтарный ТЕКСТ ≥4.5:1 */
 /* «Урегулирование в ЛК Агента» — наше отличие: янтарным (не синей ссылкой), с «?». */
@@ -290,8 +290,12 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .pop__r--sum b{ color:var(--navy); } .win[data-1ctheme='dark'] .pop__r--sum b{ color:var(--ink); }
 .pop__note{ margin-top:8px; color:var(--muted); font-size:calc(10.5px*var(--scale)); line-height:1.45; }
 .rsub{ display:block; margin-top:2px; color:var(--muted); font-size:calc(11px*var(--scale)); }
+.rsub--late{ color:var(--badge-attn); font-weight:600; } /* дата позже запрошенной — решающий фактор при равной цене */
 .rsvc{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); font-size:calc(12.5px*var(--scale)); cursor:pointer; }
 .rsvc--add{ color:var(--navy); border-style:dashed; } .win[data-1ctheme='dark'] .rsvc--add{ color:var(--blue); }
+/* обязательный сервис — НЕ кнопка: без рамки-аффордансы, «обязательно» чипом + «?» почему */
+.rsvc--req{ border:none; background:none; padding:8px 0; cursor:default; flex-wrap:wrap; row-gap:4px; }
+.rsvc-price{ white-space:nowrap; }
 .rsvc-name{ font-weight:500; } .rsvc-price{ color:var(--muted); font-variant-numeric:tabular-nums; }
 .rtotal{ font-size:calc(16px*var(--scale)); font-weight:700; font-variant-numeric:tabular-nums; }
 .rpay{ display:block; margin-top:2px; color:var(--muted); font-size:calc(11px*var(--scale)); }
@@ -1577,7 +1581,7 @@ function osagoForm(){
 }
 function osagoCalc(){
   document.getElementById('osagoScreen').innerHTML =
-    '<div class="ptitle">Расчёт ОСАГО</div><div class="calc-loader"><div class="oprog"><span></span></div><p>Выполняется расчёт в страховых — обычно 10–20 секунд</p></div>';
+    '<div class="ptitle">Расчёт ОСАГО</div><div class="calc-loader"><div class="oprog"><span></span></div><p>Выполняется расчёт в страховых — обычно до минуты</p></div>';
   setTimeout(osagoResults, 1600);
 }
 function osagoResults(){
@@ -1585,22 +1589,27 @@ function osagoResults(){
   QUOTES.forEach(function(q){
     var svc;
     if(q.svc==='off') svc='<button class="rsvc rsvc--add" onclick="toast(\'Добавить сервис\')"><span style="font-size:16px">+</span> Добавить сервис</button>';
-    else if(q.req) svc='<div class="rsvc"><span class="rsvc-name">'+q.svcName+'</span><span class="rsvc-price">'+q.svcPrice+' ₽ · обязательно</span></div>';
+    else if(q.req) svc='<div class="rsvc rsvc--req"><span class="rsvc-name">'+q.svcName+'</span><span class="rsvc-price">'+q.svcPrice+' ₽</span><span class="chip chip--attn">обязательно</span><button class="rlk-info" onclick="reqSvcPop(event)" title="Почему обязателен">?</button></div>';
     else svc='<button class="rsvc" onclick="toast(\'Изменить сервис\')"><span class="rsvc-name">'+q.svcName+'</span><span class="rsvc-price">'+q.svcPrice+' ₽</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>';
     var total = q.svcPrice ? (parseInt(q.price.replace(/\s/g,''))+parseInt(q.svcPrice.replace(/\s/g,''))).toLocaleString('ru-RU') : q.price;
+    /* дата начала позже запрошенной в форме (24.07) — подсветить: при равных ценах это решающий фактор */
+    var lateDays=parseInt(q.date)-24;
+    var dateHtml=lateDays>0
+      ? '<span class="rsub rsub--late">Действует с '+q.date+' — на '+lateDays+' '+(lateDays===1?'день':(lateDays<5?'дня':'дней'))+' позже запрошенной</span>'
+      : '<span class="rsub">Действует с '+q.date+'</span>';
     rows += '<div class="roffer'+(q.best?' roffer--best':'')+'">'
       +skLogoImg(q.sk,'rlogo')
-      +'<div><div class="rcarrier">'+q.sk+'</div><span class="rqtype '+(q.type==='Сегмент'?'rqtype--seg':'rqtype--pool')+'">'+q.type+'</span>'
+      +'<div><div class="rcarrier">'+q.sk+'</div><span class="rqtype '+(q.type==='Сегмент'?'rqtype--seg':'rqtype--pool')+'">'+q.type+(q.type==='Сегмент'?'':'<button class="rlk-info" onclick="poolPop(event)" title="Что такое пул">?</button>')+'</span>'
         +(q.lk?'<span class="rlk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Урегулирование в ЛК Агента<button class="rlk-info" onclick="lkPop(event)">?</button></span>':'')
         +(q.best?'<span class="rbest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Лучшая цена</span>':'')+'</div>'
-      +'<div><span class="rprice">'+q.price+' ₽</span><button class="rprice-info" onclick="pricePop(event,\''+q.sk+'\',\''+q.price+'\')">?</button><span class="rsub">Действует с '+q.date+'</span></div>'
+      +'<div><span class="rprice">'+q.price+' ₽</span><button class="rprice-info" onclick="pricePop(event,\''+q.sk+'\',\''+q.price+'\')">?</button>'+dateHtml+'</div>'
       +'<div>'+svc+'</div>'
       +'<div><span class="rtotal">'+total+' ₽</span><span class="rpay">'+q.pay+'</span></div>'
-      +'<button class="btn btn--primary" onclick="osagoPay(\''+q.sk+'\',\''+total+'\')">Оформить</button>'
+      +'<button class="btn btn--primary btn--lg" onclick="osagoPay(\''+q.sk+'\',\''+total+'\')">Оформить</button>'
     +'</div>';
   });
   document.getElementById('osagoScreen').innerHTML =
-    '<div class="ptitle">Результаты расчёта</div><div class="psub">Отсортированы по цене — самое выгодное предложение сверху</div>'
+    '<div class="ptitle">Результаты расчёта</div><div class="psub">Сегмент — по цене, самое выгодное сверху; предложения перестраховочного пула — ниже списка</div>'
     +'<div class="roffers-scroll"><div class="rhead"><span></span><span>Страховая компания</span><span>ОСАГО</span><span>Дополнительные сервисы</span><span>Итого</span><span></span></div>'
     +'<div class="roffers">'+rows+'</div></div>'
     +'<div class="rback"><button class="btn" onclick="go(\'osago\')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>Вернуться к расчёту</button></div>';
@@ -1632,6 +1641,16 @@ function pricePop(ev, sk, price){
     +'<div class="pop__r"><span>× КО · ограничение</span><b>1,00</b></div>'
     +'<div class="pop__r pop__r--sum"><span>ОСАГО · '+sk+'</span><b>'+price+' ₽</b></div>'
     +'<div class="pop__note">Коэффициенты — общие. Разницу в цене между СК даёт базовый тариф (ТБ): его каждая компания ставит сама.</div>');
+}
+function poolPop(ev){
+  openPop(ev,
+    '<div class="pop__h">Перестраховочный пул</div>'
+    +'<div class="pop__note" style="margin-top:0">По этому клиенту СК даёт тариф не напрямую, а через общий перестраховочный пул рынка. Такие предложения показываем ниже «сегментных», даже если цена меньше соседней, — сравнивайте сначала верхнюю часть списка.</div>');
+}
+function reqSvcPop(ev){
+  openPop(ev,
+    '<div class="pop__h">Почему сервис обязателен</div>'
+    +'<div class="pop__note" style="margin-top:0">Условие этой страховой для данного сегмента: полис продаётся только вместе с сервисом. Его цена уже включена в «Итого» — сравнивайте именно итоговую сумму.</div>');
 }
 function lkPop(ev){
   openPop(ev,
