@@ -165,6 +165,13 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .st--ok{ color:var(--ok-text); } .st--draft{ color:var(--muted); } .st--wait{ color:var(--wait); } .st--pay{ color:var(--badge-attn); }
 .st--procurgent{ color:var(--badge-attn); } /* «ваш ход» — янтарь */ .st--proc{ color:var(--wait); } /* в работе у страховой — синий */
 .empty-cell{ color:var(--muted); }
+td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пустая таблица — одним классом */
+.cap{ color:var(--muted); font-size:calc(12px*var(--scale)); }       /* КАНОН мета-строки (вместо inline 12px без --scale) */
+/* КАНОН «Чип статуса» (база — .sup-stbadge): бледный фон + читаемый тёмный текст.
+   Лок: тип котировки (.rqtype) — простой цветной ТЕКСТ, НЕ чип. */
+.chip{ display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:5px; font-size:calc(11px*var(--scale)); font-weight:600; background:var(--bg); color:var(--muted); }
+.chip--attn{ background:color-mix(in srgb,var(--warn) 14%,transparent); color:var(--badge-attn); }
+.chip--ok{ background:color-mix(in srgb,var(--ok) 14%,transparent); color:var(--ok-text); }
 .proc-badge .pdot{ width:8px; height:8px; border-radius:50%; background:var(--warn); display:inline-block; flex:none; }
 
 /* крупнее и чище иконки по всей системе (под аудиторию 45+) */
@@ -175,8 +182,10 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .tb-icon svg{ width:22px; height:22px; }
 /* видимый фокус с клавиатуры на всём хроме рамы (§7 п.13 DESIGN.md) — раньше был только :hover */
 .tb-icon:focus-visible, .tab:focus-visible, .sec:focus-visible, .formcmd button:focus-visible,
-.ptile:focus-visible, .btn:focus-visible, .cross-card .btn:focus-visible{
-  outline:2px solid var(--navy); outline-offset:2px;
+.ptile:focus-visible, .btn:focus-visible, .cross-card .btn:focus-visible,
+.pill:focus-visible, .otab:focus-visible, .rsvc:focus-visible, .rprice-info:focus-visible,
+.rlk-info:focus-visible, .pay__cancel:focus-visible, .assist:focus-visible{
+  outline:2px solid var(--accent); outline-offset:2px;
 }
 .proc-badge svg{ width:14px; height:14px; }
 .sorth svg{ width:13px; height:13px; }
@@ -211,7 +220,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .osec__head .sp{ flex:1; }
 .osearch{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 12px; background:var(--bg); border-radius:8px; margin-bottom:14px; }
 .osearch__lbl{ font-size:calc(12.5px*var(--scale)); color:var(--muted); }
-.osearch input{ height:36px; padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:calc(13.5px*var(--scale)); min-width:180px; }
+.osearch input{ height:var(--ctl-h); padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:max(16px,calc(13.5px*var(--scale))); min-width:180px; }
 .pills{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
 .pill{ padding:8px 13px; font-size:calc(12.5px*var(--scale)); background:var(--card); color:var(--muted); cursor:pointer; border:none; border-right:1px solid var(--line); }
 .pill:last-child{ border-right:none; } /* переключатель 1С: активный сегмент — тинт + подчёркивание (заливку задаёт тема, не navy) */
@@ -222,9 +231,16 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 .sw__k{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:var(--shadow-2); transition:left .15s; }
 .sw input{ display:none; } .sw input:checked + .sw__t{ background:var(--navy); } .sw input:checked + .sw__t .sw__k{ left:18px; }
 .orow{ display:flex; flex-wrap:wrap; gap:12px 14px; align-items:flex-end; }
+.orow+.orow{ margin-top:12px; }
+/* КАНОН «Поле» (эталон 2026-09-19): подпись сверху · контрол 44px/текст ≥16px · слот подсказки/ошибки.
+   Новые формы строить только на .of; прочие инпуты (композеры чатов и т.п.) переводим «при касании». */
 .of{ display:flex; flex-direction:column; gap:5px; } .of label{ font-size:calc(12.5px*var(--scale)); color:var(--muted); font-weight:600; }
-.of input,.of select{ height:38px; padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:calc(14px*var(--scale)); }
-.of input:focus,.of select:focus{ outline:2px solid var(--navy); outline-offset:1px; }
+.of input,.of select{ height:var(--ctl-h); padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:max(16px,calc(14px*var(--scale))); }
+.of input:focus,.of select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+.of input:disabled,.of select:disabled{ background:var(--bg); color:var(--muted); cursor:not-allowed; }
+.of--err input,.of--err select{ border-color:var(--err); }
+.of__hint{ color:var(--muted); font-size:calc(11.5px*var(--scale)); }
+.of__err{ display:flex; align-items:center; gap:5px; color:var(--err); font-size:calc(11.5px*var(--scale)); font-weight:600; }
 .of--narrow{ width:132px } .of--small{ width:190px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
 .ocheck{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-size:calc(12.5px*var(--scale)); color:var(--ink); padding-bottom:9px; }
 /* Составной контрол: сегменты + поле в один ряд под подписью (Идентификатор VIN/№кузова/№шасси). */
@@ -252,11 +268,14 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; } td.date{ color:va
 /* «Урегулирование в ЛК Агента» — наше отличие: янтарным (не синей ссылкой), с «?». */
 .rlk{ display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:calc(11px*var(--scale)); color:var(--badge-attn); font-weight:600; }
 .rlk svg{ width:12px; height:12px; flex:none; }
-.rlk-info{ width:15px; height:15px; border-radius:50%; border:1px solid currentColor; background:none; color:inherit; font-size:10px; line-height:1; cursor:pointer; flex:none; }
+/* КАНОН «?»-триггер: видимая мишень 22px + хит-зона 44px (::after), поповер по клику */
+.rlk-info{ width:22px; height:22px; border-radius:50%; border:1px solid currentColor; background:none; color:inherit; font-size:12px; line-height:1; cursor:pointer; flex:none; position:relative; }
+.rlk-info::after{ content:''; position:absolute; inset:-11px; }
 .rbest{ display:inline-flex; align-items:center; gap:5px; margin-top:5px; padding:2px 8px; border-radius:5px; background:color-mix(in srgb,var(--ok) 14%,transparent); color:var(--ok-text); font-size:calc(11px*var(--scale)); font-weight:600; }
 .rbest svg{ width:12px; height:12px; }
 .rprice{ font-size:calc(17px*var(--scale)); font-weight:600; font-variant-numeric:tabular-nums; }
-.rprice-info{ margin-left:6px; width:18px; height:18px; border-radius:50%; border:1px solid var(--line); background:none; color:var(--muted); font-size:11px; cursor:pointer; }
+.rprice-info{ margin-left:6px; width:22px; height:22px; border-radius:50%; border:1px solid var(--line); background:none; color:var(--muted); font-size:12px; cursor:pointer; position:relative; }
+.rprice-info::after{ content:''; position:absolute; inset:-11px; }
 /* Поповер «как рассчитана цена» — клик по «?» у цены/ЛК. В управляемой форме 1С это была
    бы всплывающая подсказка/сообщение; здесь показываем разложение по коэффициентам —
    прозрачность цены и есть наше отличие. */
@@ -589,7 +608,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 /* липкая панель действий формы ОСАГО — «Рассчитать» и прогресс всегда на виду */
 .osticky{ position:sticky; bottom:0; z-index:5; display:flex; align-items:center; gap:12px; margin-top:10px; padding:13px 20px; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -4px 16px rgba(0,0,0,.07); flex-wrap:wrap; }
 .win[data-1ctheme='dark'] .osticky{ box-shadow:0 -4px 16px rgba(0,0,0,.32); }
-.osticky__prog{ display:inline-flex; align-items:center; gap:7px; color:var(--ok); font-size:calc(13px*var(--scale)); font-weight:600; }
+.osticky__prog{ display:inline-flex; align-items:center; gap:7px; color:var(--ok-text); font-size:calc(13px*var(--scale)); font-weight:600; }
 .osticky__prog svg{ width:17px; height:17px; }
 .btn--lg{ height:44px; padding:0 22px; font-size:calc(14.5px*var(--scale)); }
 
@@ -1450,7 +1469,7 @@ function screenClients(){
       +'<td><span class="st st--'+(cv?cv.cls:c.st)+'">'+(cv?cv.stl:c.stl)+'</span>'+attn+'</td>'
       +'<td class="company">'+c.sk+'</td></tr>';
   });
-  if(!rows) rows='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:26px">Сейчас никто не ждёт ваших действий.</td></tr>';
+  if(!rows) rows='<tr><td colspan="8" class="empty-row">Сейчас никто не ждёт ваших действий.</td></tr>';
   return '<div class="screen active">'
     +'<div class="ptitle">Мои клиенты</div>'
     +'<div class="tbar">'
@@ -1497,7 +1516,7 @@ function osagoForm(){
         +'<div class="of of--narrow"><label>Год выпуска</label><input value="2021"/></div>'
         +'<div class="of of--narrow"><label>Мощность (л.с.)</label><input value="181"/></div>'
       +'</div>'
-      +'<div class="orow" style="margin-top:12px">'
+      +'<div class="orow">'
         +'<div class="of"><label>Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input style="width:200px" value="XW7BK4FK90S123456"/></div></div>'
         +'<div class="of"><label>Документ ТС</label><div class="pills"><button class="pill pill--active" onclick="pill(this)">СТС</button><button class="pill" onclick="pill(this)">ПТС</button><button class="pill" onclick="pill(this)">ЭПТС</button></div></div>'
         +'<div class="of of--small"><label>Серия и номер</label><input value="99 23 456789"/></div>'
@@ -1513,7 +1532,7 @@ function osagoForm(){
         +'<label class="ocheck"><input type="checkbox"/> Без отчества</label>'
         +'<div class="of of--narrow"><label>Дата рождения</label><input value="14.03.1978"/></div>'
       +'</div>'
-      +'<div class="orow" style="margin-top:12px">'
+      +'<div class="orow">'
         +'<div class="of of--small"><label>Тип документа</label><select><option>Паспорт РФ</option></select></div>'
         +'<div class="of of--narrow"><label>Серия и номер</label><input value="0412 567890"/></div>'
         +'<div class="of of--narrow"><label>Дата выдачи</label><input value="20.04.1998"/></div>'
@@ -1883,7 +1902,7 @@ function svRowsHTML(){
   if(!rows){
     var filtered=!!(svQ||svFPeriod!=='all'||svFType!=='all'||svFUnans);
     var msg=filtered?'Ничего не найдено — измените поиск или фильтры.':(svSeg==='closed'?'Завершённых обращений пока нет.':'Активных обращений нет — всё разобрано.');
-    rows='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:26px">'+msg+'</td></tr>';
+    rows='<tr><td colspan="5" class="empty-row">'+msg+'</td></tr>';
   }
   return rows;
 }
@@ -2443,7 +2462,7 @@ function supQueue(){
       +'<td>'+(it.resp||'<span class="empty-cell">—</span>')+'</td>'
       +'<td class="sup-stcell"><span class="sup-stbadge sup-stbadge--'+supStTone(it)+'">'+it.st+'</span>'+supSla(it)+supAge(it)+'</td>'
       +'</tr>';
-  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:26px">'+supEmpty()+'</td></tr>';
+  }).join('') || '<tr><td colspan="10" class="empty-row">'+supEmpty()+'</td></tr>';
   var sks={}, vids={}, resps={}, regions={};
   SUP.forEach(function(it){ if(it.sk&&it.sk!=='—') sks[it.sk]=1; vids[it.vid]=1; if(it.resp) resps[it.resp]=1; if(it.region) regions[it.region]=1; });
   var skOpts='<option value="all">Все СК</option>'+Object.keys(sks).map(function(s){ return '<option'+(supSK===s?' selected':'')+'>'+s+'</option>'; }).join('');
@@ -2738,7 +2757,7 @@ function sup2ReqView(){
       +'<td>'+(it.resp||'<span class="empty-cell">—</span>')+'</td>'
       +'<td class="sup-stcell"><span class="sup-stbadge sup-stbadge--'+supStTone(it)+'">'+it.st+'</span>'+supSla(it)+supAge(it)+'</td>'
     +'</tr>';
-  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:26px">'+supEmpty()+'</td></tr>';
+  }).join('') || '<tr><td colspan="10" class="empty-row">'+supEmpty()+'</td></tr>';
   return '<div class="sup-mine-bar"><span class="sup-mine-cap">Чей мяч:</span><div class="chattabs sup-tabs">'+tbar+'</div></div>'
     +'<div class="sup-count">Заявок: <b>'+items.length+'</b> · вкладка «'+SUP_BALL[supTab]+'»</div>'
     +'<div class="list-wrap sup-listwrap" style="margin-top:0"><div class="list-scroll"><table class="list sup-list">'
