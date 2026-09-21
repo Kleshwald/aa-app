@@ -193,6 +193,10 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 /* флажок вместо кастомного тумблера (в 1С — нативный «Флажок») */
 .tcheck{ display:inline-flex; align-items:center; gap:8px; margin-left:auto; font-size:calc(13px*var(--scale)); color:var(--ink); cursor:pointer; }
 .tcheck input{ width:17px; height:17px; }
+/* фазировка «конвертируй при касании»: путь ОСАГО уже на законе 44/16; общие .tcheck/.btn на чужих экранах доводим при их касании */
+#osagoScreen .tcheck{ font-size:calc(13.5px*var(--scale)); min-height:var(--ctl-h); }
+#osagoScreen .tcheck input{ width:18px; height:18px; accent-color:var(--accent); }
+#osagoScreen .btn{ height:var(--ctl-h); }
 /* индикатор выполнения вместо CSS-спиннера (в 1С — модальный прогресс «Выполняется…») */
 .oprog{ width:240px; height:6px; border-radius:3px; background:var(--line); overflow:hidden; }
 .oprog span{ display:block; width:40%; height:100%; background:var(--navy); border-radius:3px; animation:oprogmove 1.1s ease-in-out infinite; }
@@ -208,7 +212,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 
 /* ===== ОСАГО (как в Angular) ===== */
 .otabs{ display:flex; gap:4px; padding:4px 20px 0; }
-.otab{ padding:10px 18px; font-size:calc(13.5px*var(--scale)); color:var(--muted); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; }
+.otab{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 18px; font:inherit; font-size:calc(13.5px*var(--scale)); color:var(--muted); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; }
 .otab--active{ color:var(--navy); border-bottom-color:var(--navy); font-weight:600; }
 .win[data-1ctheme='dark'] .otab--active{ color:var(--blue); border-bottom-color:var(--blue); }
 .osec{ border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:14px 20px 0; background:var(--card); }
@@ -220,10 +224,10 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .badge svg{ width:12px; height:12px; }
 .osec__head .sp{ flex:1; }
 .osearch{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 12px; background:var(--bg); border-radius:8px; margin-bottom:14px; }
-.osearch__lbl{ font-size:calc(12.5px*var(--scale)); color:var(--muted); }
+.osearch__lbl{ font-size:calc(13px*var(--scale)); color:var(--muted); }
 .osearch input{ height:var(--ctl-h); padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:max(16px,calc(13.5px*var(--scale))); min-width:180px; }
 .pills{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
-.pill{ padding:8px 13px; font-size:calc(12.5px*var(--scale)); background:var(--card); color:var(--muted); cursor:pointer; border:none; border-right:1px solid var(--line); }
+.pill{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 14px; font:inherit; font-size:calc(13.5px*var(--scale)); background:var(--card); color:var(--muted); cursor:pointer; border:none; border-right:1px solid var(--line); }
 .pill:last-child{ border-right:none; } /* переключатель 1С: активный сегмент — тинт + подчёркивание (заливку задаёт тема, не navy) */
 .pill--active{ background:var(--sel); color:var(--navy); font-weight:600; box-shadow:inset 0 -2px 0 var(--navy); }
 .win[data-1ctheme='dark'] .pill--active{ color:var(--blue); box-shadow:inset 0 -2px 0 var(--blue); }
@@ -240,10 +244,11 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .of input:focus,.of select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
 .of input:disabled,.of select:disabled{ background:var(--bg); color:var(--muted); cursor:not-allowed; }
 .of--err input,.of--err select{ border-color:var(--err); }
-.of__hint{ color:var(--muted); font-size:calc(11.5px*var(--scale)); }
+.of__hint{ color:var(--muted); font-size:calc(12.5px*var(--scale)); }
 .of__err{ display:flex; align-items:center; gap:5px; color:var(--err); font-size:calc(11.5px*var(--scale)); font-weight:600; }
 .of--narrow{ width:132px } .of--small{ width:190px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
-.ocheck{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-size:calc(12.5px*var(--scale)); color:var(--ink); padding-bottom:9px; }
+.ocheck{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; font-size:calc(13.5px*var(--scale)); color:var(--ink); min-height:var(--ctl-h); cursor:pointer; }
+.ocheck input{ width:18px; height:18px; accent-color:var(--accent); flex:none; }
 /* Составной контрол: сегменты + поле в один ряд под подписью (Идентификатор VIN/№кузова/№шасси). */
 .octl{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 /* Ссылка «Дополнительные сведения ТС» — голубой (наш цвет ссылок), как в брендбуке 8.5. */
@@ -251,7 +256,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .omore a{ color:var(--blue); font-size:calc(13px*var(--scale)); cursor:pointer; }
 .omore a:hover{ text-decoration:underline; }
 .oactions{ display:flex; align-items:center; gap:12px; padding:16px 20px 24px; flex-wrap:wrap; }
-.assist{ display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 16px; border:1px dashed var(--navy); border-radius:8px; background:none; color:var(--navy); font:inherit; font-size:calc(13.5px*var(--scale)); cursor:pointer; }
+.assist{ display:inline-flex; align-items:center; gap:8px; height:var(--ctl-h); padding:0 16px; border:1px dashed var(--navy); border-radius:8px; background:none; color:var(--navy); font:inherit; font-size:calc(13.5px*var(--scale)); cursor:pointer; }
 .win[data-1ctheme='dark'] .assist{ color:var(--blue); border-color:var(--blue); }
 .ohint{ color:var(--muted); font-size:calc(12.5px*var(--scale)); margin-left:auto; }
 
@@ -292,6 +297,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .rsub{ display:block; margin-top:2px; color:var(--muted); font-size:calc(11px*var(--scale)); }
 .rsub--late{ color:var(--badge-attn); font-weight:600; } /* дата позже запрошенной — решающий фактор при равной цене */
 .rsvc{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); font-size:calc(12.5px*var(--scale)); cursor:pointer; }
+button.rsvc{ position:relative; } button.rsvc::after{ content:''; position:absolute; inset:-5px 0; } /* хит-зона 44 при компактном виде — канон «?» */
 .rsvc--add{ color:var(--navy); border-style:dashed; } .win[data-1ctheme='dark'] .rsvc--add{ color:var(--blue); }
 /* обязательный сервис — НЕ кнопка: без рамки-аффордансы, «обязательно» чипом + «?» почему */
 .rsvc--req{ border:none; background:none; padding:8px 0; cursor:default; flex-wrap:wrap; row-gap:4px; }
@@ -617,6 +623,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .osticky{ position:sticky; bottom:0; z-index:5; display:flex; align-items:center; gap:12px; margin-top:10px; padding:13px 20px; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -4px 16px rgba(0,0,0,.07); flex-wrap:wrap; }
 .win[data-1ctheme='dark'] .osticky{ box-shadow:0 -4px 16px rgba(0,0,0,.32); }
 .osticky__prog{ display:inline-flex; align-items:center; gap:7px; color:var(--ok-text); font-size:calc(13px*var(--scale)); font-weight:600; }
+.osticky__prog--warn{ color:var(--badge-attn); }
 .osticky__prog svg{ width:17px; height:17px; }
 .btn--lg{ height:44px; padding:0 22px; font-size:calc(14.5px*var(--scale)); }
 
@@ -1502,6 +1509,20 @@ function badge(done){ return done
   : '<span class="badge">Не заполнено</span>'; }
 function otab(el){ var p=el.parentNode; var t=p.querySelectorAll('.otab'); for(var i=0;i<t.length;i++) t[i].classList.remove('otab--active'); el.classList.add('otab--active'); }
 function pill(el){ var t=el.parentNode.querySelectorAll('.pill'); for(var i=0;i<t.length;i++) t[i].classList.remove('pill--active'); el.classList.add('pill--active'); }
+/* честные контролы: клик по пилюле/чекбоксу реально меняет форму, а не только подсветку */
+function searchBy(el,kind){ pill(el); var i=document.getElementById('oSearchVal'); if(!i) return;
+  i.value={plate:'А307ЕТ124',vin:'Z94C241BAKR123456',body:'KR123456'}[kind]||''; }
+function toggleOff(cb,id){ var e=document.getElementById(id); if(!e) return;
+  if(cb.checked){ e.dataset.v=e.value; e.value=''; e.disabled=true; } else { e.value=e.dataset.v||''; e.disabled=false; } }
+function driversMode(unlim){ var d=document.getElementById('oDrivers'), n=document.getElementById('oDriversOff');
+  if(d) d.hidden=unlim; if(n) n.hidden=!unlim; }
+function driverFrom(who){ var v = who==='other' ? {oDLn:'',oDFn:'',oDMn:'',oDExp:''} : {oDLn:'Смирнова',oDFn:'Анна',oDMn:'Павловна',oDExp:'12.05.2014'};
+  Object.keys(v).forEach(function(id){ var e=document.getElementById(id); if(e) e.value=v[id]; }); }
+var PROG_OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Все разделы заполнены';
+var PROG_WARN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Остался раздел «Собственник»';
+function ownerSame(cb){ var f=document.getElementById('oOwnerFields'), b=document.getElementById('oOwnerBadge'), p=document.getElementById('oProg');
+  if(f) f.hidden=cb.checked; if(b) b.innerHTML=badge(cb.checked);
+  if(p){ p.classList.toggle('osticky__prog--warn',!cb.checked); p.innerHTML=cb.checked?PROG_OK:PROG_WARN; } }
 function toggleCustomMM(cb){ var mk=document.getElementById('mmMake'), md=document.getElementById('mmModel'); if(!mk||!md) return;
   /* placeholder — только пример формата, подпись остаётся в label (не дублируем) */
   if(cb.checked){ mk.innerHTML='<label for="oMake">Марка</label><input id="oMake" placeholder="например, Kia"/>'; md.innerHTML='<label for="oModel">Модель</label><input id="oModel" placeholder="например, Rio"/>'; }
@@ -1519,12 +1540,12 @@ function osagoForm(){
     /* Транспортное средство */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Транспортное средство '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox"/> С прицепом</label></div>'
       +'<div class="osearch"><label class="osearch__lbl" for="oSearchVal">Поиск по</label>'
-      +'<div class="pills"><button class="pill pill--active">Гос.номер</button><button class="pill">VIN</button><button class="pill">Кузов</button></div>'
+      +'<div class="pills"><button class="pill pill--active" onclick="searchBy(this,\'plate\')">Гос.номер</button><button class="pill" onclick="searchBy(this,\'vin\')">VIN</button><button class="pill" onclick="searchBy(this,\'body\')">Кузов</button></div>'
       +'<input id="oSearchVal" value="А307ЕТ124" /><button class="btn" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
       +'<label class="tcheck"><input type="checkbox" onchange="toggleCustomMM(this)"/> Произвольная марка/модель</label></div>'
       +'<div class="orow">'
         +'<div class="of of--narrow"><label for="oPlate">Гос.знак</label><input id="oPlate" value="А307ЕТ124"/></div>'
-        +'<label class="ocheck"><input type="checkbox"/> Без номера</label>'
+        +'<label class="ocheck"><input type="checkbox" onchange="toggleOff(this,\'oPlate\')"/> Без номера</label>'
         +'<div class="of of--small"><label for="oCat">Категория</label><select id="oCat"><option>B — легковые</option><option>C — грузовые</option><option>D — автобусы</option></select></div>'
         +'<div class="of of--small" id="mmMake"><label for="oMake">Марка</label><select id="oMake"><option>Kia</option><option>Toyota</option></select></div>'
         +'<div class="of of--small" id="mmModel"><label for="oModel">Модель</label><select id="oModel"><option>Rio</option><option>Sportage</option></select></div>'
@@ -1544,7 +1565,7 @@ function osagoForm(){
         +'<div class="of of--small"><label for="oLn">Фамилия</label><input id="oLn" value="Смирнова"/></div>'
         +'<div class="of of--small"><label for="oFn">Имя</label><input id="oFn" value="Анна"/></div>'
         +'<div class="of of--grow"><label for="oMn">Отчество</label><input id="oMn" value="Павловна"/></div>'
-        +'<label class="ocheck"><input type="checkbox"/> Без отчества</label>'
+        +'<label class="ocheck"><input type="checkbox" onchange="toggleOff(this,\'oMn\')"/> Без отчества</label>'
         +'<div class="of of--narrow"><label for="oBd">Дата рождения</label><input id="oBd" value="02.09.1981"/></div>'
       +'</div>'
       +'<div class="orow">'
@@ -1554,17 +1575,26 @@ function osagoForm(){
         +'<div class="of of--wide"><label for="oAddr">Адрес регистрации</label><input id="oAddr" value="Минусинск, ул. Гагарина, 7"/></div>'
       +'</div></article>'
     /* Собственник */
-    +'<article class="osec"><div class="osec__head"><span class="osec__title">Собственник '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox" checked/> Совпадает со страхователем</label></div></article>'
+    +'<article class="osec"><div class="osec__head"><span class="osec__title">Собственник <span id="oOwnerBadge">'+badge(true)+'</span></span><span class="sp"></span><label class="ocheck"><input type="checkbox" checked onchange="ownerSame(this)"/> Совпадает со страхователем</label></div>'
+      +'<div id="oOwnerFields" hidden><div class="orow">'
+        +'<div class="of of--small"><label for="oOwLn">Фамилия</label><input id="oOwLn"/></div>'
+        +'<div class="of of--small"><label for="oOwFn">Имя</label><input id="oOwFn"/></div>'
+        +'<div class="of of--grow"><label for="oOwMn">Отчество</label><input id="oOwMn"/></div>'
+        +'<div class="of of--narrow"><label for="oOwBd">Дата рождения</label><input id="oOwBd" placeholder="дд.мм.гггг"/></div>'
+      +'</div></div></article>'
     /* Водители */
-    +'<article class="osec"><div class="osec__head"><span class="osec__title">Водители '+badge(true)+'</span><span class="sp"></span><div class="pills"><button class="pill pill--active">Ограниченный список</button><button class="pill">Без ограничений</button></div></div>'
-      +'<div class="pills" style="margin-bottom:12px"><button class="pill pill--active">Страхователь</button><button class="pill">Собственник</button><button class="pill">Иное лицо</button></div>'
+    +'<article class="osec"><div class="osec__head"><span class="osec__title">Водители '+badge(true)+'</span><span class="sp"></span><div class="pills"><button class="pill pill--active" onclick="pill(this);driversMode(false)">Ограниченный список</button><button class="pill" onclick="pill(this);driversMode(true)">Без ограничений</button></div></div>'
+      +'<div id="oDriversOff" class="cap" hidden>Данные водителей не нужны — полис действует для любого водителя. Обычно это дороже ограниченного списка.</div>'
+      +'<div id="oDrivers">'
+      +'<div class="pills" style="margin-bottom:12px"><button class="pill pill--active" onclick="pill(this);driverFrom(\'sh\')">Страхователь</button><button class="pill" onclick="pill(this);driverFrom(\'own\')">Собственник</button><button class="pill" onclick="pill(this);driverFrom(\'other\')">Иное лицо</button></div>'
       +'<div class="orow">'
         +'<div class="of of--small"><label for="oDLn">Фамилия</label><input id="oDLn" value="Смирнова"/></div>'
         +'<div class="of of--small"><label for="oDFn">Имя</label><input id="oDFn" value="Анна"/></div>'
         +'<div class="of of--grow"><label for="oDMn">Отчество</label><input id="oDMn" value="Павловна"/></div>'
         +'<div class="of of--narrow"><label for="oDExp">Стаж с</label><input id="oDExp" value="12.05.2014"/></div>'
       +'</div>'
-      +'<div class="oactions" style="padding:12px 0 0"><button class="btn" onclick="toast(\'Добавлен водитель\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div></article>'
+      +'<div class="oactions" style="padding:12px 0 0"><button class="btn" onclick="toast(\'Добавлен водитель\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div>'
+      +'</div></article>'
     /* Параметры */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Параметры и контакты '+badge(true)+'</span></div>'
       +'<div class="orow">'
@@ -1575,7 +1605,7 @@ function osagoForm(){
         +'<div class="of of--small"><label for="oEmail">Email (необязательно)</label><input id="oEmail" value="" placeholder="ivanova@mail.ru"/><span class="of__hint">Сюда страховая пришлёт е-полис</span></div>'
       +'</div></article>'
     +'<div class="osticky">'
-      +'<span class="osticky__prog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Все разделы заполнены</span>'
+      +'<span class="osticky__prog" id="oProg">'+PROG_OK+'</span>'
       +'<span style="flex:1"></span>'
       +'<button class="assist" onclick="toast(\'Ассистент заполнил форму\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z"/></svg>Ассистент, заполни!</button>'
       +'<button class="btn" onclick="toast(\'Черновик сохранён\')">Сохранить черновик</button>'
