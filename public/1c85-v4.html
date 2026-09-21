@@ -12,7 +12,8 @@ html,body{ margin:0; height:100%; }
   --bg:#F5F6F8; --card:#FFFFFF; --ink:#1F2937; --muted:#4B5563; --line:#E5E7EB;
   --yellow:#FFC800;              /* остаётся только в логотипе 1С */
   --navy:#0C3363; --navy-2:#164a8a; --blue:#3992E4;
-  --ok:#16A34A; --warn:#D97706; --err:#DC2626; --wait:#2f6fb0; --badge-attn:#B45309;
+  --ok:#16A34A; --warn:#D97706; --err:#DC2626; --wait:#2f6fb0;
+  --badge-attn:#AD402A; --attn-acc:#C45138; --attn-bg:#FFF0EA; /* коралл (дизайн-карта 0.1, принято 2026-09-21): текст «внимания» / счётчики / плашки; строки НЕ красим */
   --ok-text:#15803D;             /* зелёный ТЕКСТ ≥4.5:1 (сам --ok — точкам/рамкам/заливкам) */
   /* янтарный ТЕКСТ ≥4.5:1 — это --badge-attn (пара к --ok-text); --warn — рамкам/фонам/точкам */
   --sel:#EFF4F9;                 /* ВЫДЕЛЕНИЕ — наш бледно-голубой brand-50 (было бледно-жёлтым) */
@@ -34,6 +35,7 @@ html,body{ margin:0; height:100%; }
   --bg:#1E1E1E; --card:#262626; --ink:#F3F4F6; --muted:#9CA3AF; --line:#3A3A3A;
   --navy:#5BA5E8; --navy-2:#7fbdf2; --blue:#6BA6E6;
   --ok:#22C55E; --warn:#F59E0B; --err:#EF4444; --wait:#6BA6E6;
+  --badge-attn:#E06A50; --attn-bg:#3B2622;
   --sel:#22303F; --sel-line:#33465A; --hover:#2A2C2F; --titlebar:#1A1B1D;
   --accent:var(--blue); --on-accent:#0b1220;
   --shadow-1:0 8px 24px rgba(0,0,0,.5);
@@ -77,12 +79,12 @@ html,body{ margin:0; height:100%; }
 .sec__badge{ margin-left:auto; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--navy); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center; }
 .win[data-1ctheme='dark'] .sec__badge{ color:#0b1220; }
 /* «Ждут ваших действий» — янтарный бейдж (единый сигнал: сайдбар = Чаты + Мои клиенты) */
-.sec__badge--attn{ background:var(--badge-attn); color:#fff; }
+.sec__badge--attn{ background:var(--attn-acc); color:#fff; }
 .win[data-1ctheme='dark'] .sec__badge--attn{ color:#fff; }
 /* строка клиента: подпись действия под статусом, когда клиент ждёт агента */
 .cl-attn{ display:flex; align-items:center; gap:5px; margin-top:4px; font-size:calc(11.5px*var(--scale)); font-weight:600; color:var(--badge-attn); white-space:nowrap; }
 .cl-attn::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--badge-attn); flex:none; }
-.tcheck__b{ min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--badge-attn); color:#fff; font-size:11px; font-weight:700; display:inline-grid; place-items:center; margin-left:4px; }
+.tcheck__b{ min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--attn-acc); color:#fff; font-size:11px; font-weight:700; display:inline-grid; place-items:center; margin-left:4px; }
 /* Чат куратора — рабочее место роли «Куратор» */
 .cur-meta{ font-size:calc(11.5px*var(--scale)); color:var(--muted); margin:3px 0 2px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
 .cur-thread{ border:1px solid var(--line); border-radius:12px; background:var(--card); overflow:hidden; }
@@ -171,7 +173,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 /* КАНОН «Чип статуса» (база — .sup-stbadge): бледный фон + читаемый тёмный текст.
    Лок: тип котировки (.rqtype) — простой цветной ТЕКСТ, НЕ чип. */
 .chip{ display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:5px; font-size:calc(11px*var(--scale)); font-weight:600; background:var(--bg); color:var(--muted); }
-.chip--attn{ background:color-mix(in srgb,var(--warn) 14%,transparent); color:var(--badge-attn); }
+.chip--attn{ background:var(--attn-bg); color:var(--badge-attn); }
 .chip--ok{ background:color-mix(in srgb,var(--ok) 14%,transparent); color:var(--ok-text); }
 .proc-badge .pdot{ width:8px; height:8px; border-radius:50%; background:var(--warn); display:inline-block; flex:none; }
 
@@ -242,6 +244,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .sw__k{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:var(--shadow-2); transition:left .15s; }
 .sw input{ display:none; } .sw input:checked + .sw__t{ background:var(--navy); } .sw input:checked + .sw__t .sw__k{ left:18px; }
 .orow{ display:flex; flex-wrap:wrap; gap:12px 14px; align-items:flex-end; }
+.orow--top{ align-items:flex-start; } /* ряд с хинтом (Email): равнение по верху, хинт висит ниже не двигая соседей */
 .orow+.orow{ margin-top:12px; }
 /* КАНОН «Поле» (эталон 2026-09-19): подпись сверху · контрол 44px/текст ≥16px · слот подсказки/ошибки.
    Новые формы строить только на .of; прочие инпуты (композеры чатов и т.п.) переводим «при касании». */
@@ -278,7 +281,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .rqtype--seg{ color:var(--wait); }   /* Сегмент — синий (наш пул рынка) */
 .rqtype--pool{ color:var(--badge-attn); }  /* Перестраховочный пул — янтарный ТЕКСТ ≥4.5:1 */
 /* «Урегулирование в ЛК Агента» — наше отличие: янтарным (не синей ссылкой), с «?». */
-.rlk{ display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:calc(11px*var(--scale)); color:var(--badge-attn); font-weight:600; }
+.rlk{ display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:calc(11px*var(--scale)); color:var(--wait); font-weight:600; } /* фича-плюс, не «внимание» — спокойный синий (коралл теперь = действие) */
 .rlk svg{ width:12px; height:12px; flex:none; }
 /* КАНОН «?»-триггер: видимая мишень 22px + хит-зона 44px (::after), поповер по клику */
 .rlk-info{ width:22px; height:22px; border-radius:50%; border:1px solid currentColor; background:none; color:inherit; font-size:12px; line-height:1; cursor:pointer; flex:none; position:relative; }
@@ -398,7 +401,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 
 /* ===== Система взаимодействия 1С ===== */
 .sv-btn{ position:relative; }
-.sv-badge{ position:absolute; top:5px; right:5px; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--badge-attn); color:#fff; font-size:10px; font-weight:700; display:grid; place-items:center; }
+.sv-badge{ position:absolute; top:5px; right:5px; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--attn-acc); color:#fff; font-size:10px; font-weight:700; display:grid; place-items:center; }
 .sv{ position:fixed; top:0; right:0; bottom:0; width:370px; max-width:92vw; background:var(--card); border-left:1px solid var(--line);
   box-shadow:-10px 0 30px rgba(0,0,0,.14); transform:translateX(100%); transition:transform .2s ease; z-index:50; display:flex; flex-direction:column; }
 .sv.open{ transform:translateX(0); }
@@ -419,7 +422,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .sv-item__snip{ color:var(--muted); font-size:calc(11.5px*var(--scale)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
 .sv-chip{ display:inline-block; padding:1px 6px; border-radius:4px; background:var(--sel); border:1px solid var(--sel-line); color:var(--navy); font-size:calc(10px*var(--scale)); font-weight:600; }
 .win[data-1ctheme='dark'] .sv-chip{ color:var(--blue); }
-.sv-unread{ min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--badge-attn); color:#fff; font-size:10.5px; font-weight:700; display:grid; place-items:center; flex:none; align-self:center; }
+.sv-unread{ min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--attn-acc); color:#fff; font-size:10.5px; font-weight:700; display:grid; place-items:center; flex:none; align-self:center; }
 .sv-ctx{ padding:8px 14px; background:var(--sel); color:var(--muted); font-size:calc(11px*var(--scale)); border-bottom:1px solid var(--line); }
 .sv__thread{ flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px; background:var(--bg); }
 .svm{ max-width:80%; padding:8px 11px; border-radius:11px; font-size:calc(12px*var(--scale)); line-height:1.4; }
@@ -446,7 +449,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .svtab{ flex:1; padding:9px 8px; border:none; background:none; border-bottom:2px solid transparent; margin-bottom:-1px; color:var(--muted); font:inherit; font-size:calc(12.5px*var(--scale)); font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:7px; }
 .svtab:hover{ color:var(--ink); }
 .svtab--active{ color:var(--navy); border-bottom-color:var(--navy); } .win[data-1ctheme='dark'] .svtab--active{ color:var(--blue); border-bottom-color:var(--blue); }
-.svtab__b{ min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--badge-attn); color:#fff; font-size:10px; font-weight:700; display:inline-grid; place-items:center; }
+.svtab__b{ min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--attn-acc); color:#fff; font-size:10px; font-weight:700; display:inline-grid; place-items:center; }
 /* строка обращения — ориентир: ФИО страхователя, дата последнего действия, вид + объект */
 .svrow__t{ display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
 .svrow__t b{ font-size:calc(13px*var(--scale)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1549,20 +1552,22 @@ function osagoForm(){
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Транспортное средство '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox"/> С прицепом</label></div>'
       +'<div class="osearch"><label class="osearch__lbl" for="oSearchVal">Поиск по</label>'
       +'<div class="pills"><button class="pill pill--active" onclick="searchBy(this,\'plate\')">Гос.номер</button><button class="pill" onclick="searchBy(this,\'vin\')">VIN</button><button class="pill" onclick="searchBy(this,\'body\')">Кузов</button></div>'
-      +'<input id="oSearchVal" value="А307ЕТ124" /><button class="btn btn--primary" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
-      +'<label class="tcheck"><input type="checkbox" onchange="toggleCustomMM(this)"/> Произвольная марка/модель</label></div>'
+      +'<input id="oSearchVal" value="А307ЕТ124" /><button class="btn btn--primary" onclick="toast(\'Ищем ТС в базе…\')">Найти</button></div>'
       +'<div class="orow">'
         +'<div class="of of--narrow"><label for="oPlate">Гос.знак</label><input id="oPlate" value="А307ЕТ124"/></div>'
         +'<label class="ocheck"><input type="checkbox" onchange="toggleOff(this,\'oPlate\')"/> Без номера</label>'
         +'<div class="of of--small"><label for="oCat">Категория</label><select id="oCat"><option>B — легковые</option><option>C — грузовые</option><option>D — автобусы</option></select></div>'
         +'<div class="of of--small" id="mmMake"><label for="oMake">Марка</label><select id="oMake"><option>Kia</option><option>Toyota</option></select></div>'
         +'<div class="of of--small" id="mmModel"><label for="oModel">Модель</label><select id="oModel"><option>Rio</option><option>Sportage</option></select></div>'
+        +'<label class="ocheck"><input type="checkbox" onchange="toggleCustomMM(this)"/> Произвольная марка/модель</label>'
         +'<div class="of of--narrow"><label for="oYear">Год выпуска</label><input id="oYear" value="2022"/></div>'
         +'<div class="of of--narrow"><label for="oPower">Мощность (л.с.)</label><input id="oPower" value="123"/></div>'
       +'</div>'
       +'<div class="orow">'
         +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input id="oVin" class="of--grow" value="Z94C241BAKR123456"/></div></div>'
         +'<div class="of"><label>Документ ТС</label><div class="pills"><button class="pill pill--active" onclick="pill(this)">СТС</button><button class="pill" onclick="pill(this)">ПТС</button><button class="pill" onclick="pill(this)">ЭПТС</button></div></div>'
+      +'</div>'
+      +'<div class="orow">'
         +'<div class="of of--small"><label for="oDocNum">Серия и номер</label><input id="oDocNum" value="99 23 456789"/></div>'
         +'<div class="of of--narrow"><label for="oDocDate">Дата выдачи</label><input id="oDocDate" value="15.05.2022"/></div>'
       +'</div>'
@@ -1583,7 +1588,7 @@ function osagoForm(){
         +'<div class="of of--wide"><label for="oAddr">Адрес регистрации</label><input id="oAddr" value="Минусинск, ул. Гагарина, 7"/></div>'
       +'</div></article>'
     /* Собственник */
-    +'<article class="osec"><div class="osec__head"><span class="osec__title">Собственник <span id="oOwnerBadge">'+badge(true)+'</span></span><span class="sp"></span><label class="ocheck"><input type="checkbox" checked onchange="ownerSame(this)"/> Совпадает со страхователем</label></div>'
+    +'<article class="osec"><div class="osec__head"><span class="osec__title">Собственник <span id="oOwnerBadge">'+badge(true)+'</span></span><label class="ocheck"><input type="checkbox" checked onchange="ownerSame(this)"/> Совпадает со страхователем</label></div>'
       +'<div id="oOwnerFields" hidden><div class="orow">'
         +'<div class="of of--small"><label for="oOwLn">Фамилия</label><input id="oOwLn"/></div>'
         +'<div class="of of--small"><label for="oOwFn">Имя</label><input id="oOwFn"/></div>'
@@ -1617,19 +1622,19 @@ function osagoForm(){
       +'</div></article>'
     /* Параметры */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Параметры и контакты '+badge(true)+'</span></div>'
-      +'<div class="orow">'
+      +'<div class="orow orow--top">'
         +'<div class="of of--narrow"><label for="oStart">Дата начала</label><input id="oStart" value="24.07.2026"/></div>'
         +'<div class="of of--narrow"><label for="oEnd">Дата окончания</label><input id="oEnd" value="23.07.2027"/></div>'
         +'<div class="of of--small"><label for="oPurpose">Цель использования</label><select id="oPurpose"><option>Личная</option><option>Такси</option></select></div>'
         +'<div class="of of--small"><label for="oPhone">Телефон клиента</label><input id="oPhone" value="+7 (902) 555-30-17"/></div>'
-        +'<div class="of of--small"><label for="oEmail">Email (необязательно)</label><input id="oEmail" value="" placeholder="ivanova@mail.ru"/><span class="of__hint">Сюда страховая пришлёт е-полис</span></div>'
+        +'<div class="of of--grow"><label for="oEmail">Email (необязательно)</label><input id="oEmail" value="" placeholder="ivanova@mail.ru"/><span class="of__hint">Сюда страховая пришлёт е-полис</span></div>'
       +'</div></article>'
     +'<div class="osticky">'
       +'<span class="osticky__prog" id="oProg">'+PROG_OK+'</span>'
       +'<span style="flex:1"></span>'
       +'<button class="assist" onclick="toast(\'Ассистент заполнил форму\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z"/></svg>Ассистент, заполни!</button>'
       +'<button class="btn" onclick="toast(\'Черновик сохранён\')">Сохранить черновик</button>'
-      +'<button class="btn btn--primary btn--lg" onclick="osagoCalc()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>Рассчитать в 6 компаниях</button>'
+      +'<button class="btn btn--primary btn--lg" onclick="osagoCalc()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>Рассчитать</button>'
     +'</div>';
 }
 function osagoCalc(){
