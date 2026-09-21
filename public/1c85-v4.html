@@ -20,7 +20,8 @@ html,body{ margin:0; height:100%; }
   /* эталон-слой (свод 2026-09-19): --accent — ЕДИНЫЙ акцент вместо пары navy/blue-в-тёмной.
      Использовать в новых канонах и dark-фиксах; старые правила сворачиваем «при касании» экрана. */
   --accent:var(--navy); --on-accent:#fff;
-  --ctl-h:44px;                  /* закон 44px — контролам главного пути; read-only таблицы — осознанный компакт */
+  --ctl-h:48px;                  /* дизайн-карта 0.1: поля и кнопки не ниже 48px (контролам главного пути; read-only таблицы — осознанный компакт) */
+  --btn-primary:#365D83; --btn-primary-h:#2D5072; --btn-primary-a:#264561; /* джинсовый — основные кнопки (дизайн-карта 0.1) */
   --shadow-1:0 8px 24px rgba(0,0,0,.18); --shadow-2:0 1px 2px rgba(0,0,0,.3);
   --chan-max:#5B21B6; --chan-max-bg:color-mix(in srgb,#6D28D9 12%,transparent); /* канал «Мессенджер МАХ» */
   width:100vw; height:100vh; overflow:hidden;
@@ -194,9 +195,14 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .tcheck{ display:inline-flex; align-items:center; gap:8px; margin-left:auto; font-size:calc(13px*var(--scale)); color:var(--ink); cursor:pointer; }
 .tcheck input{ width:17px; height:17px; }
 /* фазировка «конвертируй при касании»: путь ОСАГО уже на законе 44/16; общие .tcheck/.btn на чужих экранах доводим при их касании */
-#osagoScreen .tcheck{ font-size:calc(13.5px*var(--scale)); min-height:var(--ctl-h); }
+#osagoScreen .tcheck{ font-size:calc(15px*var(--scale)); min-height:var(--ctl-h); }
 #osagoScreen .tcheck input{ width:18px; height:18px; accent-color:var(--accent); }
-#osagoScreen .btn{ height:var(--ctl-h); }
+#osagoScreen .btn{ height:var(--ctl-h); font-size:calc(15px*var(--scale)); }
+#osagoScreen .btn--lg{ font-size:calc(17px*var(--scale)); }
+/* джинсовый primary по дизайн-карте 0.1 («Найти» — основная кнопка); фазировка — при касании остальных экранов */
+#osagoScreen .btn--primary{ background:var(--btn-primary); border-color:var(--btn-primary); color:#fff; }
+#osagoScreen .btn--primary:hover{ background:var(--btn-primary-h); border-color:var(--btn-primary-h); }
+#osagoScreen .btn--primary:active{ background:var(--btn-primary-a); border-color:var(--btn-primary-a); }
 /* индикатор выполнения вместо CSS-спиннера (в 1С — модальный прогресс «Выполняется…») */
 .oprog{ width:240px; height:6px; border-radius:3px; background:var(--line); overflow:hidden; }
 .oprog span{ display:block; width:40%; height:100%; background:var(--navy); border-radius:3px; animation:oprogmove 1.1s ease-in-out infinite; }
@@ -212,7 +218,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 
 /* ===== ОСАГО (как в Angular) ===== */
 .otabs{ display:flex; gap:4px; padding:4px 20px 0; }
-.otab{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 18px; font:inherit; font-size:calc(13.5px*var(--scale)); color:var(--muted); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; }
+.otab{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 18px; font:inherit; font-size:calc(15px*var(--scale)); color:var(--muted); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; }
 .otab--active{ color:var(--navy); border-bottom-color:var(--navy); font-weight:600; }
 .win[data-1ctheme='dark'] .otab--active{ color:var(--blue); border-bottom-color:var(--blue); }
 .osec{ border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:14px 20px 0; background:var(--card); }
@@ -224,10 +230,10 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .badge svg{ width:12px; height:12px; }
 .osec__head .sp{ flex:1; }
 .osearch{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 12px; background:var(--bg); border-radius:8px; margin-bottom:14px; }
-.osearch__lbl{ font-size:calc(13px*var(--scale)); color:var(--muted); }
-.osearch input{ height:var(--ctl-h); padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:max(16px,calc(13.5px*var(--scale))); min-width:180px; }
+.osearch__lbl{ font-size:calc(14px*var(--scale)); color:var(--muted); }
+.osearch input{ height:var(--ctl-h); padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:max(18px,calc(13.5px*var(--scale))); min-width:180px; }
 .pills{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
-.pill{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 14px; font:inherit; font-size:calc(13.5px*var(--scale)); background:var(--card); color:var(--muted); cursor:pointer; border:none; border-right:1px solid var(--line); }
+.pill{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 14px; font:inherit; font-size:calc(15px*var(--scale)); background:var(--card); color:var(--muted); cursor:pointer; border:none; border-right:1px solid var(--line); }
 .pill:last-child{ border-right:none; } /* переключатель 1С: активный сегмент — тинт + подчёркивание (заливку задаёт тема, не navy) */
 .pill--active{ background:var(--sel); color:var(--navy); font-weight:600; box-shadow:inset 0 -2px 0 var(--navy); }
 .win[data-1ctheme='dark'] .pill--active{ color:var(--blue); box-shadow:inset 0 -2px 0 var(--blue); }
@@ -239,15 +245,15 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .orow+.orow{ margin-top:12px; }
 /* КАНОН «Поле» (эталон 2026-09-19): подпись сверху · контрол 44px/текст ≥16px · слот подсказки/ошибки.
    Новые формы строить только на .of; прочие инпуты (композеры чатов и т.п.) переводим «при касании». */
-.of{ display:flex; flex-direction:column; gap:5px; } .of label{ font-size:calc(12.5px*var(--scale)); color:var(--muted); font-weight:600; }
-.of input,.of select{ height:var(--ctl-h); padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:max(16px,calc(14px*var(--scale))); }
+.of{ display:flex; flex-direction:column; gap:5px; } .of label{ font-size:calc(14px*var(--scale)); color:var(--muted); font-weight:600; }
+.of input,.of select{ height:var(--ctl-h); padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:max(18px,calc(14px*var(--scale))); }
 .of input:focus,.of select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
 .of input:disabled,.of select:disabled{ background:var(--bg); color:var(--muted); cursor:not-allowed; }
 .of--err input,.of--err select{ border-color:var(--err); }
 .of__hint{ color:var(--muted); font-size:calc(12.5px*var(--scale)); }
 .of__err{ display:flex; align-items:center; gap:5px; color:var(--err); font-size:calc(11.5px*var(--scale)); font-weight:600; }
 .of--narrow{ width:132px } .of--small{ width:190px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
-.ocheck{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; font-size:calc(13.5px*var(--scale)); color:var(--ink); min-height:var(--ctl-h); cursor:pointer; }
+.ocheck{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; font-size:calc(15px*var(--scale)); color:var(--ink); min-height:var(--ctl-h); cursor:pointer; }
 .ocheck input{ width:18px; height:18px; accent-color:var(--accent); flex:none; }
 /* Составной контрол: сегменты + поле в один ряд под подписью (Идентификатор VIN/№кузова/№шасси). */
 .octl{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
@@ -256,7 +262,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .omore a{ color:var(--blue); font-size:calc(13px*var(--scale)); cursor:pointer; }
 .omore a:hover{ text-decoration:underline; }
 .oactions{ display:flex; align-items:center; gap:12px; padding:16px 20px 24px; flex-wrap:wrap; }
-.assist{ display:inline-flex; align-items:center; gap:8px; height:var(--ctl-h); padding:0 16px; border:1px dashed var(--navy); border-radius:8px; background:none; color:var(--navy); font:inherit; font-size:calc(13.5px*var(--scale)); cursor:pointer; }
+.assist{ display:inline-flex; align-items:center; gap:8px; height:var(--ctl-h); padding:0 16px; border:1px dashed var(--navy); border-radius:8px; background:none; color:var(--navy); font:inherit; font-size:calc(15px*var(--scale)); cursor:pointer; }
 .win[data-1ctheme='dark'] .assist{ color:var(--blue); border-color:var(--blue); }
 .ohint{ color:var(--muted); font-size:calc(12.5px*var(--scale)); margin-left:auto; }
 
@@ -1516,7 +1522,9 @@ function toggleOff(cb,id){ var e=document.getElementById(id); if(!e) return;
   if(cb.checked){ e.dataset.v=e.value; e.value=''; e.disabled=true; } else { e.value=e.dataset.v||''; e.disabled=false; } }
 function driversMode(unlim){ var d=document.getElementById('oDrivers'), n=document.getElementById('oDriversOff');
   if(d) d.hidden=unlim; if(n) n.hidden=!unlim; }
-function driverFrom(who){ var v = who==='other' ? {oDLn:'',oDFn:'',oDMn:'',oDExp:''} : {oDLn:'Смирнова',oDFn:'Анна',oDMn:'Павловна',oDExp:'12.05.2014'};
+function driverFrom(who){ var v = who==='other'
+    ? {oDLn:'',oDFn:'',oDMn:'',oDBd:'',oDLic:'',oDLicD:'',oDExp:''}
+    : {oDLn:'Смирнова',oDFn:'Анна',oDMn:'Павловна',oDBd:'02.09.1981',oDLic:'2414 567890',oDLicD:'12.05.2014',oDExp:'12.05.2014'};
   Object.keys(v).forEach(function(id){ var e=document.getElementById(id); if(e) e.value=v[id]; }); }
 var PROG_OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Все разделы заполнены';
 var PROG_WARN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Остался раздел «Собственник»';
@@ -1541,7 +1549,7 @@ function osagoForm(){
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Транспортное средство '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox"/> С прицепом</label></div>'
       +'<div class="osearch"><label class="osearch__lbl" for="oSearchVal">Поиск по</label>'
       +'<div class="pills"><button class="pill pill--active" onclick="searchBy(this,\'plate\')">Гос.номер</button><button class="pill" onclick="searchBy(this,\'vin\')">VIN</button><button class="pill" onclick="searchBy(this,\'body\')">Кузов</button></div>'
-      +'<input id="oSearchVal" value="А307ЕТ124" /><button class="btn" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
+      +'<input id="oSearchVal" value="А307ЕТ124" /><button class="btn btn--primary" onclick="toast(\'Ищем ТС в базе…\')">Найти</button>'
       +'<label class="tcheck"><input type="checkbox" onchange="toggleCustomMM(this)"/> Произвольная марка/модель</label></div>'
       +'<div class="orow">'
         +'<div class="of of--narrow"><label for="oPlate">Гос.знак</label><input id="oPlate" value="А307ЕТ124"/></div>'
@@ -1553,7 +1561,7 @@ function osagoForm(){
         +'<div class="of of--narrow"><label for="oPower">Мощность (л.с.)</label><input id="oPower" value="123"/></div>'
       +'</div>'
       +'<div class="orow">'
-        +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input id="oVin" class="of--small" value="Z94C241BAKR123456"/></div></div>'
+        +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input id="oVin" class="of--grow" value="Z94C241BAKR123456"/></div></div>'
         +'<div class="of"><label>Документ ТС</label><div class="pills"><button class="pill pill--active" onclick="pill(this)">СТС</button><button class="pill" onclick="pill(this)">ПТС</button><button class="pill" onclick="pill(this)">ЭПТС</button></div></div>'
         +'<div class="of of--small"><label for="oDocNum">Серия и номер</label><input id="oDocNum" value="99 23 456789"/></div>'
         +'<div class="of of--narrow"><label for="oDocDate">Дата выдачи</label><input id="oDocDate" value="15.05.2022"/></div>'
@@ -1581,6 +1589,12 @@ function osagoForm(){
         +'<div class="of of--small"><label for="oOwFn">Имя</label><input id="oOwFn"/></div>'
         +'<div class="of of--grow"><label for="oOwMn">Отчество</label><input id="oOwMn"/></div>'
         +'<div class="of of--narrow"><label for="oOwBd">Дата рождения</label><input id="oOwBd" placeholder="дд.мм.гггг"/></div>'
+      +'</div>'
+      +'<div class="orow">'
+        +'<div class="of of--small"><label for="oOwDocT">Тип документа</label><select id="oOwDocT"><option>Паспорт РФ</option></select></div>'
+        +'<div class="of of--narrow"><label for="oOwPass">Серия и номер</label><input id="oOwPass"/></div>'
+        +'<div class="of of--narrow"><label for="oOwPassD">Дата выдачи</label><input id="oOwPassD" placeholder="дд.мм.гггг"/></div>'
+        +'<div class="of of--wide"><label for="oOwAddr">Адрес регистрации</label><input id="oOwAddr"/></div>'
       +'</div></div></article>'
     /* Водители */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Водители '+badge(true)+'</span><span class="sp"></span><div class="pills"><button class="pill pill--active" onclick="pill(this);driversMode(false)">Ограниченный список</button><button class="pill" onclick="pill(this);driversMode(true)">Без ограничений</button></div></div>'
@@ -1591,7 +1605,13 @@ function osagoForm(){
         +'<div class="of of--small"><label for="oDLn">Фамилия</label><input id="oDLn" value="Смирнова"/></div>'
         +'<div class="of of--small"><label for="oDFn">Имя</label><input id="oDFn" value="Анна"/></div>'
         +'<div class="of of--grow"><label for="oDMn">Отчество</label><input id="oDMn" value="Павловна"/></div>'
-        +'<div class="of of--narrow"><label for="oDExp">Стаж с</label><input id="oDExp" value="12.05.2014"/></div>'
+        +'<div class="of of--narrow"><label for="oDBd">Дата рождения</label><input id="oDBd" value="02.09.1981"/></div>'
+      +'</div>'
+      +'<div class="orow">'
+        +'<div class="of of--grow"><label for="oDDocT">Тип документа</label><select id="oDDocT"><option>Водительское удостоверение</option></select></div>'
+        +'<div class="of of--narrow"><label for="oDLic">Серия и номер</label><input id="oDLic" value="2414 567890"/></div>'
+        +'<div class="of of--narrow"><label for="oDLicD">Дата выдачи В/У</label><input id="oDLicD" value="12.05.2014"/></div>'
+        +'<div class="of of--small"><label for="oDExp">Дата начала стажа</label><input id="oDExp" value="12.05.2014"/></div>'
       +'</div>'
       +'<div class="oactions" style="padding:12px 0 0"><button class="btn" onclick="toast(\'Добавлен водитель\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div>'
       +'</div></article>'
