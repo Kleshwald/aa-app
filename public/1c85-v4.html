@@ -225,9 +225,10 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .win[data-1ctheme='dark'] .otab--active{ color:var(--blue); border-bottom-color:var(--blue); }
 .osec{ border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:14px 20px 0; background:var(--card); }
 .osec__head{ display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
-.osec__title{ font-size:calc(15px*var(--scale)); font-weight:600; color:var(--navy); display:flex; align-items:center; gap:10px; }
+.osec__title{ font-size:calc(17px*var(--scale)); font-weight:650; color:var(--navy); display:flex; align-items:center; gap:10px; }
+#osagoScreen .ptitle{ font-size:calc(19px*var(--scale)); } /* иерархия при вводе 18px: страница 19 > секция 17 > ввод 18/label 14 */
 .win[data-1ctheme='dark'] .osec__title{ color:var(--ink); }
-.badge{ font-size:calc(11.5px*var(--scale)); padding:2px 9px; border-radius:6px; background:var(--line); color:var(--muted); display:inline-flex; align-items:center; gap:5px; }
+.badge{ font-size:calc(12.5px*var(--scale)); padding:3px 10px; border-radius:6px; background:var(--line); color:var(--muted); display:inline-flex; align-items:center; gap:5px; }
 .badge--done{ background:color-mix(in srgb,var(--ok) 15%,transparent); color:var(--ok-text); }
 .badge svg{ width:12px; height:12px; }
 .osec__head .sp{ flex:1; }
@@ -255,18 +256,18 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .of--err input,.of--err select{ border-color:var(--err); }
 .of__hint{ color:var(--muted); font-size:calc(12.5px*var(--scale)); }
 .of__err{ display:flex; align-items:center; gap:5px; color:var(--err); font-size:calc(11.5px*var(--scale)); font-weight:600; }
-.of--narrow{ width:132px } .of--small{ width:190px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
+.of--narrow{ width:132px } .of--small{ width:190px } .of--med{ width:300px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
 .ocheck{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; font-size:calc(15px*var(--scale)); color:var(--ink); min-height:var(--ctl-h); cursor:pointer; }
 .ocheck input{ width:18px; height:18px; accent-color:var(--accent); flex:none; }
 /* Составной контрол: сегменты + поле в один ряд под подписью (Идентификатор VIN/№кузова/№шасси). */
 .octl{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.octl input{ width:212px; } /* ровно под VIN 17 знаков при 18px */
 /* Ссылка «Дополнительные сведения ТС» — голубой (наш цвет ссылок), как в брендбуке 8.5. */
-.omore{ margin-top:12px; }
-.omore a{ color:var(--blue); font-size:calc(13px*var(--scale)); cursor:pointer; }
-.omore a:hover{ text-decoration:underline; }
 .oactions{ display:flex; align-items:center; gap:12px; padding:16px 20px 24px; flex-wrap:wrap; }
-.assist{ display:inline-flex; align-items:center; gap:8px; height:var(--ctl-h); padding:0 16px; border:1px dashed var(--navy); border-radius:8px; background:none; color:var(--navy); font:inherit; font-size:calc(15px*var(--scale)); cursor:pointer; }
-.win[data-1ctheme='dark'] .assist{ color:var(--blue); border-color:var(--blue); }
+.assist{ display:inline-flex; align-items:center; justify-content:center; width:var(--ctl-h); height:var(--ctl-h); flex:none; padding:0; border:1px solid var(--sel-line); border-radius:10px; background:var(--sel); color:var(--navy); cursor:pointer; } /* AI-иконка (владелец 2026-09-21); подпись — в title */
+.assist:hover{ border-color:var(--navy); }
+.win[data-1ctheme='dark'] .assist{ color:var(--blue); }
+.win[data-1ctheme='dark'] .assist:hover{ border-color:var(--blue); }
 .ohint{ color:var(--muted); font-size:calc(12.5px*var(--scale)); margin-left:auto; }
 
 /* ОСАГО результаты — колоночная таблица */
@@ -631,7 +632,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 /* липкая панель действий формы ОСАГО — «Рассчитать» и прогресс всегда на виду */
 .osticky{ position:sticky; bottom:0; z-index:5; display:flex; align-items:center; gap:12px; margin-top:10px; padding:13px 20px; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -4px 16px rgba(0,0,0,.07); flex-wrap:wrap; }
 .win[data-1ctheme='dark'] .osticky{ box-shadow:0 -4px 16px rgba(0,0,0,.32); }
-.osticky__prog{ display:inline-flex; align-items:center; gap:7px; color:var(--ok-text); font-size:calc(13px*var(--scale)); font-weight:600; }
+.osticky__prog{ display:inline-flex; align-items:center; gap:7px; color:var(--ok-text); font-size:calc(14px*var(--scale)); font-weight:600; }
 .osticky__prog--warn{ color:var(--badge-attn); }
 .osticky__prog svg{ width:17px; height:17px; }
 .btn--lg{ height:44px; padding:0 22px; font-size:calc(14.5px*var(--scale)); }
@@ -1564,14 +1565,12 @@ function osagoForm(){
         +'<div class="of of--narrow"><label for="oPower">Мощность (л.с.)</label><input id="oPower" value="123"/></div>'
       +'</div>'
       +'<div class="orow">'
-        +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">№ кузова</button><button class="pill" onclick="pill(this)">№ шасси</button></div><input id="oVin" class="of--grow" value="Z94C241BAKR123456"/></div></div>'
+        +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">Кузов</button><button class="pill" onclick="pill(this)">Шасси</button></div><input id="oVin" value="Z94C241BAKR123456"/></div></div>'
         +'<div class="of"><label>Документ ТС</label><div class="pills"><button class="pill pill--active" onclick="pill(this)">СТС</button><button class="pill" onclick="pill(this)">ПТС</button><button class="pill" onclick="pill(this)">ЭПТС</button></div></div>'
-      +'</div>'
-      +'<div class="orow">'
         +'<div class="of of--small"><label for="oDocNum">Серия и номер</label><input id="oDocNum" value="99 23 456789"/></div>'
         +'<div class="of of--narrow"><label for="oDocDate">Дата выдачи</label><input id="oDocDate" value="15.05.2022"/></div>'
       +'</div>'
-      +'<div class="omore"><a onclick="toast(\'Доп. сведения ТС: расшифровка VIN, изменения конструкции, ограничения\')">Дополнительные сведения ТС</a></div></article>'
+      +'</article>'
     /* Страхователь */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Страхователь '+badge(true)+'</span></div>'
       +'<div class="orow">'
@@ -1613,7 +1612,7 @@ function osagoForm(){
         +'<div class="of of--narrow"><label for="oDBd">Дата рождения</label><input id="oDBd" value="02.09.1981"/></div>'
       +'</div>'
       +'<div class="orow">'
-        +'<div class="of of--grow"><label for="oDDocT">Тип документа</label><select id="oDDocT"><option>Водительское удостоверение</option></select></div>'
+        +'<div class="of of--med"><label for="oDDocT">Тип документа</label><select id="oDDocT"><option>Водительское удостоверение</option></select></div>'
         +'<div class="of of--narrow"><label for="oDLic">Серия и номер</label><input id="oDLic" value="2414 567890"/></div>'
         +'<div class="of of--narrow"><label for="oDLicD">Дата выдачи В/У</label><input id="oDLicD" value="12.05.2014"/></div>'
         +'<div class="of of--small"><label for="oDExp">Дата начала стажа</label><input id="oDExp" value="12.05.2014"/></div>'
@@ -1632,7 +1631,7 @@ function osagoForm(){
     +'<div class="osticky">'
       +'<span class="osticky__prog" id="oProg">'+PROG_OK+'</span>'
       +'<span style="flex:1"></span>'
-      +'<button class="assist" onclick="toast(\'Ассистент заполнил форму\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z"/></svg>Ассистент, заполни!</button>'
+      +'<button class="assist" onclick="toast(\'Ассистент заполнил форму\')" title="Ассистент заполнит форму за вас" aria-label="Ассистент заполнит форму за вас"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M11 4l1.7 4.6L17.3 10.3l-4.6 1.7L11 16.6l-1.7-4.6L4.7 10.3l4.6-1.7Z"/><path d="M18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8Z"/></svg></button>'
       +'<button class="btn" onclick="toast(\'Черновик сохранён\')">Сохранить черновик</button>'
       +'<button class="btn btn--primary btn--lg" onclick="osagoCalc()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>Рассчитать</button>'
     +'</div>';
