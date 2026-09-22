@@ -198,15 +198,15 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 /* флажок вместо кастомного тумблера (в 1С — нативный «Флажок») */
 .tcheck{ display:inline-flex; align-items:center; gap:8px; margin-left:auto; font-size:calc(13px*var(--scale)); color:var(--ink); cursor:pointer; }
 .tcheck input{ width:17px; height:17px; }
-/* фазировка «конвертируй при касании»: путь ОСАГО уже на законе 44/16; общие .tcheck/.btn на чужих экранах доводим при их касании */
-#osagoScreen .tcheck{ font-size:calc(15px*var(--scale)); min-height:var(--ctl-h); }
-#osagoScreen .tcheck input{ width:18px; height:18px; accent-color:var(--accent); }
-#osagoScreen .btn, .mdl .btn{ height:var(--ctl-h); font-size:calc(15px*var(--scale)); }
-#osagoScreen .btn--lg, .mdl .btn--lg{ font-size:calc(17px*var(--scale)); }
+/* фазировка «конвертируй при касании»: пути ОСАГО и Здоровья уже на законе 44/16; общие .tcheck/.btn на чужих экранах доводим при их касании */
+#osagoScreen .tcheck, #healthScreen .tcheck{ font-size:calc(15px*var(--scale)); min-height:var(--ctl-h); }
+#osagoScreen .tcheck input, #healthScreen .tcheck input{ width:18px; height:18px; accent-color:var(--accent); }
+#osagoScreen .btn, #healthScreen .btn, #financeScreen .btn, .mdl .btn{ height:var(--ctl-h); font-size:calc(15px*var(--scale)); }
+#osagoScreen .btn--lg, #healthScreen .btn--lg, .mdl .btn--lg{ font-size:calc(17px*var(--scale)); }
 /* джинсовый primary по дизайн-карте 0.1 («Найти» — основная кнопка); фазировка — при касании остальных экранов; .mdl — модалы пути */
-#osagoScreen .btn--primary, .mdl .btn--primary{ background:var(--btn-primary); border-color:var(--btn-primary); color:#fff; }
-#osagoScreen .btn--primary:hover, .mdl .btn--primary:hover{ background:var(--btn-primary-h); border-color:var(--btn-primary-h); }
-#osagoScreen .btn--primary:active, .mdl .btn--primary:active{ background:var(--btn-primary-a); border-color:var(--btn-primary-a); }
+#osagoScreen .btn--primary, #healthScreen .btn--primary, #financeScreen .btn--primary, .mdl .btn--primary{ background:var(--btn-primary); border-color:var(--btn-primary); color:#fff; }
+#osagoScreen .btn--primary:hover, #healthScreen .btn--primary:hover, #financeScreen .btn--primary:hover, .mdl .btn--primary:hover{ background:var(--btn-primary-h); border-color:var(--btn-primary-h); }
+#osagoScreen .btn--primary:active, #healthScreen .btn--primary:active, #financeScreen .btn--primary:active, .mdl .btn--primary:active{ background:var(--btn-primary-a); border-color:var(--btn-primary-a); }
 /* индикатор выполнения вместо CSS-спиннера (в 1С — модальный прогресс «Выполняется…») */
 .oprog{ width:240px; height:6px; border-radius:3px; background:var(--line); overflow:hidden; }
 .oprog span{ display:block; width:40%; height:100%; background:var(--navy); border-radius:3px; animation:oprogmove 1.1s ease-in-out infinite; }
@@ -415,10 +415,17 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .doc{ display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--line); font-size:calc(14px*var(--scale)); } .doc:last-child{ border-bottom:none; }
 .doc svg{ color:var(--navy); flex:none; } .doc a{ margin-left:auto; color:var(--blue); cursor:pointer; }
 .hp-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; } @media (max-width:680px){ .hp-grid{ grid-template-columns:1fr; } }
-.hp-card{ border:1px solid var(--line); border-radius:10px; padding:18px; cursor:pointer; display:flex; flex-direction:column; gap:8px; }
+.hp-card{ position:relative; border:1px solid var(--line); border-radius:10px; padding:18px; cursor:pointer; display:flex; flex-direction:column; gap:8px; }
 .hp-card:hover{ border-color:var(--navy); background:var(--hover); }
 .hp-card .ico{ width:44px; height:44px; border-radius:10px; background:var(--sel); display:grid; place-items:center; color:var(--navy); } .win[data-1ctheme='dark'] .hp-card .ico{ color:var(--blue); }
 .hp-card b{ font-size:calc(14px*var(--scale)); } .hp-card span{ color:var(--muted); font-size:calc(12px*var(--scale)); }
+/* Здоровье: выбранный продукт + метрики в липкой панели оформления */
+.hp-card--active{ border-color:var(--accent); background:var(--sel); box-shadow:inset 0 0 0 1px var(--accent); }
+.hp-card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.hp-card__check{ position:absolute; top:12px; right:12px; width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; }
+.hl-metric{ display:flex; flex-direction:column; gap:1px; }
+.hl-metric span{ color:var(--muted); font-size:calc(11.5px*var(--scale)); }
+.hl-metric b{ font-size:calc(16px*var(--scale)); font-variant-numeric:tabular-nums; }
 .chat{ display:flex; flex-direction:column; height:calc(100vh - 82px); }
 .chat__head{ display:flex; align-items:center; gap:12px; padding:14px 20px; background:var(--bg); border-bottom:1px solid var(--line); }
 .chat__av{ width:38px; height:38px; border-radius:50%; background:var(--navy); color:#fff; display:grid; place-items:center; font-weight:600; font-size:13px; }
@@ -2048,10 +2055,17 @@ function screenContract(i){
   +'</div>';
 
   // Уже купленное (addon = МиниКАСКО у ОСАГО) НЕ предлагаем снова; счётчик = реальность.
+  // Договору «Здоровья» — допы из мира здоровья (канон Angular policies.handler), не автопродукты.
   var offers=[];
-  if(!(addon&&addon.name==='МиниКАСКО')) offers.push(ccross('shield','МиниКАСКО','Ремонт при мелком ДТП без справок','2 450 ₽'));
-  if(!(addon&&addon.name==='Юрист поможет')) offers.push(ccross('law','Юрист поможет','Юрподдержка при спорах на дороге','от 500 ₽'));
-  offers.push(ccross('heart','НС при ДТП','Защита водителя и пассажиров на 100 000 ₽','от 800 ₽'));
+  if(c.o==='Здоровье'){
+    if(c.p!=='Антиклещ') offers.push(ccross('heart','Антиклещ','Защита от укуса клеща','от 350 ₽'));
+    if(c.p!=='НС Спорт') offers.push(ccross('shield','НС Спорт','Травмы на тренировках и соревнованиях','от 900 ₽'));
+    if(c.p!=='Несч. случай') offers.push(ccross('heart','Несчастный случай','Травмы, госпитализация, инвалидность','от 390 ₽'));
+  }else{
+    if(!(addon&&addon.name==='МиниКАСКО')) offers.push(ccross('shield','МиниКАСКО','Ремонт при мелком ДТП без справок','2 450 ₽'));
+    if(!(addon&&addon.name==='Юрист поможет')) offers.push(ccross('law','Юрист поможет','Юрподдержка при спорах на дороге','от 500 ₽'));
+    offers.push(ccross('heart','НС при ДТП','Защита водителя и пассажиров на 100 000 ₽','от 800 ₽'));
+  }
   var added=addon?1:0;
   var cross='<div class="card"><div class="cross-head"><h3>Предложите клиенту ещё</h3><span class="cross-limit">Добавлено '+added+' из 3 — можно ещё '+(3-added)+'</span></div>'
     +'<p class="card__lead">'+(contractIssued?'Клиент рядом и в настрое — лучший момент допродать. Минута, без новой анкеты.':'Один звонок клиенту — плюс к доходу и его защите. Оформление займёт минуту.')+'</p>'
@@ -2068,10 +2082,247 @@ function screenContract(i){
 }
 
 /* ===== прочие экраны ===== */
-function screenHealth(){
-  var cards=''; HEALTH.forEach(function(h){ cards+='<div class="hp-card" onclick="toast(\''+h.t+'\')"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.4-7 10-7 10z"/></svg></span><b>'+h.t+'</b><span>'+h.s+'</span></div>'; });
-  return '<div class="screen active"><div class="ptitle">Здоровье</div><div class="psub">Выберите продукт</div><div class="pad"><div class="hp-grid">'+cards+'</div></div></div>';
+/* ===== Здоровье: продукт+параметры → расчёт → предложения → оформление → оплата.
+   Канон пути = ОСАГО (лоадер .oprog, строки предложений .roffer, оплата «платит клиент»,
+   полис РОЖДАЕТСЯ строкой в «Мои клиенты»). Локи котировок: скидка клиенту подписана
+   «Скидка из комиссии» (0 / −15%), у части СК цена фиксированная (Антиклещ у Ренессанса),
+   КВ в рублях не показываем. Источник логики — Angular src/app/features/health. */
+var HL_CARRIERS={
+  accident:[{sk:'Ренессанс',rate:0.0078,disc:true},{sk:'Согласие',rate:0.0085,disc:true}],
+  sport:[{sk:'Ренессанс',rate:0.011,disc:true},{sk:'Согласие',rate:0.0125,disc:true},{sk:'Югория',rate:0.013,disc:true}],
+  tick:[{sk:'Ренессанс',rate:0.004,disc:false},{sk:'Югория',rate:0.0045,disc:true}]
+};
+var HL_TERMS={year:['Год',12],'6m':['6 месяцев',6],'3m':['3 месяца',3]};
+var HL_SUMS=[50000,100000,150000,300000,500000,1000000];
+var HL={prod:'accident',grp:false,cat:'child',term:'year',sum:50000,start:'2026-07-24',count:2,disc:{},sel:null,selPrice:0,insN:1,holder:'',phone:'',insCnt:1};
+var HL_PAY_TIMER=null;
+function hlFmt(n){ return n.toLocaleString('ru-RU'); }
+function hlIco(id){
+  if(id==='sport') return '<path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v1a3 3 0 0 0 3 3"/><path d="M17 6h3v1a3 3 0 0 1-3 3"/><path d="M12 13v3"/><path d="M9.5 20h5l-1-4h-3z"/>';
+  if(id==='tick') return '<ellipse cx="12" cy="13.5" rx="4" ry="5"/><circle cx="12" cy="6.5" r="2"/><path d="M8.2 11l-3-1.2"/><path d="M8 14H4"/><path d="M8.2 17l-3 1.2"/><path d="M15.8 11l3-1.2"/><path d="M16 14h4"/><path d="M15.8 17l3 1.2"/>';
+  return '<path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M12 9v6"/><path d="M9 12h6"/>';
 }
+function hlMeta(){ for(var i=0;i<HEALTH.length;i++){ if(HEALTH[i].id===HL.prod) return HEALTH[i]; } return HEALTH[0]; }
+function hlCount(){ return HL.grp?Math.max(2,HL.count):1; }
+function hlEnd(){ var d=new Date(HL.start+'T00:00:00'); d.setMonth(d.getMonth()+HL_TERMS[HL.term][1]); d.setDate(d.getDate()-1); return d; }
+function hlEndRu(){ var d=hlEnd(); return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); }
+function hlDateRu(iso){ var p=(iso||'').split('-'); return p.length===3?(p[2]+'.'+p[1]+'.'+p[0]):iso; }
+function screenHealth(){ return '<div class="screen active" id="healthScreen">'+healthParams()+'</div>'; }
+function healthParams(){
+  var cards=''; HEALTH.forEach(function(h){ var on=h.id===HL.prod;
+    cards+='<div class="hp-card'+(on?' hp-card--active':'')+'" role="button" tabindex="0" aria-pressed="'+on+'" onclick="hlSetProd(\''+h.id+'\')">'
+      +(on?'<span class="hp-card__check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>':'')
+      +'<span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+hlIco(h.id)+'</svg></span><b>'+h.t+'</b><span>'+h.s+'</span></div>'; });
+  var terms=''; for(var t in HL_TERMS) terms+='<option value="'+t+'"'+(HL.term===t?' selected':'')+'>'+HL_TERMS[t][0]+'</option>';
+  var sums=''; HL_SUMS.forEach(function(s){ sums+='<option value="'+s+'"'+(HL.sum===s?' selected':'')+'>'+hlFmt(s)+' ₽</option>'; });
+  return '<div class="ptitle">Здоровье</div>'
+    +'<div class="pad" style="padding-bottom:0"><div class="cap" style="margin-bottom:10px">Выберите продукт — рассчитаем цены у страховых компаний</div><div class="hp-grid">'+cards+'</div></div>'
+    +'<article class="osec"><div class="osec__head"><span class="osec__title">Параметры · '+hlMeta().t+' '+badge(true)+'</span></div>'
+      +'<div class="orow">'
+        +'<div class="of"><label>Кого страхуем</label><div class="pills">'
+          +'<button class="pill'+(HL.grp?'':' pill--active')+'" onclick="pill(this);hlGrp(false)">Индивидуальный</button>'
+          +'<button class="pill'+(HL.grp?' pill--active':'')+'" onclick="pill(this);hlGrp(true)">Для группы от 2-х человек</button></div></div>'
+        +'<div class="of"><label>Возраст</label><div class="pills">'
+          +'<button class="pill'+(HL.cat==='child'?' pill--active':'')+'" onclick="pill(this);HL.cat=\'child\'">Ребёнок (2–16 лет)</button>'
+          +'<button class="pill'+(HL.cat==='adult'?' pill--active':'')+'" onclick="pill(this);HL.cat=\'adult\'">Взрослый (16–70 лет)</button></div></div>'
+      +'</div>'
+      +'<div class="orow">'
+        +'<div class="of of--small"><label for="hlTerm">Срок страхования</label><select id="hlTerm" onchange="HL.term=this.value;hlEndSync()">'+terms+'</select></div>'
+        +'<div class="of"><label for="hlStart">Дата начала</label><input type="date" id="hlStart" value="'+HL.start+'" onchange="if(this.value)HL.start=this.value;hlEndSync()"/></div>'
+        +'<div class="of of--narrow"><label for="hlEnd">Дата окончания</label><input id="hlEnd" value="'+hlEndRu()+'" disabled/></div>'
+        +'<div class="of of--narrow" id="hlCountWrap" style="'+(HL.grp?'':'display:none')+'"><label for="hlCount">Количество</label><input id="hlCount" type="number" min="2" value="'+HL.count+'" onchange="HL.count=Math.max(2,parseInt(this.value)||2);this.value=HL.count"/></div>'
+        +'<div class="of of--small"><label for="hlSum">Страховая сумма</label><select id="hlSum" onchange="HL.sum=parseInt(this.value)">'+sums+'</select></div>'
+      +'</div></article>'
+    +'<div class="osticky">'
+      +'<span class="osticky__prog">'+PROG_OK+'</span><span style="flex:1"></span>'
+      +'<button class="btn" onclick="toast(\'Черновик сохранён\')">Сохранить черновик</button>'
+      +'<button class="btn btn--primary btn--lg" onclick="healthCalc()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>Рассчитать</button>'
+    +'</div>';
+}
+function hlSetProd(id){ HL.prod=id; HL.disc={}; var s=document.getElementById('healthScreen'); if(s) s.innerHTML=healthParams(); }
+function hlGrp(g){ HL.grp=g; var w=document.getElementById('hlCountWrap'); if(w) w.style.display=g?'':'none'; }
+function hlEndSync(){ var e=document.getElementById('hlEnd'); if(e) e.value=hlEndRu(); }
+function healthCalc(){
+  var w=document.getElementById('healthScreen'); if(!w) return;
+  w.innerHTML='<div class="ptitle">Расчёт — '+hlMeta().t+'</div><div class="calc-loader"><div class="oprog"><span></span></div><p>Выполняется расчёт в страховых — обычно до минуты</p></div>';
+  setTimeout(healthResults, 1600);
+}
+function hlOffers(){
+  var tf=HL_TERMS[HL.term][1]/12, cf=HL.cat==='adult'?1.1:1, n=hlCount();
+  return HL_CARRIERS[HL.prod].map(function(c){
+    return {sk:c.sk,rate:c.rate,disc:c.disc,base:Math.max(150,Math.round(HL.sum*c.rate*tf*cf*n))};
+  }).sort(function(a,b){ return a.base-b.base; });
+}
+function hlPrice(o){ var d=o.disc?(HL.disc[o.sk]||0):0; return Math.round(o.base*(1-d/100)); }
+function healthResults(){
+  var w=document.getElementById('healthScreen'); if(!w) return;
+  var offers=hlOffers();
+  var min=offers.length?Math.min.apply(null,offers.map(hlPrice)):0;
+  var rows='';
+  offers.forEach(function(o){
+    var d=o.disc?(HL.disc[o.sk]||0):0, tot=hlPrice(o), best=tot===min; /* «Лучшая цена» — у ВСЕХ предложений с минимальной ценой */
+    var discCell=o.disc
+      ? '<div><div class="pills">'
+        +'<button class="pill'+(d?'':' pill--active')+'" onclick="hlDisc(\''+o.sk+'\',0)">Без скидки</button>'
+        +'<button class="pill'+(d?' pill--active':'')+'" onclick="hlDisc(\''+o.sk+'\',15)">−15%</button></div></div>'
+      : '<div><span class="cap">Цена фиксированная — скидка из комиссии недоступна</span></div>';
+    rows+='<div class="roffer'+(best?' roffer--best':'')+'">'
+      +skLogoImg(o.sk,'rlogo')
+      +'<div><div class="rcarrier">'+o.sk+'</div>'
+        +(best?'<span class="rbest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Лучшая цена</span>':'')+'</div>'
+      +'<div><span class="rprice">'+hlFmt(o.base)+' ₽</span><button class="rprice-info" onclick="hlPricePop(event,\''+o.sk+'\')" title="Как рассчитана цена">?</button></div>'
+      +discCell
+      +'<div><span class="rtotal">'+hlFmt(tot)+' ₽</span>'+(d?'<span class="rpay" style="color:var(--ok-text)">Клиент сэкономит '+hlFmt(o.base-tot)+' ₽</span>':'<span class="rpay">'+HL_TERMS[HL.term][0]+' · '+hlCount()+' чел.</span>')+'</div>'
+      +'<button class="btn btn--primary btn--lg" onclick="healthIssue(\''+o.sk+'\')">Оформить</button>'
+    +'</div>';
+  });
+  w.innerHTML='<div class="ptitle">Результаты расчёта — '+hlMeta().t+'</div>'
+    +'<div class="psub">Отсортированы по цене — самое выгодное сверху · Страховая защита '+hlFmt(HL.sum)+' ₽ · Срок: '+HL_TERMS[HL.term][0]+(hlCount()>1?' · Застрахованных: '+hlCount():'')+'</div>'
+    +'<div class="roffers-scroll"><div class="rhead"><span></span><span>Страховая компания</span><span>Цена</span><span>Скидка из комиссии</span><span>Итого</span><span></span></div>'
+    +'<div class="roffers">'+rows+'</div></div>'
+    +'<div class="rback"><button class="oback" onclick="go(\'health\')">← Вернуться к параметрам</button></div>';
+}
+function hlDisc(sk,pct){ HL.disc[sk]=pct; healthResults(); }
+function hlPricePop(ev,sk){
+  var o=null; hlOffers().forEach(function(x){ if(x.sk===sk) o=x; }); if(!o) return;
+  var d=o.disc?(HL.disc[o.sk]||0):0, tf=HL_TERMS[HL.term][1]/12, cf=HL.cat==='adult'?1.1:1;
+  openPop(ev,
+    '<div class="pop__h">Из чего складывается цена</div>'
+    +'<div class="pop__r"><span>Страховая сумма</span><b>'+hlFmt(HL.sum)+' ₽</b></div>'
+    +'<div class="pop__r"><span>Тариф · '+o.sk+'</span><b>'+(o.rate*100).toFixed(2).replace('.',',')+' %</b></div>'
+    +'<div class="pop__r"><span>× Срок · '+HL_TERMS[HL.term][0]+'</span><b>'+String(tf).replace('.',',')+'</b></div>'
+    +'<div class="pop__r"><span>× Категория · '+(HL.cat==='adult'?'Взрослый':'Ребёнок')+'</span><b>'+String(cf).replace('.',',')+'</b></div>'
+    +'<div class="pop__r"><span>× Застрахованных</span><b>'+hlCount()+'</b></div>'
+    +(d?'<div class="pop__r"><span>− Скидка из комиссии '+d+'%</span><b>−'+hlFmt(o.base-hlPrice(o))+' ₽</b></div>':'')
+    +'<div class="pop__r pop__r--sum"><span>'+hlMeta().t+'</span><b>'+hlFmt(hlPrice(o))+' ₽</b></div>'
+    +'<div class="pop__note">Тариф у каждой СК свой — отсюда разница цен. «Скидка из комиссии» уменьшает цену клиенту за счёт вознаграждения агента.</div>');
+}
+function hlInsBlock(n,v){
+  v=v||{ln:'',fn:'',mn:'',bd:''};
+  return '<div class="odrv"'+(n===1?' style="margin-top:0;padding-top:0;border-top:none"':'')+' data-ins>'
+    +'<div class="odrv__head"><span class="cap">Застрахованный '+n+'</span>'+(n>1?'<button class="odrv__del" onclick="hlDelIns(this)">Убрать</button>':'')+'</div>'
+    +'<div class="orow">'
+      +'<div class="of of--small"><label for="hI'+n+'Ln">Фамилия</label><input id="hI'+n+'Ln" value="'+v.ln+'"/></div>'
+      +'<div class="of of--small"><label for="hI'+n+'Fn">Имя</label><input id="hI'+n+'Fn" value="'+v.fn+'"/></div>'
+      +'<div class="of of--grow"><label for="hI'+n+'Mn">Отчество</label><input id="hI'+n+'Mn" value="'+v.mn+'"/></div>'
+      +'<div class="of"><label for="hI'+n+'Bd">Дата рождения</label><input type="date" id="hI'+n+'Bd" value="'+v.bd+'"/></div>'
+    +'</div></div>';
+}
+function healthIssue(sk){
+  var w=document.getElementById('healthScreen'); if(!w) return;
+  HL.sel=sk;
+  var o=null; hlOffers().forEach(function(x){ if(x.sk===sk) o=x; });
+  HL.selPrice=o?hlPrice(o):0;
+  /* застрахованный №1 префилл по категории: ребёнок (дефолт) или сам страхователь */
+  var ins1=HL.cat==='child'?{ln:'Павлов',fn:'Артём',mn:'Сергеевич',bd:'2015-06-14'}:{ln:'Павлова',fn:'Ирина',mn:'Сергеевна',bd:'1985-03-12'};
+  var n=hlCount(); HL.insN=n;
+  var blocks=hlInsBlock(1,ins1);
+  for(var k=2;k<=n;k++) blocks+=hlInsBlock(k,null);
+  w.innerHTML='<div class="ptitle">'+hlMeta().t+' — оформление</div>'
+    +'<article class="osec"><div class="osec__head"><span class="osec__title">Параметры полиса '+badge(true)+'</span></div>'
+      +'<div class="orow">'
+        +'<div class="of of--narrow"><label>Страховая сумма</label><input value="'+hlFmt(HL.sum)+' ₽" disabled/></div>'
+        +'<div class="of of--narrow"><label>Срок</label><input value="'+HL_TERMS[HL.term][0]+'" disabled/></div>'
+        +'<div class="of of--narrow"><label>Дата начала</label><input value="'+hlDateRu(HL.start)+'" disabled/></div>'
+        +'<div class="of of--narrow"><label>Дата окончания</label><input value="'+hlEndRu()+'" disabled/></div>'
+      +'</div></article>'
+    +'<article class="osec"><div class="osec__head"><span class="osec__title">Страхователь '+badge(true)+'</span></div>'
+      +'<div class="orow">'
+        +'<div class="of of--small"><label for="hLn">Фамилия</label><input id="hLn" value="Павлова"/></div>'
+        +'<div class="of of--small"><label for="hFn">Имя</label><input id="hFn" value="Ирина"/></div>'
+        +'<div class="of of--grow"><label for="hMn">Отчество</label><input id="hMn" value="Сергеевна"/></div>'
+        +'<label class="ocheck"><input type="checkbox" onchange="toggleOff(this,\'hMn\')"/> Без отчества</label>'
+        +'<div class="of"><label for="hBd">Дата рождения</label><input type="date" id="hBd" value="1985-03-12"/></div>'
+      +'</div>'
+      +'<div class="orow">'
+        +'<div class="of of--small"><label for="hDocT">Тип документа</label><select id="hDocT"><option>Паспорт РФ</option></select></div>'
+        +'<div class="of of--narrow"><label for="hPass">Серия и номер</label><input id="hPass" value="0409 552314"/></div>'
+        +'<div class="of"><label for="hPassD">Дата выдачи</label><input type="date" id="hPassD" value="2005-04-18"/></div>'
+        +'<div class="of of--wide"><label for="hAddr">Адрес регистрации</label><input id="hAddr" value="Минусинск, ул. Ленина, 14"/></div>'
+      +'</div>'
+      +'<div class="orow">'
+        +'<div class="of of--small"><label for="hPhone">Телефон клиента</label><input type="tel" id="hPhone" value="+7 (923) 411-58-06"/></div>'
+        +'<div class="of of--grow"><label for="hEmail">Email (необязательно)</label><input type="email" id="hEmail" value="" placeholder="pavlova@mail.ru"/></div>'
+      +'</div></article>'
+    +'<article class="osec"><div class="osec__head"><span class="osec__title">Застрахованные '+badge(true)+'</span><span class="sp"></span><label class="ocheck"><input type="checkbox" onchange="hlSameAs(this)"/> Страхователь = застрахованный</label></div>'
+      +'<div id="hlInsList">'+blocks+'</div>'
+      +'<div class="oactions" style="padding:12px 0 0"><button class="btn" onclick="hlAddIns()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить застрахованного</button></div>'
+    +'</article>'
+    +'<div class="osticky">'
+      +skLogoImg(sk,'rlogo')
+      +'<div class="hl-metric"><span>Стоимость полиса · '+sk+'</span><b>'+hlFmt(HL.selPrice)+' ₽</b></div>'
+      +'<div class="hl-metric"><span>Застрахованы</span><b id="hlInsCount">'+n+' чел.</b></div>'
+      +'<span style="flex:1"></span>'
+      +'<button class="btn" onclick="healthResults()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>К предложениям</button>'
+      +'<button class="btn" onclick="toast(\'Черновик сохранён\')">Сохранить черновик</button>'
+      +'<button class="btn btn--primary btn--lg" onclick="healthPay()">Оплатить '+hlFmt(HL.selPrice)+' ₽</button>'
+    +'</div>';
+}
+function hlAddIns(){ HL.insN++; var t=document.createElement('div'); t.innerHTML=hlInsBlock(HL.insN,null); document.getElementById('hlInsList').appendChild(t.firstChild); hlInsCountSync(); }
+function hlDelIns(btn){ var b=btn.closest('[data-ins]'); if(b) b.remove(); hlInsCountSync(); }
+function hlInsCountSync(){ var n=document.querySelectorAll('#hlInsList [data-ins]').length; var c=document.getElementById('hlInsCount'); if(c) c.textContent=n+' чел.'; }
+function hlSameAs(cb){
+  if(!cb.checked) return;
+  var g=function(id){ var e=document.getElementById(id); return e?e.value:''; };
+  var first=document.querySelector('#hlInsList [data-ins]'); if(!first) return;
+  var ins=first.querySelectorAll('input');
+  if(ins.length>3){ ins[0].value=g('hLn'); ins[1].value=g('hFn'); ins[2].value=g('hMn'); ins[3].value=g('hBd'); }
+}
+/* ── Оплата: канон ОСАГО «платит клиент» (эквайринг у СК). У СК Здоровья счёта нет —
+   два пути: «клиент рядом» и ссылка WhatsApp/СМС. ── */
+function healthPay(){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value:''; };
+  HL.holder=[g('hLn'),g('hFn'),g('hMn')].filter(Boolean).join(' ')||'Павлова Ирина Сергеевна';
+  HL.phone=g('hPhone')||'+7 (923) 411-58-06';
+  HL.insCnt=document.querySelectorAll('#hlInsList [data-ins]').length||1;
+  hlPayScreen();
+}
+function hlPayScreen(){
+  var w=document.getElementById('healthScreen'); if(!w) return;
+  if(HL_PAY_TIMER){ clearTimeout(HL_PAY_TIMER); HL_PAY_TIMER=null; }
+  w.innerHTML='<div class="ptitle">Оплата полиса — платит клиент</div>'
+    +'<div class="pay"><div class="pay__card">'
+    +'<div class="pay__amount">'+hlFmt(HL.selPrice)+' ₽</div>'
+    +'<div class="pay__carrier">'+HL.sel+' · '+hlMeta().t+'<br>'+HL.holder+' · застрахованных: '+HL.insCnt+'</div>'
+    +'<div class="pay__act">'
+      +'<button class="btn btn--primary btn--lg" onclick="hlPayNow()">Клиент оплатит сейчас</button>'
+      +'<div class="cap">Поверните экран к клиенту — он вводит данные СВОЕЙ карты на странице банка.</div>'
+      +'<button class="btn btn--lg" onclick="hlPayLink()">Отправить ссылку на оплату</button>'
+      +'<div class="cap">WhatsApp или СМС — клиент оплатит со своего телефона, полис появится после оплаты.</div>'
+    +'</div>'
+    +'<button class="oback" onclick="healthIssue(HL.sel)">← Вернуться к оформлению</button></div></div>';
+}
+function hlPayNow(){
+  var w=document.getElementById('healthScreen'); if(!w) return;
+  w.innerHTML='<div class="ptitle">Оплата полиса — платит клиент</div>'
+    +'<div class="pay"><div class="pay__card">'
+    +'<div class="pay__amount">'+hlFmt(HL.selPrice)+' ₽</div><div class="pay__carrier">Страница оплаты банка · '+HL.sel+'</div>'
+    +'<div class="oprog" style="margin:10px auto"><span></span></div>'
+    +'<p class="pay__step">Клиент вводит данные своей карты…</p>'
+    +'<p class="pay__hint">Не закрывайте окно во время оплаты.</p>'
+    +'<button class="oback" onclick="hlPayScreen()">Отменить оплату</button></div></div>';
+  HL_PAY_TIMER=setTimeout(hlIssued,2200);
+}
+function hlBirth(st){
+  var names={accident:'Несч. случай',sport:'НС Спорт',tick:'Антиклещ'};
+  var num='РРР-405'+(60000+Math.floor(Math.random()*39999));
+  /* период считаем от даты оформления в демо-мире (27.08.2026, как у ОСАГО), не от даты из формы —
+     иначе на договоре «конец раньше года» */
+  var u=new Date(2026,7,27); u.setMonth(u.getMonth()+HL_TERMS[HL.term][1]); u.setDate(u.getDate()-1);
+  var untilRu=String(u.getDate()).padStart(2,'0')+'.'+String(u.getMonth()+1).padStart(2,'0')+'.'+u.getFullYear();
+  var c={ d:'27.08.2026', until:untilRu, phone:HL.phone, n:HL.holder, o:'Здоровье', sub:'', num:num, p:names[HL.prod]||'НС',
+    price:hlFmt(HL.selPrice), st:st, sti:st==='ok'?'check':'clock', stl:st==='ok'?'Оформлен':'Ожидает оплаты', sk:HL.sel,
+    addonName:null, addonPrice:0 };
+  CLIENTS.unshift(c);
+  /* индексные привязки: заявки SUP держат policyIdx — сдвиг обязателен (канон osagoBirth) */
+  SUP.forEach(function(s){ if(typeof s.policyIdx==='number') s.policyIdx++; });
+}
+function hlIssued(){
+  HL_PAY_TIMER=null;
+  if(!document.getElementById('healthScreen')) return; /* агент ушёл с экрана оплаты — не дёргаем витрину */
+  hlBirth('ok'); openContract(0,true); /* лок issue→contract: после оплаты сразу договор */
+}
+function hlPayLink(){ hlBirth('pay'); toast('Ссылка на оплату отправлена клиенту'); go('clients'); }
 function screenProlongation(){
   var rows=''; PROL.forEach(function(p){ rows+='<tr class="click" onclick="toast(\'Продлить '+p.n+'\')"><td class="date">'+p.d+'</td><td>'+p.n+'</td><td>'+p.o+'</td><td><span class="polnum">'+p.num+'</span></td><td class="num">'+p.price+'</td><td><span class="st st--'+p.st+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><polyline points="12 8 12 12 15 14"/></svg>'+p.stl+'</span></td><td class="company">'+p.sk+'</td><td><button class="btn btn--primary btn--sm" onclick="event.stopPropagation();toast(\'Пролонгация запущена\')">Продлить</button></td></tr>'; });
   return '<div class="screen active"><div class="ptitle">Пролонгация</div>'
@@ -3267,7 +3518,7 @@ function toastStack(){ var s=document.getElementById('toaststack'); if(!s){ s=do
 function toast(msg){ var t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:var(--card);color:var(--ink);padding:11px 14px;border:1px solid var(--line);border-left:3px solid var(--navy);border-radius:8px;font:inherit;font-size:calc(12px*var(--scale));max-width:300px;box-shadow:var(--shadow-1)'; toastStack().appendChild(t); setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 1900); }
 /* Тема/масштаб убраны из шапки: прототип только СВЕТЛЫЙ (решение владельца), масштаб фикс 1.12 под 45+. */
 /* Клавиатура для кликабельных плиток процессов (.ptile — div с onclick): Enter/Пробел = клик. */
-document.addEventListener('keydown',function(e){ if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.classList&&e.target.classList.contains('ptile')){ e.preventDefault(); e.target.click(); } });
+document.addEventListener('keydown',function(e){ if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.classList&&(e.target.classList.contains('ptile')||e.target.classList.contains('hp-card'))){ e.preventDefault(); e.target.click(); } });
 
 /* ===== Система взаимодействия 1С ===== */
 /* Чаты: два контура. personal — единые длинные переписки (поддержка, куратор).
