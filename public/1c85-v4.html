@@ -238,8 +238,8 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .pills{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
 .pill{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 11px; font:inherit; font-size:calc(15px*var(--scale)); background:var(--card); color:var(--muted); cursor:pointer; border:none; border-right:1px solid var(--line); }
 .pill:last-child{ border-right:none; } /* переключатель 1С: активный сегмент — тинт + рамка (заливку задаёт тема, не navy) */
-.pill--active{ background:var(--sel); color:var(--navy); font-weight:600; box-shadow:inset 0 0 0 1.5px var(--navy); } /* рамка, не подчёркивание: андерлайн — язык вкладок/ссылок; в реальной 1С тумблер умеет только BorderColor */
-.win[data-1ctheme='dark'] .pill--active{ color:var(--blue); box-shadow:inset 0 0 0 1.5px var(--blue); }
+.pill--active{ background:var(--btn-primary); color:#fff; font-weight:600; } /* классический сегмент: активный залит джинсовым (владелец 2026-09-22; рамка и подчёркивание отвергнуты) */
+.win[data-1ctheme='dark'] .pill--active{ background:var(--btn-primary); color:#fff; }
 .sw{ display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:calc(12.5px*var(--scale)); color:var(--ink); margin-left:auto; }
 .sw__t{ width:34px; height:18px; border-radius:10px; background:var(--line); position:relative; }
 .sw__k{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:var(--shadow-2); transition:left .15s; }
@@ -256,7 +256,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .of--err input,.of--err select{ border-color:var(--err); }
 .of__hint{ color:var(--muted); font-size:calc(12.5px*var(--scale)); }
 .of__err{ display:flex; align-items:center; gap:5px; color:var(--err); font-size:calc(11.5px*var(--scale)); font-weight:600; }
-.of--narrow{ width:132px } .of--small{ width:190px } .of--med{ width:300px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
+.of--xs{ width:96px } .of--narrow{ width:132px } .of--small{ width:190px } .of--med{ width:300px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
 .of:has(input[type=date]){ width:166px; } /* дата с нативным календариком шире narrow */
 .of input[type=date]{ padding:0 8px; }
 .win[data-1ctheme='dark'] .of input[type=date]{ color-scheme:dark; }
@@ -271,7 +271,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .odrv__del:hover{ text-decoration:underline; }
 /* Ссылка «Дополнительные сведения ТС» — голубой (наш цвет ссылок), как в брендбуке 8.5. */
 .oactions{ display:flex; align-items:center; gap:12px; padding:16px 20px 24px; flex-wrap:wrap; }
-.assist{ display:inline-flex; align-items:center; justify-content:center; width:var(--ctl-h); height:var(--ctl-h); flex:none; padding:0; border:1px solid var(--sel-line); border-radius:10px; background:var(--sel); color:var(--navy); cursor:pointer; } /* AI-иконка (владелец 2026-09-21); подпись — в title */
+.assist{ display:inline-flex; align-items:center; gap:8px; height:var(--ctl-h); flex:none; padding:0 16px; border:1px solid var(--sel-line); border-radius:10px; background:var(--sel); color:var(--navy); font:inherit; font-size:calc(15px*var(--scale)); cursor:pointer; } /* блёстки + подпись (владелец 2026-09-22: называется «Ассистент, заполни!») */
 .assist:hover{ border-color:var(--navy); }
 .win[data-1ctheme='dark'] .assist{ color:var(--blue); }
 .win[data-1ctheme='dark'] .assist:hover{ border-color:var(--blue); }
@@ -1534,9 +1534,12 @@ function toggleOff(cb,id){ var e=document.getElementById(id); if(!e) return;
 function driversMode(unlim){ var d=document.getElementById('oDrivers'), n=document.getElementById('oDriversOff');
   if(d) d.hidden=unlim; if(n) n.hidden=!unlim; }
 function driverFrom(who){ var v = who==='other'
-    ? {oDLn:'',oDFn:'',oDMn:'',oDBd:'',oDLic:'',oDLicD:'',oDExp:''}
-    : {oDLn:'Смирнова',oDFn:'Анна',oDMn:'Павловна',oDBd:'1981-09-02',oDLic:'2414 567890',oDLicD:'2014-05-12',oDExp:'2014-05-12'};
+    ? {oDLn:'',oDFn:'',oDMn:'',oDBd:'',oDLicS:'',oDLicN:'',oDExp:''}
+    : {oDLn:'Смирнова',oDFn:'Анна',oDMn:'Павловна',oDBd:'1981-09-02',oDLicS:'2414',oDLicN:'567890',oDExp:'2014-05-12'};
   Object.keys(v).forEach(function(id){ var e=document.getElementById(id); if(e) e.value=v[id]; }); }
+/* предыдущее В/У (боевая логика): стаж тянется со старого В/У; «Другая фамилия» открывает поле фамилии */
+function prevVU(cb){ var host=cb.closest('.odrv')||document; var b=host.querySelector('[data-prev]'); if(b) b.hidden=!cb.checked; }
+function otherLn(cb){ var host=cb.closest('.odrv')||document; var e=host.querySelector('[data-prevln]'); if(e){ e.disabled=!cb.checked; if(!cb.checked) e.value=''; } }
 function syncEnd(){ var s=document.getElementById('oStart'), e=document.getElementById('oEnd'); if(!s||!e||!s.value) return;
   var d=new Date(s.value+'T00:00:00'); d.setFullYear(d.getFullYear()+1); d.setDate(d.getDate()-1);
   e.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1548,13 +1551,22 @@ function addDriver(){ DRV_N++; var n=DRV_N;
       +'<div class="of of--small"><label for="oD'+n+'Ln">Фамилия</label><input id="oD'+n+'Ln"/></div>'
       +'<div class="of of--small"><label for="oD'+n+'Fn">Имя</label><input id="oD'+n+'Fn"/></div>'
       +'<div class="of of--grow"><label for="oD'+n+'Mn">Отчество</label><input id="oD'+n+'Mn"/></div>'
+      +'<label class="ocheck"><input type="checkbox" onchange="toggleOff(this,\'oD'+n+'Mn\')"/> Без отчества</label>'
       +'<div class="of"><label for="oD'+n+'Bd">Дата рождения</label><input type="date" id="oD'+n+'Bd"/></div>'
     +'</div><div class="orow">'
-      +'<div class="of of--med"><label for="oD'+n+'DocT">Тип документа</label><select id="oD'+n+'DocT"><option>Водительское удостоверение</option></select></div>'
-      +'<div class="of of--small"><label for="oD'+n+'Lic">Серия и номер</label><input id="oD'+n+'Lic"/></div>'
-      +'<div class="of"><label for="oD'+n+'LicD">Дата выдачи В/У</label><input type="date" id="oD'+n+'LicD"/></div>'
+      +'<div class="of of--xs"><label for="oD'+n+'LicS">Серия В/У</label><input id="oD'+n+'LicS"/></div>'
+      +'<div class="of of--narrow"><label for="oD'+n+'LicN">Номер В/У</label><input id="oD'+n+'LicN"/></div>'
+      +'<label class="ocheck"><input type="checkbox"/> Иностранное В/У</label>'
       +'<div class="of"><label for="oD'+n+'Exp">Дата начала стажа</label><input type="date" id="oD'+n+'Exp"/></div>'
-    +'</div>';
+      +'<label class="ocheck"><input type="checkbox" onchange="prevVU(this)"/> Указать предыдущее В/У</label>'
+    +'</div>'
+    +'<div data-prev hidden><div class="orow">'
+      +'<div class="of of--xs"><label for="oD'+n+'PLicS">Серия пред. В/У</label><input id="oD'+n+'PLicS"/></div>'
+      +'<div class="of of--narrow"><label for="oD'+n+'PLicN">Номер пред. В/У</label><input id="oD'+n+'PLicN"/></div>'
+      +'<label class="ocheck"><input type="checkbox"/> Иностранное В/У</label>'
+      +'<label class="ocheck"><input type="checkbox" onchange="otherLn(this)"/> Другая фамилия</label>'
+      +'<div class="of of--small"><label for="oD'+n+'PLn">Фамилия в пред. В/У</label><input id="oD'+n+'PLn" data-prevln disabled/></div>'
+    +'</div></div>';
   var a=document.getElementById('oAddDrvWrap'); if(a) a.parentNode.insertBefore(w,a); }
 var PROG_OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Все разделы заполнены';
 var PROG_WARN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Остался раздел «Собственник»';
@@ -1635,13 +1647,25 @@ function osagoForm(){
         +'<div class="of of--small"><label for="oDLn">Фамилия</label><input id="oDLn" value="Смирнова"/></div>'
         +'<div class="of of--small"><label for="oDFn">Имя</label><input id="oDFn" value="Анна"/></div>'
         +'<div class="of of--grow"><label for="oDMn">Отчество</label><input id="oDMn" value="Павловна"/></div>'
+        +'<label class="ocheck"><input type="checkbox" onchange="toggleOff(this,\'oDMn\')"/> Без отчества</label>'
         +'<div class="of of--narrow"><label for="oDBd">Дата рождения</label><input type="date" id="oDBd" value="1981-09-02"/></div>'
       +'</div>'
       +'<div class="orow">'
-        +'<div class="of of--med"><label for="oDDocT">Тип документа</label><select id="oDDocT"><option>Водительское удостоверение</option></select></div>'
-        +'<div class="of of--narrow"><label for="oDLic">Серия и номер</label><input id="oDLic" value="2414 567890"/></div>'
-        +'<div class="of"><label for="oDLicD">Дата выдачи В/У</label><input type="date" id="oDLicD" value="2014-05-12"/></div>'
+        +'<div class="of of--xs"><label for="oDLicS">Серия В/У</label><input id="oDLicS" value="2414"/></div>'
+        +'<div class="of of--narrow"><label for="oDLicN">Номер В/У</label><input id="oDLicN" value="567890"/></div>'
+        +'<label class="ocheck"><input type="checkbox"/> Иностранное В/У</label>'
         +'<div class="of"><label for="oDExp">Дата начала стажа</label><input type="date" id="oDExp" value="2014-05-12"/></div>'
+        +'<label class="ocheck"><input type="checkbox" onchange="prevVU(this)"/> Указать предыдущее В/У</label>'
+      +'</div>'
+      +'<div data-prev hidden>'
+        +'<div class="cap" style="margin:10px 0 6px">Если водитель менял права — стаж и КБМ посчитаются по предыдущему В/У.</div>'
+        +'<div class="orow">'
+          +'<div class="of of--xs"><label for="oPLicS">Серия пред. В/У</label><input id="oPLicS"/></div>'
+          +'<div class="of of--narrow"><label for="oPLicN">Номер пред. В/У</label><input id="oPLicN"/></div>'
+          +'<label class="ocheck"><input type="checkbox"/> Иностранное В/У</label>'
+          +'<label class="ocheck"><input type="checkbox" onchange="otherLn(this)"/> Другая фамилия</label>'
+          +'<div class="of of--small"><label for="oPLn">Фамилия в пред. В/У</label><input id="oPLn" data-prevln disabled/></div>'
+        +'</div>'
       +'</div>'
       +'<div class="oactions" style="padding:12px 0 0" id="oAddDrvWrap"><button class="btn" onclick="addDriver()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div>'
       +'</div></article>'
@@ -1657,7 +1681,7 @@ function osagoForm(){
     +'<div class="osticky">'
       +'<span class="osticky__prog" id="oProg">'+PROG_OK+'</span>'
       +'<span style="flex:1"></span>'
-      +'<button class="assist" onclick="toast(\'Ассистент заполнил форму\')" title="Ассистент заполнит форму за вас" aria-label="Ассистент заполнит форму за вас"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M11 4l1.7 4.6L17.3 10.3l-4.6 1.7L11 16.6l-1.7-4.6L4.7 10.3l4.6-1.7Z"/><path d="M18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8Z"/></svg></button>'
+      +'<button class="assist" onclick="toast(\'Ассистент заполнил форму\')" title="Ассистент заполнит форму за вас"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M11 4l1.7 4.6L17.3 10.3l-4.6 1.7L11 16.6l-1.7-4.6L4.7 10.3l4.6-1.7Z"/><path d="M18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8Z"/></svg>Ассистент, заполни!</button>'
       +'<button class="btn" onclick="toast(\'Черновик сохранён\')">Сохранить черновик</button>'
       +'<button class="btn btn--primary btn--lg" onclick="osagoCalc()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>Рассчитать</button>'
     +'</div>';
