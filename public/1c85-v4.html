@@ -236,10 +236,10 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .osearch__lbl{ font-size:calc(14px*var(--scale)); color:var(--muted); }
 .osearch input{ height:var(--ctl-h); padding:0 11px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink); font:inherit; font-size:max(18px,calc(13.5px*var(--scale))); min-width:180px; }
 .pills{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
-.pill{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 14px; font:inherit; font-size:calc(15px*var(--scale)); background:var(--card); color:var(--muted); cursor:pointer; border:none; border-right:1px solid var(--line); }
-.pill:last-child{ border-right:none; } /* переключатель 1С: активный сегмент — тинт + подчёркивание (заливку задаёт тема, не navy) */
-.pill--active{ background:var(--sel); color:var(--navy); font-weight:600; box-shadow:inset 0 -2px 0 var(--navy); }
-.win[data-1ctheme='dark'] .pill--active{ color:var(--blue); box-shadow:inset 0 -2px 0 var(--blue); }
+.pill{ display:inline-flex; align-items:center; min-height:var(--ctl-h); padding:0 11px; font:inherit; font-size:calc(15px*var(--scale)); background:var(--card); color:var(--muted); cursor:pointer; border:none; border-right:1px solid var(--line); }
+.pill:last-child{ border-right:none; } /* переключатель 1С: активный сегмент — тинт + рамка (заливку задаёт тема, не navy) */
+.pill--active{ background:var(--sel); color:var(--navy); font-weight:600; box-shadow:inset 0 0 0 1.5px var(--navy); } /* рамка, не подчёркивание: андерлайн — язык вкладок/ссылок; в реальной 1С тумблер умеет только BorderColor */
+.win[data-1ctheme='dark'] .pill--active{ color:var(--blue); box-shadow:inset 0 0 0 1.5px var(--blue); }
 .sw{ display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:calc(12.5px*var(--scale)); color:var(--ink); margin-left:auto; }
 .sw__t{ width:34px; height:18px; border-radius:10px; background:var(--line); position:relative; }
 .sw__k{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:var(--shadow-2); transition:left .15s; }
@@ -257,11 +257,18 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .of__hint{ color:var(--muted); font-size:calc(12.5px*var(--scale)); }
 .of__err{ display:flex; align-items:center; gap:5px; color:var(--err); font-size:calc(11.5px*var(--scale)); font-weight:600; }
 .of--narrow{ width:132px } .of--small{ width:190px } .of--med{ width:300px } .of--grow{ flex:1; min-width:150px } .of--wide{ flex:2; min-width:220px }
+.of:has(input[type=date]){ width:166px; } /* дата с нативным календариком шире narrow */
+.of input[type=date]{ padding:0 8px; }
+.win[data-1ctheme='dark'] .of input[type=date]{ color-scheme:dark; }
 .ocheck{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; font-size:calc(15px*var(--scale)); color:var(--ink); min-height:var(--ctl-h); cursor:pointer; }
 .ocheck input{ width:18px; height:18px; accent-color:var(--accent); flex:none; }
 /* Составной контрол: сегменты + поле в один ряд под подписью (Идентификатор VIN/№кузова/№шасси). */
 .octl{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .octl input{ width:212px; } /* ровно под VIN 17 знаков при 18px */
+.odrv{ margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); }
+.odrv__head{ display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+.odrv__del{ background:none; border:none; color:var(--blue); font:inherit; font-size:calc(13.5px*var(--scale)); cursor:pointer; min-height:32px; padding:0 6px; }
+.odrv__del:hover{ text-decoration:underline; }
 /* Ссылка «Дополнительные сведения ТС» — голубой (наш цвет ссылок), как в брендбуке 8.5. */
 .oactions{ display:flex; align-items:center; gap:12px; padding:16px 20px 24px; flex-wrap:wrap; }
 .assist{ display:inline-flex; align-items:center; justify-content:center; width:var(--ctl-h); height:var(--ctl-h); flex:none; padding:0; border:1px solid var(--sel-line); border-radius:10px; background:var(--sel); color:var(--navy); cursor:pointer; } /* AI-иконка (владелец 2026-09-21); подпись — в title */
@@ -1528,8 +1535,27 @@ function driversMode(unlim){ var d=document.getElementById('oDrivers'), n=docume
   if(d) d.hidden=unlim; if(n) n.hidden=!unlim; }
 function driverFrom(who){ var v = who==='other'
     ? {oDLn:'',oDFn:'',oDMn:'',oDBd:'',oDLic:'',oDLicD:'',oDExp:''}
-    : {oDLn:'Смирнова',oDFn:'Анна',oDMn:'Павловна',oDBd:'02.09.1981',oDLic:'2414 567890',oDLicD:'12.05.2014',oDExp:'12.05.2014'};
+    : {oDLn:'Смирнова',oDFn:'Анна',oDMn:'Павловна',oDBd:'1981-09-02',oDLic:'2414 567890',oDLicD:'2014-05-12',oDExp:'2014-05-12'};
   Object.keys(v).forEach(function(id){ var e=document.getElementById(id); if(e) e.value=v[id]; }); }
+function syncEnd(){ var s=document.getElementById('oStart'), e=document.getElementById('oEnd'); if(!s||!e||!s.value) return;
+  var d=new Date(s.value+'T00:00:00'); d.setFullYear(d.getFullYear()+1); d.setDate(d.getDate()-1);
+  e.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+var DRV_N=1;
+function addDriver(){ DRV_N++; var n=DRV_N;
+  var w=document.createElement('div'); w.className='odrv';
+  w.innerHTML='<div class="odrv__head"><span class="cap">Водитель '+n+'</span><button class="odrv__del" onclick="this.closest(\'.odrv\').remove()">Убрать</button></div>'
+    +'<div class="orow">'
+      +'<div class="of of--small"><label for="oD'+n+'Ln">Фамилия</label><input id="oD'+n+'Ln"/></div>'
+      +'<div class="of of--small"><label for="oD'+n+'Fn">Имя</label><input id="oD'+n+'Fn"/></div>'
+      +'<div class="of of--grow"><label for="oD'+n+'Mn">Отчество</label><input id="oD'+n+'Mn"/></div>'
+      +'<div class="of"><label for="oD'+n+'Bd">Дата рождения</label><input type="date" id="oD'+n+'Bd"/></div>'
+    +'</div><div class="orow">'
+      +'<div class="of of--med"><label for="oD'+n+'DocT">Тип документа</label><select id="oD'+n+'DocT"><option>Водительское удостоверение</option></select></div>'
+      +'<div class="of of--small"><label for="oD'+n+'Lic">Серия и номер</label><input id="oD'+n+'Lic"/></div>'
+      +'<div class="of"><label for="oD'+n+'LicD">Дата выдачи В/У</label><input type="date" id="oD'+n+'LicD"/></div>'
+      +'<div class="of"><label for="oD'+n+'Exp">Дата начала стажа</label><input type="date" id="oD'+n+'Exp"/></div>'
+    +'</div>';
+  var a=document.getElementById('oAddDrvWrap'); if(a) a.parentNode.insertBefore(w,a); }
 var PROG_OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Все разделы заполнены';
 var PROG_WARN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Остался раздел «Собственник»';
 function ownerSame(cb){ var f=document.getElementById('oOwnerFields'), b=document.getElementById('oOwnerBadge'), p=document.getElementById('oProg');
@@ -1543,7 +1569,7 @@ function otabNote(kind){ var n=document.getElementById('otabNote'); if(!n) retur
   n.querySelector('span').textContent = kind==='ip'
     ? 'В этой версии показан путь физического лица. Для ИП путь тот же — добавляются ОГРНИП и расчётный счёт.'
     : 'В этой версии — путь физического лица. Юридическое лицо оформляется через запрос тарифа — пример: «Мои клиенты» → Заявка №2418.'; }
-function screenOsago(){ return '<div class="screen active" id="osagoScreen">'+osagoForm()+'</div>'; }
+function screenOsago(){ DRV_N=1; return '<div class="screen active" id="osagoScreen">'+osagoForm()+'</div>'; }
 function osagoForm(){
   return '<div class="ptitle">ОСАГО</div>'
     /* Вкладки ИП/ЮЛ не переключаются (контент один — ФЛ): раньше подсветка «врала» про смену формы. */
@@ -1568,7 +1594,7 @@ function osagoForm(){
         +'<div class="of"><label for="oVin">Идентификатор</label><div class="octl"><div class="pills"><button class="pill pill--active" onclick="pill(this)">VIN</button><button class="pill" onclick="pill(this)">Кузов</button><button class="pill" onclick="pill(this)">Шасси</button></div><input id="oVin" value="Z94C241BAKR123456"/></div></div>'
         +'<div class="of"><label>Документ ТС</label><div class="pills"><button class="pill pill--active" onclick="pill(this)">СТС</button><button class="pill" onclick="pill(this)">ПТС</button><button class="pill" onclick="pill(this)">ЭПТС</button></div></div>'
         +'<div class="of of--small"><label for="oDocNum">Серия и номер</label><input id="oDocNum" value="99 23 456789"/></div>'
-        +'<div class="of of--narrow"><label for="oDocDate">Дата выдачи</label><input id="oDocDate" value="15.05.2022"/></div>'
+        +'<div class="of of--narrow"><label for="oDocDate">Дата выдачи</label><input type="date" id="oDocDate" value="2022-05-15"/></div>'
       +'</div>'
       +'</article>'
     /* Страхователь */
@@ -1578,12 +1604,12 @@ function osagoForm(){
         +'<div class="of of--small"><label for="oFn">Имя</label><input id="oFn" value="Анна"/></div>'
         +'<div class="of of--grow"><label for="oMn">Отчество</label><input id="oMn" value="Павловна"/></div>'
         +'<label class="ocheck"><input type="checkbox" onchange="toggleOff(this,\'oMn\')"/> Без отчества</label>'
-        +'<div class="of of--narrow"><label for="oBd">Дата рождения</label><input id="oBd" value="02.09.1981"/></div>'
+        +'<div class="of of--narrow"><label for="oBd">Дата рождения</label><input type="date" id="oBd" value="1981-09-02"/></div>'
       +'</div>'
       +'<div class="orow">'
         +'<div class="of of--small"><label for="oDocT">Тип документа</label><select id="oDocT"><option>Паспорт РФ</option></select></div>'
         +'<div class="of of--narrow"><label for="oPass">Серия и номер</label><input id="oPass" value="0417 664215"/></div>'
-        +'<div class="of of--narrow"><label for="oPassD">Дата выдачи</label><input id="oPassD" value="15.10.2001"/></div>'
+        +'<div class="of of--narrow"><label for="oPassD">Дата выдачи</label><input type="date" id="oPassD" value="2001-10-15"/></div>'
         +'<div class="of of--wide"><label for="oAddr">Адрес регистрации</label><input id="oAddr" value="Минусинск, ул. Гагарина, 7"/></div>'
       +'</div></article>'
     /* Собственник */
@@ -1592,12 +1618,12 @@ function osagoForm(){
         +'<div class="of of--small"><label for="oOwLn">Фамилия</label><input id="oOwLn"/></div>'
         +'<div class="of of--small"><label for="oOwFn">Имя</label><input id="oOwFn"/></div>'
         +'<div class="of of--grow"><label for="oOwMn">Отчество</label><input id="oOwMn"/></div>'
-        +'<div class="of of--narrow"><label for="oOwBd">Дата рождения</label><input id="oOwBd" placeholder="дд.мм.гггг"/></div>'
+        +'<div class="of of--narrow"><label for="oOwBd">Дата рождения</label><input type="date" id="oOwBd"/></div>'
       +'</div>'
       +'<div class="orow">'
         +'<div class="of of--small"><label for="oOwDocT">Тип документа</label><select id="oOwDocT"><option>Паспорт РФ</option></select></div>'
         +'<div class="of of--narrow"><label for="oOwPass">Серия и номер</label><input id="oOwPass"/></div>'
-        +'<div class="of of--narrow"><label for="oOwPassD">Дата выдачи</label><input id="oOwPassD" placeholder="дд.мм.гггг"/></div>'
+        +'<div class="of of--narrow"><label for="oOwPassD">Дата выдачи</label><input type="date" id="oOwPassD"/></div>'
         +'<div class="of of--wide"><label for="oOwAddr">Адрес регистрации</label><input id="oOwAddr"/></div>'
       +'</div></div></article>'
     /* Водители */
@@ -1609,24 +1635,24 @@ function osagoForm(){
         +'<div class="of of--small"><label for="oDLn">Фамилия</label><input id="oDLn" value="Смирнова"/></div>'
         +'<div class="of of--small"><label for="oDFn">Имя</label><input id="oDFn" value="Анна"/></div>'
         +'<div class="of of--grow"><label for="oDMn">Отчество</label><input id="oDMn" value="Павловна"/></div>'
-        +'<div class="of of--narrow"><label for="oDBd">Дата рождения</label><input id="oDBd" value="02.09.1981"/></div>'
+        +'<div class="of of--narrow"><label for="oDBd">Дата рождения</label><input type="date" id="oDBd" value="1981-09-02"/></div>'
       +'</div>'
       +'<div class="orow">'
         +'<div class="of of--med"><label for="oDDocT">Тип документа</label><select id="oDDocT"><option>Водительское удостоверение</option></select></div>'
         +'<div class="of of--narrow"><label for="oDLic">Серия и номер</label><input id="oDLic" value="2414 567890"/></div>'
-        +'<div class="of of--narrow"><label for="oDLicD">Дата выдачи В/У</label><input id="oDLicD" value="12.05.2014"/></div>'
-        +'<div class="of of--small"><label for="oDExp">Дата начала стажа</label><input id="oDExp" value="12.05.2014"/></div>'
+        +'<div class="of"><label for="oDLicD">Дата выдачи В/У</label><input type="date" id="oDLicD" value="2014-05-12"/></div>'
+        +'<div class="of"><label for="oDExp">Дата начала стажа</label><input type="date" id="oDExp" value="2014-05-12"/></div>'
       +'</div>'
-      +'<div class="oactions" style="padding:12px 0 0"><button class="btn" onclick="toast(\'Добавлен водитель\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div>'
+      +'<div class="oactions" style="padding:12px 0 0" id="oAddDrvWrap"><button class="btn" onclick="addDriver()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить водителя</button></div>'
       +'</div></article>'
     /* Параметры */
     +'<article class="osec"><div class="osec__head"><span class="osec__title">Параметры и контакты '+badge(true)+'</span></div>'
       +'<div class="orow orow--top">'
-        +'<div class="of of--narrow"><label for="oStart">Дата начала</label><input id="oStart" value="24.07.2026"/></div>'
-        +'<div class="of of--narrow"><label for="oEnd">Дата окончания</label><input id="oEnd" value="23.07.2027"/></div>'
+        +'<div class="of"><label for="oStart">Дата начала</label><input type="date" id="oStart" value="2026-07-24" onchange="syncEnd()"/></div>'
+        +'<div class="of"><label for="oEnd">Дата окончания</label><input type="date" id="oEnd" value="2027-07-23"/></div>'
         +'<div class="of of--small"><label for="oPurpose">Цель использования</label><select id="oPurpose"><option>Личная</option><option>Такси</option></select></div>'
-        +'<div class="of of--small"><label for="oPhone">Телефон клиента</label><input id="oPhone" value="+7 (902) 555-30-17"/></div>'
-        +'<div class="of of--grow"><label for="oEmail">Email (необязательно)</label><input id="oEmail" value="" placeholder="ivanova@mail.ru"/><span class="of__hint">Сюда страховая пришлёт е-полис</span></div>'
+        +'<div class="of of--small"><label for="oPhone">Телефон клиента</label><input type="tel" id="oPhone" value="+7 (902) 555-30-17"/></div>'
+        +'<div class="of of--grow"><label for="oEmail">Email (необязательно)</label><input type="email" id="oEmail" value="" placeholder="ivanova@mail.ru"/></div>'
       +'</div></article>'
     +'<div class="osticky">'
       +'<span class="osticky__prog" id="oProg">'+PROG_OK+'</span>'
