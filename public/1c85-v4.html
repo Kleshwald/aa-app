@@ -2342,6 +2342,29 @@ function screenProfile(){
 function ptab(el,idx){ var t=el.parentNode.children; for(var i=0;i<t.length;i++) t[i].classList.remove('ptab--active'); el.classList.add('ptab--active'); document.querySelectorAll('.ptab-body').forEach(function(b,i){ b.classList.toggle('active',i===idx); }); }
 function screenStub(title,desc){ return '<div class="screen active"><div class="ptitle">'+title+'</div><div class="stub"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg><b>'+title+'</b><span>'+desc+'</span><button class="btn" onclick="go(\'clients\')">К клиентам</button></div></div>'; }
 
+/* ===== Ипотека — партнёрский виджет Polis.Online ===== */
+/* Реальный внешний сервис (не мок). Скрипт грузим лениво при первом входе на вкладку:
+   прототип не зависит от внешнего хоста, на 3G старт может быть долгим — держим подпись-статус. */
+var mortgageScriptLoading=false;
+function loadMortgageWidget(){
+  if(mortgageScriptLoading) return;
+  mortgageScriptLoading=true;
+  var s=document.createElement('script');
+  s.src='https://agentacademy.polis.online/widget_mortgage_v2.min.js';
+  s.onerror=function(){ mortgageScriptLoading=false; var h=document.getElementById('mortgageHint'); if(h){ h.style.display='block'; h.innerHTML='Не удалось загрузить модуль расчёта — проверьте соединение. <a href="javascript:void(0)" onclick="go(\'mortgage\')">Попробовать ещё раз</a>'; } };
+  document.head.appendChild(s);
+  if(window.customElements&&customElements.whenDefined) customElements.whenDefined('polis-online-widget-mortgage').then(function(){ var h=document.getElementById('mortgageHint'); if(h) h.style.display='none'; });
+}
+function screenMortgage(){
+  var ready=window.customElements&&customElements.get&&customElements.get('polis-online-widget-mortgage');
+  return '<div class="screen active"><div class="ptitle">Ипотека</div>'
+    +'<div class="psub">Страхование залоговой недвижимости — расчёт и оформление через сервис Polis.Online</div>'
+    +'<div class="pad">'
+    +'<div id="mortgageHint" style="'+(ready?'display:none;':'')+'color:var(--muted);font-size:calc(13px*var(--scale));padding:6px 0 14px">Загружаем модуль расчёта…</div>'
+    +'<polis-online-widget-mortgage name="polis-online-widget-mortgage" data-api-key="HKM4p7ZMkw" data-widget-id="61810"></polis-online-widget-mortgage>'
+    +'</div></div>';
+}
+
 /* ===== Рабочее место поддержки — очередь заявок 1С + вопросы чата ===== */
 /* Один экран оператора. Ось «чей мяч» (У нас / У агента / У страховой), SLA капает ТОЛЬКО пока мяч у нас.
    Заявки 1С и вопросы из чата — одна очередь. Логика взята из боевой 1С: «Мои заявки» + карточка заявки + ход дела.
@@ -2998,7 +3021,7 @@ function render(view,arg){
   else if(view==='support'){ supHost='1'; w.innerHTML=screenSupport(); }
   else if(view==='support2'){ supHost='2'; w.innerHTML=screenSupport2(); }
   else if(view==='profile') w.innerHTML=screenProfile();
-  else if(view==='mortgage') w.innerHTML=screenStub('Ипотека','Раздел в разработке — страхование залоговой недвижимости');
+  else if(view==='mortgage'){ w.innerHTML=screenMortgage(); loadMortgageWidget(); }
   else if(view==='finance') w.innerHTML=screenStub('Мои финансы','Комиссии, выплаты и сверки');
   else if(view==='learning') w.innerHTML=screenStub('Обучение','Курсы и материалы для агента');
   w.scrollTop=0;
