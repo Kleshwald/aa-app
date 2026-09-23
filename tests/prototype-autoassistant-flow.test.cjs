@@ -1,0 +1,71 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const source=fs.readFileSync(path.join(__dirname,'../public/autoassistant.js'),'utf8');
+test('unissued AP contracts open AP directly; issued and ordinary contracts open details',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../public/1c85-v4.html'),'utf8');
+  const start=html.indexOf('function openContract('),end=html.indexOf('\n}',start)+2;
+  let destination;
+  const c={autoassistant:true,st:'draft'};
+  const ctx={CLIENTS:[c],contractProduct:()=> 'osago',openAutoassistant:()=>{destination='ap';},render:()=>{destination='contract';},document:{querySelectorAll:()=>[],getElementById:()=>({innerHTML:''})}};
+  vm.createContext(ctx);vm.runInContext(html.slice(start,end),ctx);
+  for(const st of ['draft','wait']){c.st=st;ctx.openContract(0);assert.equal(destination,'ap');}
+  ctx.openContract(0,false,true);assert.equal(destination,'contract');
+  c.st='ok';ctx.openContract(0);assert.equal(destination,'contract');
+  c.st='cancelled';ctx.openContract(0);assert.equal(destination,'contract');
+  c.st='draft';c.autoassistant=false;ctx.openContract(0);assert.equal(destination,'contract');
+});
+test('AP document appears on service payment and is retained without duplicates',()=>{
+  const ctx={File:require('node:buffer').File,procEscape:String};vm.createContext(ctx);vm.runInContext(source,ctx);
+  const c={n:'Тестовый Страхователь',autoServicePrice:2450};
+  assert.equal(ctx.apServiceDocument(c),null);
+  c.autoServicePaid=true;
+  const file=ctx.apServiceDocument(c);
+  assert.ok(ctx.apFiles[file.key]);assert.equal(ctx.apServiceDocument(c),file);
+  assert.match(ctx.apServiceDocumentHTML(c),/Документ сервиса АП/);
+});
+test('quote snapshot retains every driver and respects the owner checkbox',()=>{
+  function row(values){return {querySelectorAll(q){return q==='label'?Object.keys(values).map(textContent=>({textContent})):Object.entries(values).map(([name,value])=>({querySelector(q){return q==='label'?{textContent:name}:{value};}}));}};}
+  const holder=row({Фамилия:'Иванов',Имя:'Иван',Отчество:'Иванович'}),owner=row({Фамилия:'Петров',Имя:'Пётр',Отчество:'Петрович'}),drivers=row({});
+  let same=false;
+  const rows=[row({Фамилия:'Первый',Имя:'Водитель'}),row({Фамилия:'Второй',Имя:'Водитель'}),row({Фамилия:'Третий',Имя:'Водитель'})];
+  drivers.querySelectorAll=q=>q==='.orow'?rows:[];
+  const sections=[['Страхователь',holder],['Собственник',owner],['Водители',drivers],['Транспорт',row({})],['Параметры',row({})]].map(([name,s])=>Object.assign(s,{querySelector(q){return q==='.osec__title'?{textContent:name}:q==='input[type="checkbox"]'?{checked:same}:null;}}));
+  const ctx={document:{getElementById:()=>({querySelectorAll:()=>sections})}};vm.createContext(ctx);vm.runInContext(source,ctx);
+  ctx.apCaptureQuote();assert.equal(ctx.apQuoteSnapshot.drivers.length,3);assert.equal(ctx.apQuoteSnapshot.owner,'Петров Пётр Петрович');
+  assert.equal(ctx.apDocs(ctx.apQuoteSnapshot).filter(d=>d.id.startsWith('driver-')).length,6);
+  same=true;ctx.apCaptureQuote();assert.equal(ctx.apQuoteSnapshot.owner,'Иванов Иван Иванович');
+});
+test('AP requires operator payment confirmation and complete policy documents',()=>{
+  const client={p:'ОСАГО',autoassistant:true,autoServicePaid:false,autoServicePrice:2450,price:'5990'};
+  const item={id:'1',kind:'deal',policyIdx:0,cstatus:'docs_uploaded',attachments:[],dealData:{servicePaid:true,osagoPremium:5990,insurer:'Евроинс',paymentLink:'https://pay.example',policySeries:'',policyNumber:'',policyFiles:[]}};
+  const ctx={CLIENTS:[client],URL,procEscape:String,contractProduct:()=> 'osago',procForPolicy:()=>[],render(){},toast(){},supRerender(){},supFind:()=>item,document:{getElementById:()=>({innerHTML:'',checked:false})}};
+  vm.createContext(ctx);vm.runInContext(source,ctx);
+  ctx.procSetStatus=(id,status,actor)=>{if(!ctx.apTransitionAllowed(item,status,actor))return false;item.cstatus=status;item.lastActor=actor;return true;};
+  ctx.QUOTES=[{svc:'autoassistant',price:'5990',svcPrice:'2450'}];ctx.apQuoteSnapshot={n:'Иванов Иван Иванович',o:'Toyota',sub:'А123АА'};
+  assert.equal(ctx.apChooseQuote(0),true);
+  assert.match(ctx.screenAutoassistant(),/Документы для оформления ОСАГО/);
+  assert.equal(ctx.autoAddFile('passport-main',{files:[{name:'passport.pdf'}]}),true);
+  assert.equal(ctx.autoSubmit(),false);
+  assert.equal(ctx.dealSendPayment('1'),true);
+  assert.equal(item.cstatus,'awaiting_payment');
+  assert.equal(ctx.dealConfirmPayment('1'),false);
+  item.dealData.paymentConfirmed=true;
+  assert.equal(ctx.apTransitionAllowed(item,'paid','agent'),false);
+  assert.equal(ctx.apTransitionAllowed(item,'paid','system'),false);
+  item.dealData.paymentConfirmed=false;
+  ctx.document.getElementById=()=>({checked:true});
+  assert.equal(ctx.dealConfirmPayment('1'),true);
+  assert.equal(item.cstatus,'paid');assert.equal(item.lastActor,'support');
+  assert.equal(ctx.dealConfirmPayment('1'),false);
+  assert.equal(ctx.dealFinalize('1'),false);
+  ctx.dealOpSet('1','policySeries','ХХХ');ctx.dealOpSet('1','policyNumber','1234567890');
+  ctx.dealPolicyFile('1','policy',{files:[{name:'policy.pdf'}]});
+  assert.equal(ctx.dealFinalize('1'),false);
+  ctx.dealPolicyFile('1','application',{files:[{name:'application.pdf'}]});
+  assert.equal(ctx.dealFinalize('1'),true);assert.equal(item.cstatus,'done');
+  assert.equal(client.stl,'Оформлен');assert.equal(client.dealDocs.length,2);
+  assert.equal(ctx.dealFinalize('1'),false);
+});
