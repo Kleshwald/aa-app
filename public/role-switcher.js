@@ -2,13 +2,14 @@
 var PROTOTYPE_ROLES = {
   admin: { title: 'Администратор', initials: 'АД', description: 'Все разделы' },
   curator: { title: 'Куратор', initials: 'КУ', description: 'Без панели оператора и настроек' },
-  agent: { title: 'Агент', initials: 'АГ', description: 'Разделы агента' }
+  agent: { title: 'Агент', initials: 'АГ', description: 'Без профиля и служебных разделов' }
 };
 var prototypeRole = 'admin';
 
 function prototypeRoleCanAccess(view) {
   if (view === 'support' || view === 'support2' || view === 'settings') return prototypeRole === 'admin';
   if (view === 'analytics') return prototypeRole !== 'agent';
+  if (view === 'profile') return prototypeRole !== 'agent';
   return true;
 }
 
@@ -70,7 +71,7 @@ function screenSettings() {
           '</span><span><strong>' + role.title + '</strong><small>' + role.description +
           '</small></span><span class="role-switcher__check" aria-hidden="true">' + (key === prototypeRole ? '✓' : '') + '</span></button>';
       }).join('') +
-      '<div class="role-switcher__footer"><button type="button" id="roleProfileButton">Открыть профиль</button></div>';
+      (prototypeRoleCanAccess('profile') ? '<div class="role-switcher__footer"><button type="button" id="roleProfileButton">Открыть профиль</button></div>' : '');
   }
   function applyRole() {
     frame.dataset.role = prototypeRole;
