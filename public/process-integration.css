@@ -1,0 +1,10 @@
+/* Local process presentation retained within the main release's design system. */
+.cancel-choice { display:flex; align-items:center; gap:12px; min-height:48px; padding:10px; cursor:pointer; border:1px solid var(--line); border-radius:10px; }
+.cancel-choice:has(input:checked) { background:var(--sel); border-color:var(--accent); }
+.cancel-choice input { position:static; opacity:1; width:20px; height:20px; flex:none; accent-color:var(--accent); }
+.win .list--chat tbody td,
+.win .list--chat tbody td :is(b,.polnum,.sv-chip,.st,.cl-attn) { font-weight:400; }
+.win .list--chat tbody tr.svrow--new td:first-child > b { font-weight:600; }
+.prol-empty-note { margin:0 24px 20px; color:var(--muted); }
+.prol-preview-menu { margin:0; inset:120px 64px auto auto; max-width:calc(100vw - 32px); padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); }
+.prol-preview-caption { margin-bottom:10px; }

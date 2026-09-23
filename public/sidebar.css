@@ -1,0 +1,18 @@
+/* Explicit state overrides the legacy narrow-screen icon-only rule. */
+.win[data-sidebar='expanded'] { grid-template-columns:248px minmax(0,1fr) 48px; }
+.win[data-sidebar='collapsed'] { grid-template-columns:76px minmax(0,1fr) 48px; }
+.win .sections .sec { min-height:56px; flex-shrink:0; font-size:18px; line-height:24px; padding:14px 16px; }
+.win .sections .sec svg { width:28px; height:28px; }
+.win .sections .sec__badge { min-width:24px; height:24px; border-radius:12px; font-size:13px; }
+.win[data-sidebar='expanded'] .sections .sec > span { display:initial; }
+.win[data-sidebar='expanded'] .sections .sec > .sec__badge { display:grid; }
+.win .sec--collapse { width:100%; background:transparent; border-right:0; border-bottom:0; font-family:inherit; text-align:left; min-height:48px; flex-shrink:0; }
+.win .sections .sec:focus-visible { outline:2px solid var(--navy); outline-offset:-3px; }
+.win[data-sidebar='collapsed'] .sections .sec { justify-content:center; gap:0; padding:14px 0; min-height:56px; }
+.win[data-sidebar='collapsed'] .sections .sec > span { display:none; }
+.win[data-sidebar='collapsed'] .sec--collapse svg { transform:rotate(180deg); }
+.win[data-sidebar='collapsed'] .titlebar { padding:10px 6px 8px; justify-content:center; min-width:0; overflow:hidden; }
+.win[data-sidebar='collapsed'] .aa-logo { max-width:100%; height:auto; max-height:30px; object-fit:contain; }
+.win .sections .sec[data-view='messages'], .win .sections .sec[data-view='support'] { position:relative; }
+.win .sections .sec #messagesBadge, .win .sections .sec #supBadge { position:absolute; top:3px; left:35px; margin:0; min-width:20px; height:20px; padding:0 4px; border-radius:10px; font-size:12px; line-height:20px; }
+.win[data-sidebar='collapsed'] .sections .sec #messagesBadge, .win[data-sidebar='collapsed'] .sections .sec #supBadge { display:grid; left:auto; right:7px; }

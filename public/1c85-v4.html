@@ -270,6 +270,7 @@ td.empty-row{ text-align:center; color:var(--muted); padding:26px; } /* пуст
 .win[data-1ctheme='dark'] .of input[type=date]{ color-scheme:dark; }
 .ocheck{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; font-size:calc(15px*var(--scale)); color:var(--ink); min-height:var(--ctl-h); cursor:pointer; }
 .ocheck input{ width:18px; height:18px; accent-color:var(--accent); flex:none; }
+.of input[id^='change-'][readonly],.of select[id^='change-']:disabled{ background:var(--bg); color:var(--muted); }
 /* Составной контрол: сегменты + поле в один ряд под подписью (Идентификатор VIN/№кузова/№шасси). */
 .octl{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .octl input{ width:212px; } /* ровно под VIN 17 знаков при 18px */
@@ -1020,6 +1021,28 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .sup-fld{ display:flex; flex-direction:column; gap:4px; } .sup-fld--full{ grid-column:1/-1; }
 .sup-fld label{ font-size:calc(12px*var(--scale)); color:var(--muted); font-weight:600; }
 .sup-fld__v{ min-height:38px; padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:var(--bg); color:var(--ink); font-size:calc(14px*var(--scale)); white-space:pre-wrap; }
+.loss-op{ margin:12px 0; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+.loss-op__head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.loss-op__head h3{ margin:0; color:var(--navy); font-size:calc(15px*var(--scale)); }
+.win[data-1ctheme='dark'] .loss-op__head h3{ color:var(--blue); }
+.loss-op__grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px 12px; }
+.loss-op__grid .sup-fld--wide{ grid-column:span 2; }
+.loss-op .tselect{ width:100%; }
+.loss-op__checks{ min-height:38px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.loss-op__foot{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+.loss-sub{ margin-top:12px; padding:12px; border-left:3px solid var(--warn); border-radius:7px; background:color-mix(in srgb,var(--warn) 7%,transparent); }
+.loss-sub__title{ font-weight:700; margin-bottom:9px; }
+.loss-service{ margin-top:8px; padding-top:8px; border-top:1px solid var(--line); }
+.loss-track{ display:flex; align-items:flex-start; gap:0; margin:10px 0 14px; overflow-x:auto; }
+.loss-track__step{ position:relative; flex:1 0 112px; padding-top:20px; color:var(--muted); font-size:calc(10.5px*var(--scale)); text-align:center; }
+.loss-track__step::before{ content:''; position:absolute; z-index:1; top:2px; left:calc(50% - 7px); width:14px; height:14px; border-radius:50%; background:var(--line); border:2px solid var(--card); box-shadow:0 0 0 1px var(--line); }
+.loss-track__step::after{ content:''; position:absolute; top:8px; left:0; width:100%; height:2px; background:var(--line); }
+.loss-track__step:first-child::after{ left:50%; width:50%; }.loss-track__step:last-child::after{ width:50%; }
+.loss-track__step.is-done::before,.loss-track__step.is-current::before{ background:var(--navy); box-shadow:0 0 0 1px var(--navy); }
+.loss-track__step.is-done::after{ background:var(--navy); }.loss-track__step.is-current{ color:var(--ink); font-weight:700; }
+.loss-summary{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:0 0 12px; }
+.loss-summary .sup-fld__v{ min-height:34px; padding:6px 9px; font-size:calc(12px*var(--scale)); }
+@media (max-width:900px){ .loss-op__grid{ grid-template-columns:1fr 1fr; } }
 .sup-reply{ margin-top:12px; padding:12px 13px; border-radius:9px; border:1px solid var(--line); }
 .sup-reply--agent{ border-left:3px solid var(--blue); background:color-mix(in srgb,var(--blue) 5%,transparent); }
 .sup-reply--note{ border-left:3px solid var(--warn); background:color-mix(in srgb,var(--warn) 6%,transparent); }
@@ -1066,6 +1089,40 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
 .chg-foot{ display:flex; align-items:center; gap:14px; margin-top:2px; }
 .chg-next{ margin-right:auto; color:var(--muted); font-size:calc(11.5px*var(--scale)); line-height:1.5; max-width:460px; }
 .fld-label{ display:block; font-size:calc(11px*var(--scale)); font-weight:600; color:var(--muted); margin:10px 0 4px; }
+/* Подача убытка: пошаговая форма вместо двух пустых модальных окон 8.3. */
+.loss-progress{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin:0 0 2px; }
+.loss-progress__item{ position:relative; display:flex; align-items:center; gap:8px; color:var(--muted); font-size:calc(11.5px*var(--scale)); font-weight:600; }
+.loss-progress__item:not(:last-child)::after{ content:''; position:absolute; left:30px; right:8px; top:13px; height:2px; background:var(--line); z-index:0; }
+.loss-progress__num{ position:relative; z-index:1; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; border:2px solid var(--line); background:var(--card); color:var(--muted); }
+.loss-progress__item>span:last-child{ position:relative; z-index:1; padding-right:8px; background:var(--card); }
+.loss-progress__item.is-current{ color:var(--navy); }
+.loss-progress__item.is-current .loss-progress__num{ border-color:var(--navy); box-shadow:0 0 0 3px var(--sel); }
+.loss-progress__item.is-done .loss-progress__num{ border-color:var(--navy); background:var(--navy); color:#fff; }
+.loss-progress__item.is-done::after{ background:var(--navy); }
+.loss-lead{ color:var(--muted); font-size:calc(12.5px*var(--scale)); line-height:1.5; margin:5px 0 13px; }
+.loss-options{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.loss-option{ display:flex; gap:12px; align-items:flex-start; padding:14px; border:1px solid var(--line); border-radius:9px; background:var(--card); cursor:pointer; }
+.loss-option:hover{ border-color:var(--navy); background:var(--hover); }
+.loss-option.is-selected{ border-color:var(--navy); background:var(--sel); box-shadow:inset 3px 0 0 var(--navy); }
+.loss-option input{ position:absolute; opacity:0; }
+.loss-option__radio{ width:20px; height:20px; border:2px solid var(--line); border-radius:50%; background:var(--card); flex:none; margin-top:1px; display:grid; place-items:center; }
+.loss-option.is-selected .loss-option__radio{ border-color:var(--navy); }
+.loss-option.is-selected .loss-option__radio::after{ content:''; width:10px; height:10px; border-radius:50%; background:var(--navy); }
+.loss-option b{ display:block; font-size:calc(13px*var(--scale)); }
+.loss-option small{ display:block; margin-top:3px; color:var(--muted); font-size:calc(11.5px*var(--scale)); line-height:1.4; }
+.loss-fields{ display:grid; grid-template-columns:220px 1fr; gap:14px; }
+.loss-docs{ border-top:1px solid var(--line); }
+.loss-doc{ display:grid; grid-template-columns:minmax(220px,1fr) minmax(160px,.75fr) auto; gap:12px; align-items:center; min-height:58px; padding:10px 0; border-bottom:1px solid var(--line); }
+.loss-doc__title{ font-size:calc(12.5px*var(--scale)); font-weight:600; }
+.loss-doc__meta{ display:block; margin-top:2px; color:var(--muted); font-size:calc(10.5px*var(--scale)); font-weight:400; }
+.loss-doc__help{ color:var(--blue); font-size:calc(11px*var(--scale)); cursor:pointer; font-weight:600; }
+.loss-doc__file{ color:var(--muted); font-size:calc(11.5px*var(--scale)); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.loss-doc__file.is-ready{ color:var(--ok-text); font-weight:600; }
+.loss-doc__auto{ display:inline-flex; align-items:center; gap:6px; color:var(--ok-text); font-size:calc(11.5px*var(--scale)); font-weight:600; }
+.loss-upload{ display:inline-flex; align-items:center; justify-content:center; min-height:36px; padding:0 12px; border:1px solid var(--navy); border-radius:7px; color:var(--navy); font-size:calc(11.5px*var(--scale)); font-weight:600; cursor:pointer; white-space:nowrap; background:var(--card); }
+.loss-upload:hover{ background:var(--sel); }
+.loss-actions{ display:flex; align-items:center; justify-content:flex-end; gap:10px; }
+@media (max-width:900px){ .loss-options,.loss-fields{ grid-template-columns:1fr; } .loss-doc{ grid-template-columns:1fr auto; } .loss-doc__file{ grid-column:1/-1; grid-row:2; } }
 /* ── Операторские блоки процесса (тоже были без стилей) ── */
 .sup-changebox{ margin:14px 0 4px; padding:12px 14px; border:1px solid var(--line); border-radius:9px; background:var(--bg); }
 .proc-row{ display:flex; gap:8px; align-items:flex-end; margin:8px 0; }
@@ -1123,7 +1180,7 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
   </div>
 
   <div class="body">
-    <nav class="sections">
+    <nav class="sections" id="mainSections" aria-label="Разделы">
       <div class="sec sec--active" data-view="clients" onclick="go('clients')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="9" cy="8" r="3.1"/><path d="M3.6 20a5.5 5.5 0 0 1 10.8 0"/><path d="M16 5.4a3.1 3.1 0 0 1 0 6.1"/><path d="M17.2 14.7a5.5 5.5 0 0 1 3.2 5.3"/></svg><span>Мои клиенты</span></div>
       <div class="sec" data-view="prolongation" onclick="go('prolongation')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg><span>Пролонгация</span></div>
       <div class="sec" data-view="osago" onclick="go('osago')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 13l1.6-4.2A2 2 0 0 1 8.5 7.5h7a2 2 0 0 1 1.9 1.3L19 13"/><path d="M4 13h16v4H4z"/><circle cx="7.5" cy="17" r="1.3"/><circle cx="16.5" cy="17" r="1.3"/></svg><span>ОСАГО</span></div>
@@ -1134,12 +1191,12 @@ img.rlogo{ object-fit:contain; background:#fff; border-color:var(--line); paddin
       <div class="sec" data-view="messages" onclick="go('messages')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 13a7 7 0 0 1 14 0"/><path d="M5 13v2.5a2 2 0 0 0 2 2h.5v-6H7a2 2 0 0 0-2 2z"/><path d="M19 13v2.5a2 2 0 0 1-2 2h-.5v-6h.5a2 2 0 0 1 2 2z"/><path d="M17.5 17.5a3.2 3.2 0 0 1-3.2 3h-2"/></svg><span>Поддержка</span><span class="sec__badge sec__badge--attn" id="messagesBadge" title="Ждут вашего ответа"></span></div>
       <div class="sec" data-view="support" onclick="supOpen=null;go('support')" title="Кокпит оператора поддержки — очередь и маршрутизация"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 13h4l2 3h4l2-3h4"/><path d="M4 13V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7"/><path d="M4 13v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span>Оператор</span><span class="sec__badge" id="supBadge"></span></div>
       <div class="sections__spacer"></div>
-      <div class="sec sec--collapse"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M13 6l-6 6 6 6"/><path d="M18 6v12"/></svg><span>Свернуть</span></div>
+      <button type="button" class="sec sec--collapse" id="sidebarToggle" aria-controls="mainSections" aria-expanded="true" aria-label="Свернуть боковую панель"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M13 6l-6 6 6 6"/><path d="M18 6v12"/></svg><span>Свернуть</span></button>
     </nav>
 
     <section class="work" id="work">
       <div class="formcmd">
-        <button title="Ещё" onclick="toast('Меню «Ещё» формы: печать, изменить форму, настройка списка…')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="19" r="1.3"/></svg></button>
+        <button id="form-more" title="Ещё" onclick="var menu=document.getElementById('prol-preview-menu');if(menu)menu.togglePopover();else toast('Меню «Ещё» формы: печать, изменить форму, настройка списка…')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="19" r="1.3"/></svg></button>
         <button title="Закрыть форму" onclick="toast('Форма закрыта')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>
       <div class="workscreen" id="workscreen"></div>
@@ -1180,7 +1237,7 @@ var CLIENTS = [
   {d:'14.07.2026',n:'Фёдорова Татьяна Михайловна',o:'Nissan Qashqai',sub:'У884КА124',num:'ТТТ 7061007342',p:'ОСАГО',price:'10 050',st:'ok',sti:'check',stl:'Оформлен',sk:'Ренессанс'},
   {d:'12.07.2026',n:'Осипов Максим Юрьевич',o:'Здоровье',sub:'',num:'РРР-40560421',p:'Несч. случай',price:'2 100',st:'ok',sti:'check',stl:'Оформлен',sk:'СОГАЗ',chat:'d-settled'},
   {d:'11.07.2026',n:'Гусев Пётр Ильич',o:'Здоровье',sub:'',num:'РРР-40563377',p:'НС Спорт',price:'2 400',proc:'loss',procL:'Урегулирование',urgent:true,st:'procurgent',sti:'alert',stl:'Ожидаем документы',sk:'Ренессанс',attn:true,attnAct:'Приложите чеки на лечение'},
-  {d:'10.07.2026',n:'Данилова Светлана Борисовна',o:'ВАЗ Granta',sub:'С317ОР124',num:'ТТТ 7047339815',p:'ОСАГО',price:'5 990',st:'draft',sti:'edit',stl:'Черновик',sk:'РГС',attn:true,attnAct:'Завершите оформление'},
+  {d:'22.09.2026',n:'Баев Виктор Михайлович',o:'TOYOTA IPSUM',sub:'Т395АУ154',num:'Ещё не выпущен',p:'ОСАГО',price:'5 385,33',st:'draft',sti:'edit',stl:'Черновик',sk:'Перестраховочный пул',autoassistant:true,autoServicePrice:2450,autoServicePaid:true,startDate:'23.09.2026',endDate:'22.09.2027',drivers:[{fullName:'Баев Виктор Михайлович'}],attn:true,attnAct:'Загрузите документы для Автопомощника'},
   {d:'08.07.2026',n:'Тихонов Артём Валерьевич',o:'UAZ Patriot',sub:'М668ВК124',num:'ТТТ 7055120097',p:'ОСАГО',price:'13 470',st:'ok',sti:'check',stl:'Оформлен',sk:'Согласие'}
 ];
 var DEAL = {d:'22.07.2026',n:'ООО «Тепломонтаж»',o:'Парк 4 ТС',num:'Заявка №2418',p:'ОСАГО ЮЛ',st:'Тариф получен',need:'Согласуйте тариф',attn:true,attnAct:'Согласуйте тариф',chat:'deal'};
@@ -1189,9 +1246,9 @@ var QUOTES = [
   {sk:'Ренессанс',ci:'renessans',price:'9 480',date:'24 июля',pay:'Банковская карта',type:'Сегмент',best:true,lk:false,svc:'ns',svcName:'НС при ДТП',svcPrice:'800'},
   {sk:'Югория',ci:'ugoria',price:'9 480',date:'25 июля',pay:'Банковская карта',type:'Сегмент',best:true,lk:false,svc:'legal',svcName:'Юрист поможет',svcPrice:'500'},
   {sk:'Согласие',ci:'soglasie',price:'9 640',date:'24 июля',pay:'Банковская карта',type:'Сегмент',best:false,lk:false,svc:'legal',svcName:'Юрист поможет',svcPrice:'500'},
-  {sk:'РГС',ci:'rosgosstrah',price:'10 120',date:'24 июля',pay:'Оплата по счёту',type:'Сегмент',best:false,lk:true,svc:'ns',svcName:'НС при ДТП',svcPrice:'1 000'},
-  {sk:'Зетта',ci:'zetta',price:'11 050',date:'24 июля',pay:'Банковская карта',type:'Сегмент',best:false,lk:false,svc:'mini',svcName:'МиниКАСКО',svcPrice:'2 450'},
-  {sk:'СОГАЗ',ci:'sogaz',price:'10 780',date:'26 июля',pay:'Оплата по счёту',type:'Перестраховочный пул',best:false,lk:true,svc:'mini',svcName:'МиниКАСКО',svcPrice:'2 450',req:true}
+  {sk:'РГС',ci:'rosgosstrah',price:'10 120',date:'24 июля',pay:'Оплата по счёту',type:'Сегмент',best:false,lk:true,svc:'off'},
+  {sk:'Зетта',ci:'zetta',price:'11 050',date:'24 июля',pay:'Банковская карта',type:'Сегмент',best:false,lk:false,svc:'off'},
+  {sk:'Поддержка',ci:'sogaz',price:'10 780',date:'26 июля',pay:'Оплата по счёту',type:'Перестраховочный пул',best:false,lk:false,svc:'autoassistant',svcName:'Автопомощник',svcPrice:'2 450',req:true}
 ];
 var HEALTH = [
   {id:'accident',t:'Страхование от несчастного случая',s:'Травмы, госпитализация, инвалидность'},
@@ -1199,10 +1256,38 @@ var HEALTH = [
   {id:'tick',t:'Страхование от укуса клеща',s:'Диагностика и лечение после укуса'}
 ];
 var PROL = [
-  {d:'до 29.07.2026',n:'Кузнецова Ольга Ивановна',o:'Toyota Camry · Т432ЕК124',num:'ТТТ 7056214893',price:'9 480',st:'pay',stl:'Истекает через 6 дней',sk:'Ренессанс'},
-  {d:'до 05.08.2026',n:'Никитин Владимир Олегович',o:'Renault Duster · Е553РТ124',num:'ТТТ 7049221056',price:'11 260',st:'wait',stl:'Истекает через 13 дней',sk:'Зетта'},
-  {d:'до 22.08.2026',n:'Тихонов Артём Валерьевич',o:'UAZ Patriot · М668ВК124',num:'ТТТ 7055120097',price:'13 470',st:'ok',stl:'Истекает через 30 дней',sk:'Согласие'}
+  {id:'00456',kind:'osago',product:'ОСАГО ФЛ',annual:true,end:'2026-09-17',n:'Иванов Сергей Александрович',o:'Hyundai Solaris · К517НЕ28',plate:'К517НЕ28',license:'25 11 345678',num:'ЕЕЕ 1234567890',price:'8 900',status:'expired',statusLabel:'Просрочен',calculated:true,issued:false,sk:'Ингосстрах',resp:'Чаптыкова Ирина Васильевна'},
+  {id:'00457',kind:'osago',product:'ОСАГО ФЛ',annual:true,end:'2026-09-27',n:'Петрова Ольга Викторовна',o:'Kia Rio · А186ХН28',plate:'А186ХН28',license:'25 09 774411',num:'ЕЕЕ 0987654321',price:'7 600',status:'soon',statusLabel:'10 дней до окончания',calculated:true,issued:false,sk:'РЕСО-Гарантия',resp:'Чаптыкова Ирина Васильевна'},
+  {id:'00458',kind:'osago',product:'ОСАГО ЮЛ',annual:true,end:'2026-10-04',n:'ООО «Зея»',o:'КамАЗ 65116 · В223ОН155',plate:'В223ОН155',license:'',num:'ЕЕЕ 1122334455',price:'10 200',status:'due',statusLabel:'К продлению',calculated:false,issued:false,sk:'СОГАЗ',resp:'Ржаная Ольга Георгиевна'},
+  {id:'00459',kind:'osago',product:'ОСАГО ФЛ',annual:true,end:'2026-09-20',n:'Кузнецов Дмитрий Игоревич',o:'Toyota Camry · Т432ЕК124',plate:'Т432ЕК124',license:'24 08 902144',num:'ЕЕЕ 2233445566',price:'12 450',status:'done',statusLabel:'Продлён',calculated:true,issued:true,sk:'АльфаСтрахование',resp:'Ржаная Ольга Георгиевна'},
+  {id:'00460',kind:'osago',product:'ОСАГО ЮЛ',annual:true,end:'2026-10-18',n:'ООО «ТрансСервис»',o:'ГАЗ 3302 · А936НТ28',plate:'А936НТ28',license:'',num:'ЕЕЕ 3344556677',price:'6 800',status:'due',statusLabel:'К продлению',calculated:false,issued:false,sk:'Ингосстрах',resp:'Уланова Анастасия Сергеевна'},
+  {id:'00621',kind:'health',product:'НС Спорт',annual:true,end:'2026-09-16',n:'Иванова Светлана Викторовна',o:'НС Спорт · годовой',plate:'',license:'',num:'СПТ-2025-001256',price:'22 450',status:'expired',statusLabel:'Просрочен',calculated:true,issued:false,sk:'Ренессанс',resp:'Чаптыкова Ирина Васильевна'},
+  {id:'00622',kind:'health',product:'НС Универсальный',annual:true,end:'2026-09-28',n:'Петров Александр Сергеевич',o:'НС Универсальный · годовой',plate:'',license:'',num:'ЗДР-2025-000834',price:'15 800',status:'soon',statusLabel:'10 дней до окончания',calculated:true,issued:false,sk:'Ингосстрах',resp:'Чаптыкова Ирина Васильевна'},
+  {id:'00623',kind:'health',product:'Антиклещ',annual:true,end:'2026-10-14',n:'Сидорова Мария Николаевна',o:'Антиклещ · годовой',plate:'',license:'',num:'АНТ-2025-001102',price:'1 950',status:'due',statusLabel:'К продлению',calculated:false,issued:false,sk:'СОГАЗ',resp:'Ржаная Ольга Георгиевна'},
+  {id:'00624',kind:'health',product:'НС Спорт',annual:true,end:'2026-09-22',n:'Белоусов Игорь Валентинович',o:'НС Спорт · годовой',plate:'',license:'',num:'СПТ-2025-000744',price:'16 200',status:'done',statusLabel:'Продлён',calculated:true,issued:true,sk:'РЕСО-Гарантия',resp:'Уланова Анастасия Сергеевна'},
+  {id:'00625',kind:'health',product:'НС Спорт',annual:false,end:'2026-09-30',n:'Орлова Анна Павловна',o:'НС Спорт · 1 месяц',plate:'',license:'',num:'СПТ-МЕС-00912',price:'690',status:'due',statusLabel:'Месячный полис',calculated:false,issued:false,sk:'Ренессанс',resp:'Уланова Анастасия Сергеевна'},
+  {id:'00626',kind:'health',product:'Антиклещ',annual:false,end:'2026-10-02',n:'Смирнов Максим Олегович',o:'Антиклещ · 1 месяц',plate:'',license:'',num:'АНТ-МЕС-00418',price:'350',status:'due',statusLabel:'Месячный полис',calculated:false,issued:false,sk:'СОГАЗ',resp:'Ржаная Ольга Георгиевна'}
 ];
+var prolTab='osago';
+// Only a prototype preview switch; never delete policies or NSIS search fixtures.
+var prolEmptyDemo=false;
+var prolPreviousTab='osago';
+var prolState={
+  osago:{from:'2026-09-01',to:'2026-10-31',resp:'all',client:'all',product:'all',q:''},
+  health:{from:'2026-09-01',to:'2026-10-31',resp:'all',client:'all',product:'all',q:''}
+};
+var prolNsis={fio:'',plate:'',license:'',searched:false};
+// Демоданные на 21.09.2026: тип клиента не совпадает с цветовым состоянием срока.
+var PROL_TODAY='2026-09-21';
+var PROL_CLIENTS=[['all','Все клиенты'],['issued','Оформленные'],['approved','Одобренные'],['rsa','Оформленные в РСА'],['declined','Не прошли скоринг']];
+var PROL_RESP=['Чаптыкова Ирина Васильевна','Ржаная Ольга Георгиевна','Уланова Анастасия Сергеевна'];
+PROL.forEach(function(p,i){
+  p.client=['approved','approved','declined','issued','rsa','approved','approved','declined','issued','issued','issued'][i];
+  p.ikp=['00623','01523','01768'][PROL_RESP.indexOf(p.resp)];
+  p.phone='+7 (900) 000-00-'+String(i+1).padStart(2,'0');
+  // Цвет и подпись срока всегда рассчитываются по дате, а не хранятся отдельно.
+  delete p.status; delete p.statusLabel;
+});
 
 function stIco(k){
   if(k==='check') return '<polyline points="5 12 10 17 19 7"/>';
@@ -1214,6 +1299,7 @@ function stIco(k){
 function procIco(k){
   if(k==='change') return '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>';
   if(k==='cancel') return '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><line x1="9" y1="15" x2="15" y2="15"/>';
+  if(k==='deal') return '<path d="M4 7h16v11H4z"/><path d="M8 7V5h8v2"/><path d="M4 12h16"/><path d="M10 12v2h4v-2"/>';
   return '<path d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/>';
 }
 
@@ -1241,19 +1327,14 @@ function reasonByCode(code){ for(var i=0;i<CHANGE_REASONS.length;i++){ if(CHANGE
 /* Причины расторжения (§4): пакет зависит от причины; базовый документ — заявление с подписью клиента. */
 var CANCEL_REASONS=[
   {code:'sold',label:'Продажа автомобиля',docs:['Договор купли-продажи']},
-  {code:'total',label:'Гибель (утилизация) ТС',docs:['Свидетельство об утилизации или акт о гибели ТС']},
-  {code:'owner-death',label:'Смерть страхователя',docs:['Свидетельство о смерти','Документ наследника']},
-  {code:'other',label:'Другая причина',docs:[],hint:'Опишите причину в комментарии — поддержка подскажет пакет документов.'}
+  {code:'total',label:'Гибель автомобиля при пожаре',docs:[]},
+  {code:'owner-death',label:'Смерть страхователя или собственника',docs:[]},
+  {code:'theft',label:'Угон автомобиля',docs:[]},
+  {code:'svo',label:'Участие собственника в СВО',docs:[]},
+  {code:'other',label:'Прочее',docs:[]}
 ];
 function cancelReason(code){ for(var i=0;i<CANCEL_REASONS.length;i++){ if(CANCEL_REASONS[i].code===code) return CANCEL_REASONS[i]; } return null; }
-/* Возврат части премии считаем у себя (канон §4): по неистёкшим дням от даты оформления до «сегодня» имитации. */
-function cancelRefund(c){
-  var price=parseInt(String(c.price||'').replace(/\D/g,''),10)||0; if(!price) return 0;
-  var p=String(c.d||'').split('.'); if(p.length!==3) return Math.round(price*0.5);
-  var start=new Date(+p[2],+p[1]-1,+p[0]), today=new Date(2026,7,27);
-  var passed=Math.max(0,Math.round((today-start)/86400000));
-  return Math.max(0,Math.round(price*(365-Math.min(passed,365))/365));
-}
+/* Возврат части премии: сумма вводится поддержкой, локального расчёта нет. */
 /* Базовый пакет FNOL по убытку (§5) — черновой, сверить с поддержкой (бэклог). */
 var LOSS_DOCS=['Извещение о ДТП (европротокол)','Постановление или определение ГИБДД','Фото повреждений','Банковские реквизиты для выплаты'];
 /* «Обычно нужны» — union черновых пакетов выбранных причин (+признак возможной доплаты). */
@@ -1278,7 +1359,8 @@ var PROC_STATUS={
   'rejected':{ag:'Отказ',sup:'Отказ',ball:'done',tone:'draft',term:true}
 };
 /* Вид заявки: заголовок + терминал «done» словами вида (10a: у убытка и расторжения свой итог). */
-var PROC_KIND={change:{t:'Внесение изменений',done:'Изменения внесены'},cancel:{t:'Расторжение договора',done:'Договор расторгнут'},loss:{t:'Урегулирование убытка',done:'Убыток урегулирован'},deal:{t:'Автопомощник',done:'Полис оформлен'}};
+var PROC_KIND={change:{t:'Внесение изменений',done:'Изменения внесены'},cancel:{t:'Расторжение договора',done:'Договор расторгнут. Деньги возвращены'},loss:{t:'Урегулирование убытка',done:'Убыток урегулирован'},deal:{t:'Автопомощник',done:'Полис оформлен'}};
+function procIsLoss(it){ return !!it&&(it.kind==='loss'||it.vid==='Урегулирование убытка'); }
 /* Нейтральные тексты для истории (не раскрывают агенту слово «Новая»). */
 var PROC_FALLBACK={'new':'Заявка создана','in_work':'Заявка в работе у поддержки','awaiting_docs':'Запрошены документы','docs_uploaded':'Документы загружены','awaiting_payment':'Выставлена доплата','paid':'Оплата подтверждена','under_review':'Передано страховой на рассмотрение','signing':'Соглашение готово к подписанию','signed':'Соглашение подписано','settled':'Урегулировано, выплата произведена','done':'Заявка завершена','rejected':'Отказ по заявке'};
 function procAgentLabel(it){ if(it.cstatus==='done'&&PROC_KIND[it.kind]) return PROC_KIND[it.kind].done; var s=PROC_STATUS[it.cstatus]; return s?s.ag:it.st; }
@@ -1324,46 +1406,196 @@ function procSyncSV(it,actor,comment){
   if(typeof updateBell==='function') updateBell();
   if(typeof svOnMessages==='function'&&svOnMessages()&&!svOpen) rerenderChats();
 }
-function procSetStatus(id,cstatus,actor,comment){ var it=supFind(id); if(!it) return; it.cstatus=cstatus; procApply(it,actor,comment); supUpdateBadge(); if(typeof updateBell==='function') updateBell(); }
+function procSetStatus(id,cstatus,actor,comment){ var it=supFind(id); if(!it) return false;
+  if(it.kind==='deal'&&!apTransitionAllowed(it,cstatus,actor)){toast('Используйте действие текущего этапа Автопомощника.');return false;}
+  if(it.kind==='cancel'&&cstatus==='done'&&(!it.refundConfirmed||actor!=='support')){toast('Подтвердите возврат денег в действиях по заявке.');return false;}
+  // УУ закрывается только подтверждённой выплатой, не общей командой «Готово».
+  if(procIsLoss(it)&&(cstatus==='done'||(cstatus==='settled'&&(!it.payoutConfirmed||actor!=='support'||(it.cstatus&&it.cstatus!=='signed')||lossCloseChecks(it).length)))){
+    toast('Для завершения УУ подтвердите выплату в действиях по заявке.'); return false;
+  }
+  it.cstatus=cstatus; procApply(it,actor,comment); supUpdateBadge(); if(typeof updateBell==='function') updateBell(); return true; }
 function procGenNo(){ var n=15181; SUP.forEach(function(it){ if(/^\d+$/.test(it.id)){ var v=parseInt(it.id,10); if(v>n) n=v; } }); return ('000000000'+(n+1)).slice(-9); }
 
 /* Агент создаёт заявку по договору idx — ЛЮБОГО вида (change/cancel/loss), в общий стор SUP.
    Обращение в «Поддержке» рождается вместе с заявкой — единая лента с первого шага. */
 function procCreateCase(idx,kind,payload){ var c=CLIENTS[idx]; if(!c) return; var id=procGenNo();
   var kindT=(PROC_KIND[kind]||{}).t||'Заявка';
+  var submitted=new Date(), submittedDay=[submitted.getFullYear(),String(submitted.getMonth()+1).padStart(2,'0'),String(submitted.getDate()).padStart(2,'0')].join('-');
   var it={ id:id, src:'1c', kind:kind, vid:kindT, cstatus:'new', policyIdx:idx,
-    num:c.num, holder:c.n, obj:c.o+(c.sub?' · '+c.sub:''), region:'Красноярский', agent:'Филь Виктория Викторовна', sk:c.sk, resp:'', date:'27.08.2026', type:payload.type||'Простая',
+    num:c.num, holder:c.n, obj:c.o+(c.sub?' · '+c.sub:''), region:'Красноярский', agent:'Филь Виктория Викторовна', sk:c.sk, resp:'', date:submittedDay.split('-').reverse().join('.'), type:payload.type||'Простая',
     reasons:(payload.reasons||[]).slice(), reasonComment:payload.comment||'', attachments:(payload.files||[]).map(function(f){ return {name:f,by:'agent',at:'сейчас'}; }),
+    changeData:kind==='change'&&payload.changeData?JSON.parse(JSON.stringify(payload.changeData)):null,
+    cancelData:kind==='cancel'&&payload.cancelData?JSON.parse(JSON.stringify(payload.cancelData)):null,
+    dealData:kind==='deal'&&payload.dealData?JSON.parse(JSON.stringify(payload.dealData)):null,
     docRequest:null, payAmount:null, payStale:false, rejectReason:null,
-    refund:payload.refund||null, lossDate:payload.lossDate||'', claimant:payload.claimant||'',
+    refund:payload.refund||null, lossDate:payload.lossDate||'', claimant:payload.claimant||'', lossProduct:payload.lossProduct||'',
+    lossDetails:kind==='loss'?{claimNumber:'',claimType:'primary',claimSign:'pvu',inspectionType:'',applicant:payload.claimant==='Представитель по доверенности'?'representative':'owner',claimDate:submittedDay,insurerAgreementDate:'',agentAgreementDate:'',paymentDate:'',payoutAmount:'',rs:false,go:false,hasComplaint:false,note:''}:null,
     what:payload.what, ac:payload.comment||'—', steps:[] };
+  // Категория — только метаданные демонстрации. Содержимое файлов никуда не отправляется.
+  if(kind==='loss'&&payload.lossDocuments) it.attachments=payload.lossDocuments.map(function(f){return {name:f.name,category:f.category,categoryLabel:f.categoryLabel,by:'agent',at:'сейчас'};});
   SUP.unshift(it);
   if(typeof SV!=='undefined'){ var did='d-case-'+id;
-    var svKind={change:'Изменение',cancel:'Расторжение',loss:'Убыток'}[kind]||'Заявка';
-    SV.push({id:did,group:'object',ts:Date.now(),icon:(kind==='loss'?'loss':(kind==='cancel'?'cancel':'change')),kind:svKind,k:kind,st:'new',caseId:id,holder:c.n,objName:c.o+(c.sub?' · '+c.sub:''),num:c.num,last:'сейчас',snip:'Заявка № '+id+' отправлена — поддержка возьмёт в работу',unread:0,obj:svKind});
+    var svKind={change:'Изменение',cancel:'Расторжение',loss:'Убыток',deal:'Автопомощник'}[kind]||'Заявка';
+    SV.push({id:did,group:'object',ts:Date.now(),icon:(kind==='deal'?'deal':(kind==='loss'?'loss':(kind==='cancel'?'cancel':'change'))),kind:svKind,k:kind,st:'new',caseId:id,holder:c.n,objName:c.o+(c.sub?' · '+c.sub:''),num:c.num,last:'сейчас',snip:'Заявка № '+id+' отправлена — поддержка возьмёт в работу',unread:0,obj:svKind});
     SV_THREADS[did]=[{sys:1,t:'Заявка № '+id+' создана. '+payload.what}];
     c.chat=did;
   }
   procApply(it,'agent','Заявка создана агентом. '+payload.what);
   supUpdateBadge(); if(typeof updateBell==='function') updateBell();
-  toast('Заявка № '+id+' создана — поддержка возьмёт в работу'); openContract(idx,false); }
-function procCreate(idx,reasons,comment,files){
-  procCreateCase(idx,'change',{reasons:reasons,comment:comment,files:files,
+  toast('Заявка № '+id+' создана — поддержка возьмёт в работу'); if(!payload.stay) openContract(idx,false); return id; }
+function procCreate(idx,reasons,comment,files,changeData){
+  return procCreateCase(idx,'change',{reasons:reasons,comment:comment,files:files,changeData:changeData,
     what:'Внесение изменений в полис ОСАГО. Причины: '+reasons.map(reasonLabel).join(', ')+'.'});
 }
 
 /* --- Визард агента --- */
-var changeIdx=0, changeSel={}, changeFiles=[];
-function openChange(idx){ changeIdx=idx; changeSel={}; changeFiles=[]; changeErr=false; render('change');
+function procEscape(value){ return String(value==null?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function contractProduct(c){var p=c&&c.p||'';return p.indexOf('ОСАГО')>-1?'osago':((c&&c.o==='Здоровье')||/^(НС |Антиклещ|Несч[.] случай)/.test(p)?'health':p==='Ипотека'?'mortgage':'unknown');}
+function contractReady(c){return !!c&&['draft','pay','wait','cancelled'].indexOf(c.st)<0;}
+function contractCancelled(idx){return typeof procForPolicy==='function'&&procForPolicy(idx).some(function(it){return it.kind==='cancel'&&it.cstatus==='done';});}
+function contractCanStart(idx,kind){var c=CLIENTS[idx],p=contractProduct(c);if(kind==='deal')return !!c&&p==='osago'&&c.autoassistant===true&&c.st==='draft'&&!contractCancelled(idx)&&!procForPolicy(idx).some(function(it){return it.kind==='deal';});return contractReady(c)&&!contractCancelled(idx)&&(p==='osago'||(p==='health'&&kind==='loss'));}
+function contractStartAllowed(idx,kind){if(contractCanStart(idx,kind))return true;toast('Этот процесс недоступен для данного продукта или состояния договора.');return false;}
+
+/* Поля по причинам, readonly и минимальная проверка заполнения — эскиз, НЕ новые правила 1С/СК.
+   Перед переносом в 1С сверить доступность, обязательность и форматы с аналитиком/поддержкой.
+   Количество водителей 1–5 или без ограничений — docs/knowledge/03-osago.md §2.5.
+   Общая osagoForm() содержит собственные обработчики расчёта; ВИ переиспользует её CSS,
+   но хранит отдельный снимок/черновик и не изменяет CLIENTS при вводе или отправке. */
+var CHANGE_FIELDS=[
+  {key:'vehicleModel',label:'Марка и модель',group:'vehicle',reasons:[]},
+  {key:'plate',label:'Гос.знак',group:'vehicle',reasons:['replace-plate-sts']},
+  {key:'vin',label:'VIN',group:'vehicle',reasons:[]},
+  {key:'year',label:'Год выпуска',group:'vehicle',reasons:[]},
+  {key:'power',label:'Мощность, л.с.',group:'vehicle',reasons:[]},
+  {key:'vehicleDocType',label:'Документ ТС',group:'vehicle',reasons:['replace-plate-sts'],options:['СТС','ПТС','ЭПТС']},
+  {key:'vehicleDocNumber',label:'Серия и номер документа ТС',group:'vehicle',reasons:['replace-plate-sts']},
+  {key:'vehicleDocDate',label:'Дата выдачи документа ТС',group:'vehicle',reasons:['replace-plate-sts']},
+  {key:'withTrailer',label:'Используется с прицепом',group:'vehicle',reasons:['with-trailer'],check:true},
+  {key:'policyholderName',label:'ФИО страхователя',group:'policyholder',reasons:['policyholder-name'],wide:true},
+  {key:'policyholderBirthDate',label:'Дата рождения',group:'policyholder',reasons:[]},
+  {key:'policyholderDocType',label:'Тип документа страхователя',group:'policyholder',reasons:['policyholder-doc']},
+  {key:'policyholderDocNumber',label:'Серия и номер',group:'policyholder',reasons:['policyholder-doc']},
+  {key:'policyholderDocDate',label:'Дата выдачи',group:'policyholder',reasons:['policyholder-doc']},
+  {key:'policyholderAddress',label:'Адрес регистрации',group:'policyholder',reasons:['policyholder-doc'],wide:true},
+  {key:'ownerName',label:'ФИО собственника',group:'owner',reasons:['owner-name','change-owner'],wide:true},
+  {key:'ownerBirthDate',label:'Дата рождения',group:'owner',reasons:['change-owner']},
+  {key:'ownerDocType',label:'Тип документа собственника',group:'owner',reasons:['owner-doc','change-owner']},
+  {key:'ownerDocNumber',label:'Серия и номер',group:'owner',reasons:['owner-doc','change-owner']},
+  {key:'ownerDocDate',label:'Дата выдачи',group:'owner',reasons:['owner-doc','change-owner']},
+  {key:'ownerAddress',label:'Адрес регистрации',group:'owner',reasons:['owner-doc','change-owner'],wide:true},
+  {key:'unlimitedDrivers',label:'Без ограничений по водителям',group:'drivers',reasons:['unlimited-drivers'],check:true},
+  {key:'startDate',label:'Дата начала',group:'parameters',reasons:[]},
+  {key:'endDate',label:'Дата окончания',group:'parameters',reasons:[]},
+  {key:'usePurpose',label:'Цель использования',group:'parameters',reasons:[]},
+  {key:'phone',label:'Телефон клиента',group:'parameters',reasons:[]},
+  {key:'email',label:'Email',group:'parameters',reasons:[]}
+];
+var CHANGE_DRIVER_FIELDS=[['fullName','ФИО водителя'],['birthDate','Дата рождения'],['licenseNumber','Серия и номер ВУ'],['licenseDate','Дата выдачи ВУ'],['experienceFrom','Стаж с']];
+function changeClone(value){ return JSON.parse(JSON.stringify(value)); }
+function changeSnapshot(c){
+  /* Только имя страхователя, ТС и ГРЗ берём из CLIENTS. c.d — не подтверждённое начало срока.
+     Остальное — явно
+     обозначенные примеры из существующих osagoForm/PROL, не сведения этого договора. */
+  var fields={vehicleModel:c.o||'',plate:c.sub||'',vin:'XW7BK4FK90S123456',year:'2021',power:'181',vehicleDocType:'СТС',vehicleDocNumber:'99 23 456789',vehicleDocDate:'15.05.2022',withTrailer:false,
+    policyholderName:c.n||'',policyholderBirthDate:'14.03.1978',policyholderDocType:'Паспорт РФ',policyholderDocNumber:'0412 567890',policyholderDocDate:'20.04.1998',policyholderAddress:'Минусинск, ул. Ленина, 12',
+    ownerName:'Кузнецова Ольга Ивановна',ownerBirthDate:'14.03.1978',ownerDocType:'Паспорт РФ',ownerDocNumber:'0412 567890',ownerDocDate:'20.04.1998',ownerAddress:'Минусинск, ул. Ленина, 12',unlimitedDrivers:false,
+    startDate:c.startDate||'',endDate:c.endDate||'',usePurpose:'Личная',phone:'+7 (902) 111-41-08',email:'o.kuznetsova@mail.ru'};
+  // Не подменяем неизвестный срок датой строки в списке или общей демодатой.
+  var fromCard=['vehicleModel','plate','policyholderName'];
+  return {policyNumber:c.num,product:c.p,insurer:c.sk,fields:fields,
+    drivers:[{id:'driver-1',fullName:'Кузнецова Ольга Ивановна',birthDate:'14.03.1978',licenseNumber:'24 08 902144',licenseDate:'12.05.2014',experienceFrom:'12.05.2014'},
+      {id:'driver-2',fullName:'Морозова Ирина Петровна',birthDate:'',licenseNumber:'25 11 345678',licenseDate:'',experienceFrom:''}],
+    demoFields:CHANGE_FIELDS.filter(function(f){return fromCard.indexOf(f.key)===-1;}).map(function(f){return f.key;}),driversAreDemo:true};
+}
+function changeFieldAllowed(reasons,key){ var f=CHANGE_FIELDS.filter(function(x){return x.key===key;})[0]; return !!f&&(reasons.indexOf('policy-error')!==-1||f.reasons.some(function(r){return reasons.indexOf(r)!==-1;})); }
+function changeDriverAllowed(reasons,driver,key){ return reasons.indexOf('policy-error')!==-1||(driver.added&&reasons.indexOf('add-driver')!==-1)||(reasons.indexOf('replace-license')!==-1&&(key==='licenseNumber'||key==='licenseDate')); }
+function changeCleanDriver(d){ var out={id:d.id}; CHANGE_DRIVER_FIELDS.forEach(function(f){out[f[0]]=String(d[f[0]]||'');}); return out; }
+function changeProposal(snapshot,draft,reasons){
+  var out={fields:changeClone(snapshot.fields),drivers:[]};
+  CHANGE_FIELDS.forEach(function(f){if(changeFieldAllowed(reasons,f.key))out.fields[f.key]=draft.fields[f.key];});
+  snapshot.drivers.forEach(function(old){ var d=draft.drivers.filter(function(x){return x.id===old.id;})[0]||old;
+    if(d.removed&&(reasons.indexOf('remove-driver')!==-1||reasons.indexOf('policy-error')!==-1))return;
+    var next=changeCleanDriver(old); CHANGE_DRIVER_FIELDS.forEach(function(f){if(changeDriverAllowed(reasons,d,f[0]))next[f[0]]=String(d[f[0]]||'');}); out.drivers.push(next); });
+  if(reasons.indexOf('add-driver')!==-1||reasons.indexOf('policy-error')!==-1)draft.drivers.forEach(function(d){if(d.added&&!d.removed)out.drivers.push(changeCleanDriver(d));});
+  return out;
+}
+function changeDraftErrors(snapshot,proposed){
+  var errors=[];
+  if(JSON.stringify(snapshot.fields)===JSON.stringify(proposed.fields)&&JSON.stringify(snapshot.drivers)===JSON.stringify(proposed.drivers))errors.push('Внесите новые данные в поля договора.');
+  if(!proposed.fields.unlimitedDrivers&&!proposed.drivers.length)errors.push('Оставьте хотя бы одного водителя или выберите причину «ЛДУ без ограничений».');
+  if(!proposed.fields.unlimitedDrivers&&proposed.drivers.length>5)errors.push('В ограниченном списке может быть не более 5 водителей.');
+  if(!proposed.fields.unlimitedDrivers)proposed.drivers.forEach(function(d,i){if(!d.fullName.trim()||!d.licenseNumber.trim())errors.push('Укажите ФИО и номер ВУ водителя '+(i+1)+'.');});
+  return errors;
+}
+var changeIdx=0, changeSel={}, changeFiles=[], changeComment='', changeStep=1, changeOriginal=null, changeDraft=null, changeFormError='', changeDriverSeq=2;
+function openChange(idx){ if(!contractStartAllowed(idx,'change'))return; changeIdx=idx; changeSel={}; changeFiles=[]; changeComment=''; changeErr=false; changeStep=1; changeFormError=''; changeDriverSeq=2; changeOriginal=changeSnapshot(CLIENTS[idx]||CLIENTS[0]); changeDraft=changeClone(changeOriginal); render('change');
   document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); });
   document.getElementById('activeTab').innerHTML='Внесение изменений <span class="tab__x">×</span>'; }
 function changeToggle(code){ if(changeSel[code]) delete changeSel[code]; else changeSel[code]=1; if(Object.keys(changeSel).length) changeErr=false; render('change'); }
 function changeAddFile(){ changeFiles.push('Документ '+(changeFiles.length+1)+'.pdf'); render('change'); }
 var changeErr=false;
-function changeSubmit(){ var reasons=Object.keys(changeSel);
+function changeNext(){ if(changeStep!==1)return; var reasons=Object.keys(changeSel);
   if(!reasons.length){ changeErr=true; render('change'); var e=document.querySelector('.chg-err'); if(e) e.scrollIntoView({block:'center'}); return; }
-  changeErr=false; var ta=document.getElementById('changeComment'); procCreate(changeIdx, reasons, ta?ta.value.trim():'', changeFiles); }
+  var ta=document.getElementById('changeComment'); if(ta)changeComment=ta.value; changeErr=false; changeStep=2; changeFormError=''; render('change'); var w=document.getElementById('work'); if(w)w.scrollTop=0; }
+function changeBack(){ if(changeStep===0)return; changeStep=1; changeFormError=''; render('change'); }
+function changeSetField(key,value){ if(!changeDraft||!changeFieldAllowed(Object.keys(changeSel),key))return; changeDraft.fields[key]=value; changeFormError=''; if(key==='unlimitedDrivers')render('change'); }
+function changeSetDriver(id,key,value){ var d=changeDraft&&changeDraft.drivers.filter(function(x){return x.id===id;})[0]; if(d&&changeDriverAllowed(Object.keys(changeSel),d,key)){d[key]=value;changeFormError='';} }
+function changeAddDriver(){ var rs=Object.keys(changeSel); if(rs.indexOf('add-driver')===-1&&rs.indexOf('policy-error')===-1)return;
+  if(changeProposal(changeOriginal,changeDraft,rs).drivers.length>=5){toast('В ограниченном списке — не более 5 водителей.');return;}
+  changeDraft.drivers.push({id:'driver-'+(++changeDriverSeq),added:true,fullName:'',birthDate:'',licenseNumber:'',licenseDate:'',experienceFrom:''}); changeFormError=''; render('change'); }
+function changeRemoveDriver(id){ var d=changeDraft.drivers.filter(function(x){return x.id===id;})[0], rs=Object.keys(changeSel); if(!d||(!d.added&&rs.indexOf('remove-driver')===-1&&rs.indexOf('policy-error')===-1))return;
+  if(d.removed&&changeProposal(changeOriginal,changeDraft,rs).drivers.length>=5){toast('В ограниченном списке — не более 5 водителей.');return;} d.removed=!d.removed; changeFormError=''; render('change'); }
+function changeSubmit(){
+  if(changeStep===0)return; // Уже отправленная заявка не создаётся повторно.
+  if(changeStep!==2){changeNext();return;} // Нельзя обойти шаг редактирования вызовом старой кнопки.
+  var reasons=Object.keys(changeSel); if(!reasons.length||!changeOriginal||!changeDraft){changeBack();return;}
+  var proposed=changeProposal(changeOriginal,changeDraft,reasons), errors=changeDraftErrors(changeOriginal,proposed);
+  if(errors.length){changeFormError=errors.join(' ');render('change');var e=document.getElementById('changeFormError');if(e)e.scrollIntoView({block:'center'});return;}
+  var id=procCreate(changeIdx,reasons,changeComment.trim(),changeFiles,{snapshot:changeClone(changeOriginal),proposed:proposed});
+  if(id)changeStep=0;
+}
+function changeFieldHTML(f){ var allowed=changeFieldAllowed(Object.keys(changeSel),f.key), value=allowed?changeDraft.fields[f.key]:changeOriginal.fields[f.key], id='change-'+f.key;
+  if(f.check)return '<label class="ocheck"><input id="'+id+'" type="checkbox"'+(value?' checked':'')+(allowed?' onchange="changeSetField(\''+f.key+'\',this.checked)"':' disabled')+'> '+f.label+'</label>';
+  var control=f.options?'<select id="'+id+'"'+(allowed?' onchange="changeSetField(\''+f.key+'\',this.value)"':' disabled')+'>'+f.options.map(function(o){return '<option'+(value===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select>'
+    :'<input id="'+id+'" value="'+procEscape(value)+'"'+(allowed?' oninput="changeSetField(\''+f.key+'\',this.value)"':' readonly')+'>';
+  return '<div class="of '+(f.wide?'of--wide':'of--small')+'"><label for="'+id+'">'+f.label+'</label>'+control+'</div>';
+}
+function changeDriversHTML(){ var rs=Object.keys(changeSel), proposal=changeProposal(changeOriginal,changeDraft,rs), unlimited=proposal.fields.unlimitedDrivers;
+  var h='<article class="osec"><div class="osec__head"><span class="osec__title">Водители</span><span class="sp"></span>'+changeFieldHTML(CHANGE_FIELDS.filter(function(f){return f.key==='unlimitedDrivers';})[0])+'</div>';
+  if(unlimited)return h+'<p class="card__lead">Список водителей не требуется. Заполненные данные сохранены в черновике.</p></article>';
+  changeDraft.drivers.forEach(function(d,i){
+    if(d.added&&rs.indexOf('add-driver')===-1&&rs.indexOf('policy-error')===-1)return;
+    var removed=d.removed&&(d.added||rs.indexOf('remove-driver')!==-1||rs.indexOf('policy-error')!==-1);
+    var shown=proposal.drivers.filter(function(x){return x.id===d.id;})[0]||d;
+    h+='<div style="margin-top:14px"><div class="osec__head"><b>Водитель '+(i+1)+(d.added?' · новый':'')+(removed?' · исключён из заявки':'')+'</b><span class="sp"></span>';
+    if(d.added||rs.indexOf('remove-driver')!==-1||rs.indexOf('policy-error')!==-1)h+='<button class="btn btn--sm" onclick="changeRemoveDriver(\''+d.id+'\')">'+(removed?'Вернуть водителя':'Удалить водителя')+'</button>';
+    h+='</div>';
+    if(!removed)h+='<div class="orow">'+CHANGE_DRIVER_FIELDS.map(function(f){var enabled=changeDriverAllowed(rs,d,f[0]),id='change-'+d.id+'-'+f[0];return '<div class="of '+(f[0]==='fullName'?'of--wide':'of--small')+'"><label for="'+id+'">'+f[1]+'</label><input id="'+id+'" value="'+procEscape(shown[f[0]])+'"'+(enabled?' oninput="changeSetDriver(\''+d.id+'\',\''+f[0]+'\',this.value)"':' readonly')+'></div>';}).join('')+'</div>';
+    h+='</div>';
+  });
+  if(rs.indexOf('add-driver')!==-1||rs.indexOf('policy-error')!==-1)h+='<div class="oactions" style="padding:12px 0 0"><button class="btn btn--sm" onclick="changeAddDriver()"'+(proposal.drivers.length>=5?' disabled title="Не более 5 водителей"':'')+'>Добавить водителя</button></div>';
+  return h+'</article>';
+}
+function screenChangeContract(c){ var groups=[['vehicle','Транспортное средство'],['policyholder','Страхователь'],['owner','Собственник']], sections='';
+  groups.forEach(function(g){sections+='<article class="osec"><div class="osec__head"><span class="osec__title">'+g[1]+'</span></div><div class="orow">'+CHANGE_FIELDS.filter(function(f){return f.group===g[0];}).map(changeFieldHTML).join('')+'</div></article>';});
+  sections+=changeDriversHTML()+'<article class="osec"><div class="osec__head"><span class="osec__title">Параметры и контакты</span></div><div class="orow">'+CHANGE_FIELDS.filter(function(f){return f.group==='parameters';}).map(changeFieldHTML).join('')+'</div></article>';
+  return '<div class="screen active"><div class="breadcrumb"><a onclick="openContract('+changeIdx+',false)">Договор</a> / <a onclick="changeBack()">Причины изменения</a> / Данные договора</div><div class="ptitle">Внесение изменений в договор ОСАГО</div><div class="psub">Шаг 2 из 2 · Проверьте договор и внесите новые данные</div>'
+    +'<article class="osec"><div class="osec__head"><span class="osec__title">'+procEscape(c.num)+' · '+procEscape(c.sk)+'</span></div><div class="prg-reasons">'+Object.keys(changeSel).map(function(r){return '<span class="prg-chip">'+reasonLabel(r)+'</span>';}).join('')+'</div><p class="card__lead">Поля доступны по выбранным причинам.</p><p class="card__lead">Демо: отсутствующие в карточке сведения заполнены примерами.</p></article>'
+    +sections+'<article class="osec"><div class="osec__head"><span class="osec__title">Документы и комментарий</span></div><div class="proc-files">'+(changeFiles.length?changeFiles.map(function(f){return '<span class="proc-file">'+procEscape(f)+'</span>';}).join(''):'Документы можно приложить позже по запросу поддержки.')+'</div>'+(changeComment?'<p style="white-space:pre-wrap">'+procEscape(changeComment)+'</p>':'<p class="card__lead">Комментарий не указан.</p>')+'<button class="btn btn--sm" onclick="changeBack()">Изменить причины, документы и комментарий</button></article>'
+    +(changeFormError?'<div class="chg-err" id="changeFormError" style="margin:14px 20px" role="alert">'+procEscape(changeFormError)+'</div>':'')
+    +'<div class="osticky"><button class="btn" onclick="changeBack()">Назад</button><span class="chg-next" style="flex:1">Новые данные получит поддержка. После отправки — проверка документов.</span><button class="btn btn--primary" onclick="changeSubmit()">Отправить заявку</button></div></div>';
+}
+function changeDataHTML(it){ if(it.kind!=='change'||!it.changeData)return ''; var data=it.changeData.proposed, rs=it.reasons||[];
+  var h='<div class="sup-side__h" style="margin-top:14px">Новые данные договора</div><p class="card__lead">Предложены агентом. Недостающие исходные сведения — демопримеры.</p>';
+  CHANGE_FIELDS.forEach(function(f){if(changeFieldAllowed(rs,f.key))h+='<div class="kv"><span>'+f.label+'</span><b style="overflow-wrap:anywhere;white-space:pre-wrap">'+procEscape(f.check?(data.fields[f.key]?'Да':'Нет'):(data.fields[f.key]||'Не указано'))+'</b></div>';});
+  if(rs.some(function(r){return ['add-driver','remove-driver','replace-license','unlimited-drivers','policy-error'].indexOf(r)!==-1;})){
+    h+='<div class="sup-side__h" style="margin-top:10px">'+(data.fields.unlimitedDrivers?'Водители — без ограничений':'Список водителей в заявке')+'</div>';
+    if(!data.fields.unlimitedDrivers)data.drivers.forEach(function(d,i){h+='<div style="margin:10px 0"><b>Водитель '+(i+1)+'</b>'+CHANGE_DRIVER_FIELDS.map(function(f){return '<div class="kv"><span>'+f[1]+'</span><b style="overflow-wrap:anywhere">'+procEscape(d[f[0]]||'Не указано')+'</b></div>';}).join('')+'</div>';});
+  }
+  return h;
+}
 function screenChange(){ var c=CLIENTS[changeIdx]||CLIENTS[0];
+  if(changeStep===2)return screenChangeContract(c);
   /* 3 смысловые группы, 2 колонки — вертикальное сканирование, частые сверху. */
   var reasons='', lastG='';
   CHANGE_REASONS.forEach(function(r){ var on=!!changeSel[r.code];
@@ -1384,7 +1616,7 @@ function screenChange(){ var c=CLIENTS[changeIdx]||CLIENTS[0];
   var files=changeFiles.length? changeFiles.map(function(f){ return '<div class="chg-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+f+'</div>'; }).join('') : '<div class="chg-none">Приложите документы сейчас — заявка пройдёт быстрее, без запроса от поддержки. Если документов под рукой нет, можно отправить и приложить позже.</div>';
   return '<div class="screen active">'
     +'<div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+changeIdx+',false)">Договор</a> / Внесение изменений</div>'
-    +'<div class="ptitle">Внесение изменений в договор</div>'
+    +'<div class="ptitle">Внесение изменений в договор</div><div class="psub">Шаг 1 из 2 · Причины изменения и документы</div>'
     +'<div class="chg-wrap">'
       +'<div class="card"><div class="kv"><span>Договор</span><b>'+c.p+' · '+c.num+'</b></div><div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+c.o+(c.sub?' · '+c.sub:'')+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+c.sk+'</b></div></div>'
       +'<div class="card"><h3>Что меняем в договоре?</h3><div class="chg-reasons">'+reasons+'</div>'+needBox+err+'</div>'
@@ -1392,83 +1624,127 @@ function screenChange(){ var c=CLIENTS[changeIdx]||CLIENTS[0];
         +'<div class="chg-files">'+files+'</div>'
         +'<label class="chg-upload"><input type="file" hidden onchange="changeAddFile()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>Приложить документ</label>'
         +'<label class="fld-label" for="changeComment">Комментарий для поддержки</label>'
-        +'<textarea class="sup-ta" id="changeComment" placeholder="Например: впишите второго водителя — Морозова Ирина Петровна…" style="width:100%"></textarea>'
+        +'<textarea class="sup-ta" id="changeComment" oninput="changeComment=this.value" placeholder="Например: впишите второго водителя — Морозова Ирина Петровна…" style="width:100%">'+procEscape(changeComment)+'</textarea>'
       +'</div>'
-      +'<div class="chg-foot"><span class="chg-next">После отправки: поддержка проверит заявку → если понадобятся документы или доплата, попросим здесь же → приложим новый полис к договору. О каждом шаге сообщим оповещением.</span>'
-        +'<button class="btn btn--primary" onclick="changeSubmit()">Отправить заявку'+(n?' ('+n+')':'')+'</button></div>'
+      +'<div class="chg-foot"><span class="chg-next">Далее откроется заполненный договор ОСАГО — внесите новые данные, затем отправьте заявку поддержке.</span>'
+        +'<button class="btn btn--primary" onclick="changeNext()">Далее — данные договора</button></div>'
     +'</div></div>';
 }
 
-/* --- Визард расторжения (§4): одна причина, пакет по причине, расчёт возврата виден сразу --- */
-var cancelIdx=0, cancelSel='', cancelFiles=[], cancelErr=false;
-function openCancel(idx){ cancelIdx=idx; cancelSel=''; cancelFiles=[]; cancelErr=false; render('cancelw');
+/* --- Визард расторжения: заявитель и причина → проверка и отправка. --- */
+var cancelIdx=0, cancelSel='', cancelFiles=[], cancelComment='', cancelErr=false, cancelStep=1, cancelClaimant='', cancelCreatedId='';
+function openCancel(idx){ if(!contractStartAllowed(idx,'cancel'))return; cancelIdx=idx; cancelSel=''; cancelFiles=[]; cancelComment=''; cancelErr=false; cancelStep=1; cancelClaimant=''; cancelCreatedId=''; render('cancelw');
   document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); });
   document.getElementById('activeTab').innerHTML='Расторжение договора <span class="tab__x">×</span>'; }
-function cancelPick(code){ cancelSel=(cancelSel===code)?'':code; if(cancelSel) cancelErr=false; render('cancelw'); }
-function cancelAddFile(){ cancelFiles.push('Документ '+(cancelFiles.length+1)+'.pdf'); render('cancelw'); }
-function cancelSubmit(){ if(!cancelSel){ cancelErr=true; render('cancelw'); var e=document.querySelector('.chg-err'); if(e) e.scrollIntoView({block:'center'}); return; }
-  var c=CLIENTS[cancelIdx], r=cancelReason(cancelSel), ta=document.getElementById('cancelComment');
-  procCreateCase(cancelIdx,'cancel',{comment:ta?ta.value.trim():'',files:cancelFiles,refund:cancelRefund(c),
-    what:'Расторжение полиса '+c.p+' — '+r.label.toLowerCase()+'.'}); }
-function screenCancel(){ var c=CLIENTS[cancelIdx]||CLIENTS[0];
-  var rs=CANCEL_REASONS.map(function(r){ var on=cancelSel===r.code; return '<label class="chk'+(on?' chk--on':'')+'"><input type="checkbox" '+(on?'checked':'')+' onchange="cancelPick(\''+r.code+'\')"><span class="chk__box"></span><span>'+r.label+'</span></label>'; }).join('');
-  var r=cancelReason(cancelSel), needBox='';
-  if(r){ var docs=['Заявление на расторжение (подпись клиента)'].concat(r.docs);
-    needBox='<div class="chg-need"><b>Обычно нужны:</b> '+docs.join(' · ')+'. Поддержка может запросить ещё.'+(r.hint?'<span class="chg-need__pay">'+r.hint+'</span>':'')+'</div>'; }
-  var refundBox='<div class="chg-need"><b>К возврату ≈ '+cancelRefund(c).toLocaleString('ru-RU')+' ₽</b> — расчёт по неистёкшим дням страхования.<span class="chg-need__pay">Сумму может скорректировать страховая. Выплата клиенту — до 14 календарных дней после расторжения.</span></div>';
-  var err=cancelErr?'<div class="chg-err"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Выберите причину расторжения.</div>':'';
-  var files=cancelFiles.length? cancelFiles.map(function(f){ return '<div class="chg-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+f+'</div>'; }).join('') : '<div class="chg-none">Приложите документы сейчас — заявка пройдёт быстрее, без запроса от поддержки.</div>';
-  return '<div class="screen active">'
-    +'<div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+cancelIdx+',false)">Договор</a> / Расторжение</div>'
-    +'<div class="ptitle">Расторжение договора</div>'
-    +'<div class="chg-wrap">'
-      +'<div class="card"><div class="kv"><span>Договор</span><b>'+c.p+' · '+c.num+'</b></div><div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+c.o+(c.sub?' · '+c.sub:'')+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+c.sk+'</b></div></div>'
-      +'<div class="card"><h3>Почему расторгаем?</h3><div class="chg-reasons">'+rs+'</div>'+needBox+refundBox+err+'</div>'
-      +'<div class="card"><h3>Документы и комментарий</h3><div class="chg-files">'+files+'</div>'
-        +'<label class="chg-upload"><input type="file" hidden onchange="cancelAddFile()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>Приложить документ</label>'
-        +'<label class="fld-label" for="cancelComment">Комментарий для поддержки</label>'
-        +'<textarea class="sup-ta" id="cancelComment" placeholder="Например: клиент продал автомобиль 20 августа…" style="width:100%"></textarea>'
-      +'</div>'
-      +'<div class="chg-foot"><span class="chg-next">После отправки: поддержка проверит заявку → отправим договор в СК на расторжение → возврат клиенту до 14 календарных дней. О каждом шаге сообщим оповещением.</span>'
-        +'<button class="btn btn--primary" onclick="cancelSubmit()">Отправить заявку</button></div>'
-    +'</div></div>';
+function cancelPick(code){ cancelSel=code; cancelErr=false; render('cancelw'); }
+function cancelNext(){ if(!cancelReason(cancelSel)||['Страхователь','Представитель страхователя'].indexOf(cancelClaimant)<0){cancelErr=true;render('cancelw');return false;} cancelStep=2;cancelErr=false;render('cancelw');return true; }
+function cancelSubmit(){ if(cancelStep!==2||cancelCreatedId||!cancelReason(cancelSel)||['Страхователь','Представитель страхователя'].indexOf(cancelClaimant)<0) return false;
+  var c=CLIENTS[cancelIdx],r=cancelReason(cancelSel);
+  cancelCreatedId=procCreateCase(cancelIdx,'cancel',{comment:cancelComment.trim(),files:[],claimant:cancelClaimant,
+    cancelData:{reason:r.label,owner:c.owner||'',date:'',error:false},
+    what:'Расторжение полиса '+c.p+' — '+r.label+'.'});
+  return !!cancelCreatedId; }
+function screenCancel(){ var c=CLIENTS[cancelIdx]||CLIENTS[0],r=cancelReason(cancelSel);
+  var summary='<div class="card"><div class="kv"><span>Договор</span><b>'+procEscape(c.p+' · '+c.num)+'</b></div><div class="kv"><span>Страхователь</span><b>'+procEscape(c.n)+'</b></div><div class="kv"><span>Собственник</span><b>'+procEscape(c.owner||'Не указан')+'</b></div><div class="kv"><span>Страховая компания</span><b>'+procEscape(c.sk)+'</b></div></div>';
+  var body='';
+  if(cancelStep===1){
+    body='<div class="card"><h3>Кто заявитель?</h3><div class="chg-reasons">'+['Страхователь','Представитель страхователя'].map(function(v){return '<label class="cancel-choice"><input type="radio" name="cancelClaimant" '+(cancelClaimant===v?'checked':'')+' onchange="cancelClaimant=this.value;cancelErr=false;render(\'cancelw\')" value="'+v+'"><span>'+v+'</span></label>';}).join('')+'</div></div>'
+      +'<div class="card"><h3>Причина расторжения</h3><div class="chg-reasons">'+CANCEL_REASONS.map(function(v){return '<label class="cancel-choice"><input type="radio" name="cancelReason" '+(cancelSel===v.code?'checked':'')+' onchange="cancelPick(\''+v.code+'\')"><span>'+v.label+'</span></label>';}).join('')+'</div>'
+      +(cancelErr?'<div class="chg-err" role="alert">Выберите заявителя и причину расторжения.</div>':'')+'</div>';
+  }else{
+    body='<div class="card"><h3>Проверьте данные</h3><div class="kv"><span>Заявитель</span><b>'+procEscape(cancelClaimant)+'</b></div><div class="kv"><span>Причина</span><b>'+procEscape(r?r.label:'')+'</b></div><div class="kv"><span>Дата расторжения</span><b>Не подтверждена</b></div><div class="kv"><span>Сумма к возврату</span><b>Не определена</b></div></div>'
+      +'<div class="card"><label class="fld-label" for="cancelComment">Комментарий для поддержки</label><textarea class="sup-ta" id="cancelComment" style="width:100%" oninput="cancelComment=this.value">'+procEscape(cancelComment)+'</textarea></div>';
+  }
+  return '<div class="screen active"><div class="breadcrumb"><a onclick="openContract('+cancelIdx+',false)">Договор</a> / Расторжение</div><div class="ptitle">Расторжение договора</div><div class="chg-wrap"><p>Шаг '+cancelStep+' из 2 · '+(cancelStep===1?'Заявитель и причина':'Проверка и отправка')+'</p>'+summary+body+'<div class="chg-foot"><button class="btn" onclick="'+(cancelStep===1?'openContract('+cancelIdx+',false)':'cancelStep=1;render(\'cancelw\')')+'">Назад</button><button class="btn btn--primary" onclick="'+(cancelStep===1?'cancelNext()':'cancelSubmit()')+'">'+(cancelStep===1?'Далее':'Отправить заявку')+'</button></div></div></div>';
 }
-/* --- Визард убытка (FNOL §5): что произошло + базовый пакет документов --- */
-var lossIdx=0, lossFiles=[], lossErr=false;
-function openLoss(idx){ lossIdx=idx; lossFiles=[]; lossErr=false; render('lossw');
+var lossIdx=0, lossStep=1, lossClaimant='', lossProduct='osago', lossDate='', lossDesc='', lossComment='', lossFiles={}, lossErr='', lossCreatedId='', lossDuplicateCount=0, lossDuplicateAccepted=false;
+var LOSS_UPLOADS=[
+  {id:'application',title:'Заявление на выплату страхового возмещения',meta:'',help:'Скачать бланк'},
+  {id:'photos',title:'Фото осмотра транспортного средства',meta:'До 30 фотографий',help:'Инструкция по осмотру',multiple:true},
+  {id:'passport',title:'Паспорт РФ собственника',meta:'Разворот с фото и регистрация'},
+  {id:'bank',title:'Реквизиты расчётного счёта',meta:''},
+  {id:'vehicle',title:'ПТС или СТС',meta:''},
+  {id:'gibdd',title:'Документы из ГИБДД',meta:''},
+  {id:'notice',title:'Извещение о ДТП',meta:''},
+  {id:'policy',title:'Полис ОСАГО',meta:''},
+  {id:'other',title:'Другие документы',meta:'При наличии',multiple:true}
+];
+function lossDocumentList(){
+  if(lossProduct!=='health') return LOSS_UPLOADS.slice();
+  return [
+    LOSS_UPLOADS[0],
+    {id:'medical',title:'Медицинские документы',meta:'Справка, выписка или заключение врача',multiple:true},
+    {id:'passport',title:'Паспорт застрахованного',meta:'Разворот с фото и регистрация'},
+    LOSS_UPLOADS[3],LOSS_UPLOADS[8]
+  ];
+}
+function openLoss(idx){ if(!contractStartAllowed(idx,'loss')) return; lossIdx=idx; lossStep=1; lossClaimant=''; lossProduct=contractProduct(CLIENTS[idx]); lossDate=''; lossDesc=''; lossComment=''; lossFiles={}; lossErr=''; lossCreatedId=''; lossDuplicateCount=procForPolicy(idx).filter(function(x){return x.kind==='loss';}).length; lossDuplicateAccepted=!lossDuplicateCount; render('lossw');
   document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); });
   document.getElementById('activeTab').innerHTML='Урегулирование убытка <span class="tab__x">×</span>'; }
-function lossAddFile(){ var d=(document.getElementById('lossDesc')||{}).value; lossFiles.push('Документ '+(lossFiles.length+1)+'.pdf'); render('lossw'); var ta=document.getElementById('lossDesc'); if(ta&&d) ta.value=d; }
-function lossSubmit(){ var ta=document.getElementById('lossDesc'); var d=ta?ta.value.trim():'';
-  if(!d){ lossErr=true; render('lossw'); var e=document.querySelector('.chg-err'); if(e) e.scrollIntoView({block:'center'}); return; }
-  var dt=(document.getElementById('lossDate')||{}).value||''; var cl=(document.getElementById('lossClaimant')||{}).value||'Собственник';
-  procCreateCase(lossIdx,'loss',{comment:d,files:lossFiles,lossDate:dt,claimant:cl,type:'Сложная',
-    what:'Убыток по '+CLIENTS[lossIdx].p+(dt?(' — событие '+dt):'')+'. '+d}); }
-function screenLoss(){ var c=CLIENTS[lossIdx]||CLIENTS[0];
-  var err=lossErr?'<div class="chg-err"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>Опишите, что произошло — без этого страховая не примет убыток.</div>':'';
-  var needBox='<div class="chg-need"><b>Обычно нужны:</b> '+LOSS_DOCS.join(' · ')+'. Поддержка может запросить ещё.'
-    +'<span class="chg-need__pay">После рассмотрения СК пришлём соглашение о выплате — подпишете у клиента и загрузите здесь же.</span></div>';
-  var files=lossFiles.length? lossFiles.map(function(f){ return '<div class="chg-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>'+f+'</div>'; }).join('') : '<div class="chg-none">Приложите документы сейчас — заявка пройдёт быстрее, без запроса от поддержки.</div>';
-  return '<div class="screen active">'
-    +'<div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+lossIdx+',false)">Договор</a> / Урегулирование убытка</div>'
-    +'<div class="ptitle">Урегулирование убытка</div>'
-    +'<div class="chg-wrap">'
-      +'<div class="card"><div class="kv"><span>Договор</span><b>'+c.p+' · '+c.num+'</b></div><div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+c.o+(c.sub?' · '+c.sub:'')+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+c.sk+'</b></div></div>'
-      +'<div class="card"><h3>Что произошло?</h3>'
-        +'<div style="display:flex;gap:14px;flex-wrap:wrap"><span style="flex:1;min-width:180px"><label class="fld-label" for="lossDate" style="margin-top:0">Дата события</label><input id="lossDate" class="tselect" style="width:100%" placeholder="ДД.ММ.ГГГГ"/></span>'
-        +'<span style="flex:1;min-width:220px"><label class="fld-label" for="lossClaimant" style="margin-top:0">Заявитель</label><select id="lossClaimant" class="tselect" style="width:100%"><option>Собственник</option><option>Представитель по доверенности</option></select></span></div>'
-        +'<label class="fld-label" for="lossDesc">Описание события</label>'
-        +'<textarea class="sup-ta" id="lossDesc" placeholder="Например: ДТП на парковке — повреждён задний бампер, второй участник оформлен по европротоколу…" style="width:100%"></textarea>'
-        +needBox+err+'</div>'
-      +'<div class="card"><h3>Документы</h3><div class="chg-files">'+files+'</div>'
-        +'<label class="chg-upload"><input type="file" hidden onchange="lossAddFile()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>Приложить документ</label></div>'
-      +'<div class="chg-foot"><span class="chg-next">После отправки: поддержка проверит заявку → передадим страховой на рассмотрение → соглашение о выплате на подпись у клиента → выплата. О каждом шаге сообщим оповещением.</span>'
-        +'<button class="btn btn--primary" onclick="lossSubmit()">Отправить заявку</button></div>'
-    +'</div></div>';
+function lossSaveDraft(){ var cm=document.getElementById('lossComment'); if(cm) lossComment=cm.value; }
+function lossPickClaimant(v){ if(v!=='owner'&&v!=='proxy') return; lossSaveDraft(); lossClaimant=v; lossErr=''; render('lossw'); }
+function lossNext(){ if(lossStep!==1||!lossDuplicateAccepted) return false; lossSaveDraft();
+  if(lossClaimant!=='owner'&&lossClaimant!=='proxy'){ lossErr='Выберите заявителя.'; render('lossw'); return false; }
+  lossErr=''; lossStep=2; render('lossw'); var w=document.getElementById('work'); if(w) w.scrollTop=0; return true; }
+function lossPrev(){ if(lossStep!==2||lossCreatedId) return; lossSaveDraft(); lossErr=''; lossStep=1; render('lossw'); var w=document.getElementById('work'); if(w) w.scrollTop=0; }
+function lossAddFile(code,input){ if(lossStep!==2||lossCreatedId) return false; lossSaveDraft(); var fs=input&&input.files;
+  if(!fs||!fs.length) return false;
+  var doc=lossDocumentList().find(function(d){return d.id===code;}); if(!doc) return false;
+  var names=Array.from(fs).map(function(f){return f.name;});
+  var next=doc.multiple?(lossFiles[code]||[]).concat(names):names.slice(0,1);
+  if(code==='photos'&&next.length>30){ lossErr='Можно приложить не более 30 фотографий.'; render('lossw'); return false; }
+  lossFiles[code]=next; lossErr=''; render('lossw'); return true; }
+function lossRemoveFile(code,index){ if(lossStep!==2||lossCreatedId) return; lossSaveDraft(); var names=lossFiles[code]; if(!names) return;
+  if(Number.isInteger(index)&&index>=0&&index<names.length) names.splice(index,1);
+  else if(index===undefined) names.length=0;
+  if(!names.length) delete lossFiles[code]; lossErr=''; render('lossw'); }
+function lossSubmit(){ if(lossStep!==2||lossCreatedId||!lossDuplicateAccepted||(lossClaimant!=='owner'&&lossClaimant!=='proxy')) return false; lossSaveDraft();
+  var documents=[]; lossDocumentList().forEach(function(d){ (lossFiles[d.id]||[]).forEach(function(name){ documents.push({category:d.id,categoryLabel:d.title,name:name}); }); });
+  var cl=lossClaimant==='proxy'?'Представитель по доверенности':(lossProduct==='health'?'Застрахованный':'Собственник');
+  lossCreatedId=procCreateCase(lossIdx,'loss',{comment:lossComment,files:documents.map(function(d){return d.name;}),lossDocuments:documents,lossDate:lossDate,claimant:cl,type:'Сложная',stay:true,lossProduct:lossProduct,
+    what:'Урегулирование убытка по '+CLIENTS[lossIdx].p+'.'});
+  if(!lossCreatedId) return false; lossStep=3; lossErr=''; render('lossw'); var w=document.getElementById('work'); if(w) w.scrollTop=0; return true; }
+function lossProgress(){ var labels=['Заявитель','Документы']; return '<div class="loss-progress">'+labels.map(function(t,i){ var n=i+1,cl=(lossStep>2||n<lossStep)?' is-done':(n===lossStep?' is-current':''); return '<div class="loss-progress__item'+cl+'"><span class="loss-progress__num">'+((lossStep>2||n<lossStep)?'✓':n)+'</span><span>'+t+'</span></div>'; }).join('')+'</div>'; }
+function lossContractCard(c){ return '<div class="card"><div class="kv"><span>Договор</span><b>'+procEscape(c.p)+' · '+procEscape(c.num)+'</b></div><div class="kv"><span>Страхователь</span><b>'+procEscape(c.n)+'</b></div>'+(c.o?'<div class="kv"><span>Объект</span><b>'+procEscape(c.o+(c.sub?' · '+c.sub:''))+'</b></div>':'')+'<div class="kv"><span>Страховая</span><b>'+procEscape(c.sk)+'</b></div></div>'; }
+function lossDocRow(d){ var names=lossFiles[d.id]||[];
+  var state=names.length?'<div class="loss-doc__file">'+names.map(function(name,i){return '<div style="display:flex;gap:8px;align-items:center;overflow-wrap:anywhere"><span>'+procEscape(name)+'</span><button class="btn btn--sm" aria-label="Удалить '+procEscape(name)+'" onclick="lossRemoveFile(\''+d.id+'\','+i+')">×</button></div>';}).join('')+'</div>':'<span class="loss-doc__file">Файл не выбран</span>';
+  var action='<label class="loss-upload"><input type="file" '+(d.multiple?'multiple ':'')+'aria-label="'+procEscape(d.title)+'" hidden onchange="lossAddFile(\''+d.id+'\',this)">'+(names.length?(d.multiple?'Добавить файлы':'Заменить файл'):'Выбрать файл')+'</label>';
+  return '<div class="loss-doc"><div><div class="loss-doc__title">'+procEscape(d.title)+'</div>'+(d.meta?'<span class="loss-doc__meta">'+procEscape(d.meta)+'</span>':'')+(d.help?'<a class="loss-doc__help" onclick="toast(\''+d.help+' (демо)\')">'+d.help+'</a>':'')+'</div>'+state+action+'</div>'; }
+function screenLoss(){ var c=CLIENTS[lossIdx]||CLIENTS[0], body='', actions='';
+  var err=lossErr?'<div class="chg-err" role="alert">'+procEscape(lossErr)+'</div>':'';
+  if(!lossDuplicateAccepted){
+    body='<div class="card"><h3>По договору уже есть '+lossDuplicateCount+' '+(lossDuplicateCount===1?'убыток':'убытка')+'</h3><p class="loss-lead">Проверьте историю договора, чтобы случайно не создать повторную заявку. Если это другой страховой случай, можно продолжить.</p></div>';
+    actions='<div class="loss-actions"><button class="btn" onclick="openContract('+lossIdx+',false)">Посмотреть существующие</button><button class="btn btn--primary" onclick="lossDuplicateAccepted=true;render(\'lossw\')">Заявить новый убыток</button></div>';
+  } else if(lossStep===1){
+    var owner=lossProduct==='health'?'Застрахованный':'Собственник';
+    body='<div class="card"><h3>Кто заявитель?</h3><div class="loss-options">'
+      +'<label class="loss-option'+(lossClaimant==='owner'?' is-selected':'')+'"><input type="radio" name="lossClaimant" value="owner" '+(lossClaimant==='owner'?'checked':'')+' onchange="lossPickClaimant(\'owner\')"><span class="loss-option__radio"></span><span><b>'+owner+'</b></span></label>'
+      +'<label class="loss-option'+(lossClaimant==='proxy'?' is-selected':'')+'"><input type="radio" name="lossClaimant" value="proxy" '+(lossClaimant==='proxy'?'checked':'')+' onchange="lossPickClaimant(\'proxy\')"><span class="loss-option__radio"></span><span><b>Представитель по доверенности</b></span></label></div>'+err+'</div>';
+    actions='<div class="loss-actions"><button class="btn" onclick="openContract('+lossIdx+',false)">Назад в договор</button><button class="btn btn--primary" onclick="lossNext()">Далее</button></div>';
+  } else if(lossStep===2) {
+    body='<div class="card"><h3>Документы для урегулирования</h3><div class="loss-docs">'+lossDocumentList().map(lossDocRow).join('')+'</div>'+err
+      +'<label class="fld-label" for="lossComment">Комментарий для поддержки <span style="font-weight:400">(необязательно)</span></label><textarea class="sup-ta" id="lossComment" oninput="lossComment=this.value" style="width:100%">'+procEscape(lossComment)+'</textarea></div>';
+    actions='<div class="loss-actions"><button class="btn" onclick="lossPrev()">Назад</button><button class="btn btn--primary" onclick="lossSubmit()">Отправить заявку</button></div>';
+  } else {
+    var created=supFind(lossCreatedId);
+    body='<div class="card" style="text-align:center;padding:34px"><div style="font-size:36px;color:var(--ok)">✓</div><h3>Заявка отправлена</h3><p class="loss-lead">№ '+procEscape(lossCreatedId)+'</p><div class="loss-op__grid" style="text-align:left;margin-top:18px"><div class="sup-fld"><label>Дата подачи</label><div class="sup-fld__v">'+procEscape(created?created.date:'')+'</div></div><div class="sup-fld"><label>Статус</label><div class="sup-fld__v">Проверка документов</div></div></div></div>';
+    actions='<div class="loss-actions"><button class="btn" onclick="openContract('+lossIdx+',false)">Перейти в договор</button><button class="btn btn--primary" onclick="procOpenDiscussion(\''+lossCreatedId+'\')">Открыть переписку</button></div>';
+  }
+  return '<div class="screen active"><div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / <a onclick="openContract('+lossIdx+',false)">Договор</a> / Урегулирование убытка</div><div class="ptitle">Урегулирование убытка</div><div class="chg-wrap">'+lossProgress()+lossContractCard(c)+body+actions+'</div></div>';
 }
+
 
 /* --- Прогресс заявки на договоре (сторона агента) --- */
 function procForPolicy(idx){ return SUP.filter(function(it){ return it.cstatus && it.policyIdx===idx; }).sort(function(a,b){ return (b._ts||0)-(a._ts||0); }); }
+function lossTrack(it){ if(it.kind!=='loss') return ''; var order=['new','in_work','awaiting_docs','docs_uploaded','under_review','signing','signed','settled'], pos=order.indexOf(it.cstatus); if(pos<0) pos=0; var stages=[{p:0,t:'Заявка подана'},{p:1,t:'Проверка документов'},{p:4,t:'Передано в СК'},{p:5,t:'Решение и соглашение'},{p:7,t:'Выплата'}]; return '<div class="loss-track">'+stages.map(function(s){return '<div class="loss-track__step '+(pos>s.p?'is-done':(pos===s.p?'is-current':''))+'">'+s.t+'</div>';}).join('')+'</div>'; }
+function procCaseDiscussion(id){ if(typeof SV==='undefined') return null; for(var i=0;i<SV.length;i++){ if(SV[i].caseId===id) return SV[i]; } return null; }
+function procOpenDiscussion(id){ var row=procCaseDiscussion(id); if(!row){ toast('Переписка по заявке пока недоступна'); return false; } openDiscussion(row.id); return true; }
+var procDocRequestSequence=0;
+/* items — оставшиеся документы; entries сохраняет индексы позиций после частичной загрузки. */
+function procDocRequestEntries(it){ var req=it&&it.docRequest; if(!req) return [];
+  if(!req.key) req.key='docs-'+it.id+'-'+(++procDocRequestSequence);
+  if(!req.entries) req.entries=(req.items||[]).map(function(label){ return {label:label,files:[]}; });
+  return req.entries; }
 function procActiveReq(idx){ var list=procForPolicy(idx);
   /* Активные — полной карточкой; done/settled — строкой в свёрнутом «Завершённые заявки» (лок process_visibility).
      rejected остаётся карточкой: терминал, но действенный — рядом вход «Подать заново». */
@@ -1483,56 +1759,83 @@ function procActiveReq(idx){ var list=procForPolicy(idx);
       +'</div></div>';
   }
   if(!act.length) return '<p class="none-note">Активных заявок по договору нет — все обращения закрыты.</p>'+closedBlock;
-  return act.map(function(it){ var s=PROC_STATUS[it.cstatus]||{}; var agBall=procIsAgentBall(it);
+  return act.map(function(it){ if(it.kind==='deal'&&it.dealData)return apCaseCard(it,false); var s=PROC_STATUS[it.cstatus]||{}; var agBall=procIsAgentBall(it);
     var kindT=(PROC_KIND[it.kind]||{}).t||it.vid||'Заявка';
     var badge='<span class="prg-badge prg-badge--'+(s.tone||'proc')+'">'+procAgentLabel(it)+'</span>';
     var reasons=(it.reasons&&it.reasons.length)
       ? '<div class="prg-reasons">'+it.reasons.map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('')+'</div>'
       : (it.what?'<p class="card__lead" style="margin:4px 0 8px">'+it.what+'</p>':'');
     /* Расторжение: расчёт возврата виден всю дорогу (канон §4 — сумму может скорректировать СК). */
-    var refundLine=(it.kind==='cancel'&&it.refund)?'<div class="prg-pay"><b>К возврату ≈ '+it.refund.toLocaleString('ru-RU')+' ₽</b><div class="prg-disc">Расчёт по неистёкшим дням; сумму может скорректировать страховая. Выплата клиенту — до 14 календарных дней после расторжения.</div></div>':'';
+    var refundLine=it.kind==='cancel'?'<div class="prg-pay"><b>'+(it.refundConfirmed?'Деньги возвращены':'Сумма к возврату')+(it.refund!=null?': '+Number(it.refund).toLocaleString('ru-RU')+' ₽':(it.refundConfirmed?'':': не определена'))+'</b></div>':'';
     var action='';
     if(it.cstatus==='awaiting_docs'){
-      var req=(it.docRequest&&it.docRequest.items&&it.docRequest.items.length)? '<div class="prg-need">Нужны документы: '+it.docRequest.items.join(', ')+'</div>':'<div class="prg-need">Поддержка запросила документы.</div>';
-      action=req+'<button class="btn btn--primary btn--sm" onclick="procAgentUpload(\''+it.id+'\')">Загрузить документы</button>';
+      var reqItems=procDocRequestEntries(it), req=reqItems.length?'<div class="prg-need"><b>Поддержка запросила:</b>'+reqItems.map(function(entry,index){ return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:7px"><span>'+procEscape(entry.label)+(entry.files.length?'<small style="display:block;color:var(--ok)">Приложено: '+entry.files.map(procEscape).join(', ')+'</small>':'')+'</span>'+(entry.files.length?'<span class="status-text ok">Приложено</span>':'<label class="btn btn--sm"><input type="file" multiple hidden onchange="procAgentUpload(\''+it.id+'\','+index+',this,\''+it.docRequest.key+'\')">Загрузить</label>')+'</div>'; }).join('')+'</div>':'<div class="prg-need">Поддержка запросила документы.</div>';
+      action=req;
     } else if(it.cstatus==='awaiting_payment'){
       /* Платит КЛИЕНТ: ссылка у агента — передать (WhatsApp/СМС) или показать QR; агент лишь подтверждает оплату. */
       var amtS=(it.payAmount||0).toLocaleString('ru-RU')+' ₽';
       var disc='<div class="prg-disc">⚠ Ссылка может стать недействительной. Если оплата не проходит — запросите новую у поддержки.</div>';
-      if(it.payStale) action='<div class="prg-pay"><b>К доплате: '+amtS+'</b><div class="prg-stale">Вы запросили новую ссылку — поддержка перевыставит.</div></div>';
+      if(it.kind==='deal') action='<div class="prg-pay"><b>К оплате за ОСАГО: '+amtS+' — платит клиент.</b><div class="prg-script">Передайте клиенту ссылку на оплату из переписки. После оплаты поддержка подтвердит платёж и приложит готовый полис.</div>'+disc+'<div class="prg-payrow"><button class="btn btn--primary btn--sm" onclick="procShareLink(\''+it.id+'\')">Скопировать ссылку клиенту</button><button class="btn btn--sm" onclick="procShareLink(\''+it.id+'\',1)">Показать QR</button></div></div>';
+      else if(it.payStale) action='<div class="prg-pay"><b>К доплате: '+amtS+'</b><div class="prg-stale">Вы запросили новую ссылку — поддержка перевыставит.</div></div>';
       else if(!it.linkShared) action='<div class="prg-pay"><b>К доплате: '+amtS+' — платит клиент.</b>'
         +'<div class="prg-script">Скажите клиенту: «За изменение страховая рассчитала доплату '+amtS+' — отправляю вам ссылку на оплату».</div>'+disc
         +'<div class="prg-payrow"><button class="btn btn--primary btn--sm" onclick="procShareLink(\''+it.id+'\')">Отправить ссылку клиенту</button><button class="btn btn--sm" onclick="procShareLink(\''+it.id+'\',1)">Показать QR для оплаты</button></div></div>';
       else action='<div class="prg-pay"><b>К доплате: '+amtS+' — ссылка у клиента.</b>'+disc
         +'<div class="prg-payrow"><button class="btn btn--primary btn--sm" onclick="procAgentPay(\''+it.id+'\')">Клиент оплатил — подтвердить</button><button class="btn btn--sm" onclick="procReqNewLink(\''+it.id+'\')">Ссылка не открывается</button></div></div>';
     } else if(it.cstatus==='signing'){
-      action='<div class="prg-need">Соглашение о выплате готово — подпишите у клиента и загрузите скан.</div><button class="btn btn--primary btn--sm" onclick="procAgentSign(\''+it.id+'\')">Загрузить подписанное соглашение</button>';
-    } else if(it.cstatus==='under_review'){ action='<div class="prg-wait">Заявка у страховой — на рассмотрении. Ответ придёт сюда и оповещением.</div>'; }
+      var currentAgreement=(it.attachments||[]).filter(function(a){return a.agreement&&a.current;})[0];
+      action='<div class="prg-need">Соглашение о выплате готово — подпишите у клиента и загрузите скан.</div>'+(currentAgreement?'<button class="btn btn--sm" onclick="toast(\'Скачивается актуальное соглашение: '+currentAgreement.name+'\')">Скачать актуальное соглашение</button> ':'')+'<button class="btn btn--primary btn--sm" onclick="procAgentSign(\''+it.id+'\')">Загрузить подписанное соглашение</button>';
+    } else if(it.cstatus==='signed'){ action='<div class="prg-wait">Соглашение подписано. Ожидаем подтверждения выплаты.</div>'; }
+    else if(it.cstatus==='under_review'){ action='<div class="prg-wait">Заявка у страховой — на рассмотрении. Ответ придёт сюда и оповещением.</div>'; }
     else if(it.cstatus==='settled'){ action='<div class="prg-done">✓ Урегулировано — выплата произведена.</div>'; }
     else if(it.cstatus==='done'){ action='<div class="prg-done">✓ '+((PROC_KIND[it.kind]||{}).done||'Заявка завершена')+(it.kind==='change'?' — новый полис доступен в документах.':'.')+'</div>'; }
     else if(it.cstatus==='rejected'){ action='<div class="prg-rej">Отказ'+(it.rejectReason?' — '+it.rejectReason:'')+'</div><button class="btn btn--sm" onclick="'+(it.kind==='change'?('openChange('+idx+')'):'toast(\'Повторная подача — через новую заявку из договора\')')+'">Подать заявку заново</button>'; }
-    else if(it.cstatus==='new'){ action='<div class="prg-wait">Поддержка возьмёт заявку в работу. Дальше: проверим → если понадобятся документы или доплата — попросим здесь же → приложим новый полис. О каждом шаге сообщим оповещением — проверять не нужно.</div>'; }
+    else if(it.cstatus==='new'){
+      var nextText=it.kind==='deal'
+        ?'Документы переданы поддержке. После проверки здесь появится сумма и ссылка на оплату ОСАГО. Оплата не завершает оформление автоматически — готовый полис приложит поддержка.'
+        :it.kind==='loss'
+        ?'Поддержка проверит заявку и передаст её страховой. Если понадобятся документы — запросим здесь же. После решения СК пришлём соглашение на подпись, затем сообщим о выплате.'
+        :(it.kind==='cancel'
+          ?'Поддержка проверит заявку и передаст её страховой на расторжение. Если понадобятся документы — запросим здесь же. О решении и возврате сообщим оповещением.'
+          :'Поддержка проверит заявку. Если понадобятся документы или доплата — попросим здесь же, затем приложим новый полис к договору.');
+      action='<div class="prg-wait">'+nextText+' Проверять статус вручную не нужно — сообщим о каждом шаге.</div>'; }
     else { action='<div class="prg-wait">Заявка у поддержки — ждём ответа.</div>'; }
-    var chatBtn=(CLIENTS[idx]&&CLIENTS[idx].chat)? '<div style="margin-top:6px"><button class="req__reply" onclick="openDiscussion(\''+CLIENTS[idx].chat+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка по обращению →</button></div>':'';
+    var chatBtn=procCaseDiscussion(it.id)? '<div style="margin-top:6px"><button class="req__reply" onclick="procOpenDiscussion(\''+it.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка по обращению →</button></div>':'';
     var hist='<div class="prg__hist"><button class="prg__histbtn" onclick="this.nextElementSibling.classList.toggle(\'show\')">История заявки</button><div class="prg__timeline">'+it.steps.filter(function(st){ return !st.internal; }).map(function(st){ var lbl=st.cs&&PROC_STATUS[st.cs]?PROC_STATUS[st.cs].ag:(st.s||''); return '<div class="prg__ev"><span class="prg__evd">'+st.d+'</span><span class="prg__evs">'+lbl+'</span><span class="prg__evc">'+st.c+'</span></div>'; }).join('')+'</div></div>';
-    return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+reasons+refundLine+action+hist+chatBtn+'</div>';
+    return '<div class="prg '+(agBall?'prg--act':'')+'"><div class="prg__top"><span class="req__kind">'+kindT+'</span><span class="req__num">№ '+it.id+'</span>'+badge+'</div>'+lossTrack(it)+reasons+refundLine+action+hist+chatBtn+'</div>';
   }).join('')+closedBlock;
 }
 /* Действия агента */
-function procAgentUpload(id){ var it=supFind(id); if(!it) return; it.attachments=(it.attachments||[]).concat([{name:'Документ агента.pdf',by:'agent',at:'сейчас'}]); it.docRequest=null; it.cstatus='docs_uploaded'; procApply(it,'agent','Агент приложил запрошенные документы.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Документы отправлены поддержке'); render('contract',it.policyIdx); }
-function procAgentPay(id){ var it=supFind(id); if(!it) return; it.payStale=false; it.cstatus='paid'; procApply(it,'agent','Агент подтвердил оплату доплаты '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Оплата отправлена — поддержка продолжит оформление'); render('contract',it.policyIdx); }
-function procAgentSign(id){ var it=supFind(id); if(!it) return; it.attachments=(it.attachments||[]).concat([{name:'Соглашение (подписано).pdf',by:'agent',at:'сейчас'}]); it.cstatus='signed'; procApply(it,'agent','Агент загрузил подписанное клиентом соглашение.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Соглашение отправлено — страховая произведёт выплату'); render('contract',it.policyIdx); }
+function procAgentUpload(id,index,input,requestKey){ var it=supFind(id), files=input&&input.files;
+  if(!it||it.cstatus!=='awaiting_docs'||!it.docRequest||!files||!files.length) return false;
+  var entries=procDocRequestEntries(it), req=it.docRequest, entry=entries[index];
+  if(!Number.isInteger(index)||!entry||entry.files.length||(requestKey&&requestKey!==req.key)) return false;
+  var names=Array.prototype.map.call(files,function(file){ return file.name; }).filter(function(name){ return typeof name==='string'&&name.length>0; });
+  if(!names.length) return false;
+  entry.files=names;
+  it.attachments=(it.attachments||[]).concat(names.map(function(name){ return {name:name,by:'agent',at:'сейчас',requestedFor:entry.label,requestKey:req.key}; }));
+  req.items=entries.filter(function(item){ return !item.files.length; }).map(function(item){ return item.label; });
+  var pending=req.items.length, comment='Агент приложил документы по запросу «'+procEscape(entry.label)+'».';
+  if(pending) comment+=' Осталось приложить: '+req.items.map(procEscape).join(', ')+'.';
+  else { it.docRequest=null; it.cstatus='docs_uploaded'; comment+=' Все запрошенные документы приложены.'; }
+  procApply(it,'agent',comment);
+  var row=procCaseDiscussion(id); if(row&&pending){ row.action=true; row.act=caseVerb(it); }
+  supUpdateBadge(); if(typeof updateBell==='function')updateBell();
+  toast(pending?'Документы приложены. Осталось позиций: '+pending:'Все запрошенные документы отправлены поддержке');
+  render('contract',it.policyIdx); return true; }
+function procAgentPay(id){ var it=supFind(id); if(!it) return; if(it.kind==='deal'){toast('Оплату ОСАГО подтверждает оператор.');return false;} it.payStale=false; it.cstatus='paid'; procApply(it,'agent','Агент подтвердил оплату доплаты '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Оплата отправлена — поддержка продолжит оформление'); render('contract',it.policyIdx); }
+function procAgentSign(id){ var it=supFind(id); if(!it) return; if(it.kind==='deal'){toast('Используйте действия вкладки Автопомощника.');return false;} it.attachments=(it.attachments||[]).concat([{name:'Соглашение (подписано).pdf',by:'agent',at:'сейчас'}]); it.cstatus='signed'; procApply(it,'agent','Агент загрузил подписанное клиентом соглашение.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Соглашение отправлено — страховая произведёт выплату'); render('contract',it.policyIdx); }
 function procReqNewLink(id){ var it=supFind(id); if(!it) return; it.payStale=true; it.linkShared=false; it.ball='us'; it.back=true; it._ts=Date.now(); (it.steps=it.steps||[]).push({d:'сейчас',cs:'awaiting_payment',c:'Агент: ссылка на оплату не открывается — прошу новую.'}); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Запрос новой ссылки отправлен поддержке'); render('contract',it.policyIdx); }
 /* Ссылку на доплату получает агент и ПЕРЕДАЁТ клиенту (WhatsApp/СМС) или показывает QR — платит клиент. */
-function procShareLink(id,qr){ var it=supFind(id); if(!it) return; it.linkShared=true;
+function procShareLink(id,qr){ var it=supFind(id); if(!it) return; if(it.kind==='deal')return apCopyLink(id); it.linkShared=true;
   (it.steps=it.steps||[]).push({d:'сейчас',cs:'awaiting_payment',c:qr?'Агент показал клиенту QR для оплаты.':'Агент передал клиенту ссылку на оплату.'});
   toast(qr?'QR показан клиенту — после оплаты нажмите «Клиент оплатил»':'Ссылка скопирована — отправьте клиенту в WhatsApp или СМС');
   render('contract',it.policyIdx); }
 /* Действия оператора (переходы канона) */
 function procTake(id){ procSetStatus(id,'in_work','support','Поддержка взяла заявку в работу.'); toast('Заявка в работе'); supRerender(); }
-function procReqDocs(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procDocReq'); var items=(inp&&inp.value.trim())? inp.value.split(',').map(function(x){return x.trim();}).filter(Boolean):['СТС','Водительское удостоверение']; it.docRequest={items:items}; it.cstatus='awaiting_docs'; procApply(it,'support','Поддержка запросила документы: '+items.join(', ')+'.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Запрос документов отправлен агенту'); supRerender(); }
-function procPayLink(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procPayAmt'); var amt=inp?parseInt((inp.value||'').replace(/\D/g,''),10):0; if(!amt) amt=2500; it.payAmount=amt; it.payStale=false; it.cstatus='awaiting_payment'; procApply(it,'support','Выставлена доплата за изменение: '+amt.toLocaleString('ru-RU')+' ₽ — ссылка направлена агенту.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Ссылка на доплату направлена агенту'); supRerender(); }
-function procReissue(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procPayAmt2'); var amt=(inp&&inp.value)?parseInt(inp.value.replace(/\D/g,''),10):it.payAmount; if(amt) it.payAmount=amt; it.payStale=false; it.cstatus='awaiting_payment'; procApply(it,'support','Поддержка перевыпустила ссылку на оплату.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Ссылка перевыпущена'); supRerender(); }
+function procReqDocs(id){ var it=supFind(id); if(!it) return; if(it.kind==='deal'){toast('Используйте действия вкладки Автопомощника.');return false;} var inp=document.getElementById('procDocReq'); var items=(inp&&inp.value.trim())? inp.value.split(',').map(function(x){return x.trim();}).filter(Boolean):['СТС','Водительское удостоверение']; if(!items.length){ toast('Укажите документы для запроса'); return; } it.docRequest={items:items}; procDocRequestEntries(it); it.cstatus='awaiting_docs'; procApply(it,'support','Поддержка запросила документы: '+items.map(procEscape).join(', ')+'.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Запрос документов отправлен агенту'); supRerender(); }
+function procPayLink(id){ var it=supFind(id); if(!it) return; if(it.kind==='deal'){toast('Используйте действия вкладки Автопомощника.');return false;} var inp=document.getElementById('procPayAmt'); var amt=inp?parseInt((inp.value||'').replace(/\D/g,''),10):0; if(!amt) amt=2500; it.payAmount=amt; it.payStale=false; it.cstatus='awaiting_payment'; procApply(it,'support','Выставлена доплата за изменение: '+amt.toLocaleString('ru-RU')+' ₽ — ссылка направлена агенту.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Ссылка на доплату направлена агенту'); supRerender(); }
+function procReissue(id){ var it=supFind(id); if(!it) return; if(it.kind==='deal'){toast('Используйте действия вкладки Автопомощника.');return false;} var inp=document.getElementById('procPayAmt2'); var amt=(inp&&inp.value)?parseInt(inp.value.replace(/\D/g,''),10):it.payAmount; if(amt) it.payAmount=amt; it.payStale=false; it.cstatus='awaiting_payment'; procApply(it,'support','Поддержка перевыпустила ссылку на оплату.'); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Ссылка перевыпущена'); supRerender(); }
 function procAttachPolicy(id){ var it=supFind(id); if(!it) return;
   /* Канон ВИ-ФТ-6: поддержка меняет № полиса — фиксируем old/new, договор показывает новый. */
   var c=CLIENTS[it.policyIdx];
@@ -1543,9 +1846,25 @@ function procAttachPolicy(id){ var it=supFind(id); if(!it) return;
 /* Переходы канона по видам: cancel (§4) и loss (§5). */
 function procToSK(id){ procSetStatus(id,'under_review','support','Убыток заведён и передан в СК на рассмотрение.'); toast('Передано в СК — на рассмотрении'); supRerender(); }
 function procToSigning(id){ procSetStatus(id,'signing','support','СК согласовала выплату. Соглашение направлено — подпишите у клиента и загрузите.'); toast('Соглашение направлено агенту на подписание'); supRerender(); }
-function procSettle(id){ var it=supFind(id); if(it) it.valueSeen=false; procSetStatus(id,'settled','support','Отдано на выплату — убыток урегулирован.'); toast('Убыток урегулирован — выплата произведена'); supRerender(); }
-function procCancelDone(id){ var it=supFind(id); if(it) it.valueSeen=false; procSetStatus(id,'done','support','Договор отправлен в СК на расторжение. Возврат премии — до 14 календарных дней.'); toast('Договор расторгнут — возврат до 14 дней'); supRerender(); }
-function procReject(id){ var it=supFind(id); if(!it) return; var inp=document.getElementById('procRejReason'); var r=inp?inp.value.trim():''; if(!r){ var e=document.getElementById('procRejErr'); if(e) e.hidden=false; return; } it.rejectReason=r; it.cstatus='rejected'; procApply(it,'support','Отказ: '+r); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Заявка отклонена'); supRerender(); }
+function lossCloseChecks(it){ var d=lossOpData(it), miss=[], amount=String(d.payoutAmount||'').replace(/\s/g,''), date=String(d.paymentDate||''), stamp=Date.parse(date+'T00:00:00Z'), now=new Date(), today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  if(!String(d.claimNumber||'').trim()) miss.push('номер убытка');
+  if(!/^\d+(?:[.,]\d{1,2})?$/.test(amount)||!Number.isFinite(Number(amount.replace(',','.')))||Number(amount.replace(',','.'))<=0) miss.push('корректную сумму выплаты');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(stamp)||new Date(stamp).toISOString().slice(0,10)!==date) miss.push('фактическую дату выплаты');
+  else if(date>today) miss.push('дату выплаты не позже сегодняшней');
+  if(!(it.attachments||[]).some(function(a){return a.agreement&&a.current;})) miss.push('актуальное соглашение');
+  if(it.docRequest&&it.docRequest.items&&it.docRequest.items.length) miss.push('закрытие запроса документов'); return miss; }
+function procSettle(id){ var it=supFind(id); if(!procIsLoss(it)||it.ball==='done') return;
+  if(it.cstatus&&it.cstatus!=='signed'){ toast('Сначала дождитесь подписанного соглашения.'); return; }
+  var miss=lossCloseChecks(it); if(miss.length){ toast('Нельзя подтвердить выплату: '+miss.join(', ')); var e=document.getElementById('lossCloseErr'); if(e){e.hidden=false;e.textContent='Для подтверждения выплаты проверьте: '+miss.join(', ')+'.';} return; }
+  var d=lossOpData(it), amount=Number(String(d.payoutAmount).replace(/\s/g,'').replace(',','.')).toLocaleString('ru-RU'), date=d.paymentDate.split('-').reverse().join('.');
+  it.kind='loss'; it.payoutConfirmed=true; it.payoutConfirmedAt=new Date().toISOString(); it.valueSeen=false;
+  procSetStatus(id,'settled','support','Поддержка подтвердила выплату '+amount+' ₽ от '+date+'. Убыток урегулирован.');
+  toast('Выплата подтверждена — убыток урегулирован'); supRerender(); }
+function procCancelDone(id){ var it=supFind(id); if(!it||it.kind!=='cancel'||['in_work','docs_uploaded','paid'].indexOf(it.cstatus)<0)return false;
+  var check=document.getElementById('cancelReturned');if(!check||!check.checked){toast('Подтвердите, что деньги уже возвращены клиенту.');return false;}
+  it.refundConfirmed=true;it.refundConfirmedAt=new Date().toISOString();it.valueSeen=false;
+  procSetStatus(id,'done','support','Договор расторгнут. Деньги возвращены.');toast('Возврат подтверждён');supRerender();return true; }
+function procReject(id){ var it=supFind(id); if(!it) return; if(it.kind==='deal'){toast('Используйте действия вкладки Автопомощника.');return false;} var inp=document.getElementById('procRejReason'); var r=inp?inp.value.trim():''; if(!r){ var e=document.getElementById('procRejErr'); if(e) e.hidden=false; return; } it.rejectReason=r; it.cstatus='rejected'; procApply(it,'support','Отказ: '+r); supUpdateBadge(); if(typeof updateBell==='function')updateBell(); toast('Заявка отклонена'); supRerender(); }
 /* Операторская панель хода заявки — переходы по канону ВИДА (change §3 / cancel §4 / loss §5).
    Статус канон-заявки меняется ТОЛЬКО этими действиями (свободной смены нет — «мок ≠ контракт»). */
 function procOpBox(it){ var cs=it.cstatus, k=it.kind||'change';
@@ -1554,34 +1873,104 @@ function procOpBox(it){ var cs=it.cstatus, k=it.kind||'change';
   if(cs==='in_work'||cs==='docs_uploaded'||cs==='paid'){
     /* Предзаполнение по ВИДУ и причинам заявки — оператор видит и правит, тихих дефолтов нет. */
     var predoc=reasonNeeds(it.reasons||[]).docs.join(', ');
-    if(!predoc){ predoc=(k==='cancel')?'Заявление на расторжение (подпись клиента)':(k==='loss'?'Извещение о ДТП, Банковские реквизиты для выплаты':'СТС, Водительское удостоверение'); }
+    if(!predoc){ predoc=(k==='cancel')?'Заявление на расторжение (подпись клиента)':(k==='loss'?(lossIsHealth(it)?'Медицинские документы, Банковские реквизиты для выплаты':'Извещение о ДТП, Банковские реквизиты для выплаты'):'СТС, Водительское удостоверение'); }
     h+='<div class="proc-row"><span class="proc-fld"><label for="procDocReq">Какие документы запросить</label><input id="procDocReq" class="tselect" value="'+predoc.replace(/"/g,'&quot;')+'" placeholder="Через запятую"/></span><button class="btn btn--sm" onclick="procReqDocs(\''+it.id+'\')">Запросить документы</button></div>';
-    if(k==='change'){
+    if(k==='deal'){
+      if(cs==='in_work'||cs==='docs_uploaded') h+='<button class="btn btn--primary btn--sm" onclick="dealSendPayment(\''+it.id+'\')">Направить ссылку на оплату ОСАГО</button>';
+      if(cs==='paid') h+='<button class="btn btn--primary btn--sm" onclick="dealFinalize(\''+it.id+'\')">Приложить полис → Готово</button>';
+    } else if(k==='change'){
       h+='<div class="proc-row"><span class="proc-fld"><label for="procPayAmt">Сумма доплаты, ₽</label><input id="procPayAmt" class="tselect" placeholder="Например: 450"/></span><button class="btn btn--sm" onclick="procPayLink(\''+it.id+'\')">Ссылка на доплату</button></div>';
       h+='<button class="btn btn--primary btn--sm" onclick="procAttachPolicy(\''+it.id+'\')">Приложить новый полис → Готово</button>';
     } else if(k==='cancel'){
-      h+='<button class="btn btn--primary btn--sm" onclick="procCancelDone(\''+it.id+'\')">Отправить в СК на расторжение → Готово</button>';
+      h+='<label class="cancel-choice"><input type="checkbox" id="cancelReturned"><span>Деньги уже возвращены клиенту</span></label><button class="btn btn--primary btn--sm" onclick="procCancelDone(\''+it.id+'\')">Подтвердить возврат → Готово</button>';
     } else if(k==='loss'){
       h+='<button class="btn btn--primary btn--sm" onclick="procToSK(\''+it.id+'\')">Завести в СК → На рассмотрении</button>';
     }
   }
   if(cs==='awaiting_docs') h+='<div class="proc-wait">Мяч у агента — ждём документы: '+(((it.docRequest&&it.docRequest.items)||[]).join(', ')||'—')+'</div>';
-  if(cs==='awaiting_payment'){ if(it.payStale) h+='<div class="proc-wait">Агент сообщил: ссылка не открывается.</div><div class="proc-row"><span class="proc-fld"><label for="procPayAmt2">Новая сумма, ₽ (необязательно)</label><input id="procPayAmt2" class="tselect" placeholder="Оставьте пустым — сумма прежняя"/></span><button class="btn btn--primary btn--sm" onclick="procReissue(\''+it.id+'\')">Перевыпустить ссылку</button></div>'; else h+='<div class="proc-wait">Мяч у агента — ждём оплату '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽ от клиента.</div>'; }
+  if(cs==='awaiting_payment'){ if(k==='deal') h+='<div class="proc-wait">Ждём оплату ОСАГО '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽ клиентом.</div><button class="btn btn--primary btn--sm" onclick="dealConfirmPayment(\''+it.id+'\')">Подтвердить оплату</button>'; else if(it.payStale) h+='<div class="proc-wait">Агент сообщил: ссылка не открывается.</div><div class="proc-row"><span class="proc-fld"><label for="procPayAmt2">Новая сумма, ₽ (необязательно)</label><input id="procPayAmt2" class="tselect" placeholder="Оставьте пустым — сумма прежняя"/></span><button class="btn btn--primary btn--sm" onclick="procReissue(\''+it.id+'\')">Перевыпустить ссылку</button></div>'; else h+='<div class="proc-wait">Мяч у агента — ждём оплату '+(it.payAmount||0).toLocaleString('ru-RU')+' ₽ от клиента.</div>'; }
   if(cs==='under_review') h+='<div class="proc-wait">Мяч у страховой — заявка на рассмотрении.</div><button class="btn btn--primary btn--sm" onclick="procToSigning(\''+it.id+'\')">СК согласовала → соглашение на подписание</button>';
   if(cs==='signing') h+='<div class="proc-wait">Мяч у агента — ждём подписанное клиентом соглашение.</div>';
-  if(cs==='signed') h+='<button class="btn btn--primary btn--sm" onclick="procSettle(\''+it.id+'\')">Отдать на выплату → Урегулирован</button>';
+  if(k==='loss'&&cs==='signed') h+='<div class="proc-wait">Ожидаем подтверждения выплаты.</div><div class="proc-err" id="lossCloseErr" hidden></div><button class="btn btn--primary btn--sm" onclick="procSettle(\''+it.id+'\')">Подтвердить выплату → Урегулирован</button>';
   if(cs==='done'||cs==='settled') h+='<div class="proc-done">✓ '+((PROC_KIND[k]||{}).done||'Готово')+'</div>';
   if(cs==='rejected') h+='<div class="proc-rej">Отказ: '+(it.rejectReason||'')+'</div>';
   if(!(PROC_STATUS[cs]||{}).term) h+='<div class="proc-sep"></div><div class="proc-row"><span class="proc-fld"><label for="procRejReason">Причина отказа (свободный текст)</label><input id="procRejReason" class="tselect" placeholder="Например: VIN в СТС не совпадает с базой"/></span><button class="btn btn--sm" onclick="procReject(\''+it.id+'\')">Отказать</button></div><div class="proc-err" id="procRejErr" hidden>Укажите причину отказа — агент увидит её дословно.</div>';
   return h+'</div></div>';
 }
-function procReasonsBlock(it){ var reasons=(it.reasons||[]).length? it.reasons.map(function(r){ return '<span class="prg-chip">'+reasonLabel(r)+'</span>'; }).join('') : '<span class="empty-cell">'+(it.what||'—')+'</span>';
-  var files=(it.attachments||[]).length? it.attachments.map(function(a){ return '<span class="proc-file">'+a.name+(a.by==='agent'?' · агент':'')+'</span>'; }).join('') : '<span class="empty-cell">файлов нет</span>';
+function procReasonsBlock(it){ var reasons=(it.reasons||[]).length? it.reasons.map(function(r){ return '<span class="prg-chip">'+procEscape(reasonLabel(r))+'</span>'; }).join('') : '<span class="empty-cell">'+procEscape(it.what||'—')+'</span>';
+  var files=(it.attachments||[]).length? it.attachments.map(function(a){ return '<span class="proc-file">'+(a.categoryLabel||a.requestedFor?procEscape(a.categoryLabel||a.requestedFor)+' · ':'')+procEscape(a.name)+(a.by==='agent'?' · агент':' · поддержка')+(a.agreement&&a.current?' · актуальное':'')+'</span>'; }).join('') : '<span class="empty-cell">файлов нет</span>';
   /* «Запрошены» тут не дублируем — единственное место этого факта: «Мяч у агента — ждём документы…» в действиях. */
-  var rtitle={change:'Причина изменения',cancel:'Причина расторжения',loss:'Описание убытка'}[it.kind]||'Причина обращения';
+  var rtitle={change:'Причина изменения',cancel:'Причина расторжения',loss:'Описание убытка',deal:'Основание оформления'}[it.kind]||'Причина обращения';
   return '<div class="sup-changebox"><div class="sup-side__h">'+rtitle+'</div><div class="prg-reasons">'+reasons+'</div>'
-    +'<div class="sup-side__h" style="margin-top:8px">Приложенные файлы</div><div class="proc-files">'+files+'</div>'
-    +(it.reasonComment?'<div class="kv"><span>Комментарий агента</span><b>'+it.reasonComment+'</b></div>':'')+'</div>';
+    +'<div class="sup-side__h" id="lossFiles-'+it.id+'" style="margin-top:8px">Приложенные файлы</div>'+(it.kind==='loss'?'<div style="display:flex;gap:6px;margin-bottom:7px"><button class="btn btn--sm" onclick="lossSortFiles(\''+it.id+'\',\'name\')">По названию</button><button class="btn btn--sm" onclick="lossSortFiles(\''+it.id+'\',\'date\')">По дате</button></div>':'')+'<div class="proc-files">'+files+'</div>'
+    +(it.reasonComment?'<div class="kv"><span>Комментарий агента</span><b>'+procEscape(it.reasonComment)+'</b></div>':'')+changeDataHTML(it)+(it.kind==='cancel'?cancelSupportHTML(it):'')+'</div>'+(it.kind==='deal'?dealSupportHTML(it):'');
+}
+function cancelSupportSet(id,key,value){var it=supFind(id);if(!it||it.kind!=='cancel'||it.refundConfirmed)return;var d=it.cancelData||(it.cancelData={});if(key==='refund'){var n=Number(String(value).replace(',','.'));it.refund=value!==''&&Number.isFinite(n)&&n>=0?n:null;}else d[key]=value;}
+function cancelSupportHTML(it){var d=it.cancelData||{},locked=it.refundConfirmed?' disabled':'';return '<div class="kv"><span>Заявитель</span><b>'+procEscape(it.claimant||'Не указан')+'</b></div><label class="fld-label">Собственник<input class="tselect"'+locked+' value="'+procEscape(d.owner||'')+'" onchange="cancelSupportSet(\''+it.id+'\',\'owner\',this.value)"></label><label class="fld-label">Дата расторжения<input type="date" class="tselect"'+locked+' value="'+procEscape(d.date||'')+'" onchange="cancelSupportSet(\''+it.id+'\',\'date\',this.value)"></label><label class="fld-label">Сумма к возврату, ₽<input class="tselect" inputmode="decimal"'+locked+' value="'+procEscape(it.refund==null?'':it.refund)+'" placeholder="Не определена" onchange="cancelSupportSet(\''+it.id+'\',\'refund\',this.value)"></label><label class="cancel-choice"><input type="checkbox"'+locked+(d.error?' checked':'')+' onchange="cancelSupportSet(\''+it.id+'\',\'error\',this.checked)"><span>Ошибка</span></label>';}
+function lossSortFiles(id,mode){ var it=supFind(id); if(!it) return; (it.attachments||[]).sort(function(a,b){ return mode==='name'?a.name.localeCompare(b.name,'ru'):String(b.at||'').localeCompare(String(a.at||''),'ru'); }); toast(mode==='name'?'Документы отсортированы по названию':'Документы отсортированы по дате'); supRerender(); }
+function lossShowFiles(id){ var el=document.getElementById('lossFiles-'+id); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }
+function lossSupportUpload(id,input){ var it=supFind(id), files=input&&input.files; if(!procIsLoss(it)||!files||!files.length) return false;
+  it.attachments=(it.attachments||[]).concat(Array.from(files).map(function(f){return {name:f.name,by:'support',at:'сейчас'};}));
+  (it.steps=it.steps||[]).push({d:'сейчас',internal:true,s:'Документы',c:'Поддержка приложила файлы: '+files.length+'.'}); toast('Файлы добавлены в прототип'); supRerender(); return true; }
+
+function lossDateISO(value){ var v=String(value||'').trim(), m=v.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s|$)/); if(m) v=m[3]+'-'+m[2]+'-'+m[1];
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return ''; var date=new Date(v+'T12:00:00Z'); return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===v?v:''; }
+function lossDisplayDate(value){ var iso=lossDateISO(value); return iso?iso.split('-').reverse().join('.'):(value||'Не указана'); }
+function lossIsHealth(it){ if(it.lossProduct) return it.lossProduct==='health'; var c=CLIENTS[it.policyIdx]; return contractProduct(c)==='health'||(it.obj||'').indexOf('Здоровье')>-1; }
+function lossOpData(it){ if(!it.lossDetails) it.lossDetails={claimNumber:'',claimType:'primary',claimSign:'pvu',inspectionType:'',applicant:(it.claimant==='Представитель по доверенности'?'representative':'owner'),claimDate:lossDateISO(it.date),insurerAgreementDate:'',agentAgreementDate:'',paymentDate:'',payoutAmount:'',rs:false,go:false,hasComplaint:false,complaints:[],note:''}; if(!it.lossDetails.complaints) it.lossDetails.complaints=it.lossDetails.hasComplaint?[{date:it.lossDetails.complaintDate||'',amount:it.lossDetails.complaintAmount||'',paymentDate:it.lossDetails.complaintPaymentDate||''}]:[]; return it.lossDetails; }
+function lossOpSet(id,key,value){ var it=supFind(id); if(!it) return; var d=lossOpData(it); d[key]=value; }
+function lossOpSave(id){ var it=supFind(id); if(!it) return; lossOpData(it); (it.steps=it.steps||[]).push({d:'сейчас',internal:true,s:'Данные сохранены',c:'Реквизиты убытка обновлены поддержкой.'}); toast('Данные убытка сохранены'); supRerender(); }
+function lossAssign(id){ var it=supFind(id), sel=document.getElementById('lossResp-'+id); if(!it||!sel||!sel.value) return; it.resp=sel.value; (it.steps=it.steps||[]).push({d:'сейчас',internal:true,s:'Ответственный',c:'Назначен: '+it.resp}); toast('Ответственный: '+it.resp); supRerender(); }
+function lossAgreement(id){ var it=supFind(id); if(!it) return; var d=lossOpData(it), list=(it.attachments=it.attachments||[]); d.agentAgreementDate=d.agentAgreementDate||'17.09.2026'; list.forEach(function(a){if(a.agreement)a.current=false;}); var ver=list.filter(function(a){return a.agreement;}).length+1; list.push({name:'Соглашение_о_выплате_v'+ver+'.pdf',by:'support',at:'сейчас',agreement:true,current:true}); (it.steps=it.steps||[]).push({d:'сейчас',internal:true,s:'Документ',c:'Прикреплена актуальная версия соглашения №'+ver+'.'}); toast('Актуальная версия соглашения прикреплена'); supRerender(); }
+function lossComplaint(id){ var it=supFind(id); if(!it) return; var d=lossOpData(it); d.hasComplaint=true; d.complaints.push({reason:'',status:'Новая',date:'',amount:'',paymentDate:''}); (it.steps=it.steps||[]).push({d:'сейчас',cs:it.cstatus,c:'Открыта претензия №'+d.complaints.length+' по убытку.'}); toast('Претензия №'+d.complaints.length+' добавлена'); supRerender(); }
+function lossComplaintBlock(it){ var d=lossOpData(it);
+  return d.complaints.map(function(cp,i){
+    function change(key){ return 'lossComplaintSet(\''+it.id+'\','+i+',\''+key+'\',this.value)'; }
+    function field(label,key,type){ var value=type==='date'?lossDateISO(cp[key]):cp[key]; return '<div class="sup-fld'+(key==='reason'?' sup-fld--wide':'')+'"><label>'+label+'</label><input class="tselect"'+(type==='date'?' type="date"':'')+(key==='amount'?' inputmode="decimal"':'')+' value="'+procEscape(value)+'" '+(key==='amount'?'oninput':'onchange')+'="'+change(key)+'"></div>'; }
+    var inspection=[['','Не выбран'],['by_agent','Осмотр агентом'],['client_independent','АО-НЭ клиента'],['field','Выездной осмотр']];
+    var statuses=['Новая','На рассмотрении','Удовлетворена','Отказ'];
+    return '<div class="loss-sub"><div class="loss-sub__title">Претензия №'+(i+1)+'</div><div class="loss-op__grid">'
+      +(!lossIsHealth(it)?'<div class="sup-fld"><label>Тип осмотра</label><select class="tselect" onchange="'+change('inspectionType')+'">'+inspection.map(function(option){return '<option value="'+option[0]+'"'+((cp.inspectionType||'')===option[0]?' selected':'')+'>'+option[1]+'</option>';}).join('')+'</select></div>':'')
+      +field('Номер убытка','claimNumber')
+      +field('Дата заявления','date','date')
+      +field('Сумма доплаты, ₽','amount')
+      +field('Дата соглашения от СК','insurerAgreementDate','date')
+      +field('Дата соглашения от агента','agentAgreementDate','date')
+      +field('Дата оплаты','paymentDate','date')
+      +'<div class="sup-fld"><label>Статус</label><select class="tselect" onchange="'+change('status')+'">'+statuses.map(function(status){return '<option'+((cp.status||'Новая')===status?' selected':'')+'>'+status+'</option>';}).join('')+'</select></div>'
+      +field('Заметка','reason')
+      +'<div class="sup-fld"><label>Документы</label><button class="btn btn--sm" onclick="toast(\'Документы претензии №'+(i+1)+' прикреплены (демо)\')">Прикрепить документы</button></div>'
+      +'</div></div>';
+  }).join(''); }
+function lossComplaintSet(id,index,key,value){ var it=supFind(id); if(!it) return; var d=lossOpData(it); if(d.complaints[index]) d.complaints[index][key]=value; }
+function lossHistory(id){ var el=document.getElementById('supTimeline-'+id); if(el){ el.scrollIntoView({behavior:'smooth',block:'start'}); el.style.boxShadow='0 0 0 2px var(--navy)'; setTimeout(function(){el.style.boxShadow='';},1400); } }
+function lossSummary(it){ var d=lossOpData(it), isHealth=lossIsHealth(it), fields=[
+  ['Продукт',isHealth?'Здоровье':'ОСАГО'],
+  ['Дата заявления',lossDisplayDate(d.claimDate)],
+  ['Файлы',(it.attachments||[]).length],
+  ['Чей ход',SUP_BALL[it.ball]||'Поддержка'],
+  ['Заявитель',d.applicant==='representative'?'Представитель по доверенности':(isHealth?'Застрахованный':'Собственник')],
+  ['Ответственный',it.resp||'Не назначен'],
+  ['Статус',it.cstatus?procSupLabel(it):it.st]
+]; if(it.lossDate) fields.splice(2,0,['Дата события',lossDisplayDate(it.lossDate)]);
+  return '<div class="loss-summary">'+fields.map(function(f){return '<div class="sup-fld"><label>'+f[0]+'</label><div class="sup-fld__v">'+procEscape(String(f[1]==null?'—':f[1]))+'</div></div>';}).join('')+'</div>'; }
+function lossOpBlock(it){ if(it.kind!=='loss'&&it.vid!=='Урегулирование убытка') return ''; var d=lossOpData(it), isHealth=lossIsHealth(it), esc=procEscape;
+  var complaint=lossComplaintBlock(it);
+  return '<div class="loss-op"><div class="loss-op__head"><h3>Данные убытка</h3></div><div class="loss-op__grid">'
+    +'<div class="sup-fld"><label>Заявитель</label><select class="tselect" onchange="lossOpSet(\''+it.id+'\',\'applicant\',this.value)"><option value="owner"'+(d.applicant==='owner'?' selected':'')+'>'+(isHealth?'Застрахованный':'Собственник')+'</option><option value="representative"'+(d.applicant==='representative'?' selected':'')+'>Представитель по доверенности</option></select></div>'
+    +'<div class="sup-fld"><label for="lossClaimDate">Дата заявления</label><input id="lossClaimDate" class="tselect" type="date" value="'+esc(lossDateISO(d.claimDate))+'" onchange="lossOpSet(\''+it.id+'\',\'claimDate\',this.value)"></div>'
+    +(!isHealth?'<div class="sup-fld"><label for="lossOwner">Собственник</label><input id="lossOwner" class="tselect" value="'+esc(d.owner||it.owner||'')+'" oninput="lossOpSet(\''+it.id+'\',\'owner\',this.value)"></div><div class="sup-fld"><label>Транспортное средство</label><div class="sup-fld__v">'+esc(it.obj||'Не указано')+'</div></div>':'')
+    +'<div class="sup-fld"><label for="lossClaimNumber">Номер убытка</label><input id="lossClaimNumber" class="tselect" placeholder="После регистрации в СК" value="'+esc(d.claimNumber)+'" oninput="lossOpSet(\''+it.id+'\',\'claimNumber\',this.value)"></div>'
+    +'<div class="sup-fld"><label>Тип убытка</label><select class="tselect" onchange="lossOpSet(\''+it.id+'\',\'claimType\',this.value)"><option value="primary"'+(d.claimType==='primary'?' selected':'')+'>Первичный</option><option value="secondary"'+(d.claimType==='secondary'?' selected':'')+'>Вторичный</option><option value="complaint"'+(d.claimType==='complaint'?' selected':'')+'>Претензия</option></select></div>'
+    +(!isHealth?'<div class="sup-fld"><label>Признак убытка</label><select class="tselect" onchange="lossOpSet(\''+it.id+'\',\'claimSign\',this.value)"><option value="pvu"'+(d.claimSign==='pvu'?' selected':'')+'>ПВУ</option><option value="classic"'+(d.claimSign==='classic'?' selected':'')+'>Классика</option></select></div>':'')
+    +(!isHealth?'<div class="sup-fld"><label>Дополнительные признаки</label><div class="loss-op__checks"><label><input type="checkbox"'+(d.rs?' checked':'')+' onchange="lossOpSet(\''+it.id+'\',\'rs\',this.checked)"> РС</label><label><input type="checkbox"'+(d.go?' checked':'')+' onchange="lossOpSet(\''+it.id+'\',\'go\',this.checked)"> ГО</label></div></div>':'')
+    +(!isHealth?'<div class="sup-fld"><label>Тип осмотра</label><select class="tselect" onchange="lossOpSet(\''+it.id+'\',\'inspectionType\',this.value)"><option value="">Не выбран</option><option value="by_agent"'+(d.inspectionType==='by_agent'?' selected':'')+'>Осмотр агентом</option><option value="client_independent"'+(d.inspectionType==='client_independent'?' selected':'')+'>АО-НЭ клиента</option><option value="field"'+(d.inspectionType==='field'?' selected':'')+'>Выездной осмотр</option></select></div>':'')
+    +'</div><div class="loss-sub"><div class="loss-sub__title">Соглашение и выплата</div><div class="loss-op__grid">'
+    +'<div class="sup-fld"><label>Дата соглашения от СК</label><input class="tselect" type="date" value="'+esc(lossDateISO(d.insurerAgreementDate))+'" onchange="lossOpSet(\''+it.id+'\',\'insurerAgreementDate\',this.value)"></div>'
+    +'<div class="sup-fld"><label>Дата соглашения от агента</label><input class="tselect" type="date" value="'+esc(lossDateISO(d.agentAgreementDate))+'" onchange="lossOpSet(\''+it.id+'\',\'agentAgreementDate\',this.value)"></div>'
+    +'<div class="sup-fld"><label for="lossPaymentDate">Фактическая дата выплаты</label><input id="lossPaymentDate" class="tselect" type="date" value="'+esc(lossDateISO(d.paymentDate))+'" oninput="lossOpSet(\''+it.id+'\',\'paymentDate\',this.value)" onchange="lossOpSet(\''+it.id+'\',\'paymentDate\',this.value)"></div>'
+    +'<div class="sup-fld"><label for="lossPayoutAmount">Сумма выплаты, ₽</label><input id="lossPayoutAmount" class="tselect" inputmode="decimal" value="'+esc(d.payoutAmount)+'" oninput="lossOpSet(\''+it.id+'\',\'payoutAmount\',this.value)"></div>'
+    +'<div class="sup-fld sup-fld--wide"><label>Внутренняя заметка по убытку</label><input class="tselect" value="'+esc(d.note)+'" oninput="lossOpSet(\''+it.id+'\',\'note\',this.value)"></div></div></div>'+complaint+'<div class="loss-op__foot"><button class="btn btn--primary btn--sm" onclick="lossOpSave(\''+it.id+'\')">Сохранить данные</button></div></div>';
 }
 
 /* ===== Мои клиенты — раскладка как в Angular ===== */
@@ -1621,11 +2010,13 @@ function clientAttnVerb(i){ var c=CLIENTS[i];
 /* «Ждут ваших действий» — единый счёт клиентов, требующих действия агента (мяч у нас). */
 function clientAttnCount(){ var n=DEAL.attn?1:0; CLIENTS.forEach(function(c,i){ if(clientAttnOn(i)) n++; }); return n; }
 function rerenderClients(){ var w=document.getElementById('workscreen'); if(w) w.innerHTML=screenClients(); }
+var clientsProduct='Все продукты';
+function clientProductMatches(c){return clientsProduct==='Все продукты'||(clientsProduct==='АП · Автопомощник'?c.autoassistant===true:clientsProduct==='ОСАГО'?c.p.indexOf('ОСАГО')===0:c.p===clientsProduct);}
 function screenClients(){
   var sortArrow='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7.5 6 4l3 3.5"/></svg>';
   var clAttnN=clientAttnCount();
   var rows='';
-  if(!clientsAttnOnly || DEAL.attn){
+  if(clientProductMatches(DEAL) && (!clientsAttnOnly || DEAL.attn)){
   rows += '<tr class="click" onclick="openDeal()"><td class="date">'+DEAL.d+'</td><td>'+DEAL.n+'</td><td>'+DEAL.o+'</td>'
     +'<td><span class="polnum">'+DEAL.num+'</span></td>'
     +'<td>'+DEAL.p+'</td><td class="num"><span class="empty-cell">—</span></td>'
@@ -1633,7 +2024,7 @@ function screenClients(){
     +'<td class="company"><span class="empty-cell">Подбираем</span></td></tr>';
   }
   CLIENTS.forEach(function(c,i){
-    if(clientsAttnOnly && !clientAttnOn(i)) return;
+    if(!clientProductMatches(c) || (clientsAttnOnly && !clientAttnOn(i))) return;
     var obj = c.p.indexOf('ОСАГО')>-1 || c.sub ? c.o+(c.sub?' <span class="plate">('+c.sub+')</span>':'') : c.o;
     var attn = clientAttnOn(i) ? '<div class="cl-attn">'+clientAttnVerb(i)+'</div>' : '';
     var cv=clientCaseView(i);
@@ -1644,14 +2035,14 @@ function screenClients(){
       +'<td><span class="st st--'+(cv?cv.cls:c.st)+'">'+(cv?cv.stl:c.stl)+'</span>'+attn+'</td>'
       +'<td class="company">'+c.sk+'</td></tr>';
   });
-  if(!rows) rows='<tr><td colspan="8" class="empty-row">Сейчас никто не ждёт ваших действий.</td></tr>';
-  return '<div class="screen active">'
+  if(!rows) rows='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:26px">Нет договоров по выбранным фильтрам.</td></tr>';
+  return '<div class="screen active clients-design-screen">'
     +'<div class="ptitle">Мои клиенты</div>'
     +'<div class="tbar">'
       +'<div class="tfield tfield--search"><label>Поиск</label><div class="tsearch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Имя, № полиса или госномер" /></div></div>'
       +'<div class="tfield"><label>Период</label><select class="tselect"><option>Этот месяц</option><option>Сегодня</option><option>Этот квартал</option><option>Этот год</option><option>Всё время</option></select></div>'
       +'<div class="tfield"><label>Статус</label><select class="tselect"><option>Все статусы</option><option>Черновик</option><option>Ожидает оплаты</option><option>Оформлен</option><option>Оформляется</option><option>Изменения в договоре</option><option>Расторжение договора</option><option>Урегулирование убытка</option></select></div>'
-      +'<div class="tfield"><label>Продукт</label><select class="tselect"><option>Все продукты</option><option>ОСАГО</option><option>НС при ДТП</option><option>Антиклещ</option><option>Ипотека</option></select></div>'
+      +'<div class="tfield"><label>Продукт</label><select class="tselect" onchange="clientsProduct=this.value;rerenderClients()">'+['Все продукты','ОСАГО','АП · Автопомощник','НС при ДТП','Антиклещ','Ипотека'].map(function(p){return '<option'+(clientsProduct===p?' selected':'')+'>'+p+'</option>';}).join('')+'</select></div>'
       +'<div class="tfield"><label>Страховая компания</label><select class="tselect"><option>Все СК</option><option>Ренессанс</option><option>Югория</option><option>Согласие</option><option>Зетта</option><option>Росгосстрах</option><option>СОГАЗ</option><option>Евроинс</option><option>Энергогарант</option></select></div>'
       +'<label class="tcheck"><input type="checkbox" id="clAttnOnly"'+(clientsAttnOnly?' checked':'')+' onchange="clientsAttnOnly=this.checked;rerenderClients()"/> Только ждущие меня'+(clAttnN?' <span class="tcheck__b">'+clAttnN+'</span>':'')+'</label>'
     +'</div>'
@@ -1834,6 +2225,8 @@ function osagoForm(){
 var OCALC_T=[];
 function ocalcStop(){ OCALC_T.forEach(clearTimeout); OCALC_T=[]; }
 function osagoCalc(){
+  apCaptureQuote();
+  if(apQuoteSnapshot) OSAGO_DRAFT={name:apQuoteSnapshot.n,obj:apQuoteSnapshot.o,plate:apQuoteSnapshot.sub};
   ocalcStop();
   document.getElementById('osagoScreen').innerHTML =
     '<div class="ptitle">Расчёт ОСАГО</div>'
@@ -1863,7 +2256,7 @@ function offerHtml(q,i,anim){
     +'<div><span class="rprice">'+q.price+' ₽</span><button class="rprice-info" onclick="pricePop(event,\''+q.sk+'\',\''+q.price+'\')">?</button><span class="rsub">Действует с '+q.date+'</span></div>'
     +'<div>'+svc+'</div>'
     +'<div><span class="rtotal">'+total+' ₽</span><span class="rpay">'+q.pay+'</span></div>'
-    +'<button class="btn btn--primary btn--lg" onclick="osagoPay(\''+q.sk+'\',\''+total+'\')">Оформить</button>'
+    +'<button class="btn btn--primary btn--lg" onclick="'+(q.svc==='autoassistant'?'apChooseQuote('+i+')':"osagoPay('"+q.sk+"','"+total+"')")+'">'+(q.svc==='autoassistant'?'Выбрать АП':'Оформить')+'</button>'
   +'</div>';
 }
 function osagoResults(stream){
@@ -2025,36 +2418,36 @@ function osagoBirth(st){
   var c={ d:'27.08.2026', until:'26.08.2027', phone:'+7 902 555-30-17', n:OSAGO_DRAFT.name, o:OSAGO_DRAFT.obj, sub:OSAGO_DRAFT.plate, num:num, p:'ОСАГО',
     price:P.base||P.total, st:st, sti:st==='ok'?'check':'clock', stl:st==='ok'?'Оформлен':'Ожидает оплаты', sk:P.sk,
     addonName:P.addon?P.addon.name:null, addonPrice:P.addon?P.addon.price:0 };
-  CLIENTS.unshift(c);
-  /* индексные привязки: заявки SUP держат policyIdx — сдвиг обязателен, иначе чужие процессы уедут на новый полис */
-  SUP.forEach(function(s){ if(typeof s.policyIdx==='number') s.policyIdx++; });
-  return 0;
+  c.startDate=apQuoteSnapshot&&apQuoteSnapshot.startDate||c.d;
+  c.endDate=apQuoteSnapshot&&apQuoteSnapshot.endDate||c.until;
+  c.paymentConfirmed=st==='ok';
+  if(c.paymentConfirmed&&P.addon) c.addon={paid:true,name:P.addon.name,price:P.addon.price,num:'Дополнительный продукт'};
+  CLIENTS.push(c);
+  /* Добавляем в конец: сохраняем policyIdx у ВИ, УУ, расторжения и АП. */
+  return CLIENTS.length-1;
 }
 function osagoIssued(){
   osagoPayTimer=null;
   if(!document.getElementById('osagoScreen')) return; /* агент ушёл с экрана оплаты — не дёргаем витрину */
-  osagoBirth('ok'); OSAGO_PENDING=null;
-  openContract(0,true); /* после оплаты сразу «горячий» договор (лок issue→contract) — отдельного экрана успеха нет */
+  var idx=osagoBirth('ok'); OSAGO_PENDING=null;
+  openContract(idx,true); /* Новая запись не сдвигает ссылки существующих процессов. */
 }
 function osagoPayLink(){ osagoBirth('pay'); OSAGO_PENDING=null; toast('Ссылка на оплату отправлена клиенту'); go('clients'); }
 function osagoInvoiceSend(){ osagoBirth('pay'); OSAGO_PENDING=null; toast('Счёт отправлен клиенту — полис выпустится после оплаты'); go('clients'); }
 
 /* ===== Договор ===== */
 var contractIssued=false;
-function ctile(kind,label,benefit,idx){ var act={change:'openChange',cancel:'openCancel',loss:'openLoss'}[kind]+'('+(idx||0)+')'; return '<div class="ptile" tabindex="0" role="button" onclick="'+act+'"><span class="ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+procIco(kind)+'</svg></span><div class="ptile__t"><b>'+label+'</b><span>'+benefit+'</span></div></div>'; }
+function ctile(kind,label,benefit,idx){ var act={change:'openChange',cancel:'openCancel',loss:'openLoss',deal:'openAutoassistant'}[kind]+'('+(idx||0)+')'; return '<div class="ptile" tabindex="0" role="button" onclick="'+act+'"><span class="ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+procIco(kind)+'</svg></span><div class="ptile__t"><b>'+label+'</b><span>'+benefit+'</span></div></div>'; }
 function ccross(icon,name,benefit,price){ var ic=icon==='shield'?'<path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>':(icon==='law'?'<path d="M5 13l2-5h10l2 5"/><path d="M5 13h14v4H5z"/>':'<path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.4-7 10-7 10z"/>'); return '<div class="cross-card"><span class="cico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+ic+'</svg></span><b>'+name+'</b><span class="benefit">'+benefit+'</span><div class="crow"><span class="price">'+price+'</span><button class="btn btn--sm" onclick="toast(\''+name+' — добавлено\')">Добавить</button></div></div>'; }
 function docRow(name){ return '<div class="doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span>'+name+'</span><span style="margin-left:auto;color:var(--muted);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 6px">PDF</span></div>'; }
 function qrSvg(){ return '<svg width="118" height="118" viewBox="0 0 90 90"><g fill="currentColor" style="color:var(--navy)"><rect x="6" y="6" width="24" height="24"/><rect x="60" y="6" width="24" height="24"/><rect x="6" y="60" width="24" height="24"/><rect x="38" y="6" width="8" height="8"/><rect x="38" y="20" width="8" height="8"/><rect x="38" y="38" width="16" height="16"/><rect x="62" y="42" width="10" height="10"/><rect x="42" y="62" width="12" height="12"/><rect x="66" y="66" width="12" height="12"/></g></svg>'; }
 function screenContract(i){
   var c=CLIENTS[i]||CLIENTS[0];
   var isOsago=c.p.indexOf('ОСАГО')>-1;
-  var premiumNum=parseInt((c.price||'0').replace(/\s/g,''))||0;
-  /* Доп: у рождённых в этой сессии полисов — честно из котировки (addonName:null = «без допа»);
-     у сидов поля нет (undefined) — прежний демо-МиниКАСКО, сиды не трогаем. */
-  var addonNum='001SHG-'+((c.num.replace(/\D/g,'')||'204471').slice(-6));
-  var addon=null;
-  if(c.addonName) addon={name:c.addonName,num:addonNum,price:c.addonPrice||0};
-  else if(c.addonName===undefined && isOsago) addon={name:'МиниКАСКО',num:addonNum,price:2450};
+  var isHealth=c.o==='Здоровье'||/^(НС\b|НС |Антиклещ|Несч\. случай)/.test(c.p);
+  var premiumNum=Number((c.price||'0').replace(/\s/g,'').replace(',','.'))||0;
+  var addon=isOsago&&c.addon&&c.addon.paid===true?c.addon:(isOsago&&c.autoassistant&&c.autoServicePaid===true?{paid:true,kind:'autoassistant',name:'Сервис «Автопомощник»',num:'Оплачен отдельно',price:c.autoServicePrice||2450}:null);
+  if(!addon && isOsago && c.paymentConfirmed && c.addonName) addon={name:c.addonName,num:'Дополнительный продукт',price:c.addonPrice||0};
   var total=premiumNum+(addon?addon.price:0);
   var fmt=function(n){ return n.toLocaleString('ru-RU'); };
   var statusText=c.st==='draft'?'Черновик':(c.st==='pay'?'Ожидает оплаты':(c.st==='wait'?'Оформляется':'Оформлен'));
@@ -2069,17 +2462,18 @@ function screenContract(i){
 
   var success=contractIssued?'<div class="success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg><div><b>Полис оформлен</b><div style="color:var(--muted);font-size:12px">'+c.p+' · '+c.n+'</div></div></div>':'';
   /* Момент ценности — единый атом .success по ВИДУ заявки: что получил клиент и что сделать агенту. */
-  var doneCase=procForPolicy(i).filter(function(it){ var e=PROC_STATUS[it.cstatus]||{}; return e.term && it.cstatus!=='rejected' && !it.valueSeen && (it.newNum||it.kind==='cancel'||it.kind==='loss'); })[0];
+  var doneCase=procForPolicy(i).filter(function(it){ var e=PROC_STATUS[it.cstatus]||{}; return e.term && it.cstatus!=='rejected' && !it.valueSeen && (it.newNum||it.kind==='cancel'||it.kind==='loss'||it.kind==='deal'); })[0];
   if(doneCase){ var vb='';
     if(doneCase.kind==='change'&&doneCase.newNum) vb='<b>Изменения внесены — передайте клиенту обновлённый полис</b>'
       +'<div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">Новый номер: <span class="polnum">'+doneCase.newNum+'</span> · Прежний полис № '+doneCase.oldNum+' недействителен — клиент должен пользоваться новым.</div>'
       +'<div style="margin-top:9px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn--primary btn--sm" onclick="toast(\'Скачивание нового полиса (демо)\')">Скачать новый полис (PDF)</button>'
       +'<button class="btn btn--sm" onclick="var q=document.querySelector(\'.qr-wrap\'); if(q){ q.classList.add(\'show\'); q.scrollIntoView({block:\'center\'}); }">Показать QR клиенту</button></div>';
-    else if(doneCase.kind==='cancel') vb='<b>Договор расторгнут</b>'
-      +'<div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">Возврат части премии'+(doneCase.refund?(' ≈ '+doneCase.refund.toLocaleString('ru-RU')+' ₽'):'')+' придёт клиенту в течение 14 календарных дней — сумму подтвердит страховая.</div>'
+    else if(doneCase.kind==='cancel') vb='<b>Договор расторгнут. Деньги возвращены.</b>'
+      +'<div style="color:var(--muted);margin-top:3px">'+(doneCase.refund!=null?'Возвращено: '+Number(doneCase.refund).toLocaleString('ru-RU')+' ₽':'Возврат подтверждён поддержкой.')+'</div>'
       +'<div style="margin-top:9px"><button class="btn btn--sm" onclick="toast(\'Скачивание соглашения о расторжении (демо)\')">Скачать соглашение о расторжении (PDF)</button></div>';
     else if(doneCase.kind==='loss') vb='<b>Убыток урегулирован — выплата произведена</b>'
       +'<div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">'+(doneCase.payout?('Выплата '+doneCase.payout+' перечислена клиенту. '):'')+'Сообщите клиенту о поступлении выплаты.</div>';
+    else if(doneCase.kind==='deal') vb='<b>ОСАГО оформлено через Автопомощник</b><div style="color:var(--muted);font-size:calc(12px*var(--scale));margin-top:3px">Полис приложен к договору — скачайте и передайте его клиенту.</div>';
     if(vb) success+='<div class="success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>'
       +'<div style="flex:1">'+vb+'</div>'
       +'<button class="sv__x" title="Скрыть" onclick="var k=supFind(\''+doneCase.id+'\'); if(k) k.valueSeen=true; render(\'contract\','+i+')">×</button></div>'; }
@@ -2088,8 +2482,8 @@ function screenContract(i){
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+skLogoImg(c.sk)+'<div style="flex:1"><h3 style="margin:0">'+c.p+'</h3><div style="color:var(--muted);font-size:12px">'+c.sk+'</div></div><span class="status-text '+statusCls+'">'+statusText+'</span></div>'
     +'<div class="cost"><div class="cost-row"><span><span>'+c.p+'</span><span class="cost-row__num">'+c.num+'</span></span><span class="cost-row__v">'+fmt(premiumNum)+' ₽</span></div>'
       +(addon?'<div class="cost-row"><span><span>'+addon.name+'</span><span class="cost-row__num">'+addon.num+'</span></span><span class="cost-row__v">'+fmt(addon.price)+' ₽</span></div>':'')
-      +(addon?'<div class="cost-row cost-row--total"><span>Итого, клиент оплатил</span><span class="cost-row__v">'+fmt(total)+' ₽</span></div>':'')+'</div>'
-    +'<div class="kv"><span>Период страхования</span><b>'+c.d+' — '+(c.until||'21.07.2027')+'</b></div>'
+      +(addon?'<div class="cost-row cost-row--total"><span>'+(c.paymentConfirmed?'Итого, клиент оплатил':'Общая стоимость · ОСАГО ещё не оплачено')+'</span><span class="cost-row__v">'+fmt(total)+' ₽</span></div>':'')+'</div>'
+    +'<div class="kv"><span>Период страхования</span><b>'+procEscape(c.startDate&&c.endDate?c.startDate+' — '+c.endDate:'Не указан')+'</b></div>'
     +(isOsago?'<div class="kv"><span>Транспортное средство</span><b>'+c.o+' ('+c.sub+')</b></div>':'<div class="kv"><span>Объект страхования</span><b>'+c.o+'</b></div>')
     +'<div class="kv"><span>Страхователь</span><b>'+c.n+'</b></div>'
     +'<div class="kv"><span>Телефон клиента</span><b><a style="color:var(--blue)" href="tel:'+((c.phone||'+7 902 111-41-08').replace(/[^+\d]/g,''))+'">'+(c.phone||'+7 902 111-41-08')+'</a></b></div>'
@@ -2098,33 +2492,28 @@ function screenContract(i){
   var docs='<div class="card"><h3>Документы клиенту</h3><p class="card__lead">Полис и документы — скачайте и передайте клиенту (печать из PDF).</p>'
     +docRow('Полис '+c.p+' · '+c.num)
     +(procForPolicy(i).some(function(it){ return it.kind==='change'&&it.cstatus==='done'; })?docRow('Полис '+c.p+' (обновлён после изменений) · '+c.num+'<span class="doc-new">Новый</span>'):'')
-    +(addon?docRow('Полис '+addon.name+' · '+addon.num):'')+docRow('Квитанция об оплате')
+    +(addon?docRow((addon.kind==='autoassistant'?'Документы по сервису ':'Полис ')+addon.name+' · '+addon.num):'')+(c.dealDocs&&c.dealDocs.application?docRow('Заявление на страхование'):'')+(c.paymentConfirmed===true?docRow('Квитанция об оплате'):'')
     +'<div class="doc-actions"><button class="btn'+(contractIssued?' btn--primary':'')+'" onclick="toast(\'Скачивание полиса (демо)\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 11l5 4 5-4"/><path d="M5 21h14"/></svg>Скачать документы (PDF)</button>'
       +'<button class="btn" onclick="this.closest(\'.card\').querySelector(\'.qr-wrap\').classList.toggle(\'show\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><path d="M13 13h3v3M20 13v7M16 20h4"/></svg>Показать QR клиенту</button></div>'
     +'<div class="qr-wrap"><div style="width:150px;height:150px;margin:0 auto;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;background:var(--card)">'+qrSvg()+'</div><p class="qr-cap">Наведите камеру телефона клиента — он скачает полис и сохранит или отправит в мессенджер.</p></div>'
   +'</div>';
 
   var activeReq=procActiveReq(i);
+  if(c.autoassistant)docs='<div class="card"><h3>Документы клиенту</h3><p class="card__lead">Документ АП доступен после оплаты сервиса; полис и заявление — после выпуска ОСАГО.</p>'+apAttachments((c.dealDocs||[]).concat(c.autoServicePaid?[apServiceDocument(c)]:[]))+'</div>';
 
-  var service='<div class="card"><h3>Обслуживание договора — онлайн</h3><p class="card__lead">Изменения, расторжение и урегулирование убытка — за пару кликов. Без писем и поездок в офис.</p>'
+  var service='<div class="card"><h3>Процессы по договору</h3><p class="card__lead">Все обращения по договору — в одном месте. Статус и следующий шаг появятся здесь.</p>'
     +activeReq
-    +'<div class="ptiles">'+ctile('change','Внести изменения','Данные ТС, водители, срок',i)+ctile('cancel','Расторгнуть договор','Возврат части премии',i)+ctile('loss','Урегулировать убыток','Заявить о страховом случае',i)+'</div>'
+    +'<div class="ptiles">'+(contractCanStart(i,'deal')?ctile('deal','Автопомощник','Открыть вкладку доппродукта',i):'')+(contractCanStart(i,'change')?ctile('change','Внести изменения','Данные ТС, водители, срок',i):'')+(contractCanStart(i,'cancel')?ctile('cancel','Расторгнуть договор','Подать заявление',i):'')+(contractCanStart(i,'loss')?ctile('loss','Урегулировать убыток','Заявить о страховом случае',i):'')+'</div>'
   +'</div>';
 
   // Уже купленное (addon = МиниКАСКО у ОСАГО) НЕ предлагаем снова; счётчик = реальность.
   // Договору «Здоровья» — допы из мира здоровья (канон Angular policies.handler), не автопродукты.
   var offers=[];
-  if(c.o==='Здоровье'){
-    if(c.p!=='Антиклещ') offers.push(ccross('heart','Антиклещ','Защита от укуса клеща','от 350 ₽'));
-    if(c.p!=='НС Спорт') offers.push(ccross('shield','НС Спорт','Травмы на тренировках и соревнованиях','от 900 ₽'));
-    if(c.p!=='Несч. случай') offers.push(ccross('heart','Несчастный случай','Травмы, госпитализация, инвалидность','от 390 ₽'));
-  }else{
-    if(!(addon&&addon.name==='МиниКАСКО')) offers.push(ccross('shield','МиниКАСКО','Ремонт при мелком ДТП без справок','2 450 ₽'));
-    if(!(addon&&addon.name==='Юрист поможет')) offers.push(ccross('law','Юрист поможет','Юрподдержка при спорах на дороге','от 500 ₽'));
-    offers.push(ccross('heart','НС при ДТП','Защита водителя и пассажиров на 100 000 ₽','от 800 ₽'));
-  }
+  if(!addon&&!isHealth){ offers.push(ccross('shield','МиниКАСКО','Ремонт при мелком ДТП без справок','2 450 ₽')); }
+  offers.push(ccross('law','Юрист поможет','Юрподдержка при спорах на дороге','от 500 ₽'));
+  offers.push(ccross('heart','НС при ДТП','Защита водителя и пассажиров на 100 000 ₽','от 800 ₽'));
   var added=addon?1:0;
-  var cross='<div class="card"><div class="cross-head"><h3>Предложите клиенту ещё</h3><span class="cross-limit">Добавлено '+added+' из 3 — можно ещё '+(3-added)+'</span></div>'
+  var cross='<div class="card"><div class="cross-head"><h3>Предложите клиенту ещё</h3><span class="cross-limit">Добавлено '+added+' из '+(added+offers.length)+' — можно ещё '+offers.length+'</span></div>'
     +'<p class="card__lead">'+(contractIssued?'Клиент рядом и в настрое — лучший момент допродать. Минута, без новой анкеты.':'Один звонок клиенту — плюс к доходу и его защите. Оформление займёт минуту.')+'</p>'
     +'<div class="cross-grid">'+offers.join('')+'</div>'
   +'</div>';
@@ -2132,7 +2521,11 @@ function screenContract(i){
   // Внимание идёт за работой сценария: горячий (только оформил) → кросс-сел вверх правой
   // колонки (маржа, пока клиент тёплый); холодный (вернулся к договору) → обслуживание/процессы
   // вверх. Кросс-сел больше НЕ в подвале на всю ширину (там он тонул в обоих случаях).
-  var rightCol=contractIssued?(cross+service):(service+cross);
+  if(!contractReady(c)) { if(!c.autoassistant) docs='<div class="card"><h3>Документы клиенту</h3><p>Документы будут доступны после оформления полиса.</p>'+(c.autoServicePaid?'<p class="status-text ok">Сервис Автопомощник оплачен отдельно.</p>':'')+'</div>'; if(!contractCanStart(i,'deal')&&!procForPolicy(i).some(function(it){return it.kind==='deal';})) service='<div class="card"><h3>Процессы по договору</h3><p>Доступно после оформления полиса.</p></div>'; }
+  else if(contractCancelled(i)) service='<div class="card"><h3>Обслуживание договора</h3><p>Договор расторгнут.</p>'+activeReq+'</div>';
+  else if(!isOsago) service=service.replace('Изменения, расторжение и урегулирование убытка — за пару кликов. Без писем и поездок в офис.',isHealth?'Изменения и расторжение для этого продукта пока не представлены в прототипе.':'Процессы для этого продукта пока не представлены в прототипе.');
+  var showCross=isOsago&&contractReady(c)&&!contractCancelled(i);
+  var rightCol=showCross?(contractIssued?(cross+service):(service+cross)):service;
   return '<div class="screen active"><div class="breadcrumb"><a onclick="go(\'clients\')">Мои клиенты</a> / Информация о договоре</div>'
     +success+(contractIssued?'':'<div class="ptitle">Информация о договоре</div>')
     +'<div class="grid2"><div>'+summary+docs+'</div><div>'+rightCol+'</div></div></div>';
@@ -2195,6 +2588,17 @@ function healthParams(){
       +'<button class="btn" onclick="toast(\'Черновик сохранён\')">Сохранить черновик</button>'
       +'<button class="btn btn--primary btn--lg" onclick="healthCalc()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>Рассчитать</button>'
     +'</div>';
+}
+function prolHasPolicies(){
+  // Availability is independent of the current filters and search query.
+  return !prolEmptyDemo&&PROL.some(function(p){return p.kind==='osago'||(p.kind==='health'&&p.annual);});
+}
+function prolToggleEmpty(){
+  prolCloseMenu();
+  if(!prolEmptyDemo){prolPreviousTab=prolTab;prolEmptyDemo=true;prolTab='nsis';}
+  else {prolEmptyDemo=false;prolTab=prolPreviousTab;}
+  render('prolongation');
+  document.getElementById('form-more').focus();
 }
 function hlSetProd(id){ HL.prod=id; HL.disc={}; var s=document.getElementById('healthScreen'); if(s) s.innerHTML=healthParams(); }
 function hlGrp(g){ HL.grp=g; var w=document.getElementById('hlCountWrap'); if(w) w.style.display=g?'':'none'; }
@@ -2370,22 +2774,172 @@ function hlBirth(st){
   var c={ d:'27.08.2026', until:untilRu, phone:HL.phone, n:HL.holder, o:'Здоровье', sub:'', num:num, p:names[HL.prod]||'НС',
     price:hlFmt(HL.selPrice), st:st, sti:st==='ok'?'check':'clock', stl:st==='ok'?'Оформлен':'Ожидает оплаты', sk:HL.sel,
     addonName:null, addonPrice:0 };
-  CLIENTS.unshift(c);
-  /* индексные привязки: заявки SUP держат policyIdx — сдвиг обязателен (канон osagoBirth) */
-  SUP.forEach(function(s){ if(typeof s.policyIdx==='number') s.policyIdx++; });
+  c.startDate=hlDateRu(HL.start); c.endDate=hlEndRu(); c.paymentConfirmed=st==='ok';
+  CLIENTS.push(c);
+  return CLIENTS.length-1;
 }
 function hlIssued(){
   HL_PAY_TIMER=null;
   if(!document.getElementById('healthScreen')) return; /* агент ушёл с экрана оплаты — не дёргаем витрину */
-  hlBirth('ok'); openContract(0,true); /* лок issue→contract: после оплаты сразу договор */
+  openContract(hlBirth('ok'),true); /* После оплаты сразу договор, без сдвига существующих процессов. */
 }
 function hlPayLink(){ hlBirth('pay'); toast('Ссылка на оплату отправлена клиенту'); go('clients'); }
 function screenProlongation(){
-  var rows=''; PROL.forEach(function(p){ rows+='<tr class="click" onclick="toast(\'Продлить '+p.n+'\')"><td class="date">'+p.d+'</td><td>'+p.n+'</td><td>'+p.o+'</td><td><span class="polnum">'+p.num+'</span></td><td class="num">'+p.price+'</td><td><span class="st st--'+p.st+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><polyline points="12 8 12 12 15 14"/></svg>'+p.stl+'</span></td><td class="company">'+p.sk+'</td><td><button class="btn btn--primary btn--sm" onclick="event.stopPropagation();toast(\'Пролонгация запущена\')">Продлить</button></td></tr>'; });
+  var hasPolicies=prolHasPolicies();
+  if(!hasPolicies)prolTab='nsis';
+  var tabs=(hasPolicies?[['osago','ОСАГО'],['health','Здоровье'],['nsis','Поиск по базе НСИС']]:[['nsis','Поиск по базе НСИС']]).map(function(t){
+    return '<button type="button" role="tab" id="prol-tab-'+t[0]+'" aria-selected="'+(prolTab===t[0])+'" aria-controls="prol-panel" class="otab'+(prolTab===t[0]?' otab--active':'')+'" onclick="prolSwitch(\''+t[0]+'\')">'+t[1]+'</button>';
+  }).join('');
   return '<div class="screen active"><div class="ptitle">Пролонгация</div>'
-    +'<div class="tbar"><div class="tfield tfield--search"><label>Поиск в НСИС</label><div class="tsearch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Госномер или ВИН"/></div></div><button class="btn" style="margin-left:auto" onclick="toast(\'Поиск в НСИС\')">Найти в НСИС</button></div>'
-    +'<div class="list-wrap"><div class="list-scroll"><table class="list"><thead><tr><th>Срок</th><th>Страхователь</th><th>Объект</th><th>№ полиса</th><th class="num">Цена</th><th>Статус</th><th>СК</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+    +'<div id="prol-preview-menu" class="prol-preview-menu" popover><div class="prol-preview-caption">Сценарий прототипа</div><button type="button" class="btn" id="prol-demo-empty" aria-pressed="'+prolEmptyDemo+'" onclick="prolToggleEmpty()">'+(prolEmptyDemo?'Показать полисы':'Показать без полисов')+'</button></div>'
+    +(hasPolicies?'<div class="otabs" role="tablist" aria-label="Разделы пролонгации">'+tabs+'</div>':'<div class="prol-empty-note" role="status">Полисы для пролонгации скоро появятся.</div>')
+    +'<div id="prol-panel"'+(hasPolicies?' role="tabpanel" aria-labelledby="prol-tab-'+prolTab+'"':' role="region" aria-label="Поиск по базе НСИС"')+'>'
+    +(prolTab==='nsis'?prolNsisForm():prolListForm())+'</div></div>';
 }
+function prolEsc(value){ return String(value==null?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function prolNorm(value){ return String(value||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/g,''); }
+function prolPlate(value){ return prolNorm(value).replace(/[abcehkmoptxy]/g,function(c){ return {'a':'а','b':'в','c':'с','e':'е','h':'н','k':'к','m':'м','o':'о','p':'р','t':'т','x':'х','y':'у'}[c]; }); }
+function prolDate(value){ return value?value.split('-').reverse().join('.'):''; }
+function prolSwitch(tab){
+  prolCloseMenu(); prolTab=prolHasPolicies()?tab:'nsis'; render('prolongation');
+  var active=document.getElementById('prol-tab-'+prolTab); if(active)active.focus();
+}
+function prolOptions(options,selected){ return options.map(function(o){ return '<option value="'+prolEsc(o[0])+'"'+(o[0]===selected?' selected':'')+'>'+prolEsc(o[1])+'</option>'; }).join(''); }
+function prolSelect(key,label,options){
+  return '<div class="tfield"><label for="prol-'+key+'">'+label+'</label><select id="prol-'+key+'" class="tselect" onchange="prolSet(\''+key+'\',this.value)">'+prolOptions(options,prolState[prolTab][key])+'</select></div>';
+}
+function prolInvalidPeriod(){ var s=prolState[prolTab]; return !!(s&&s.from&&s.to&&s.from>s.to); }
+function prolRows(){
+  var s=prolState[prolTab]; if(!s||prolInvalidPeriod()) return [];
+  var q=prolNorm(s.q);
+  return PROL.filter(function(p){
+    if(p.kind!==prolTab||(!q&&p.kind==='health'&&!p.annual)) return false;
+    if((s.from&&p.end<s.from)||(s.to&&p.end>s.to)) return false;
+    if(s.resp!=='all'&&p.resp!==s.resp) return false;
+    if(s.product!=='all'&&p.product!==s.product) return false;
+    if(s.client!=='all'&&p.client!==s.client) return false;
+    return !q||[p.n,p.num,p.plate,p.phone].some(function(v){return prolNorm(v).indexOf(q)!==-1;})||(p.plate&&prolPlate(p.plate).indexOf(prolPlate(s.q))!==-1);
+  });
+}
+function prolStats(rows){
+  var eligible=rows.filter(function(p){return p.kind!=='health'||p.annual;}), issued=eligible.filter(function(p){return p.issued;}).length;
+  return {total:eligible.length,due:eligible.length-issued,calculated:eligible.filter(function(p){return p.calculated;}).length,issued:issued,rate:eligible.length?Math.round(issued/eligible.length*100):0};
+}
+function prolAnalytics(){
+  var stats=prolStats(prolRows());
+  return '<div class="tbar" aria-label="Аналитика пролонгаций" style="padding-top:16px;gap:16px 32px">'
+    +'<span><b>'+stats.due+'</b> к продлению</span>'
+    +'<span class="st--wait"><b>'+stats.calculated+'</b> рассчитано</span>'
+    +'<span class="st--ok"><b>'+stats.issued+'</b> оформлено</span>'
+    +'<span><b>'+stats.rate+'%</b> уровень пролонгации</span></div>';
+}
+function prolListForm(){
+  var s=prolState[prolTab], products=prolTab==='osago'?['ОСАГО ФЛ','ОСАГО ЮЛ']:['НС Спорт','НС Универсальный','Антиклещ'];
+  return '<div id="prol-analytics" aria-live="polite">'+prolAnalytics()+'</div>'
+    +'<div class="tbar"><div class="tfield"><label for="prol-from">Период окончания полиса — с</label><div class="tsearch"><input type="date" id="prol-from" value="'+s.from+'" onchange="prolSet(\'from\',this.value)"/></div></div>'
+    +'<div class="tfield"><label for="prol-to">По</label><div class="tsearch"><input type="date" id="prol-to" value="'+s.to+'" onchange="prolSet(\'to\',this.value)"/></div></div>'
+    +prolSelect('resp','Ответственный',[['all','Все ответственные']].concat(PROL_RESP.map(function(r){return [r,r];})))
+    +prolSelect('client','Тип полисов',PROL_CLIENTS.filter(function(option){return prolTab!=='health'||option[0]!=='rsa';}))
+    +prolSelect('product','Продукт',[['all','Все продукты']].concat(products.map(function(p){return [p,p];})))
+    +'<div class="tfield tfield--search"><label for="prol-q">Поиск</label><div class="tsearch"><input id="prol-q" type="search" value="'+prolEsc(s.q)+'" placeholder="'+(prolTab==='osago'?'ФИО, номер полиса, госномер, телефон':'ФИО, номер полиса, телефон')+'" oninput="prolSet(\'q\',this.value)"/></div></div>'
+    +'<button class="btn" onclick="prolReset()">Сбросить фильтры</button></div>'
+    +'<div id="prol-results">'+prolResults()+'</div>';
+}
+function prolSet(key,value){
+  prolState[prolTab][key]=value; prolCloseMenu();
+  document.getElementById('prol-analytics').innerHTML=prolAnalytics();
+  document.getElementById('prol-results').innerHTML=prolResults();
+  ['from','to'].forEach(function(k){document.getElementById('prol-'+k).setAttribute('aria-invalid',String(prolInvalidPeriod()));});
+}
+function prolReset(){
+  // Снять в том числе период, который мог скрыть искомый полис.
+  prolState[prolTab]={from:'',to:'',resp:'all',client:'all',product:'all',q:''};
+  render('prolongation'); document.getElementById('prol-q').focus();
+}
+function prolAppearance(p){
+  if(p.issued) return {color:'#E9F5E6',label:'Продлён'};
+  var days=Math.round((Date.parse(p.end+'T00:00:00Z')-Date.parse(PROL_TODAY+'T00:00:00Z'))/86400000);
+  if(days<0) return {color:'#FCE8E8',label:'Просрочен'};
+  if(days<=10) return {color:'#FFF6D7',label:days===0?'Истекает сегодня':'До окончания: '+days+' дн.'};
+  return {color:'',label:'К продлению'};
+}
+function prolTable(rows,nsis,waiting){
+  var health=prolTab==='health', body=rows.map(function(p){
+    var appearance=prolAppearance(p);
+    return '<tr'+(appearance.color?' style="background:'+appearance.color+'"':'')+'>'
+      +'<td>'+prolEsc(p.ikp)+'</td><td style="white-space:normal;min-width:190px">'+prolEsc(p.n)+'</td>'
+      +'<td style="white-space:normal;min-width:160px">'+prolEsc(health?p.product:p.o)+(health?'<div class="plate">'+(p.annual?'Годовой':'Месячный')+'</div>':'')+'</td>'
+      +'<td><span class="polnum">'+prolEsc(p.num)+'</span></td><td class="date">'+prolDate(p.end)+'</td><td>'+prolEsc(p.sk)+'</td>'
+      +'<td class="num">'+prolEsc(p.price)+'</td><td>'+prolEsc(p.phone)+'</td><td>'+appearance.label+'</td></tr>';
+  }).join('');
+  if(!rows.length&&!waiting) body='<tr><td colspan="9" style="white-space:normal;padding:24px">'+(nsis?'Ничего не найдено.':'Полисы не найдены.')+'</td></tr>';
+  return '<div class="list-wrap"><div class="list-scroll" tabindex="0" aria-label="'+(nsis?'Результаты поиска НСИС':'Таблица пролонгаций')+'"'+(nsis?'':' oncontextmenu="prolContext(event)" onkeydown="if(event.key===\'ContextMenu\'||(event.shiftKey&&event.key===\'F10\'))prolContext(event)"')+'><table class="list"><thead><tr>'
+    +'<th>ИКП</th><th>ФИО страхователя</th><th>'+(health?'Продукт':'Марка, модель')+'</th><th>Номер полиса</th><th>Дата окончания</th><th>Страховая компания</th><th class="num">Цена (прошл. год), ₽</th><th>Номер телефона</th><th>Статус</th>'
+    +'</tr></thead><tbody>'+body+'</tbody></table></div></div>';
+}
+function prolLegend(){
+  return '<div class="tbar" aria-label="Цветовая индикация" style="align-items:center"><span>Цвета строк:</span>'
+    +'<span><span aria-hidden="true" style="display:inline-block;width:14px;height:14px;background:#E9F5E6;border:1px solid #83B579"></span> Продлён</span>'
+    +'<span><span aria-hidden="true" style="display:inline-block;width:14px;height:14px;background:#FFF6D7;border:1px solid #BEA24C"></span> 10 дней до окончания</span>'
+    +'<span><span aria-hidden="true" style="display:inline-block;width:14px;height:14px;background:#FCE8E8;border:1px solid #D68E8E"></span> Просрочен</span></div>';
+}
+function prolResults(){
+  if(prolInvalidPeriod()) return '<div class="chip-note" role="alert">Дата начала периода должна быть раньше даты окончания или совпадать с ней.</div>'+prolLegend();
+  var rows=prolRows();
+  return '<div class="tbar" role="status">Найдено: '+rows.length+'</div>'+prolTable(rows,false)+prolLegend();
+}
+function prolNsisForm(){
+  return '<div class="osec"><div class="osec__head"><div class="osec__title">Поиск по базе НСИС</div></div>'
+    +'<form class="tbar" style="padding:0" onsubmit="event.preventDefault();prolNsisSearch()">'
+    +[['fio','ФИО страхователя'],['plate','Гос. номер'],['license','Водительское удостоверение']].map(function(f){return '<div class="tfield" style="flex:1;min-width:190px"><label for="prol-nsis-'+f[0]+'">'+f[1]+'</label><div class="tsearch"><input id="prol-nsis-'+f[0]+'" value="'+prolEsc(prolNsis[f[0]])+'" oninput="prolNsisChange(\''+f[0]+'\',this.value)"/></div></div>';}).join('')
+    +'<button class="btn btn--primary" type="submit">Найти</button></form></div>'
+    +'<div id="prol-nsis-result" style="padding-top:16px">'+prolNsisResults()+'</div>'+prolLegend();
+}
+function prolNsisRows(){
+  if(!prolNsis.searched||!['fio','plate','license'].some(function(k){return prolNorm(prolNsis[k]);})) return [];
+  return PROL.filter(function(p){return p.kind==='osago'&&(!prolNorm(prolNsis.fio)||prolNorm(p.n).indexOf(prolNorm(prolNsis.fio))!==-1)&&(!prolNorm(prolNsis.plate)||prolPlate(p.plate).indexOf(prolPlate(prolNsis.plate))!==-1)&&(!prolNorm(prolNsis.license)||prolNorm(p.license).indexOf(prolNorm(prolNsis.license))!==-1);});
+}
+function prolNsisResults(){
+  if(!prolNsis.searched) return prolTable([],true,true);
+  var rows=prolNsisRows();
+  return '<div class="tbar" role="status">Найдено: '+rows.length+'</div>'+prolTable(rows,true);
+}
+function prolNsisChange(key,value){
+  prolNsis[key]=value; prolNsis.searched=false;
+  document.getElementById('prol-nsis-result').innerHTML=prolNsisResults();
+}
+function prolNsisSearch(){
+  if(!['fio','plate','license'].some(function(k){return prolNorm(prolNsis[k]);})){
+    document.getElementById('prol-nsis-result').innerHTML='<div class="chip-note" role="alert">Заполните хотя бы одно поле для поиска.</div>'+prolTable([],true,true); return;
+  }
+  prolNsis.searched=true; document.getElementById('prol-nsis-result').innerHTML=prolNsisResults();
+}
+function prolCloseMenu(restoreFocus){
+  var menu=document.getElementById('prol-menu'); if(menu) menu.remove();
+  if(restoreFocus){var table=document.querySelector('[aria-label="Таблица пролонгаций"]'); if(table)table.focus();}
+}
+function prolContext(e){
+  e.preventDefault(); prolCloseMenu();
+  var menu=document.createElement('div'); menu.id='prol-menu'; menu.setAttribute('role','menu');
+  menu.style.cssText='position:fixed;z-index:1000;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.15)';
+  menu.innerHTML='<button class="btn" role="menuitem" onclick="prolExport()">Вывести список…</button>';
+  document.getElementById('win').appendChild(menu);
+  var r=e.currentTarget.getBoundingClientRect(), x=e.type==='keydown'?r.left+16:e.clientX, y=e.type==='keydown'?r.top+16:e.clientY;
+  menu.style.left=Math.max(8,Math.min(x,innerWidth-menu.offsetWidth-8))+'px';
+  menu.style.top=Math.max(8,Math.min(y,innerHeight-menu.offsetHeight-8))+'px'; menu.querySelector('button').focus();
+}
+function prolCsv(rows){
+  var header=['ИКП','ФИО страхователя','Продукт','Марка, модель','Номер полиса','Дата окончания','Страховая компания','Цена (прошл. год), ₽','Номер телефона','Статус','Ответственный','Срок полиса'];
+  function cell(v){var text=String(v); if(/^[\s]*[=+@-]/.test(text))text="'"+text; return '"'+text.replace(/"/g,'""')+'"';}
+  return '\uFEFF'+[header].concat(rows.map(function(p){return [p.ikp,p.n,p.product,p.kind==='osago'?p.o:'',p.num,prolDate(p.end),p.sk,p.price,p.phone,prolAppearance(p).label,p.resp,p.annual?'Годовой':'Месячный'];})).map(function(row){return row.map(cell).join(';');}).join('\r\n');
+}
+function prolExport(){
+  var rows=prolRows(), blob=new Blob([prolCsv(rows)],{type:'text/csv;charset=utf-8;'}), url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download='Пролонгация-'+(prolTab==='health'?'Здоровье':'ОСАГО')+'.csv'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000); prolCloseMenu(true); toast('Выгружено строк: '+rows.length);
+}
+document.addEventListener('click',function(e){var menu=document.getElementById('prol-menu'); if(menu&&!menu.contains(e.target))prolCloseMenu();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('prol-menu'))prolCloseMenu(true);});
 var svCurrent='support';
 var svTab='personal';
 var svOpen=null;
@@ -2480,6 +3034,7 @@ function svTabsBar(){
 function svCase(c){ return (c&&c.caseId&&typeof supFind==='function')? supFind(c.caseId):null; }
 function svSyncFromCase(c){ var k=svCase(c); if(!k) return c;
   c.st=k.cstatus; c.payStale=!!k.payStale;
+  if(k.kind==='deal')c.num=k.num;
   if(k.payAmount) c.payAmount=k.payAmount.toLocaleString('ru-RU')+' ₽';
   if(k.cstatus==='rejected') c.rejectReason=k.rejectReason;
   return c; }
@@ -2507,6 +3062,7 @@ function svStatus(c){
 /* Глагол «ваш ход» под статусом (паттерн .cl-attn из «Моих клиентов») — только когда мяч у агента. */
 function svVerb(c){
   if(c.icon==='q') return (c.qstate==='draft') ? 'Опишите вопрос' : '';
+  var linked=svCase(c); if(linked&&linked.cstatus==='awaiting_docs') return procEscape(caseVerb(linked));
   if(c.action && c.act) return c.act;
   var cs=caseStatus(c);
   if(cs.ball==='agent' && c.act) return c.act;
@@ -2685,6 +3241,7 @@ function svMain(id){
           ? '<button class="btn btn--sm btn--primary" style="margin-top:8px" onclick="svReissueLink(\''+c.id+'\')">Запросить новую ссылку</button>'
           : (c.reissued?'<span class="st st--ok">Новая ссылка получена — передайте клиенту ✓</span>':''))+'</div>';
     }
+    if(k2&&k2.kind==='deal') {payBlock=cs.code==='awaiting_payment'?apPaymentHTML(k2):'';nextLine='<div class="ap-actions"><button class="btn" onclick="openAutoassistant('+k2.policyIdx+')">Открыть Автопомощник</button></div>'; }
     /* История заявки — та же лента, что на договоре (единый атом; внутренние заметки поддержки скрыты). */
     var hist='';
     if(k&&k.steps&&k.steps.length){
@@ -3005,7 +3562,7 @@ function screenMortgage(){
 /* ===== Рабочее место поддержки — очередь заявок 1С + вопросы чата ===== */
 /* Один экран оператора. Ось «чей мяч» (У нас / У агента / У страховой), SLA капает ТОЛЬКО пока мяч у нас.
    Заявки 1С и вопросы из чата — одна очередь. Логика взята из боевой 1С: «Мои заявки» + карточка заявки + ход дела.
-   Два раздельных поля ответа: агенту (видит) и заметка для своих (не видит). Эскалация во 2-ю линию — по теме, скрытая кухня. */
+   Два раздельных поля ответа: агенту (видит) и внутренняя заметка (не видит). Эскалация во 2-ю линию — по теме, скрытая кухня. */
 var SUP_BALL={us:'У нас',agent:'У агента',insurer:'У страховой',done:'Завершено'};
 var SUP_TOPICS=['Расчёт тарифа','Скоринг / андеррайтинг','Пул / Автопомощник','Технический сбой'];
 var SUP=[
@@ -3047,7 +3604,7 @@ var SUP=[
     what:'Расторжение договора с расчётом возврата части премии.',ac:'СК рассчитывает сумму возврата.',
     steps:[{d:'18.08 13:00',s:'Новая',c:'Заявление на расторжение.'},{d:'18.08 14:20',s:'В СК на расчёте',c:'Передано в СК для расчёта возврата.'}]},
   /* --- завершено --- */
-  {id:'000015036',src:'1c',ball:'done',vid:'Урегулирование убытка',st:'Убыток урегулирован',sla:0,
+  {id:'000015036',src:'1c',ball:'done',vid:'Урегулирование убытка',st:'Убыток урегулирован',sla:0,payoutConfirmed:true,
     num:'ХХХ 0579205802',holder:'Безруких Анастасия Андреевна',obj:'Skoda Yeti · А268ТУ124',region:'Красноярский',agent:'Полушина Наталья Викторовна',sk:'Ренессанс',type:'Сложная',
     what:'Убыток урегулирован, выплата перечислена.',ac:'Выплата 62 400 ₽ перечислена 20.08.',
     steps:[{d:'15.08 10:00',s:'Новая',c:'Убыток заявлен.'},{d:'20.08 12:00',s:'Убыток урегулирован',c:'Выплата 62 400 ₽ перечислена.'}]},
@@ -3124,7 +3681,7 @@ function seedCase(o){ var c=CLIENTS[o.idx]; if(!c) return; var s=PROC_STATUS[o.c
     num:c.num, holder:c.n, obj:c.o+(c.sub?' · '+c.sub:''), region:'Красноярский',
     agent:'Филь Виктория Викторовна', sk:c.sk, type:o.type||'Простая',
     what:o.what, ac:o.ac||'', reasons:o.reasons||[], attachments:[],
-    docRequest:o.docRequest||null, payAmount:o.payAmount||0, payStale:!!o.payStale, rejectReason:o.rejectReason||null,
+    docRequest:o.docRequest||null, payAmount:o.payAmount||0, payStale:!!o.payStale, rejectReason:o.rejectReason||null, payoutConfirmed:o.kind==='loss'&&o.cstatus==='settled',
     steps:o.steps, _ts:Date.now()-(o.ago||1)*3600000 }); }
 seedCase({idx:0,id:'000015171',kind:'change',cstatus:'awaiting_docs',ago:2,reasons:['policy-error'],docRequest:{items:['Справка о ДТП']},
   what:'Изменение по договору после ДТП.',ac:'Ждём справку о ДТП от агента.',
@@ -3205,7 +3762,7 @@ var SUP_META={
 SUP.forEach(function(it){ var m=SUP_META[it.id]; if(m){ it.date=m.date; it.resp=m.resp; if(m.days!=null) it.days=m.days; } });
 var supOpen=null, supTab='us', supSrc='all', supSK='all', supVid='all', supStuck=false, supTriage=false;
 /* Фильтр-бар боевой «Мои заявки» — ЖИВОЙ целиком: поиск, период, задачи, ответственный, регион, API, скрыть готовые. */
-var supQ='', supPeriod='month', supTask='all', supResp='all', supRegion='all', supApi=false, supHideDone=false;
+var supQ='', supPeriod='all', supTask='all', supResp='all', supRegion='all', supApi=false, supHideDone=false;
 /* Группа «Переписка с агентом» в карточке: свёрнута по умолчанию; авто-разворот при входе по маркеру «↩ ответ агента». */
 var supTalkOpen=false;
 /* supHost: '1' — объединённый кокпит (screenSupport), '2' — раздельная версия (screenSupport2). */
@@ -3243,7 +3800,7 @@ function supChatAttach(id){ var it=supFind(id); var inp=document.getElementById(
   if(inp) inp.value=''; toast('Документ прикреплён и отправлен агенту'); supTalkOpen=true; supRerender(); supTalkScroll(id); }
 function supPill(it){ if(it.ball==='done') return {cls:'ok',label:it.st}; if(it.ball==='us') return {cls:'pay',label:it.st}; if(it.ball==='insurer') return {cls:'proc',label:it.st}; return {cls:'draft',label:it.st}; }
 function supFmt(m){ var h=Math.floor(m/60), mm=m%60; return (h?h+' ч ':'')+mm+' мин'; }
-function supSla(it,big){ if(it.ball!=='us') return ''; var m=it.sla, cls, txt; if(m<0){ cls='err'; txt='Просрочено на '+supFmt(-m); } else if(m<=30){ cls='warn'; txt='SLA '+supFmt(m); } else { cls='ok'; txt='SLA '+supFmt(m); }
+function supSla(it,big){ if(it.ball!=='us'||typeof it.sla!=='number'||!Number.isFinite(it.sla)) return ''; var m=it.sla, cls, txt; if(m<0){ cls='err'; txt='Просрочено на '+supFmt(-m); } else if(m<=30){ cls='warn'; txt='SLA '+supFmt(m); } else { cls='ok'; txt='SLA '+supFmt(m); }
   return '<span class="sup-sla sup-sla--'+cls+'"'+(big?' style="font-size:calc(15px*var(--scale));padding:3px 11px;margin:0"':'')+'>'+txt+'</span>'; }
 function supSrcChip(it){ if(it.channel==='max') return '<span class="sup-src sup-src--max">МАХ</span>'; return it.src==='chat' ? '<span class="sup-src sup-src--chat">Чат</span>' : '<span class="sup-src sup-src--1c">1С</span>'; }
 function supPass(it){
@@ -3256,16 +3813,17 @@ function supPass(it){
   if(supResp!=='all' && (it.resp||'')!==supResp) return false;
   if(supRegion!=='all' && (it.region||'')!==supRegion) return false;
   if(supPeriod!=='all'){
-    var d=supDateNum(it.date);
-    if(supPeriod==='month' && (d<20260801||d>20260831)) return false;
-    if(supPeriod==='today'){ var mx=0; SUP.forEach(function(x){ var v=supDateNum(x.date); if(v>mx) mx=v; }); if(d!==mx) return false; }
+    var d=supDateNum(it.date), now=new Date(), month=now.getFullYear()*100+now.getMonth()+1, today=month*100+now.getDate();
+    if(supPeriod==='month' && Math.floor(d/100)!==month) return false;
+    if(supPeriod==='today' && d!==today) return false;
   }
   if(supQ){ var q=supQ.toLowerCase(); var hay=(it.id+' '+(it.num||'')+' '+(it.holder||'')+' '+(it.agent||'')+' '+(it.obj||'')+' '+(it.vid||'')).toLowerCase(); if(hay.indexOf(q)===-1) return false; }
   return true;
 }
+function supResetFilters(){supQ='';supPeriod='all';supTask='all';supResp='all';supRegion='all';supSrc='all';supSK='all';supVid='all';supApi=false;supHideDone=false;supStuck=false;supTriage=false;supRerender();}
 function supDoSearch(){ var i=document.getElementById('supQIn'); supQ=i?i.value.trim():''; supRerender(); }
 function supCount(ball){ return SUP.filter(function(it){ return it.ball===ball && supPass(it); }).length; }
-function supEmpty(){ if(supTriage&&!supStuck) return 'Разбор пуст — просрочек, ответов агента и новых нет.'; if(supTab==='done'&&supHideDone) return 'Готовые скрыты — снимите галочку «Скрыть готовые».'; if(supQ) return 'Ничего не найдено по запросу «'+supQ+'» — измените поиск или фильтры.'; if(supTab==='us') return 'Мяч сейчас не у нас — новых задач по фильтру нет.'; if(supTab==='agent') return 'Нет заявок, где мяч у агента.'; if(supTab==='insurer') return 'Нет заявок на стороне страховой.'; return 'Завершённых по фильтру нет.'; }
+function supEmpty(){ return 'В этой вкладке нет заявок по выбранным фильтрам. Измените период или сбросьте фильтры.'; }
 function supWarnIco(){ return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.51"/></svg>'; }
 function screenSupport(){ return '<div class="screen active sup-screen">'+(supOpen?supDetail(supOpen):supQueue())+'</div>'; }
 function supRerender(){ var w=document.getElementById('workscreen'); if(w) w.innerHTML=(supHost==='2'?screenSupport2():screenSupport()); }
@@ -3275,6 +3833,9 @@ function supStTone(it){ if(it.ball==='done') return 'ok'; var s=it.st;
   if(s==='Отложена') return 'draft';
   if(s.indexOf('Новы')===0) return 'wait';
   return 'proc'; }
+function supAnalytics(){ var losses=SUP.filter(function(x){return x.kind==='loss'||x.vid==='Урегулирование убытка';}), closed=losses.filter(function(x){return x.cstatus==='settled'||x.st==='Убыток урегулирован';}), pending=losses.filter(function(x){return x.ball==='agent';}), insurer=losses.filter(function(x){return x.ball==='insurer';});
+  var old=document.getElementById('supAnalyticsModal'); if(old) old.remove(); var el=document.createElement('div'); el.id='supAnalyticsModal'; el.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(20,30,45,.38);display:grid;place-items:center;padding:24px';
+  el.innerHTML='<div class="card" style="width:min(760px,95vw);max-height:85vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Аналитика по урегулированию убытков</h3><button class="btn btn--sm" onclick="document.getElementById(\'supAnalyticsModal\').remove()">Закрыть</button></div><div class="loss-op__grid"><div class="sup-fld"><label>Всего убытков</label><div class="sup-fld__v"><b>'+losses.length+'</b></div></div><div class="sup-fld"><label>Урегулировано</label><div class="sup-fld__v"><b>'+closed.length+'</b></div></div><div class="sup-fld"><label>Ждём агента</label><div class="sup-fld__v"><b>'+pending.length+'</b></div></div><div class="sup-fld"><label>На стороне СК</label><div class="sup-fld__v"><b>'+insurer.length+'</b></div></div></div><div style="margin-top:14px"><button class="btn btn--primary btn--sm" onclick="toast(\'Отчёт УУ подготовлен в XLSX (демо)\')">Скачать XLSX</button></div></div>'; document.body.appendChild(el); }
 function supQueue(){
   var tabs=[['us','У нас'],['agent','У агента'],['insurer','У страховой'],['done','Завершено']];
   var tbar=tabs.map(function(t){ var n=supCount(t[0]); var extra='';
@@ -3310,8 +3871,8 @@ function supQueue(){
       +'<td>'+(it.resp||'<span class="empty-cell">—</span>')+'</td>'
       +'<td class="sup-stcell"><span class="sup-stbadge sup-stbadge--'+supStTone(it)+'">'+it.st+'</span>'+supSla(it)+supAge(it)+'</td>'
       +'</tr>';
-  }).join('') || '<tr><td colspan="10" class="empty-row">'+supEmpty()+'</td></tr>';
-  var sks={}, vids={}, resps={}, regions={};
+  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:26px">'+supEmpty()+'<div><button class="btn" onclick="supResetFilters()">Сбросить фильтры</button></div></td></tr>';
+  var sks={}, vids={'Автопомощник':1}, resps={}, regions={};
   SUP.forEach(function(it){ if(it.sk&&it.sk!=='—') sks[it.sk]=1; vids[it.vid]=1; if(it.resp) resps[it.resp]=1; if(it.region) regions[it.region]=1; });
   var skOpts='<option value="all">Все СК</option>'+Object.keys(sks).map(function(s){ return '<option'+(supSK===s?' selected':'')+'>'+s+'</option>'; }).join('');
   var vidOpts='<option value="all">Все виды заявок</option>'+Object.keys(vids).map(function(s){ return '<option'+(supVid===s?' selected':'')+'>'+s+'</option>'; }).join('');
@@ -3331,7 +3892,7 @@ function supQueue(){
       +'<div class="tfield"><label>Страховая компания</label><select class="tselect" onchange="supSK=this.value;supRerender()">'+skOpts+'</select></div>'
       +'<div class="tfield"><label>Регион</label><select class="tselect" onchange="supRegion=this.value;supRerender()">'+regOpts+'</select></div>'
     +'</div>'
-    +'<div class="sup-frow2"><a class="sup-flink" onclick="toast(\'Аналитика по заявкам поддержки\')">Посмотреть аналитику</a>'
+    +'<div class="sup-frow2"><a class="sup-flink" onclick="supAnalytics()">Посмотреть аналитику по УУ</a>'
       +'<label class="tcheck" style="margin:0"><input type="checkbox"'+(supApi?' checked':'')+' onchange="supApi=this.checked;supRerender()"/> API</label>'
       +'<label class="tcheck" style="margin:0"><input type="checkbox"'+(supHideDone?' checked':'')+' onchange="supHideDone=this.checked;supRerender()"/> Скрыть готовые</label></div>'
     /* --- надстройка Agent Academy: чей мяч + источник + SLA --- */
@@ -3438,43 +3999,51 @@ function supTalkSend(id){ var it=supFind(id); if(!it) return;
 }
 function supTalkScroll(id){ var th=document.getElementById('supTalkThread-'+id); if(th) th.scrollTop=th.scrollHeight; }
 function supRequestBody(it){
+  if(it.kind==='deal'&&it.dealData)return apOperatorBody(it);
+  var isLoss=it.kind==='loss'||it.vid==='Урегулирование убытка';
   /* Канон-заявка: статус read-only (меняется только действиями «Хода заявки»); легаси-строки — старый селект. */
   var statusBox=it.cstatus
     ? '<div class="sup-side__box"><div class="sup-side__h">Статус</div><div style="margin-bottom:6px"><span class="sup-stbadge sup-stbadge--'+((PROC_STATUS[it.cstatus]||{}).tone||'proc')+'">'+procSupLabel(it)+'</span></div><div class="proc-wait" style="margin:0">Меняется действиями по заявке.</div></div>'
     : '<div class="sup-side__box"><div class="sup-side__h">Статус</div>'
-      +'<select class="tselect" style="width:100%" onchange="supSetStatus(\''+it.id+'\',this.value)"><option>'+it.st+'</option><option>В работе</option><option>Ждём оплату</option><option>Ждём документы</option><option>Передана в СК</option><option>Завершена</option></select></div>';
+      +'<select class="tselect" style="width:100%" onchange="supSetStatus(\''+it.id+'\',this.value)"><option>'+it.st+'</option><option>В работе</option><option>Ждём оплату</option><option>Ждём документы</option><option>Передана в СК</option>'+(isLoss?'':'<option>Завершена</option>')+'</select></div>';
+  var serviceButtons=isLoss
+    ? '<button class="btn btn--sm" onclick="lossShowFiles(\''+it.id+'\')">Документы убытка ('+(it.attachments||[]).length+')</button>'
+      +'<label class="btn btn--sm"><input type="file" multiple hidden aria-label="Прикрепить документы убытка" onchange="lossSupportUpload(\''+it.id+'\',this)">Прикрепить документы</label>'
+      +'<button class="btn btn--sm" onclick="lossAgreement(\''+it.id+'\')">Прикрепить соглашение</button>'
+      +'<button class="btn btn--sm" onclick="lossComplaint(\''+it.id+'\')">Добавить претензию'+(lossOpData(it).complaints.length?' ('+lossOpData(it).complaints.length+')':'')+'</button>'
+      +'<button class="btn btn--sm" onclick="toast(\'Открыт полис — '+it.num+'\')">Посмотреть полис</button>'
+      +'<button class="btn btn--sm" onclick="lossHistory(\''+it.id+'\')">История статусов</button>'
+      +(!it.cstatus&&it.ball!=='done'?'<div class="proc-err" id="lossCloseErr" hidden></div><button class="btn btn--primary btn--sm" onclick="procSettle(\''+it.id+'\')">Подтвердить выплату → Урегулирован</button>':'')
+    : (it.cstatus?'':'<button class="btn btn--sm" onclick="toast(\'Приложен новый полис (демо)\')">Приложить новый полис</button><button class="btn btn--sm" onclick="supSendPayLink(\''+it.id+'\')">Ссылка на оплату</button>')
+      +'<button class="btn btn--sm" onclick="toast(\'Документы прикреплены (демо)\')">Прикрепить документы</button><button class="btn btn--sm" onclick="toast(\'Открыт полис — '+it.num+'\')">Посмотреть полис</button>';
   var side='<div class="sup-side">'
     +statusBox
     +supAgentBox(it)
-    +'<div class="sup-side__box"><div class="sup-side__h">Сервис</div><div class="sup-actions">'
-      +(it.cstatus?'':'<button class="btn btn--sm" onclick="toast(\'Приложен новый полис (демо)\')">Приложить новый полис</button>'
-      +'<button class="btn btn--sm" onclick="supSendPayLink(\''+it.id+'\')">Ссылка на оплату</button>')
-      +'<button class="btn btn--sm" onclick="toast(\'Документы прикреплены (демо)\')">Прикрепить документы</button>'
-      +'<button class="btn btn--sm" onclick="toast(\'Ответственный изменён (демо)\')">Сменить ответственного</button>'
-      +'<button class="btn btn--sm" onclick="toast(\'Открыт полис — '+it.num+'\')">Посмотреть полис</button>'
-    +'</div></div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">'+(isLoss?'Сервис УУ':'Сервис')+'</div><div class="sup-actions">'+serviceButtons+'</div></div>'
+    +'<div class="sup-side__box"><div class="sup-side__h">Ответственный</div><div class="kv"><span>Сейчас</span><b>'+(it.resp||'Не назначен')+'</b></div><select id="lossResp-'+it.id+'" class="tselect" style="width:100%;margin:7px 0"><option value="">Выберите сотрудника</option><option>Ксения Устюжанина</option><option>Мария Словакова</option><option>Юлия Рязанцева</option><option>Екатерина Кулаева</option><option>Анастасия Уланова</option></select><button class="btn btn--sm" onclick="lossAssign(\''+it.id+'\')">Сменить ответственного</button></div>'
     +'<div class="sup-side__box"><div class="sup-side__h">Передать (маршрут)</div>'+supRouteBox(it)+'</div>'
-    +'<div class="sup-side__box"><div class="sup-side__h">Связанное</div><div class="sup-links"><a onclick="toast(\'Файлы заявки (демо)\')">Файлы (4)</a><a onclick="toast(\'Таблица изменений (демо)\')">Таблица изменений</a><a onclick="toast(\'Текущие обращения: 2\')">Текущие обращения 2</a><a onclick="toast(\'Архив: 25\')">Архив 25</a></div></div>'
+    +(isLoss?'':'<div class="sup-side__box"><div class="sup-side__h">Связанное</div><div class="sup-links"><a onclick="toast(\'Файлы заявки (демо)\')">Файлы (4)</a><a onclick="toast(\'Таблица изменений (демо)\')">Таблица изменений</a><a onclick="toast(\'Текущие обращения: 2\')">Текущие обращения 2</a><a onclick="toast(\'Архив: 25\')">Архив 25</a></div></div>')
   +'</div>';
   var main='<div>'
+    +(isLoss?lossSummary(it):'')
     +'<div class="sup-grid">'
       +'<div class="sup-fld"><label>№ полиса</label><div class="sup-fld__v">'+it.num+'</div></div>'
       +'<div class="sup-fld"><label>Страховая компания</label><div class="sup-fld__v">'+it.sk+'</div></div>'
       +'<div class="sup-fld"><label>Страхователь</label><div class="sup-fld__v">'+it.holder+'</div></div>'
       +'<div class="sup-fld"><label>Тип заявки</label><div class="sup-fld__v">'+(it.type||it.vid||'—')+'</div></div>'
       /* Дедупы: при канон-заявке причины-чипы полнее «что нужно сделать», комментарий агента живёт в блоке причин. */
-      +(it.cstatus&&(it.reasons||[]).length?'':'<div class="sup-fld sup-fld--full"><label>Что нужно сделать</label><div class="sup-fld__v">'+it.what+'</div></div>')
+      +(isLoss||(it.cstatus&&(it.reasons||[]).length)?'':'<div class="sup-fld sup-fld--full"><label>Что нужно сделать</label><div class="sup-fld__v">'+it.what+'</div></div>')
       +(it.cstatus?'':'<div class="sup-fld sup-fld--full"><label>Комментарий и действия агента</label><div class="sup-fld__v">'+it.ac+'</div></div>')
     +'</div>'
-    +(it.cstatus?procReasonsBlock(it)+procOpBox(it):'')
+    +(it.cstatus?procReasonsBlock(it)+lossOpBlock(it)+procOpBox(it):(isLoss?procReasonsBlock(it)+lossOpBlock(it):''))
     /* ОДИН вход в общение: свертываемая группа «Переписка с агентом» = тред + композер (читать и писать в одном месте).
-       Заметка для своих — отдельная поверхность (лок 2026-08-11: публичное и внутреннее не смешивать, никаких режимов). */
+       Внутренняя заметка — отдельная поверхность (лок 2026-08-11: публичное и внутреннее не смешивать, никаких режимов). */
     +'<div class="sup-replylinks">'
       +'<button class="req__reply" aria-expanded="'+(supTalkOpen?'true':'false')+'" onclick="supTalkOpen=!supTalkOpen;supRerender();if(supTalkOpen)supTalkScroll(\''+it.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.3A8.4 8.4 0 1 1 21 11.5z"/></svg>Переписка с агентом ('+supTalkCount(it)+')</button>'
-      +'<button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Заметка для своих</button>'
+      +'<button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Внутренняя заметка</button>'
     +'</div>'
     +'<div id="supTalkBox" class="sup-thread"'+(supTalkOpen?'':' hidden')+'><div class="sup-thread__h">Переписка с агентом · '+supChanLabel(it)+' <span class="sup-reply__tag sup-tag--pub">агент видит</span></div>'+supTalk(it)+'</div>'
-    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div>'
+    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Внутренняя заметка <span class="sup-reply__tag">агент не видит</span></div>'
       +'<textarea class="sup-ta" id="supNoteA" aria-label="Внутренняя заметка поддержки" placeholder="Внутренняя заметка поддержки…"></textarea>'
       +'<div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
   +'</div>';
@@ -3486,8 +4055,8 @@ function supChatBody(it){
   var main='<div>'
     +supTalk(it,{full:true})
     +'<div class="supchat__hint">Ответ и документ уходят агенту — он увидит их в своей переписке по обращению. Файлы хранятся при обращении, а не в теле сообщения.</div>'
-    +'<div class="sup-replylinks" style="margin-top:10px"><button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Заметка для своих</button></div>'
-    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Заметка для своих <span class="sup-reply__tag">агент не видит</span></div><textarea class="sup-ta" id="supNoteA" aria-label="Внутренняя заметка поддержки" placeholder="Внутренняя заметка…"></textarea><div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
+    +'<div class="sup-replylinks" style="margin-top:10px"><button class="req__reply" onclick="supToggle(\'supNoteBox\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Внутренняя заметка</button></div>'
+    +'<div id="supNoteBox" class="sup-reply sup-reply--note" hidden><div class="sup-reply__h">Внутренняя заметка <span class="sup-reply__tag">агент не видит</span></div><textarea class="sup-ta" id="supNoteA" aria-label="Внутренняя заметка поддержки" placeholder="Внутренняя заметка…"></textarea><div class="sup-reply__row"><button class="btn btn--sm" onclick="supNote(\''+it.id+'\')">Сохранить заметку</button></div></div>'
   +'</div>';
   var side='<div class="sup-side">'
     +'<div class="sup-side__box"><div class="sup-side__h">Обращение</div>'
@@ -3509,7 +4078,7 @@ function supTimeline(it){
     /* Событие «ответ в переписке» — серой строкой БЕЗ текста (текст живёт в треде); клик раскрывает переписку. */
     if(s.talk) return '<tr class="click" onclick="supTalkOpen=true;supRerender();supTalkScroll(\''+it.id+'\')"><td>'+s.d+'</td><td><span class="st st--draft">Сообщение</span></td><td style="color:var(--muted)">'+s.c+' →</td></tr>';
     var pill=s.internal?'pay':'proc'; var col=s.internal?' style="color:var(--badge-attn)"':''; var lbl=(s.cs&&PROC_STATUS[s.cs])?PROC_STATUS[s.cs].sup:(s.s||''); return '<tr><td>'+s.d+'</td><td><span class="st st--'+pill+'">'+lbl+'</span></td><td'+col+'>'+s.c+'</td></tr>'; }).join('');
-  return '<div class="suptl"><h3>История заявки</h3><div class="list-wrap" style="margin:0"><div class="list-scroll"><table class="list"><thead><tr><th>Дата</th><th>Статус</th><th>Комментарий</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+  return '<div class="suptl" id="supTimeline-'+it.id+'"><h3>История заявки</h3><div class="list-wrap" style="margin:0"><div class="list-scroll"><table class="list"><thead><tr><th>Дата</th><th>Статус</th><th>Комментарий</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
 }
 function supFoot(it){ return '<div class="supfoot"><button class="btn btn--sm" onclick="supBack()">Закрыть</button><button class="btn btn--primary btn--sm" onclick="supSave(\''+it.id+'\')">Сохранить</button></div>'; }
 /* Открыл заявку — событие «требует разбора» гасим (оператор взял в работу): снимаем маркеры new/back и обновляем счётчик. */
@@ -3562,7 +4131,10 @@ function supRoute(id,dest){ var it=supFind(id); if(!it)return; it.routedTo=dest;
   if(it.steps) it.steps.push({d:'сейчас',s:(dest==='curator'?'Куратор':'Продакт'),c:'Передано: '+human,internal:true});
   toast(dest==='curator' ? 'Обращение передано куратору (внутри поддержки)' : 'Создана задача в Kaiten — передано продакту (демо, интеграция позже)');
   supRerender(); }
-function supSetStatus(id,v){ var it=supFind(id); it.st=v; if(v==='Завершена'){ it.ball='done'; } toast('Статус: '+v); supRerender(); supUpdateBadge(); }
+function supSetStatus(id,v){ var it=supFind(id); if(!it) return; if(it.kind==='deal'){toast('Используйте действия вкладки Автопомощника.');return false;}
+  if(it.kind==='cancel'&&['Завершена','Готово'].indexOf(v)>-1){toast('Подтвердите возврат денег в действиях по заявке.');supRerender();return;}
+  if(procIsLoss(it)&&(it.cstatus||['Завершена','Готово','Урегулирован','Убыток урегулирован'].indexOf(v)>-1)){ toast('Для завершения УУ подтвердите выплату в действиях по заявке.'); supRerender(); return; }
+  it.st=v; if(v==='Завершена'){ it.ball='done'; } toast('Статус: '+v); supRerender(); supUpdateBadge(); }
 function supSave(id){ toast('Заявка сохранена'); supBack(); }
 function supUpdateBadge(){ var c=SUP.filter(function(it){ return it.ball==='us'; }).length; setBadge('#supBadge',c); setBadge('#sup2Badge',c); }
 
@@ -3605,7 +4177,7 @@ function sup2ReqView(){
       +'<td>'+(it.resp||'<span class="empty-cell">—</span>')+'</td>'
       +'<td class="sup-stcell"><span class="sup-stbadge sup-stbadge--'+supStTone(it)+'">'+it.st+'</span>'+supSla(it)+supAge(it)+'</td>'
     +'</tr>';
-  }).join('') || '<tr><td colspan="10" class="empty-row">'+supEmpty()+'</td></tr>';
+  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:26px">'+supEmpty()+'<div><button class="btn" onclick="supResetFilters()">Сбросить фильтры</button></div></td></tr>';
   return '<div class="sup-mine-bar"><span class="sup-mine-cap">Чей мяч:</span><div class="chattabs sup-tabs">'+tbar+'</div></div>'
     +'<div class="sup-count">Заявок: <b>'+items.length+'</b> · вкладка «'+SUP_BALL[supTab]+'»</div>'
     +'<div class="list-wrap sup-listwrap" style="margin-top:0"><div class="list-scroll"><table class="list sup-list">'
@@ -3641,7 +4213,7 @@ function sup2Conv(it){
 }
 
 /* ===== роутер ===== */
-var TITLES={clients:'Мои клиенты',prolongation:'Пролонгация',osago:'ОСАГО',health:'Здоровье',mortgage:'Ипотека',finance:'Мои финансы',learning:'Обучение',messages:'Поддержка',curator:'Чат куратора',chats2:'Обращения',support:'Оператор поддержки',support2:'Заявки и чаты',profile:'Профиль',change:'Внесение изменений'};
+var TITLES={clients:'Мои клиенты',prolongation:'Пролонгация',osago:'ОСАГО',health:'Здоровье',mortgage:'Ипотека',finance:'Мои финансы',learning:'Обучение',messages:'Поддержка',curator:'Чат куратора',chats2:'Обращения',support:'Оператор поддержки',support2:'Заявки и чаты',profile:'Профиль',change:'Внесение изменений',autow:'Автопомощник'};
 function render(view,arg){
   var w=document.getElementById('workscreen');
   if(view==='clients') w.innerHTML=screenClients();
@@ -3649,6 +4221,7 @@ function render(view,arg){
   else if(view==='change') w.innerHTML=screenChange();
   else if(view==='cancelw') w.innerHTML=screenCancel();
   else if(view==='lossw') w.innerHTML=screenLoss();
+  else if(view==='autow') w.innerHTML=screenAutoassistant();
   else if(view==='osago') w.innerHTML=screenOsago();
   else if(view==='health') w.innerHTML=screenHealth();
   else if(view==='prolongation') w.innerHTML=screenProlongation();
@@ -3668,7 +4241,11 @@ function go(view){
   document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')===view); });
   document.getElementById('activeTab').innerHTML=(TITLES[view]||'Форма')+' <span class="tab__x">×</span>';
 }
-function openContract(i,issued){ contractIssued=!!issued; render('contract',i); document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); }); document.getElementById('activeTab').innerHTML='Договор <span class="tab__x">×</span>'; }
+function openContract(i,issued,detailsOnly){
+  var c=CLIENTS[i];
+  if(!detailsOnly && c && c.autoassistant===true && contractProduct(c)==='osago' && ['draft','wait'].includes(c.st)) return openAutoassistant(i);
+  contractIssued=!!issued; render('contract',i); document.querySelectorAll('.sec[data-view]').forEach(function(s){ s.classList.toggle('sec--active', s.getAttribute('data-view')==='clients'); }); document.getElementById('activeTab').innerHTML='Договор <span class="tab__x">×</span>';
+}
 function openDeal(){ toast('Согласование тарифа — сделка ЮЛ (форма /deals/:id)'); }
 /* нативные оповещения 1С — все в один вертикальный стек снизу справа (не наложение) */
 function toastStack(){ var s=document.getElementById('toaststack'); if(!s){ s=document.createElement('div'); s.id='toaststack'; (document.querySelector('.win')||document.body).appendChild(s); } return s; }
@@ -3872,6 +4449,14 @@ document.getElementById('svBtn').addEventListener('click', toggleSV);
 
 updateBell();
 supUpdateBadge();
-go('clients');
 </script>
+<script src="autoassistant.js?v=20260923"></script>
+<script>
+if(location.hash==='#autoassistant') openAutoassistant(14);
+else go(location.hash==='#prolongation'?'prolongation':'clients');
+</script>
+<link rel="stylesheet" href="autoassistant.css?v=20260923">
+<link rel="stylesheet" href="process-integration.css?v=20260923">
+<link rel="stylesheet" href="sidebar.css?v=20260923">
+<script src="sidebar.js?v=20260923"></script>
 </body></html>
